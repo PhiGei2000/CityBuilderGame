@@ -1,0 +1,25 @@
+ Language: Cpp
+ BasedOnStyle: Microsoft
+ PointerAlignment: Left
+ BraceWrapping:
+    AfterCaseLabel: false
+    AfterClass: false
+    AfterEnum: false
+    AfterControlStatement: false
+    AfterFunction: false
+    AfterNamespace: false
+    AfterStruct: false
+    AfterUnion: false
+    AfterExternBlock: false
+    BeforeCatch: true
+    BeforeElse: true
+
+ AlignTrailingComments: true
+ AllowShortBlocksOnASingleLine: Always
+ AllowShortLambdasOnASingleLine: All
+ BreakStringLiterals: false
+ ColumnLimit: 0
+ NamespaceIndentation: All
+ SpacesInAngles: false
+ SpaceAfterTemplateKeyword: false
+ AlwaysBreakTemplateDeclarations: No
