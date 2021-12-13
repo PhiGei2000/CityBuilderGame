@@ -1,22 +1,15 @@
-#include "rendering/renderer.hpp"
+#include "rendering/window.hpp"
 
 #include "rendering/shader.hpp"
 
 #include <iostream>
 
 namespace trafficSimulation {
-    void Renderer::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);        
     }
 
-    void Renderer::init() {
-        if (!glfwInit()) {
-            std::cerr << "failed to intialize GLFW!" << std::endl;
-            exit(1);
-        }
-    }
-
-    void Renderer::createWindow(int width, int height, const std::string& title) {
+    void Window::createWindow(int width, int height, const std::string& title) {
         window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 
         if (window == NULL) {
@@ -31,7 +24,7 @@ namespace trafficSimulation {
         glewInit();
     }
 
-    void Renderer::render(World* world) {
+    void Window::render(World* world) {
         const ResourceManager& resources = world->getResourceManager();
         Geometry* streets = new Geometry();
         Shader* streetShader = resources.getResource<Shader>("StreetShader");

@@ -1,12 +1,13 @@
 #pragma once
-#include "rendering/geometryData.hpp"
 #include "rendering/camera.hpp"
+#include "rendering/geometryData.hpp"
 #include "resourceManager.hpp"
 #include "streets.hpp"
 
 #include <vector>
 
 namespace trafficSimulation {
+    // TODO: Remove this and switch to entitiy component system
     class World {
       private:
         bool changed = false;
