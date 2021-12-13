@@ -16,15 +16,16 @@ find_package(glm REQUIRED)
 
 add_executable(trafficSimulation ${SOURCES})
 
+target_include_directories(trafficSimulation PUBLIC
+    /usr/include/entt)
+
 target_link_libraries(trafficSimulation
     ${OPENGL_LIBRARIES}
     glfw ${GLFW_LIBRARIES}
-    ${GLEW_LIBRARIES}
+    ${GLEW_LIBRARIES}    
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
-execute_process(COMMAND ln -s ../res res
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
