@@ -2,5 +2,9 @@
 #include <glm/glm.hpp>
 
 namespace trafficSimulation {
-    using Vertex = glm::vec2;
+    struct Vertex {
+        glm::vec3 position;
+        glm::vec2 texCoord;
+        glm::vec3 normal;
+    };
 } // namespace trafficSimulation
