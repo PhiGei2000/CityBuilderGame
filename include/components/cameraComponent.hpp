@@ -3,8 +3,10 @@
 #include <glm/glm.hpp>
 
 namespace trafficSimulation::components {
-    struct CameraComponent {
-        glm::vec2 position = glm::vec2(0.0f, 0.0f);
+    struct TransformationComponent;
+
+    struct CameraComponent {  
+        static constexpr glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
 
         float viewWidth;
         float viewHeight;
@@ -12,6 +14,6 @@ namespace trafficSimulation::components {
         glm::mat4 projectionMatrix;
         glm::mat4 viewMatrix;
 
-        void calculateMatrices();
+        void calculateMatrices(const TransformationComponent& transform);
     };
 } // namespace trafficSimulation::components

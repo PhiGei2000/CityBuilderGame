@@ -8,7 +8,7 @@ namespace trafficSimulation::components {
         float angle;
         glm::vec2 scale;
 
-        glm::mat3 transform;
+        glm::mat4 transform;
 
         void calculateTransform();
     };

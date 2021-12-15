@@ -2,7 +2,7 @@
 
 namespace trafficSimulation::components {
     void TransformationComponent::calculateTransform() {
-        transform = glm::mat3(1.0f);
+        transform = glm::mat4(1.0f);
 
         transform[0].x = glm::cos(angle) * scale.x;
         transform[0].y = glm::sin(angle) * scale.y;
