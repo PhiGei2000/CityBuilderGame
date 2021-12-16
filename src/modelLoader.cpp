@@ -10,9 +10,41 @@ namespace trafficSimulation {
     void ModelLoader::processFaces(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& texCoords, const std::vector<glm::vec3>& normals, const std::vector<FaceIndices>& faces, GeometryData& data) {
         data.vertices.reserve(positions.size());
         data.indices.reserve(faces.size() * 3);
+
+        std::vector<std::tuple<unsigned int, unsigned int, unsigned int>> vertices;
+        std::vector<unsigned int> indices;
+
+        for (const FaceIndices& face : faces) {
+            for (const auto [posIndex, texIndex, normIndex] : face) {
+                bool vertexExists = false;
+                unsigned int index = vertices.size();
+
+                for (int i = 0; i < vertices.size(); i++) {
+                    const auto [vertPosIndex, vertTexIndex, vertNormIndex] = vertices[i];
+                    vertexExists = posIndex == vertPosIndex && texIndex == vertTexIndex && normIndex == vertNormIndex;
+
+                    if (vertexExists) {
+                        indices.push_back(i);
+                        break;
+                    }
+                }
+
+                if (!vertexExists) {
+                    vertices.emplace_back(posIndex, texIndex, normIndex);
+                    indices.push_back(index);
+                }
+            }
+        }
+
+        data.indices = indices;
+        for (const auto [posIndex, texIndex, normIndex] : vertices) {
+            data.vertices.emplace_back(positions[posIndex],
+                                       texCoords[texIndex],
+                                       normals[normIndex]);
+        }
     }
 
-    Geometry ModelLoader::load(const std::string& filename) {
+    Geometry* ModelLoader::load(const std::string& filename) {
         std::ifstream file;
         file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
@@ -76,6 +108,11 @@ namespace trafficSimulation {
 
             GeometryData data;
             processFaces(positions, texCoords, normals, faceIndices, data);
+
+            Geometry* geo = new Geometry();
+            geo->fillBuffers(data);
+
+            return geo;
         }
         catch (std::ifstream::failure e) {
             std::cout << "ERROR:MODEL::FILE_NOT_SUCCESSFULLY_READ" << std::endl;

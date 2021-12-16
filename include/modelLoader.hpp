@@ -15,6 +15,6 @@ namespace trafficSimulation {
         static FaceIndices parseVertexIndices(const std::string& str);        
 
       public:
-        static Geometry load(const std::string& filename);
+        static Geometry* load(const std::string& filename);
     };
 } // namespace trafficSimulation

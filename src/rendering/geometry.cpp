@@ -17,7 +17,7 @@ namespace trafficSimulation {
         glEnableVertexAttribArray(0);
     }
 
-    void Geometry::fillBuffers(GeometryData data) {
+    void Geometry::fillBuffers(const GeometryData& data) {
         bind();
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);

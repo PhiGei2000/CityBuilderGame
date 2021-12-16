@@ -11,7 +11,7 @@ namespace trafficSimulation {
         unsigned int drawCount;
 
         Geometry();
-        void fillBuffers(GeometryData data);
+        void fillBuffers(const GeometryData& data);
 
         void bind() const;
 
