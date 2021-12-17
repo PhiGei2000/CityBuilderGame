@@ -1,15 +1,42 @@
 #include "components/transformationComponent.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace trafficSimulation::components {
     void TransformationComponent::calculateTransform() {
         transform = glm::mat4(1.0f);
 
-        transform[0].x = glm::cos(angle) * scale.x;
-        transform[0].y = glm::sin(angle) * scale.y;
+        transform = glm::scale(transform, this->scale);
 
-        transform[1].x = -glm::sin(angle) * scale.x;
-        transform[1].y = glm::cos(angle) * scale.y;
+        transform = glm::toMat4(rotation) * transform;
+        transform = glm::translate(transform, position);
+    }
 
-        transform[2] = glm::vec3(position.x, position.y, 1.0f);
+    void TransformationComponent::translate(const glm::vec3& translation) {
+        position += translation;
+    }
+
+    void TransformationComponent::setPosition(const glm::vec3& position) {
+        this->position = position;
+    }
+
+    void TransformationComponent::rotate(const glm::vec3& axis, float angle) {
+        glm::quat dRot = glm::angleAxis(angle, axis);
+
+        rotation = dRot * rotation;
+    }
+
+    void TransformationComponent::setRotation(const glm::vec3& axis, float angle) {
+        rotation = glm::angleAxis(angle, axis);
+    }
+
+    void TransformationComponent::addScale(const glm::vec3& scale) {
+        this->scale.x *= scale.x;
+        this->scale.y *= scale.y;
+        this->scale.z *= scale.z;
+    }
+
+    void TransformationComponent::setScale(const glm::vec3& scale) {
+        this->scale = scale;
     }
 } // namespace trafficSimulation::components
