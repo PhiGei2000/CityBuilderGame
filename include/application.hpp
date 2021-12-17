@@ -5,21 +5,34 @@
 
 #include <entt/entt.hpp>
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+
 namespace trafficSimulation {
     namespace systems {
         class System;
-    }    
+    }
+
+    static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+    static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    static void cursorPos_callback(GLFWwindow* window, double x, double y);
 
     class Application {
       private:
-        std::vector<systems::System*> systems;        
+        std::vector<systems::System*> systems;
 
         ResourceManager resourceManager;
 
         entt::registry registry;
         entt::dispatcher eventDispatcher;
 
+        GLFWwindow* window;
+
         bool stopRequested = false;
+
+        friend void cursorPos_callback(GLFWwindow*, double, double);
+        glm::vec2 lastCursorPos = glm::vec2(400.0f, 300.0f);
 
         void init();
 
@@ -33,6 +46,7 @@ namespace trafficSimulation {
         entt::registry& getRegistry();
         entt::dispatcher& getEventDispatcher();
         ResourceManager& getResourceManager();
+        GLFWwindow* getWindow();
 
         template<typename Event>
         void raiseEvent(const Event& args);

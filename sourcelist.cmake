@@ -11,5 +11,6 @@ SET(SOURCES ${SOURCES}
     ./src/rendering/geometry.cpp    
     ./src/rendering/shader.cpp
     ./src/systems/system.cpp
+    ./src/systems/cameraSystem.cpp
     ./src/systems/renderSystem.cpp
     ./src/main.cpp)

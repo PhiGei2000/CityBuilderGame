@@ -3,5 +3,9 @@
     "files.associations": {
         "tuple": "cpp",
         "iostream": "cpp"
-    }    
+    },
+    "C_Cpp.intelliSenseEngineFallback": "Disabled",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/include"
+    ]
 }

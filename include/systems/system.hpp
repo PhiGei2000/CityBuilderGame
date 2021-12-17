@@ -10,6 +10,8 @@ namespace trafficSimulation::systems {
         entt::registry& registry;
         entt::dispatcher& eventDispatcher;
 
+        Application* app;
+
         virtual void init();
 
       public:

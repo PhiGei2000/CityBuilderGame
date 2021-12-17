@@ -2,10 +2,9 @@
 #include "event.hpp"
 
 namespace trafficSimulation::events {
-    struct KeyEvent : public Event{
-        int key;
-        int scancode;
-        int action;
-        int mods;
+    struct MouseMoveEvent : public Event {
+        float x, y;
+
+        float lastX, lastY;
     };
 } // namespace trafficSimulation::events

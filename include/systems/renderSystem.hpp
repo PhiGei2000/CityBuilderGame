@@ -1,17 +1,10 @@
 #pragma once
 #include "systems/system.hpp"
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-namespace trafficSimulation {
-    static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-    static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
+namespace trafficSimulation {    
     namespace systems {
         class RenderSystem : public System {
-          protected:
-            GLFWwindow* window;
+          protected:            
             entt::entity cameraEntity;
 
             void init() override;

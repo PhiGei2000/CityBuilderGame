@@ -1,7 +1,8 @@
 #pragma once
+#include "event.hpp"
 
 namespace trafficSimulation::events {
-    struct FramebufferSizeEvent {
+    struct FramebufferSizeEvent : public Event {
         int width;
         int height;
     };

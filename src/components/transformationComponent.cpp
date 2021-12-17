@@ -30,6 +30,10 @@ namespace trafficSimulation::components {
         rotation = glm::angleAxis(angle, axis);
     }
 
+    void TransformationComponent::setRotation(const glm::vec3& eulerAngles) {
+        rotation = glm::quat(eulerAngles);
+    }
+
     void TransformationComponent::addScale(const glm::vec3& scale) {
         this->scale.x *= scale.x;
         this->scale.y *= scale.y;

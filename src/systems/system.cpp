@@ -6,7 +6,8 @@ namespace trafficSimulation::systems {
 
     System::System(Application* app)
         : registry(app->getRegistry()),
-          eventDispatcher(app->getEventDispatcher()) {
+          eventDispatcher(app->getEventDispatcher()),
+          app(app) {
     }
 
     void System::update(int dt) {
