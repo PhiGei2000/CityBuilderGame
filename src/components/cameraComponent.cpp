@@ -4,28 +4,25 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace trafficSimulation::components {
-    void CameraComponent::calculateMatrices(const TransformationComponent& transform) {
-        projectionMatrix = glm::perspective(glm::radians(fov), width / height, 0.1f, 100.0f);
+void CameraComponent::calculateMatrices(const TransformationComponent& transform) {
+    projectionMatrix = glm::perspective(glm::radians(fov), width / height, 0.1f, 100.0f);
 
-        calculateVectors(transform);
-        glm::vec3 cameraTarget = transform.position + cameraFront;
-    }
+    calculateVectors();
+    glm::vec3 cameraTarget = transform.position + front;
 
-    void CameraComponent::calculateVectors(const TransformationComponent& transform) {
-        // x = pitch, y = yaw, z = roll
-        glm::vec3 eulerAngles = glm::eulerAngles(transform.rotation);
+    viewMatrix = glm::lookAt(transform.position, cameraTarget, up);
+}
 
-        glm::vec3 direction = glm::vec3(
-            glm::cos(glm::radians(eulerAngles.y)) * glm::cos(glm::radians(eulerAngles.x)),
-            glm::sin(glm::radians(eulerAngles.x)),
-            glm::sin(glm::radians(eulerAngles.y)) * glm::cos(glm::radians(eulerAngles.x)));
+void CameraComponent::calculateVectors() {
+    glm::vec3 direction = glm::vec3(
+        cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
+        sin(glm::radians(pitch)),
+        sin(glm::radians(yaw)) * cos(glm::radians(pitch)));
 
-        cameraFront = glm::normalize(direction);
+    front = glm::normalize(direction);
 
-        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-        cameraRight = glm::normalize(glm::cross(up, direction));
+    constexpr glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+    right = glm::normalize(glm::cross(front, up));
 
-        cameraUp = glm::normalize(glm::cross(direction, cameraRight));
-    }
-} // namespace trafficSimulation::components
+    this->up = glm::normalize(glm::cross(right, front));
+}

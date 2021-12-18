@@ -7,133 +7,131 @@
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace trafficSimulation {
-    std::string Shader::getSource(const std::string& filename) {
-        std::ifstream file;
+std::string Shader::getSource(const std::string& filename) {
+    std::ifstream file;
 
-        file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        try {
-            file.open(filename);
+    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    try {
+        file.open(filename);
 
-            std::stringstream ss;
-            ss << file.rdbuf();
+        std::stringstream ss;
+        ss << file.rdbuf();
 
-            file.close();
+        file.close();
 
-            return ss.str();
+        return ss.str();
+    }
+    catch (std::ifstream::failure e) {
+        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
+
+        throw e;
+    }
+}
+
+unsigned int Shader::compileShader(int shaderType, const std::string& filename) {
+    unsigned int shader = glCreateShader(shaderType);
+    std::string source = getSource(filename);
+    const char* sourcePtr = source.c_str();
+
+    glShaderSource(shader, 1, &sourcePtr, NULL);
+    glCompileShader(shader);
+
+    int success;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        char infoLog[256];
+        glGetShaderInfoLog(shader, 512, NULL, infoLog);
+
+        std::cout << "ERROR::SHADER::";
+        if (shaderType == GL_VERTEX_SHADER) {
+            std::cout << "VERTEX::COMPILATION_FAILED\n";
         }
-        catch (std::ifstream::failure e) {
-            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
-
-            throw e;
+        else if (shaderType == GL_FRAGMENT_SHADER) {
+            std::cout << "FRAGMENT::COMPILATION_FAILED\n";
         }
+        std::cout << infoLog << std::endl;
     }
 
-    unsigned int Shader::compileShader(int shaderType, const std::string& filename) {
-        unsigned int shader = glCreateShader(shaderType);
-        std::string source = getSource(filename);
-        const char* sourcePtr = source.c_str();
+    return shader;
+}
 
-        glShaderSource(shader, 1, &sourcePtr, NULL);
-        glCompileShader(shader);
+Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
 
-        int success;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-        if (!success) {
-            char infoLog[256];
-            glGetShaderInfoLog(shader, 512, NULL, infoLog);
+    unsigned int vertex = compileShader(GL_VERTEX_SHADER, vertexPath);
+    unsigned int fragment = compileShader(GL_FRAGMENT_SHADER, fragmentPath);
 
-            std::cout << "ERROR::SHADER::";
-            if (shaderType == GL_VERTEX_SHADER) {
-                std::cout << "VERTEX::COMPILATION_FAILED\n";
-            }
-            else if (shaderType == GL_FRAGMENT_SHADER) {
-                std::cout << "FRAGMENT::COMPILATION_FAILED\n";
-            }
-            std::cout << infoLog << std::endl;
-        }
+    program = glCreateProgram();
+    glAttachShader(program, vertex);
+    glAttachShader(program, fragment);
+    glLinkProgram(program);
 
-        return shader;
+    int success;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success) {
+        char infoLog[512];
+        glGetProgramInfoLog(program, 512, NULL, infoLog);
+
+        std::cout << "ERROR::SHADER::PROGRAM:LINKING_FAILED\n"
+                  << infoLog << std::endl;
     }
 
-    Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+}
 
-        unsigned int vertex = compileShader(GL_VERTEX_SHADER, vertexPath);
-        unsigned int fragment = compileShader(GL_FRAGMENT_SHADER, fragmentPath);
+void Shader::use() const {
+    glUseProgram(program);
+}
 
-        program = glCreateProgram();
-        glAttachShader(program, vertex);
-        glAttachShader(program, fragment);
-        glLinkProgram(program);
+unsigned int Shader::getLocation(const std::string& name) {
+    auto it = uniforms.find(name);
+    if (it == uniforms.end()) {
+        unsigned int location = glGetUniformLocation(program, name.c_str());
+        uniforms.insert(std::make_pair(name, location));
 
-        int success;
-        glGetProgramiv(program, GL_LINK_STATUS, &success);
-        if (!success) {
-            char infoLog[512];
-            glGetProgramInfoLog(program, 512, NULL, infoLog);
-
-            std::cout << "ERROR::SHADER::PROGRAM:LINKING_FAILED\n"
-                      << infoLog << std::endl;
-        }
-
-        glDeleteShader(vertex);
-        glDeleteShader(fragment);
+        return location;
     }
-
-    void Shader::use() const {
-        glUseProgram(program);
+    else {
+        return it->second;
     }
+}
 
-    unsigned int Shader::getLocation(const std::string& name) {
-        auto it = uniforms.find(name);
-        if (it == uniforms.end()) {
-            unsigned int location = glGetUniformLocation(program, name.c_str());
-            uniforms.insert(std::make_pair(name, location));
+void Shader::setBool(const std::string& name, bool value) {
+    unsigned int location = getLocation(name);
+    glUniform1i(location, (int)value);
+}
 
-            return location;
-        }
-        else {
-            return it->second;
-        }
-    }
+void Shader::setInt(const std::string& name, int value) {
+    unsigned int location = getLocation(name);
+    glUniform1i(location, value);
+}
 
-    void Shader::setBool(const std::string& name, bool value) {
-        unsigned int location = getLocation(name);
-        glUniform1i(location, (int)value);
-    }
+void Shader::setFloat(const std::string& name, float value) {
+    unsigned int location = getLocation(name);
+    glUniform1f(location, value);
+}
 
-    void Shader::setInt(const std::string& name, int value) {
-        unsigned int location = getLocation(name);
-        glUniform1i(location, value);
-    }
+void Shader::setVector2(const std::string& name, const glm::vec2& vec) {
+    unsigned int location = getLocation(name);
+    glUniform2f(location, vec.x, vec.y);
+}
 
-    void Shader::setFloat(const std::string& name, float value) {
-        unsigned int location = getLocation(name);
-        glUniform1f(location, value);
-    }
+void Shader::setVector3(const std::string& name, const glm::vec3& vec) {
+    unsigned int location = getLocation(name);
+    glUniform3f(location, vec.x, vec.y, vec.z);
+}
 
-    void Shader::setVector2(const std::string& name, const glm::vec2& vec) {
-        unsigned int location = getLocation(name);
-        glUniform2f(location, vec.x, vec.y);
-    }
+void Shader::setVector4(const std::string& name, const glm::vec4& vec) {
+    unsigned int location = getLocation(name);
+    glUniform4f(location, vec.x, vec.y, vec.z, vec.w);
+}
 
-    void Shader::setVector3(const std::string& name, const glm::vec3& vec) {
-        unsigned int location = getLocation(name);
-        glUniform3f(location, vec.x, vec.y, vec.z);
-    }
+void Shader::setMatrix3(const std::string& name, const glm::mat3& mat) {
+    unsigned int location = getLocation(name);
+    glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(mat));
+}
 
-    void Shader::setVector4(const std::string& name, const glm::vec4& vec) {
-        unsigned int location = getLocation(name);
-        glUniform4f(location, vec.x, vec.y, vec.z, vec.w);
-    }
-
-    void Shader::setMatrix3(const std::string& name, const glm::mat3& mat) {
-        unsigned int location = getLocation(name);
-        glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(mat));
-    }
-
-    void Shader::setMatrix4(const std::string& name, const glm::mat4& mat) {
-        unsigned int location = getLocation(name);
-        glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
-    }
-} // namespace trafficSimulation
+void Shader::setMatrix4(const std::string& name, const glm::mat4& mat) {
+    unsigned int location = getLocation(name);
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
+}

@@ -1,78 +1,44 @@
 #include "resourceManager.hpp"
+
+#include "rendering/geometry.hpp"
 #include "rendering/shader.hpp"
+#include "rendering/texture.hpp"
 
 #include <stdexcept>
 
-namespace trafficSimulation {
-    void ResourceManager::setResource(const std::string& resourceId, ResourceType type, void* data) {
-        Resource res = Resource{
-            resourceId, type, data};
+ResourceManager::ResourceTypeException::ResourceTypeException(const char* message)
+    : message(message) {
+}
 
-        resources[resourceId] = res;
+const char* ResourceManager::ResourceTypeException::what() const noexcept {
+    return message;
+}
+
+template<typename T>
+void ResourceManager::setResource(const std::string& resourceId, T* data) {
+    const std::type_index type = std::type_index(typeid(T));
+
+    resources[resourceId] = Resource{type, data};
+}
+
+template<typename T>
+T* ResourceManager::getResource(const std::string& resourceId) const {
+    const std::type_index type = std::type_index(typeid(T));
+    const Resource& resource = resources.at(resourceId);
+
+    if (type != resource.type) {
+        std::string message = "Resource could not converted to ";
+
+        throw ResourceTypeException(message.append(type.name()).c_str());
     }
 
-    template<>
-    void ResourceManager::setResource(const std::string& resourceId, std::string* str) {
-        setResource(resourceId, ResourceType::STRING, str);
-    }
+    return reinterpret_cast<T*>(resource.data);
+}
 
-    template<>
-    void ResourceManager::setResource(const std::string& resourceId, int* value) {
-        setResource(resourceId, ResourceType::INTEGER, value);
-    }
+template void ResourceManager::setResource<Texture>(const std::string&, Texture*);
+template void ResourceManager::setResource<Shader>(const std::string&, Shader*);
+template void ResourceManager::setResource<Geometry>(const std::string&, Geometry*);
 
-    template<>
-    void ResourceManager::setResource(const std::string& resourceId, float* value) {
-        setResource(resourceId, ResourceType::FLOAT, value);
-    }
-
-    template<>
-    void ResourceManager::setResource(const std::string& resourceId, Shader* shader) {        
-        setResource(resourceId, ResourceType::SHADER, shader);
-    }
-
-    template<>
-    std::string* ResourceManager::getResource(const std::string& resourceId) const {
-        const Resource& res = resources.at(resourceId);
-
-        if (res.type != ResourceType::STRING) {
-            throw std::invalid_argument("Resource could not converted to a string");
-        }
-
-        return reinterpret_cast<std::string*>(res.data);
-    }
-
-    template<>
-    int* ResourceManager::getResource(const std::string& resourceId) const {
-        const Resource& res = resources.at(resourceId);
-
-        if (res.type != ResourceType::INTEGER) {
-            throw std::invalid_argument("Resource could not converted to an integer");
-        }
-
-        return reinterpret_cast<int*>(res.data);
-    }
-
-    template<>
-    float* ResourceManager::getResource(const std::string& resourceId) const {
-        const Resource& res = resources.at(resourceId);
-
-        if (res.type != ResourceType::FLOAT) {
-            throw std::invalid_argument("Resource could not converted to a float");
-        }
-
-        return reinterpret_cast<float*>(res.data);
-    }
-
-    template<>
-    Shader* ResourceManager::getResource(const std::string& resourceId) const {
-        const Resource& res = resources.at(resourceId);
-
-        if (res.type != ResourceType::SHADER) {
-            throw std::invalid_argument("Resource could not converted to a shader");
-        }
-
-        return reinterpret_cast<Shader*>(res.data);
-    }
-
-} // namespace trafficSimulation
+template Texture* ResourceManager::getResource<Texture>(const std::string&) const;
+template Shader* ResourceManager::getResource<Shader>(const std::string&) const;
+template Geometry* ResourceManager::getResource<Geometry>(const std::string&) const;

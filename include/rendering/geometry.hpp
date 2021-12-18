@@ -2,19 +2,17 @@
 
 #include "rendering/geometryData.hpp"
 
-namespace trafficSimulation {
-    struct Geometry {
-        unsigned int vbo;
-        unsigned int vao;
-        unsigned int ebo;
+struct Geometry {
+    unsigned int vbo;
+    unsigned int vao;
+    unsigned int ebo;
 
-        unsigned int drawCount;
+    unsigned int drawCount;
 
-        Geometry();
-        void fillBuffers(const GeometryData& data);
+    Geometry();
+    void fillBuffers(const GeometryData& data);
 
-        void bind() const;
+    void bind() const;
 
-        void draw() const;
-    };
-} // namespace trafficSimulation
+    void draw() const;
+};

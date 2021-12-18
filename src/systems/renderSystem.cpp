@@ -8,39 +8,34 @@
 
 #include <iostream>
 
-using namespace trafficSimulation::events;
-using namespace trafficSimulation::components;
+void RenderSystem::init() {
+}
 
-namespace trafficSimulation {
-    namespace systems {
+RenderSystem::RenderSystem(Application* app)
+    : System(app) {
+    cameraEntity = registry.view<CameraComponent, TransformationComponent>().front();
+}
 
-        void RenderSystem::init() {
-            
-        }
+void RenderSystem::update(int dt) {
+    const CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
+    const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
 
-        RenderSystem::RenderSystem(Application* app)
-            : System(app) {
-                cameraEntity = registry.view<CameraComponent, TransformationComponent>().front();
-        }
+    if (!glfwWindowShouldClose(app->getWindow())) {
+        glClearColor(0.0f, 0.698f, 0.894f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        void RenderSystem::update(int dt) {
-            const CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
-            const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
-            
-            if (!glfwWindowShouldClose(app->getWindow())) {                
-                registry.view<TransformationComponent, MeshComponent>()
-                    .each([&](const TransformationComponent& transform, const MeshComponent& mesh) {
-                        mesh.shader->use();
-                        mesh.shader->setVector4("color", mesh.color);
-                        
-                        mesh.shader->setMatrix4("view", camera.viewMatrix);
-                        mesh.shader->setMatrix4("projection", camera.projectionMatrix);
+        registry.view<TransformationComponent, MeshComponent>()
+            .each([&](const TransformationComponent& transform, const MeshComponent& mesh) {
+                mesh.texture->use(0);
 
-                        mesh.shader->setMatrix4("model", transform.transform);
+                mesh.shader->use();
+                mesh.shader->setInt("diffuse", 0);
+                
+                mesh.shader->setMatrix4("view", camera.viewMatrix);
+                mesh.shader->setMatrix4("projection", camera.projectionMatrix);
+                mesh.shader->setMatrix4("model", transform.transform);
 
-                        mesh.geometry->draw();
-                    });
-            }
-        }
-    } // namespace systems
-} // namespace trafficSimulation
+                mesh.geometry->draw();
+            });
+    }
+}

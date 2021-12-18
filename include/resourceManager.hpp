@@ -1,33 +1,32 @@
 #pragma once
 
 #include <string>
+#include <typeindex>
 #include <unordered_map>
 
-namespace trafficSimulation {
-    enum class ResourceType
-    {
-        STRING,
-        INTEGER,
-        FLOAT,
-        SHADER
-    };
-
+class ResourceManager {
+  private:
     struct Resource {
-        std::string resourceId;
-        ResourceType type;
+        std::type_index type = std::type_index(typeid(void*));
 
         void* data;
     };
 
-    class ResourceManager {
+    std::unordered_map<std::string, Resource> resources;
+
+  public:
+    struct ResourceTypeException : public std::exception {
       private:
-        std::unordered_map<std::string, Resource> resources;
-        void setResource(const std::string& resourceId, ResourceType type, void* data);
+        const char* message;
 
       public:
-        template<typename T>
-        void setResource(const std::string& resourceId, T* data);
-        template<typename T>
-        T* getResource(const std::string& resourceId) const;
+        ResourceTypeException(const char* message);
+
+        const char* what() const noexcept override;
     };
-} // namespace trafficSimulation
+
+    template<typename T>
+    void setResource(const std::string& resourceId, T* data);
+    template<typename T>
+    T* getResource(const std::string& resourceId) const;
+};

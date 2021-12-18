@@ -4,24 +4,24 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-namespace trafficSimulation::components {
-    struct TransformationComponent {
-        glm::vec3 position;
-        glm::quat rotation;
-        glm::vec3 scale;
+struct TransformationComponent {
+    glm::vec3 position;
+    glm::quat rotation;
+    glm::vec3 scale;
 
-        glm::mat4 transform;
+    glm::mat4 transform;
 
-        void calculateTransform();
+    TransformationComponent(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
 
-        void translate(const glm::vec3& translation);
-        void setPosition(const glm::vec3& position);
+    void calculateTransform();
 
-        void rotate(const glm::vec3& axis, float angle);
-        void setRotation(const glm::vec3& axis, float angle);
-        void setRotation(const glm::vec3& eulerAngles);
+    void translate(const glm::vec3& translation);
+    void setPosition(const glm::vec3& position);
 
-        void addScale(const glm::vec3& scale);
-        void setScale(const glm::vec3& scale);
-    };
-} // namespace trafficSimulation::components
+    void rotate(const glm::vec3& axis, float angle);
+    void setRotation(const glm::vec3& axis, float angle);
+    void setRotation(const glm::vec3& eulerAngles);
+
+    void addScale(const glm::vec3& scale);
+    void setScale(const glm::vec3& scale);
+};

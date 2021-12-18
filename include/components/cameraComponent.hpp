@@ -2,21 +2,21 @@
 
 #include <glm/glm.hpp>
 
-namespace trafficSimulation::components {
-    struct TransformationComponent;
+struct TransformationComponent;
 
-    struct CameraComponent {
-        glm::vec3 cameraUp, cameraFront, cameraRight;
+struct CameraComponent {
+    glm::vec3 up, front, right;
 
-        float width;
-        float height;
-        float fov = 60.0f;
+    float width = 800.0f;
+    float height = 600.0f;
+    float fov = 60.0f;
 
-        glm::mat4 projectionMatrix;
-        glm::mat4 viewMatrix;
+    float yaw = -90.0f, pitch = 0.0f;
 
-        void calculateMatrices(const TransformationComponent& transform);
+    glm::mat4 projectionMatrix;
+    glm::mat4 viewMatrix;
 
-        void calculateVectors(const TransformationComponent& transform);
-    };
-} // namespace trafficSimulation::components
+    void calculateMatrices(const TransformationComponent& transform);
+
+    void calculateVectors();
+};

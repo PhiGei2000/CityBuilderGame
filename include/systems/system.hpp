@@ -4,7 +4,6 @@
 
 #include <entt/entt.hpp>
 
-namespace trafficSimulation::systems {
     class System {
       protected:
         entt::registry& registry;
@@ -19,4 +18,3 @@ namespace trafficSimulation::systems {
 
         virtual void update(int dt);
     };
-} // namespace trafficSimulation::systems

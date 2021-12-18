@@ -2,8 +2,6 @@
 
 #include "application.hpp"
 
-namespace trafficSimulation::events {
-    struct Event {
-        Application* application;
-    };
-}
+struct Event {
+    Application* application;
+};

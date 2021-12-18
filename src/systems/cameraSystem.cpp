@@ -3,81 +3,82 @@
 #include "components/components.hpp"
 
 #include <GLFW/glfw3.h>
+#include <iostream>
 
-using namespace trafficSimulation::components;
-using namespace trafficSimulation::events;
+void CameraSystem::init() {
+    entt::entity cameraEntity = registry.create();
 
-namespace trafficSimulation::systems {
-    void CameraSystem::init() {
+    registry.emplace<CameraComponent>(cameraEntity);
+    registry.emplace<TransformationComponent>(cameraEntity, glm::vec3(0.0f, 1.0f, 0.0f), glm::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
+}
+
+CameraSystem::CameraSystem(Application* app)
+    : System(app) {
+
+    init();
+    cameraEntity = registry.view<CameraComponent, TransformationComponent>().front();
+
+    eventDispatcher.sink<FramebufferSizeEvent>()
+        .connect<&CameraSystem::onFramebufferSize>(*this);
+    eventDispatcher.sink<MouseMoveEvent>()
+        .connect<&CameraSystem::onMouseMove>(*this);
+}
+
+void CameraSystem::update(int dt) {
+    CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
+    TransformationComponent& transform = registry.get<TransformationComponent>(cameraEntity);
+
+    glm::vec3 xzCameraFront = glm::vec3(camera.front.x, 0.0f, camera.front.z);
+    glm::vec3 xzCameraRight = glm::vec3(camera.right.x, 0.0f, camera.right.z);
+
+    const static float cameraSpeed = 0.01f;
+    GLFWwindow* window = app->getWindow();
+
+    glm::vec3 cameraMoveDirection = glm::vec3(0.0f);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        cameraMoveDirection += xzCameraFront;
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        cameraMoveDirection -= xzCameraFront;
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        cameraMoveDirection += xzCameraRight;
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        cameraMoveDirection -= xzCameraRight;
     }
 
-    CameraSystem::CameraSystem(Application* app)
-        : System(app) {
-        cameraEntity = registry.view<CameraComponent, TransformationComponent>().front();
-
-        eventDispatcher.sink<FramebufferSizeEvent>()
-            .connect<&CameraSystem::onFramebufferSize>(*this);
-        eventDispatcher.sink<MouseMoveEvent>()
-            .connect<&CameraSystem::onMouseMove>(*this);
-        eventDispatcher.sink<KeyEvent>()
-            .connect<&CameraSystem::onKey>(*this);
-    }
-
-    void CameraSystem::update(int dt) {
-        CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
-        TransformationComponent& transform = registry.get<TransformationComponent>(cameraEntity);
-
-        glm::vec3 xzCameraFront = glm::vec3(camera.front.x, 0.0f, camera.front.z);
-        glm::vec3 xzCameraRight = glm::vec3(camera.right.x, 0.0f, camera.right.z);
-
-        const static float cameraSpeed = 0.1f;
-        GLFWwindow* window = app->getWindow();
-
-        glm::vec3 cameraMoveDirection;
-        if (glfwGetKey(window, GLFW_KEY_W)) {
-            cameraMoveDirection += xzCameraFront;
-        }
-        if (glfwGetKey(window, GLFW_KEY_S)) {
-            cameraMoveDirection -= xzCameraFront;
-        }
-        if (glfwGetKey(window, GLFW_KEY_D)) {
-            cameraMoveDirection += xzCameraRight;
-        }
-        if (glfwGetKey(window, GLFW_KEY_A)) {
-            cameraMoveDirection -= xzCameraRight;
-        }
-        
+    if (cameraMoveDirection.x != 0 && cameraMoveDirection.z != 0) {
         transform.position += cameraSpeed * glm::normalize(cameraMoveDirection);
+        camera.calculateMatrices(transform);
     }
+}
 
-    void CameraSystem::onMouseMove(const MouseMoveEvent& e) {
-        CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
-        TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
+void CameraSystem::onMouseMove(const MouseMoveEvent& e) {
+    CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
+    TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
 
-        float dx = e.lastX - e.x;
-        float dy = e.y - e.lastY;
+    float dx = e.x - e.lastX;
+    float dy = e.lastY - e.y;
 
-        const float sensitivity = 0.1f;
-        dx *= sensitivity;
-        dy *= sensitivity;
+    const float sensitivity = 0.1f;
+    dx *= sensitivity;
+    dy *= sensitivity;
 
-        yaw += dx;
-        pitch = glm::clamp(pitch + dy, -89.0f, 89.0f);
+    camera.yaw += dx;
+    camera.pitch = glm::clamp(camera.pitch + dy, -89.0f, 89.0f);
 
-        cameraTransform.setRotation(glm::vec3(pitch, yaw, 0.0f));
-        camera.calculateMatrices(cameraTransform);
-    }
+    camera.calculateMatrices(cameraTransform);
 
-    void CameraSystem::onKey(const KeyEvent& e) {
-    }
+    std::cout << "(" << camera.front.x << "," << camera.front.y << "," << camera.front.z << ")" << std::endl;
+}
 
-    void CameraSystem::onFramebufferSize(const FramebufferSizeEvent& e) {
-        CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
-        const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
+void CameraSystem::onFramebufferSize(const FramebufferSizeEvent& e) {
+    CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
+    const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
 
-        camera.viewWidth = e.width;
-        camera.viewHeight = e.height;
+    camera.width = e.width;
+    camera.height = e.height;
 
-        camera.calculateMatrices(cameraTransform);
-    }
-} // namespace trafficSimulation::systems
+    camera.calculateMatrices(cameraTransform);
+}
