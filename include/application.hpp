@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "resourceManager.hpp"
+#include "gui/gui.hpp"
 
 #include <entt/entt.hpp>
 
@@ -10,6 +11,8 @@
 #include <glm/glm.hpp>
 
 class System;
+struct KeyEvent;
+struct FramebufferSizeEvent;
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -26,6 +29,8 @@ class Application {
 
     GLFWwindow* window;
 
+    Gui* gui = nullptr;
+
     bool stopRequested = false;
 
     friend void cursorPos_callback(GLFWwindow*, double, double);
@@ -36,6 +41,8 @@ class Application {
     void loadResources();
 
   public:
+    bool gamePaused = false;
+    
     Application();
 
     void run();
@@ -44,6 +51,9 @@ class Application {
     entt::dispatcher& getEventDispatcher();
     ResourceManager& getResourceManager();
     GLFWwindow* getWindow() const;
+
+    void onKeyEvent(const KeyEvent& e);
+    void onFramebufferSizeEvent(const FramebufferSizeEvent& e);
 
     template<typename Event>
     void raiseEvent(const Event& args);

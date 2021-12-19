@@ -56,11 +56,11 @@ unsigned int Shader::compileShader(int shaderType, const std::string& filename) 
 }
 
 Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
+    program = glCreateProgram();
 
     unsigned int vertex = compileShader(GL_VERTEX_SHADER, vertexPath);
     unsigned int fragment = compileShader(GL_FRAGMENT_SHADER, fragmentPath);
 
-    program = glCreateProgram();
     glAttachShader(program, vertex);
     glAttachShader(program, fragment);
     glLinkProgram(program);

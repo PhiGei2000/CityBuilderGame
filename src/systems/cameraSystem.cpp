@@ -25,6 +25,10 @@ CameraSystem::CameraSystem(Application* app)
 }
 
 void CameraSystem::update(int dt) {
+    if (app->gamePaused) {
+        return;
+    }
+
     CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     TransformationComponent& transform = registry.get<TransformationComponent>(cameraEntity);
 
@@ -55,6 +59,10 @@ void CameraSystem::update(int dt) {
 }
 
 void CameraSystem::onMouseMove(const MouseMoveEvent& e) {
+    if (app->gamePaused) {
+        return;
+    }
+
     CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
 
@@ -68,9 +76,7 @@ void CameraSystem::onMouseMove(const MouseMoveEvent& e) {
     camera.yaw += dx;
     camera.pitch = glm::clamp(camera.pitch + dy, -89.0f, 89.0f);
 
-    camera.calculateMatrices(cameraTransform);
-
-    std::cout << "(" << camera.front.x << "," << camera.front.y << "," << camera.front.z << ")" << std::endl;
+    camera.calculateMatrices(cameraTransform);    
 }
 
 void CameraSystem::onFramebufferSize(const FramebufferSizeEvent& e) {

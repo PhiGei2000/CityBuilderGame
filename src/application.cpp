@@ -51,7 +51,6 @@ void Application::init() {
         exit(1);
     }
 
-
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     if (glfwRawMouseMotionSupported()) {
         glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
@@ -62,7 +61,7 @@ void Application::init() {
     glfwSetCursorPosCallback(window, cursorPos_callback);
 
     glfwSetWindowUserPointer(window, this);
-    
+
     glfwMakeContextCurrent(window);
     glfwSwapInterval(0);
 
@@ -76,6 +75,11 @@ void Application::init() {
     // init systems
     systems.push_back(new CameraSystem(this));
     systems.push_back(new RenderSystem(this));
+
+    // init gui
+    gui = new Gui();
+    gui->setScreenSize(800, 600);
+    gui->init();
 }
 
 void Application::loadResources() {
@@ -101,6 +105,9 @@ void Application::loadResources() {
 
 Application::Application() {
     init();
+
+    eventDispatcher.sink<KeyEvent>().connect<&Application::onKeyEvent>(*this);
+    eventDispatcher.sink<FramebufferSizeEvent>().connect<&Application::onFramebufferSizeEvent>(*this);
 }
 
 void Application::run() {
@@ -111,14 +118,24 @@ void Application::run() {
         float currentTime = (float)glfwGetTime();
         float dt = currentTime - lastTime;
         lastTime = currentTime;
-        
+
+        glClearColor(0.0f, 0.698f, 0.894f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        gui->render();
+
         for (System* system : systems) {
             system->update(dt);
         }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        stopRequested |= glfwWindowShouldClose(window);
     }
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
 }
 
 entt::registry& Application::getRegistry() {
@@ -135,6 +152,30 @@ ResourceManager& Application::getResourceManager() {
 
 GLFWwindow* Application::getWindow() const {
     return window;
+}
+
+void Application::onKeyEvent(const KeyEvent& e) {
+    if (e.action == GLFW_PRESS) {
+        switch (e.key) {
+        case GLFW_KEY_ESCAPE:
+            // change gui visibility
+            if (gui->visible) {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                gui->visible = false;
+                gamePaused = false;
+            }
+            else {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                gui->visible = true;
+                gamePaused = true;
+            }
+            break;
+        }
+    }
+}
+
+void Application::onFramebufferSizeEvent(const FramebufferSizeEvent& e) {
+    gui->setScreenSize(e.width, e.height);
 }
 
 template<typename Event>
