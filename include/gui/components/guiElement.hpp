@@ -2,6 +2,8 @@
 #include "../constraints.hpp"
 #include "../rectangle.hpp"
 
+#include <string>
+
 #include <glm/glm.hpp>
 
 class Gui;
@@ -11,7 +13,9 @@ class GuiElement {
     Gui* gui;
 
   public:
-    GuiElement(Gui* gui, const glm::vec4& backgroundColor);
+    const std::string id;
+
+    GuiElement(const std::string& id, Gui* gui, const glm::vec4& backgroundColor);
 
     GuiElement* parent = nullptr;
     glm::vec4 backgroundColor;

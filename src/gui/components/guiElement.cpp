@@ -4,8 +4,8 @@
 
 #include <iostream>
 
-GuiElement::GuiElement(Gui* gui, const glm::vec4& backgroundColor)
-    : gui{gui}, backgroundColor{backgroundColor} {
+GuiElement::GuiElement(const std::string& id, Gui* gui, const glm::vec4& backgroundColor)
+    : id{id}, gui{gui}, backgroundColor{backgroundColor} {
 }
 
 void GuiElement::render() const {

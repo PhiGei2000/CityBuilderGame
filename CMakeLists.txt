@@ -4,6 +4,8 @@ project(trafficSimulation VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
+set(CXX_STANDARD 20)
+
 include_directories(./include/)
 include(sourcelist.cmake)
 

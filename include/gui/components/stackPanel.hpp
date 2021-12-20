@@ -13,7 +13,7 @@ class StackPanel : public Container {
 
     StackOrientation orientation;
 
-    StackPanel(Gui* gui, StackOrientation orientation, const glm::vec4 backgroundColor);    
+    StackPanel(const std::string& id, Gui* gui, StackOrientation orientation, const glm::vec4 backgroundColor);    
 
     void setChildConstraints() override;
 };

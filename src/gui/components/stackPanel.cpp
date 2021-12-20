@@ -1,7 +1,7 @@
 #include "gui/components/stackPanel.hpp"
 
-StackPanel::StackPanel(Gui* gui, StackOrientation orientation, const glm::vec4 backgroundColor)
-    : Container(gui, backgroundColor), orientation{orientation} {
+StackPanel::StackPanel(const std::string& id, Gui* gui, StackOrientation orientation, const glm::vec4 backgroundColor)
+    : Container(id, gui, backgroundColor), orientation{orientation} {
 }
 
 void StackPanel::setChildConstraints() {

@@ -10,33 +10,11 @@
 #include <GL/glew.h>
 
 void Gui::init() {
-    StackPanel* mainMenuPanel = new StackPanel(this, StackPanel::StackOrientation::COLUMN, colors::transparent);
+    StackPanel* mainMenuPanel = new StackPanel("mainMenu", this, StackPanel::StackOrientation::COLUMN, colors::transparent);
     mainMenuPanel->constraints.width = RelativeConstraint(0.6);
-    mainMenuPanel->constraints.height = RelativeConstraint(0.5);
-
-    for (int i = 0; i < 3; i++) {
-        GuiElement* child = new GuiElement(this, colors::anthraziteGrey);
-
-        child->constraints.x = CenterConstraint();
-        child->constraints.width = RelativeConstraint(0.9);
-        child->constraints.height = RelativeConstraint(0.5);
-
-        mainMenuPanel->addChild(child);
-    }
-
-    Label* label = new Label(this, colors::anthraziteGrey, "Save and Exit");    
-    label->constraints.width = RelativeConstraint(0.9);
-    label->constraints.height = RelativeConstraint(0.5);
-    mainMenuPanel->addChild(label);
+    mainMenuPanel->constraints.height = RelativeConstraint(0.5);    
 
     mainMenu = mainMenuPanel;
-
-    // mainMenu = new GuiElement(this, colors::anthraziteGrey);
-
-    // mainMenu->constraints.x = CenterConstraint();
-    // mainMenu->constraints.width = RelativeConstraint(0.5);
-    // mainMenu->constraints.y = AbsoluteConstraint(100);
-    // mainMenu->constraints.height = RelativeConstraint(0.5);
 
     textRenderer.init();
 }

@@ -9,7 +9,7 @@ class ContainerItem : public GuiElement {
     GuiElement* element;
 
   public:
-    ContainerItem(Gui* gui, GuiElement* element, const glm::vec4 backgroundColor = colors::transparent);
+    ContainerItem(const std::string& id, Gui* gui, GuiElement* element, const glm::vec4 backgroundColor = colors::transparent);
 
     void render() const override;
 };
@@ -19,7 +19,7 @@ class Container : public GuiElement {
     std::vector<ContainerItem*> children;
 
   public:
-    Container(Gui* gui, const glm::vec4& backgroundColor);
+    Container(const std::string& id, Gui* gui, const glm::vec4& backgroundColor);
     virtual void addChild(GuiElement* child);
 
     void render() const override;
