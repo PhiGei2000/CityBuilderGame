@@ -17,7 +17,7 @@ class CameraSystem : public System {
     virtual void init() override;
 
   public:
-    CameraSystem(Application* app);
+    CameraSystem(Game* game);
 
     virtual void update(int dt) override;
 

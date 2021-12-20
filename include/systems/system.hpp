@@ -1,20 +1,20 @@
 #pragma once
 
-#include "application.hpp"
+#include "../game.hpp"
 
 #include <entt/entt.hpp>
 
-    class System {
-      protected:
-        entt::registry& registry;
-        entt::dispatcher& eventDispatcher;
+class System {
+  protected:
+    entt::registry& registry;
+    entt::dispatcher& eventDispatcher;
 
-        Application* app;
+    Game* game;
 
-        virtual void init();
+    virtual void init();
 
-      public:
-        System(Application* app);
+  public:
+    System(Game* game);
 
-        virtual void update(int dt);
-    };
+    virtual void update(int dt);
+};

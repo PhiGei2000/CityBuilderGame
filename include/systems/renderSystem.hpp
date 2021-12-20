@@ -8,7 +8,7 @@ class RenderSystem : public System {
     void init() override;
 
   public:
-    RenderSystem(Application* app);
+    RenderSystem(Game* app);
 
     void update(int dt) override;
 };

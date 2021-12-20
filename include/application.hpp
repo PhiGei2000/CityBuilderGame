@@ -1,10 +1,8 @@
 #pragma once
 #include <vector>
 
-#include "resourceManager.hpp"
+#include "game.hpp"
 #include "gui/gui.hpp"
-
-#include <entt/entt.hpp>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -14,6 +12,7 @@ class System;
 struct KeyEvent;
 struct FramebufferSizeEvent;
 struct MouseButtonEvent;
+struct MouseMoveEvent;
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -21,16 +20,10 @@ static void cursorPos_callback(GLFWwindow* window, double x, double y);
 
 class Application {
   private:
-    std::vector<System*> systems;
-
-    ResourceManager resourceManager;
-
-    entt::registry registry;
-    entt::dispatcher eventDispatcher;
-
     GLFWwindow* window;
 
     Gui* gui = nullptr;
+    Game* game = nullptr;
 
     bool stopRequested = false;
 
@@ -39,25 +32,17 @@ class Application {
 
     void init();
 
-    void loadResources();
-
   public:
     bool gamePaused = false;
-    
+
     Application();
 
     void run();
 
-    entt::registry& getRegistry();
-    entt::dispatcher& getEventDispatcher();
-    ResourceManager& getResourceManager();
     GLFWwindow* getWindow() const;
 
     void onKeyEvent(const KeyEvent& e);
     void onFramebufferSizeEvent(const FramebufferSizeEvent& e);
-    
+    void onMouseMoveEvent(const MouseMoveEvent& e);
     void onMouseButtonEvent(const MouseButtonEvent& e);
-
-    template<typename Event>
-    void raiseEvent(const Event& args);
 };

@@ -19,4 +19,5 @@ SET(SOURCES ${SOURCES}
 ./src/systems/system.cpp
 ./src/systems/cameraSystem.cpp
 ./src/systems/renderSystem.cpp
+./src/game.cpp
 )

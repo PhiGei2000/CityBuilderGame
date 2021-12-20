@@ -12,8 +12,8 @@ void CameraSystem::init() {
     registry.emplace<TransformationComponent>(cameraEntity, glm::vec3(0.0f, 1.0f, 0.0f), glm::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
-CameraSystem::CameraSystem(Application* app)
-    : System(app) {
+CameraSystem::CameraSystem(Game* game)
+    : System(game) {
 
     init();
     cameraEntity = registry.view<CameraComponent, TransformationComponent>().front();
@@ -25,10 +25,6 @@ CameraSystem::CameraSystem(Application* app)
 }
 
 void CameraSystem::update(int dt) {
-    if (app->gamePaused) {
-        return;
-    }
-
     CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     TransformationComponent& transform = registry.get<TransformationComponent>(cameraEntity);
 
@@ -36,19 +32,18 @@ void CameraSystem::update(int dt) {
     glm::vec3 xzCameraRight = glm::vec3(camera.right.x, 0.0f, camera.right.z);
 
     const static float cameraSpeed = 0.01f;
-    GLFWwindow* window = app->getWindow();
 
     glm::vec3 cameraMoveDirection = glm::vec3(0.0f);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    if (game->getKey(GLFW_KEY_W) == GLFW_PRESS) {
         cameraMoveDirection += xzCameraFront;
     }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    if (game->getKey(GLFW_KEY_S) == GLFW_PRESS) {
         cameraMoveDirection -= xzCameraFront;
     }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    if (game->getKey(GLFW_KEY_D) == GLFW_PRESS) {
         cameraMoveDirection += xzCameraRight;
     }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    if (game->getKey(GLFW_KEY_A) == GLFW_PRESS) {
         cameraMoveDirection -= xzCameraRight;
     }
 
@@ -59,10 +54,6 @@ void CameraSystem::update(int dt) {
 }
 
 void CameraSystem::onMouseMove(const MouseMoveEvent& e) {
-    if (app->gamePaused) {
-        return;
-    }
-
     CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
 
@@ -76,7 +67,7 @@ void CameraSystem::onMouseMove(const MouseMoveEvent& e) {
     camera.yaw += dx;
     camera.pitch = glm::clamp(camera.pitch + dy, -89.0f, 89.0f);
 
-    camera.calculateMatrices(cameraTransform);    
+    camera.calculateMatrices(cameraTransform);
 }
 
 void CameraSystem::onFramebufferSize(const FramebufferSizeEvent& e) {

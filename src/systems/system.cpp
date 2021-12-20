@@ -3,10 +3,10 @@
 void System::init() {
 }
 
-System::System(Application* app)
-    : registry(app->getRegistry()),
-      eventDispatcher(app->getEventDispatcher()),
-      app(app) {
+System::System(Game* game)
+    : game(game),
+      registry(game->getRegistry()),
+      eventDispatcher(game->getEventDispatcher()) {
 }
 
 void System::update(int dt) {
