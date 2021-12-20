@@ -13,6 +13,7 @@
 class System;
 struct KeyEvent;
 struct FramebufferSizeEvent;
+struct MouseButtonEvent;
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -54,6 +55,8 @@ class Application {
 
     void onKeyEvent(const KeyEvent& e);
     void onFramebufferSizeEvent(const FramebufferSizeEvent& e);
+    
+    void onMouseButtonEvent(const MouseButtonEvent& e);
 
     template<typename Event>
     void raiseEvent(const Event& args);

@@ -24,4 +24,6 @@ class GuiElement {
     virtual void render() const;
 
     Rectangle getBox() const;
+
+    virtual const GuiElement* getElementAt(float x, float y) const;
 };

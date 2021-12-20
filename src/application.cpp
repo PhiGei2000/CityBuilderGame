@@ -36,6 +36,14 @@ void cursorPos_callback(GLFWwindow* window, double x, double y) {
     app->lastCursorPos = glm::vec2(x, y);
 }
 
+void mouseButton_callback(GLFWwindow* window, int button, int action, int mods) {
+    Application* app = (Application*)glfwGetWindowUserPointer(window);
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+
+    app->raiseEvent(MouseButtonEvent{app, (float)x, (float)y, button, action, mods});
+}
+
 void Application::init() {
     if (!glfwInit()) {
         std::cerr << "failed to intialize GLFW!" << std::endl;
@@ -59,6 +67,7 @@ void Application::init() {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, cursorPos_callback);
+    glfwSetMouseButtonCallback(window, mouseButton_callback);
 
     glfwSetWindowUserPointer(window, this);
 
@@ -68,7 +77,7 @@ void Application::init() {
     glewInit();
 
     glEnable(GL_DEPTH_TEST);
-        
+
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // init resources
@@ -110,6 +119,7 @@ Application::Application() {
 
     eventDispatcher.sink<KeyEvent>().connect<&Application::onKeyEvent>(*this);
     eventDispatcher.sink<FramebufferSizeEvent>().connect<&Application::onFramebufferSizeEvent>(*this);
+    eventDispatcher.sink<MouseButtonEvent>().connect<&Application::onMouseButtonEvent>(*this);
 }
 
 void Application::run() {
@@ -178,6 +188,25 @@ void Application::onKeyEvent(const KeyEvent& e) {
 
 void Application::onFramebufferSizeEvent(const FramebufferSizeEvent& e) {
     gui->setScreenSize(e.width, e.height);
+}
+
+void Application::onMouseButtonEvent(const MouseButtonEvent& e) {
+    if (e.button == GLFW_MOUSE_BUTTON_LEFT && e.action == GLFW_PRESS) {
+        if (gui->visible) {
+            const GuiElement* element = gui->getElement( e.x, e.y);
+
+            if (element->id == "mainMenu_saveExit") {
+                // stop the application
+                stopRequested = true;
+            }
+            else if (element->id == "mainMenu_continue") {
+                // close gui
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                gui->visible = false;
+                gamePaused = false;
+            }
+        }
+    }
 }
 
 template<typename Event>

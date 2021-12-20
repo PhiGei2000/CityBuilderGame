@@ -10,4 +10,6 @@ void Label::render() const {
 
     const Rectangle& box = getBox();
     gui->textRenderer.renderText(text, box, 0.5f);
+
+    gui->getShader()->use();
 }

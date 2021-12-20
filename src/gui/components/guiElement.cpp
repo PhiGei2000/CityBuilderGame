@@ -86,3 +86,12 @@ Rectangle GuiElement::getBox() const {
 
     return Rectangle{x, y, width, height};
 }
+
+const GuiElement* GuiElement::getElementAt(float x, float y) const {
+    const Rectangle& area = getBox();
+    if (area.pointInside(x, y)) {
+        return this;
+    }
+
+    return nullptr;
+}

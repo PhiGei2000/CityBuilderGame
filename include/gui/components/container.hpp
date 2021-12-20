@@ -12,6 +12,8 @@ class ContainerItem : public GuiElement {
     ContainerItem(const std::string& id, Gui* gui, GuiElement* element, const glm::vec4 backgroundColor = colors::transparent);
 
     void render() const override;
+
+    const GuiElement* getElementAt(float x, float y) const override;
 };
 
 class Container : public GuiElement {
@@ -25,4 +27,6 @@ class Container : public GuiElement {
     void render() const override;
 
     virtual void setChildConstraints() = 0;
+
+    const GuiElement* getElementAt(float x, float y) const override;
 };

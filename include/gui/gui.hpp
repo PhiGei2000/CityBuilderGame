@@ -22,7 +22,11 @@ class Gui {
 
     bool visible;
 
+    Shader* getShader() const;
+
     void setScreenSize(float width, float height);
 
     void render() const;
+
+    const GuiElement* getElement(float x, float y) const;
 };
