@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(trafficSimulation VERSION 0.1.0)
+project(cityBuilderGame VERSION 0.1.0)
 
 include(CTest)
 enable_testing()
@@ -17,13 +17,13 @@ find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 find_package(Freetype REQUIRED)
 
-add_executable(trafficSimulation ${SOURCES})
+add_executable(cityBuilderGame ${SOURCES})
 
-target_include_directories(trafficSimulation PUBLIC
+target_include_directories(cityBuilderGame PUBLIC
     /usr/include/entt
     ${FREETYPE_INCLUDE_DIRS})
 
-target_link_libraries(trafficSimulation
+target_link_libraries(cityBuilderGame
     ${OPENGL_LIBRARIES}
     glfw ${GLFW_LIBRARIES}
     ${GLEW_LIBRARIES}   
