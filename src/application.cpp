@@ -68,6 +68,8 @@ void Application::init() {
     glewInit();
 
     glEnable(GL_DEPTH_TEST);
+        
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // init resources
     loadResources();
@@ -122,11 +124,11 @@ void Application::run() {
         glClearColor(0.0f, 0.698f, 0.894f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        gui->render();
-
         for (System* system : systems) {
             system->update(dt);
         }
+
+        gui->render();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

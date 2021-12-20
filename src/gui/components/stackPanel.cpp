@@ -13,17 +13,18 @@ void StackPanel::setChildConstraints() {
         spacing = 1.0f / children.size();
 
         for (int i = 0; i < children.size(); i++) {
-            children[i]->constraints.y = RelativeConstraint(1 - (2 * i + 1) * spacing);
+            children[i]->constraints.y = RelativeConstraint(1 - (i + 1) * spacing);
+            children[i]->constraints.height = RelativeConstraint(spacing);
         }
         break;
-    // case StackOrientation::COLUMN_REVERSE:
-    //     spacing = containerBox.height / children.size();
-    //     y = -(containerBox.height - spacing) / 2;
-    //     for (auto child : children) {
-    //         child->constraints.y = AbsoluteConstraint(y);
-    //         y += spacing;
-    //     }
-    //     break;
+    case StackOrientation::COLUMN_REVERSE:
+        spacing = 1.0f / children.size();
+
+        for (int i = 0; i < children.size(); i++) {
+            children[i]->constraints.y = RelativeConstraint(i * spacing);
+            children[i]->constraints.height = RelativeConstraint(spacing);
+        }
+        break;
     // case StackOrientation::ROW:
     //     spacing = containerBox.height / children.size();
     //     x = (containerBox.width - spacing) / 2;

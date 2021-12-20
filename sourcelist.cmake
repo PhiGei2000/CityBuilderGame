@@ -1,14 +1,16 @@
 SET(SOURCES ${SOURCES}
+./src/rendering/textRenderer.cpp
 ./src/rendering/geometry.cpp
 ./src/rendering/texture.cpp
 ./src/rendering/shader.cpp
+./src/rendering/renderQuad.cpp
 ./src/application.cpp
 ./src/gui/gui.cpp
 ./src/gui/constraints.cpp
 ./src/gui/components/container.cpp
 ./src/gui/components/stackPanel.cpp
 ./src/gui/components/guiElement.cpp
-./src/gui/renderQuad.cpp
+./src/gui/components/label.cpp
 ./src/modelLoader.cpp
 ./src/main.cpp
 ./src/components/cameraComponent.cpp

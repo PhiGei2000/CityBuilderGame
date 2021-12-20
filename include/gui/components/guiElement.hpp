@@ -17,7 +17,7 @@ class GuiElement {
     glm::vec4 backgroundColor;
     Constraints constraints;
 
-    virtual void render() const;    
+    virtual void render() const;
 
     Rectangle getBox() const;
 };

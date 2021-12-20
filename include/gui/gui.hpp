@@ -1,7 +1,9 @@
 #pragma once
-#include "gui/components/guiElement.hpp"
-#include "renderQuad.hpp"
 #include "colors.hpp"
+#include "gui/components/guiElement.hpp"
+#include "rendering/renderQuad.hpp"
+#include "rendering/shader.hpp"
+#include "rendering/textRenderer.hpp"
 
 class Gui {
   private:
@@ -11,8 +13,11 @@ class Gui {
     float width, height;
 
     GuiElement* mainMenu;
+    Shader* guiShader = new Shader("res/shaders/renderQuad.vert", "res/shaders/renderQuad.frag");
 
   public:
+    TextRenderer textRenderer;
+
     void init();
 
     bool visible;

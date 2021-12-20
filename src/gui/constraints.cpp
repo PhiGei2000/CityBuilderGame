@@ -8,4 +8,8 @@ bool Constraints::valid() const {
     if (width.type == ConstraintType::ASPECT && height.type == ConstraintType::ASPECT) {
         return false;
     }
+
+    if (width.type == ConstraintType::CENTER || height.type == ConstraintType::CENTER) {
+        return false;
+    }
 }

@@ -4,7 +4,8 @@ enum class ConstraintType
 {
     ABSOLUTE,
     RELATIVE,
-    ASPECT
+    ASPECT,
+    CENTER
 };
 
 struct Constraint {
@@ -35,6 +36,12 @@ struct AspectConstraint : public Constraint {
     }
 };
 
+struct CenterConstraint : public Constraint {
+    inline CenterConstraint()
+        : Constraint(0, ConstraintType::CENTER) {
+    }
+};
+
 struct Constraints {
     Constraint x;
     Constraint y;
@@ -42,8 +49,8 @@ struct Constraints {
     Constraint height;
 
     inline Constraints()
-        : x{0, ConstraintType::ABSOLUTE},
-          y{0, ConstraintType::ABSOLUTE},
+        : x{0, ConstraintType::CENTER},
+          y{0, ConstraintType::CENTER},
           width{1, ConstraintType::RELATIVE},
           height{1, ConstraintType::RELATIVE} {
     }

@@ -1,11 +1,22 @@
 #pragma once
+#include "../colors.hpp"
 #include "guiElement.hpp"
 
 #include <vector>
 
+class ContainerItem : public GuiElement {
+  protected:
+    GuiElement* element;
+
+  public:
+    ContainerItem(Gui* gui, GuiElement* element, const glm::vec4 backgroundColor = colors::transparent);
+
+    void render() const override;
+};
+
 class Container : public GuiElement {
   protected:
-    std::vector<GuiElement*> children;
+    std::vector<ContainerItem*> children;
 
   public:
     Container(Gui* gui, const glm::vec4& backgroundColor);

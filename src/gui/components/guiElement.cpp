@@ -15,26 +15,16 @@ void GuiElement::render() const {
 
     Rectangle area = getBox();
 
-    // create transform
-    glm::mat3 transform = glm::mat3(1.0f);
-    transform[0].x = area.width / gui->width;
-    transform[1].y = area.height / gui->height;
-    transform[2].x = area.x / gui->width - 0.5f;
-    transform[2].y = area.y / gui->height - 0.5f;
-
-    Shader* guiShader = gui->quad.getShader();
-    guiShader->use();
-
-    guiShader->setMatrix3("transform", transform);
+    Shader* guiShader = gui->guiShader;
     guiShader->setVector4("color", backgroundColor);
 
-    gui->quad.draw();
+    gui->quad.draw(area.x, area.y, area.width, area.height);
 }
 
 Rectangle GuiElement::getBox() const {
     Rectangle parentBox;
     if (parent == nullptr) {
-        parentBox = Rectangle{gui->width / 2, gui->height / 2, gui->width, gui->height};
+        parentBox = Rectangle{0, 0, gui->width, gui->height};
     }
     else {
         parentBox = parent->getBox();
@@ -67,14 +57,18 @@ Rectangle GuiElement::getBox() const {
         width = height * constraints.width.value;
     }
 
-    // set center coordinates
-    float x = parentBox.x, y = parentBox.y;
+    // set coordinates of lower left corner
+    float x = parentBox.x;
+    float y = parentBox.y;
     switch (constraints.x.type) {
     case ConstraintType::ABSOLUTE:
         x += constraints.x.value;
         break;
     case ConstraintType::RELATIVE:
         x += constraints.x.value * parentBox.width;
+        break;
+    case ConstraintType::CENTER:
+        x += (parentBox.width - width) * 0.5f;
         break;
     }
 
@@ -84,6 +78,10 @@ Rectangle GuiElement::getBox() const {
         break;
     case ConstraintType::RELATIVE:
         y += constraints.y.value * parentBox.height;
+        break;
+    case ConstraintType::CENTER:
+        y += (parentBox.height - height) * 0.5f;
+        break;
     }
 
     return Rectangle{x, y, width, height};
