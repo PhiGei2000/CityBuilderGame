@@ -4,10 +4,20 @@
 #include "gui/components/label.hpp"
 #include "gui/components/stackPanel.hpp"
 
+#include "events/keyEvent.hpp"
+#include "events/mouseEvents.hpp"
+
+#include "application.hpp"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <GL/glew.h>
+
+Gui::Gui(Application* app)
+    : app(app) {
+    init();
+}
 
 void Gui::init() {
     StackPanel* mainMenuPanel = new StackPanel("mainMenu", this, StackPanel::StackOrientation::COLUMN, colors::transparent);
@@ -51,7 +61,7 @@ void Gui::render() const {
     glm::mat4 projection = glm::ortho(0.0f, width, 0.0f, height);
     guiShader->setMatrix4("projection", projection);
 
-    if (visible) {
+    if (mainMenuVisible) {
         mainMenu->render();
     }
 
@@ -61,4 +71,39 @@ void Gui::render() const {
 
 const GuiElement* Gui::getElement(float x, float y) const {
     return mainMenu->getElementAt(x, height - y);
+}
+
+void Gui::handleMouseButtonEvent(const MouseButtonEvent& e) {
+    if (e.action != GLFW_PRESS) {
+        return;
+    }
+
+    const GuiElement* element = getElement(e.x, e.y);
+
+    if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (mainMenuVisible) {
+            if (element->id == "mainMenu_saveExit") {
+                // stop the application
+                app->stop();
+            }
+            else if (element->id == "mainMenu_continue") {
+                // close gui
+                mainMenuVisible = false;
+                app->resumeGame();
+                app->setMouseVisibility(false);
+            }
+        }
+    }
+}
+
+void Gui::handleKeyEvent(const KeyEvent& e) {
+    if (e.action == GLFW_PRESS) {
+        switch (e.key) {
+        case GLFW_KEY_ESCAPE:
+            mainMenuVisible = true;
+            app->pauseGame();
+            app->setMouseVisibility(true);
+            break;
+        }
+    }
 }

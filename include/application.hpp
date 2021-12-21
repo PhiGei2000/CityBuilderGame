@@ -33,11 +33,20 @@ class Application {
     void init();
 
   public:
-    bool gamePaused = false;
-
     Application();
 
     void run();
+
+    void stop();
+
+    void setMouseVisibility(bool visible);
+
+    inline void pauseGame() {
+        game->paused = true;
+    }
+    inline void resumeGame() {
+        game->paused = false;
+    }
 
     GLFWwindow* getWindow() const;
 

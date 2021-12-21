@@ -81,9 +81,8 @@ void Application::init() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // init gui
-    gui = new Gui();
+    gui = new Gui(this);
     gui->setScreenSize(800, 600);
-    gui->init();
 
     // init game
     game = new Game(this);
@@ -119,28 +118,25 @@ void Application::run() {
     glfwTerminate();
 }
 
+void Application::stop() {
+    stopRequested = true;
+}
+
+void Application::setMouseVisibility(bool visible) {
+    if (visible) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+    else {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+}
+
 GLFWwindow* Application::getWindow() const {
     return window;
 }
 
 void Application::onKeyEvent(const KeyEvent& e) {
-    if (e.action == GLFW_PRESS) {
-        switch (e.key) {
-        case GLFW_KEY_ESCAPE:
-            // change gui visibility
-            if (gui->visible) {
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                gui->visible = false;
-                game->paused = false;
-            }
-            else {
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                gui->visible = true;
-                game->paused = true;
-            }
-            break;
-        }
-    }
+    gui->handleKeyEvent(e);
 
     game->raiseEvent(e);
 }
@@ -156,22 +152,7 @@ void Application::onMouseMoveEvent(const MouseMoveEvent& e) {
 }
 
 void Application::onMouseButtonEvent(const MouseButtonEvent& e) {
-    if (e.button == GLFW_MOUSE_BUTTON_LEFT && e.action == GLFW_PRESS) {
-        if (gui->visible) {
-            const GuiElement* element = gui->getElement(e.x, e.y);
-
-            if (element->id == "mainMenu_saveExit") {
-                // stop the application
-                stopRequested = true;
-            }
-            else if (element->id == "mainMenu_continue") {
-                // close gui
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                gui->visible = false;
-                game->paused = false;
-            }
-        }
-    }
+    gui->handleMouseButtonEvent(e);
 
     game->raiseEvent(e);
 }
