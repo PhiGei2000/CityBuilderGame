@@ -9,6 +9,7 @@ SET(SOURCES ${SOURCES}
 ./src/gui/constraints.cpp
 ./src/gui/components/container.cpp
 ./src/gui/components/stackPanel.cpp
+./src/gui/components/icon.cpp
 ./src/gui/components/guiElement.cpp
 ./src/gui/components/label.cpp
 ./src/modelLoader.cpp
