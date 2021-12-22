@@ -124,7 +124,6 @@ void Gui::handleMouseButtonEvent(const MouseButtonEvent& e) {
                 // close gui
                 mainMenuVisible = false;
                 app->resumeGame();
-                app->setMouseVisibility(false);
             }
         }
     }
@@ -136,7 +135,6 @@ void Gui::handleKeyEvent(const KeyEvent& e) {
         case GLFW_KEY_ESCAPE:
             mainMenuVisible = true;
             app->pauseGame();
-            app->setMouseVisibility(true);
             break;
         }
     }

@@ -59,11 +59,6 @@ void Application::init() {
         exit(1);
     }
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    if (glfwRawMouseMotionSupported()) {
-        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-    }
-
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, cursorPos_callback);
@@ -120,15 +115,6 @@ void Application::run() {
 
 void Application::stop() {
     stopRequested = true;
-}
-
-void Application::setMouseVisibility(bool visible) {
-    if (visible) {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
-    else {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    }
 }
 
 GLFWwindow* Application::getWindow() const {

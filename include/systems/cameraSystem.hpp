@@ -19,9 +19,7 @@ class CameraSystem : public System {
   public:
     CameraSystem(Game* game);
 
-    virtual void update(int dt) override;
-
-    void onMouseMove(const MouseMoveEvent& e);
+    virtual void update(int dt) override;    
     
     void onFramebufferSize(const FramebufferSizeEvent& e);
 };

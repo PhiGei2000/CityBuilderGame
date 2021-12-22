@@ -39,8 +39,6 @@ class Application {
 
     void stop();
 
-    void setMouseVisibility(bool visible);
-
     inline void pauseGame() {
         game->paused = true;
     }

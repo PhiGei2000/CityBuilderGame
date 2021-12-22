@@ -20,8 +20,6 @@ CameraSystem::CameraSystem(Game* game)
 
     eventDispatcher.sink<FramebufferSizeEvent>()
         .connect<&CameraSystem::onFramebufferSize>(*this);
-    eventDispatcher.sink<MouseMoveEvent>()
-        .connect<&CameraSystem::onMouseMove>(*this);
 }
 
 void CameraSystem::update(int dt) {
@@ -32,8 +30,11 @@ void CameraSystem::update(int dt) {
     glm::vec3 xzCameraRight = glm::vec3(camera.right.x, 0.0f, camera.right.z);
 
     const static float cameraSpeed = 0.01f;
+    const static float cameraRotationSpeed = 0.01f;
 
     glm::vec3 cameraMoveDirection = glm::vec3(0.0f);
+    glm::vec2 cameraRotationDirection = glm::vec2(0.0f);
+
     if (game->getKey(GLFW_KEY_W) == GLFW_PRESS) {
         cameraMoveDirection += xzCameraFront;
     }
@@ -46,28 +47,34 @@ void CameraSystem::update(int dt) {
     if (game->getKey(GLFW_KEY_A) == GLFW_PRESS) {
         cameraMoveDirection -= xzCameraRight;
     }
+    if (game->getKey(GLFW_KEY_Q) == GLFW_PRESS) {
+        cameraRotationDirection.x += 1;
+    }
+    if (game->getKey(GLFW_KEY_E) == GLFW_PRESS) {
+        cameraRotationDirection.x -= 1;
+    }
+    if (game->getKey(GLFW_KEY_R) == GLFW_PRESS) {
+        cameraRotationDirection.y += 1;
+    }
+    if (game->getKey(GLFW_KEY_F) == GLFW_PRESS) {
+        cameraRotationDirection.y -= 1;
+    }
 
-    if (cameraMoveDirection.x != 0 && cameraMoveDirection.z != 0) {
+    bool cameraModified = false;
+    if (cameraMoveDirection.x != 0 || cameraMoveDirection.z != 0) {
         transform.position += cameraSpeed * glm::normalize(cameraMoveDirection);
+        cameraModified = true;
+    }
+
+    if (cameraRotationDirection.x != 0 || cameraRotationDirection.y != 0) {
+        camera.yaw += cameraRotationDirection.x * cameraRotationSpeed;
+        camera.pitch = glm::clamp(camera.pitch + cameraRotationDirection.y * cameraRotationSpeed, -89.0f, 89.0f);
+        cameraModified = true;
+    }
+
+    if (cameraModified) {
         camera.calculateMatrices(transform);
     }
-}
-
-void CameraSystem::onMouseMove(const MouseMoveEvent& e) {
-    CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
-    TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
-
-    float dx = e.x - e.lastX;
-    float dy = e.lastY - e.y;
-
-    const float sensitivity = 0.1f;
-    dx *= sensitivity;
-    dy *= sensitivity;
-
-    camera.yaw += dx;
-    camera.pitch = glm::clamp(camera.pitch + dy, -89.0f, 89.0f);
-
-    camera.calculateMatrices(cameraTransform);
 }
 
 void CameraSystem::onFramebufferSize(const FramebufferSizeEvent& e) {
