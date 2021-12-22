@@ -39,11 +39,8 @@ class Application {
 
     void stop();
 
-    inline void pauseGame() {
-        game->paused = true;
-    }
-    inline void resumeGame() {
-        game->paused = false;
+    inline void setGameState(GameState state) {
+        game->setState(state);
     }
 
     GLFWwindow* getWindow() const;

@@ -1,9 +1,9 @@
 #include "gui/gui.hpp"
 
 #include "gui/components/guiElement.hpp"
+#include "gui/components/icon.hpp"
 #include "gui/components/label.hpp"
 #include "gui/components/stackPanel.hpp"
-#include "gui/components/icon.hpp"
 
 #include "events/keyEvent.hpp"
 #include "events/mouseEvents.hpp"
@@ -123,7 +123,7 @@ void Gui::handleMouseButtonEvent(const MouseButtonEvent& e) {
             else if (element->id == "mainMenu_continue") {
                 // close gui
                 mainMenuVisible = false;
-                app->resumeGame();
+                app->setGameState(GameState::RUNNING);
             }
         }
     }
@@ -133,8 +133,14 @@ void Gui::handleKeyEvent(const KeyEvent& e) {
     if (e.action == GLFW_PRESS) {
         switch (e.key) {
         case GLFW_KEY_ESCAPE:
-            mainMenuVisible = true;
-            app->pauseGame();
+            if (mainMenuVisible) {
+                mainMenuVisible = false;
+                app->setGameState(GameState::RUNNING);
+            }
+            else {
+                mainMenuVisible = true;
+                app->setGameState(GameState::PAUSED);
+            }
             break;
         }
     }

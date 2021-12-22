@@ -55,7 +55,7 @@ ResourceManager& Game::getResourceManager() {
 }
 
 void Game::update(float dt) {
-    if (paused) {
+    if (state == GameState::PAUSED) {
         // update render system
         systems.back()->update(dt);
     }
@@ -70,9 +70,17 @@ int Game::getKey(int key) const {
     return glfwGetKey(app->getWindow(), key);
 }
 
+void Game::setState(GameState state) {
+    this->state = state;
+}
+
+GameState Game::getState() const {
+    return state;
+}
+
 template<typename Event>
 void Game::raiseEvent(const Event& event) {
-    if (!paused) {
+    if (state != GameState::PAUSED) {
         eventDispatcher.trigger<Event>(event);
     }
 }

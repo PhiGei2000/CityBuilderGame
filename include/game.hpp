@@ -6,6 +6,13 @@
 class System;
 class Application;
 
+enum class GameState
+{
+    PAUSED,
+    RUNNING,
+    BUILD_MODE
+};
+
 class Game {
     std::vector<System*> systems;
 
@@ -19,9 +26,10 @@ class Game {
     void loadResources();
 
     void init();
-  public:
-    bool paused;
 
+    GameState state;
+
+  public:
     Game(Application* app);
 
     entt::registry& getRegistry();
@@ -31,6 +39,9 @@ class Game {
     void update(float dt);
 
     int getKey(int key) const;
+
+    void setState(GameState state);
+    GameState getState() const;
 
     template<typename Event>
     void raiseEvent(const Event& args);
