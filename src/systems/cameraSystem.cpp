@@ -8,7 +8,7 @@
 void CameraSystem::init() {
     entt::entity cameraEntity = registry.create();
 
-    const TransformationComponent& transform = registry.emplace<TransformationComponent>(cameraEntity, glm::vec3(0.0f, 1.0f, 0.0f), glm::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
+    const TransformationComponent& transform = registry.emplace<TransformationComponent>(cameraEntity, glm::vec3(0.0f, 10.0f, 0.0f), glm::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
     registry.emplace<CameraComponent>(cameraEntity).calculateMatrices(transform);
 }
 

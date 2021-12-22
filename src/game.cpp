@@ -18,6 +18,7 @@ Game::Game(Application* app)
 void Game::loadResources() {
     // models
     resourceManager.setResource<Geometry>("GROUND_GEOMETRY", ModelLoader::load("res/models/ground.obj"));
+    resourceManager.setResource<Geometry>("TREE_GEOMETRY", ModelLoader::load("res/models/tree.obj"));
 
     // shaders
     resourceManager.setResource<Shader>("MESH_SHADER", new Shader("res/shaders/mesh.vert", "res/shaders/mesh.frag"));
@@ -25,11 +26,13 @@ void Game::loadResources() {
     // textures
     resourceManager.setResource<Texture>("GROUND_TEXTURE", new Texture("res/textures/ground.png"));
     resourceManager.setResource<Texture>("STREET_TEXTURE", new Texture("res/textures/street_texture_array.png"));
+    resourceManager.setResource<Texture>("TREE_TEXTURE", new Texture("res/textures/tree.png"));
 }
 
 void Game::init() {
     // init systems
     systems.push_back(new CameraSystem(this));
+    systems.push_back(new EnvironmentSystem(this));
     systems.push_back(new RenderSystem(this));
 
     // entities

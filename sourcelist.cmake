@@ -18,6 +18,7 @@ SET(SOURCES ${SOURCES}
 ./src/components/transformationComponent.cpp
 ./src/resourceManager.cpp
 ./src/systems/system.cpp
+./src/systems/environmentSystem.cpp
 ./src/systems/cameraSystem.cpp
 ./src/systems/renderSystem.cpp
 ./src/game.cpp
