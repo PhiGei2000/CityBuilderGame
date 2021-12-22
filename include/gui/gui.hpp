@@ -1,6 +1,4 @@
 #pragma once
-#include "colors.hpp"
-
 #include "gui/components/guiElement.hpp"
 
 #include "rendering/renderQuad.hpp"
@@ -24,6 +22,9 @@ class Gui {
     GuiElement* mainMenu;
     bool mainMenuVisible = false;
 
+    GuiElement* toolbox;
+    bool toolboxVisible = true;
+
     Shader* guiShader = new Shader("res/shaders/renderQuad.vert", "res/shaders/renderQuad.frag");
 
     void init();
@@ -34,6 +35,7 @@ class Gui {
     TextRenderer textRenderer;
 
     Shader* getShader() const;
+    const RenderQuad& getRenderQuad() const;
 
     void setScreenSize(float width, float height);
 

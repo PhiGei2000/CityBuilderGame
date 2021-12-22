@@ -7,7 +7,11 @@
 
 #include <iostream>
 
-Texture::Texture(const std::string& filename) {
+Texture::Texture(const std::string& filename)
+    : Texture(filename, GL_RGB) {
+}
+
+Texture::Texture(const std::string& filename, int format) {
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -24,7 +28,7 @@ Texture::Texture(const std::string& filename) {
     unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrChannels, 0);
 
     if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else {

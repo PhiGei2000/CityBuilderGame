@@ -9,7 +9,14 @@ void Label::render() const {
     GuiElement::render();
 
     const Rectangle& box = getBox();
+    Shader* guiShader = gui->getShader();
+
+    guiShader->setBool("flipV", true);
+    guiShader->setBool("text", true);
+    guiShader->setVector4("color", colors::white);
+
     gui->textRenderer.renderText(text, box, 0.5f);
 
-    gui->getShader()->use();
+    guiShader->setBool("flipV", false);
+    guiShader->setBool("text", false);
 }

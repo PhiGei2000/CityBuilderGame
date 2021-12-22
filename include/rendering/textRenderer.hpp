@@ -19,8 +19,7 @@ class TextRenderer {
         unsigned int advance;
     };
 
-    RenderQuad quad;
-    Shader* textShader;
+    RenderQuad quad;    
     float screenWidth, screenHeight;
 
     std::map<char, Character> characters;

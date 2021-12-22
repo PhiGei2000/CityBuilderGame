@@ -3,9 +3,12 @@
 #include "gui/components/guiElement.hpp"
 #include "gui/components/label.hpp"
 #include "gui/components/stackPanel.hpp"
+#include "gui/components/icon.hpp"
 
 #include "events/keyEvent.hpp"
 #include "events/mouseEvents.hpp"
+
+#include "rendering/texture.hpp"
 
 #include "application.hpp"
 
@@ -38,11 +41,30 @@ void Gui::init() {
 
     mainMenu = mainMenuPanel;
 
+    StackPanel* toolboxPanel = new StackPanel("toolbox", this, StackPanel::StackOrientation::ROW, colors::transparent);
+    toolboxPanel->constraints.x = AbsoluteConstraint(50);
+    toolboxPanel->constraints.y = AbsoluteConstraint(50);
+    toolboxPanel->constraints.height = AbsoluteConstraint(48);
+
+    Texture* streetBuilderIconTexture = new Texture("res/gui/streetBuilder_icon.png", GL_RGBA);
+    Icon* streetBuilder = new Icon("toolbox_streetBuilder", this, streetBuilderIconTexture, colors::anthraziteGrey);
+    streetBuilder->constraints.x = AbsoluteConstraint(0);
+    streetBuilder->constraints.y = AbsoluteConstraint(0);
+    streetBuilder->constraints.height = AbsoluteConstraint(48);
+    streetBuilder->constraints.width = AspectConstraint(1);
+    toolboxPanel->addChild(streetBuilder);
+
+    toolbox = toolboxPanel;
+
     textRenderer.init();
 }
 
 Shader* Gui::getShader() const {
     return guiShader;
+}
+
+const RenderQuad& Gui::getRenderQuad() const {
+    return quad;
 }
 
 void Gui::setScreenSize(float width, float height) {
@@ -58,11 +80,20 @@ void Gui::render() const {
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
 
+    // set default uniforms
     glm::mat4 projection = glm::ortho(0.0f, width, 0.0f, height);
     guiShader->setMatrix4("projection", projection);
+    guiShader->setBool("text", false);
+    guiShader->setBool("useTexture", false);
+    guiShader->setBool("flipV", false);
+    guiShader->setInt("tex", 0);
 
     if (mainMenuVisible) {
         mainMenu->render();
+    }
+
+    if (toolboxVisible) {
+        toolbox->render();
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -79,6 +110,9 @@ void Gui::handleMouseButtonEvent(const MouseButtonEvent& e) {
     }
 
     const GuiElement* element = getElement(e.x, e.y);
+    if (element == nullptr) {
+        return;
+    }
 
     if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
         if (mainMenuVisible) {

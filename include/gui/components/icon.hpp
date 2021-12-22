@@ -1,5 +1,6 @@
 #pragma once
 #include "guiElement.hpp"
+#include "gui/colors.hpp"
 
 #include "rendering/texture.hpp"
 

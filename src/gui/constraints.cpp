@@ -12,4 +12,6 @@ bool Constraints::valid() const {
     if (width.type == ConstraintType::CENTER || height.type == ConstraintType::CENTER) {
         return false;
     }
+
+    return true;
 }

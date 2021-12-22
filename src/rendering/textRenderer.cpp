@@ -54,8 +54,6 @@ void TextRenderer::init() {
 
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
-
-    textShader = new Shader("res/shaders/renderQuad.vert", "res/shaders/text.frag");
 }
 
 void TextRenderer::setScreenSize(float width, float height) {
@@ -110,20 +108,14 @@ void TextRenderer::renderText(const std::string& text, const Rectangle& rect, fl
     }
 
     if (height > rect.height) {
-        // scale = glm::max(scale, rect.height / height);
         scale = rect.height / height;
-        
+
         width *= scale;
         height *= scale;
     }
 
     float currentX = rect.x + (rect.width - width) * 0.5f;
     float currentY = rect.y + baselineOffset + (rect.height - height) * 0.5f;
-
-    textShader->use();
-    textShader->setVector3("textColor", textColor);
-    textShader->setInt("text", 0);
-    textShader->setMatrix4("projection", glm::ortho(0.0f, screenWidth, 0.0f, screenHeight));
 
     glActiveTexture(GL_TEXTURE0);
 
