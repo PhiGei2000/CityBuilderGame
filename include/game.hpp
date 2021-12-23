@@ -2,6 +2,7 @@
 #include "resourceManager.hpp"
 
 #include <entt/entt.hpp>
+#include <glm/glm.hpp>
 
 class System;
 class Application;
@@ -39,6 +40,8 @@ class Game {
     void update(float dt);
 
     int getKey(int key) const;
+
+    glm::vec2 getMousePos() const;
 
     void setState(GameState state);
     GameState getState() const;

@@ -21,5 +21,6 @@ SET(SOURCES ${SOURCES}
 ./src/systems/environmentSystem.cpp
 ./src/systems/cameraSystem.cpp
 ./src/systems/renderSystem.cpp
+./src/systems/buildSystem.cpp
 ./src/game.cpp
 )

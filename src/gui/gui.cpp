@@ -101,7 +101,17 @@ void Gui::render() const {
 }
 
 const GuiElement* Gui::getElement(float x, float y) const {
-    return mainMenu->getElementAt(x, height - y);
+    const GuiElement* element = nullptr;
+
+    if (mainMenuVisible) {
+        element = mainMenu->getElementAt(x, height - y);
+    }    
+
+    if (element == nullptr && toolboxVisible) {
+        element = toolbox->getElementAt(x, height - y);
+    }
+
+    return element;
 }
 
 void Gui::handleMouseButtonEvent(const MouseButtonEvent& e) {
@@ -124,6 +134,12 @@ void Gui::handleMouseButtonEvent(const MouseButtonEvent& e) {
                 // close gui
                 mainMenuVisible = false;
                 app->setGameState(GameState::RUNNING);
+            }
+        }
+
+        if (toolboxVisible) {
+            if (element->id == "toolbox_streetBuilder") {
+                app->setGameState(GameState::BUILD_MODE);
             }
         }
     }

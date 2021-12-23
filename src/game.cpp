@@ -2,6 +2,7 @@
 
 #include "application.hpp"
 #include "components/components.hpp"
+#include "events/events.hpp"
 #include "modelLoader.hpp"
 #include "rendering/geometry.hpp"
 #include "rendering/shader.hpp"
@@ -19,19 +20,23 @@ void Game::loadResources() {
     // models
     resourceManager.setResource<Geometry>("GROUND_GEOMETRY", ModelLoader::load("res/models/ground.obj"));
     resourceManager.setResource<Geometry>("TREE_GEOMETRY", ModelLoader::load("res/models/tree.obj"));
+    resourceManager.setResource<Geometry>("BUILDMARKER_GEOMETRY", ModelLoader::load("res/models/buildMarker.obj"));
 
     // shaders
     resourceManager.setResource<Shader>("MESH_SHADER", new Shader("res/shaders/mesh.vert", "res/shaders/mesh.frag"));
+    resourceManager.setResource<Shader>("BUILDMARKER_SHADER", new Shader("res/shaders/mesh.vert", "res/shaders/buildMarker.frag"));
 
     // textures
     resourceManager.setResource<Texture>("GROUND_TEXTURE", new Texture("res/textures/ground.png"));
     resourceManager.setResource<Texture>("STREET_TEXTURE", new Texture("res/textures/street_texture_array.png"));
     resourceManager.setResource<Texture>("TREE_TEXTURE", new Texture("res/textures/tree.png"));
+    resourceManager.setResource<Texture>("BUILDMARKER_TEXTURE", new Texture("res/textures/buildMarker.png", GL_RGBA));
 }
 
 void Game::init() {
     // init systems
     systems.push_back(new CameraSystem(this));
+    systems.push_back(new BuildSystem(this));
     systems.push_back(new EnvironmentSystem(this));
     systems.push_back(new RenderSystem(this));
 
@@ -73,6 +78,15 @@ int Game::getKey(int key) const {
     return glfwGetKey(app->getWindow(), key);
 }
 
+glm::vec2 Game::getMousePos() const {
+    double x, y;
+    int width, height;
+    glfwGetCursorPos(app->getWindow(), &x, &y);
+    glfwGetFramebufferSize(app->getWindow(), &width, &height);
+
+    return glm::vec2((float)(2 * x) / width - 1.0f, 1.0f - (float)(2 * y) / height);
+}
+
 void Game::setState(GameState state) {
     this->state = state;
 }
@@ -82,9 +96,9 @@ GameState Game::getState() const {
 }
 
 template<typename Event>
-void Game::raiseEvent(const Event& event) {
+void Game::raiseEvent(const Event& e) {
     if (state != GameState::PAUSED) {
-        eventDispatcher.trigger<Event>(event);
+        eventDispatcher.trigger<Event>(e);
     }
 }
 

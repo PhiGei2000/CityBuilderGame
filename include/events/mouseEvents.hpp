@@ -1,13 +1,12 @@
 #pragma once
-#include "event.hpp"
 
-struct MouseMoveEvent : public Event {
+struct MouseMoveEvent {
     float x, y;
 
     float lastX, lastY;
 };
 
-struct MouseButtonEvent : public Event {
+struct MouseButtonEvent {
     float x, y;
 
     int button, action, mods;

@@ -1,7 +1,6 @@
 #pragma once
-#include "event.hpp"
 
-struct FramebufferSizeEvent : public Event {
+struct FramebufferSizeEvent {
     int width;
     int height;
 };

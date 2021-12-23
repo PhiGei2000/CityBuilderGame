@@ -20,7 +20,7 @@ void RenderSystem::update(int dt) {
     const CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
 
-    registry.view<TransformationComponent, MeshComponent>()
+    registry.view<TransformationComponent, MeshComponent>(entt::exclude<BuildMarkerComponent>)
         .each([&](const TransformationComponent& transform, const MeshComponent& mesh) {
             mesh.texture->use(0);
 
@@ -33,4 +33,20 @@ void RenderSystem::update(int dt) {
 
             mesh.geometry->draw();
         });
+
+    if (game->getState() == GameState::BUILD_MODE) {
+        registry.view<TransformationComponent, MeshComponent, BuildMarkerComponent>()
+            .each([&](const TransformationComponent& transform, const MeshComponent& mesh, const BuildMarkerComponent& buildMarker) {
+                mesh.texture->use(0);
+
+                mesh.shader->use();
+                mesh.shader->setInt("diffuse", 0);
+
+                mesh.shader->setMatrix4("view", camera.viewMatrix);
+                mesh.shader->setMatrix4("projection", camera.projectionMatrix);
+                mesh.shader->setMatrix4("model", transform.transform);
+
+                mesh.geometry->draw();
+            });
+    }
 }

@@ -102,6 +102,7 @@ Geometry* ModelLoader::load(const std::string& filename) {
 
                 faceIndices.push_back(indices);
             }
+
         }
 
         GeometryData data;

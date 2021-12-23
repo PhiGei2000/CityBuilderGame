@@ -1,7 +1,6 @@
 #pragma once
-#include "event.hpp"
 
-struct KeyEvent : public Event {
+struct KeyEvent {
     int key;
     int scancode;
     int action;

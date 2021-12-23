@@ -21,17 +21,17 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 
     Application* app = (Application*)glfwGetWindowUserPointer(window);
-    app->onFramebufferSizeEvent(FramebufferSizeEvent{app, width, height});
+    app->onFramebufferSizeEvent(FramebufferSizeEvent{width, height});
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     Application* app = (Application*)glfwGetWindowUserPointer(window);
-    app->onKeyEvent(KeyEvent{app, key, scancode, action, mods});
+    app->onKeyEvent(KeyEvent{key, scancode, action, mods});
 }
 
 void cursorPos_callback(GLFWwindow* window, double x, double y) {
     Application* app = (Application*)glfwGetWindowUserPointer(window);
-    app->onMouseMoveEvent(MouseMoveEvent{app, (float)x, (float)y, app->lastCursorPos.x, app->lastCursorPos.y});
+    app->onMouseMoveEvent(MouseMoveEvent{(float)x, (float)y, app->lastCursorPos.x, app->lastCursorPos.y});
 
     app->lastCursorPos = glm::vec2(x, y);
 }
@@ -41,7 +41,7 @@ void mouseButton_callback(GLFWwindow* window, int button, int action, int mods) 
     double x, y;
     glfwGetCursorPos(window, &x, &y);
 
-    app->onMouseButtonEvent(MouseButtonEvent{app, (float)x, (float)y, button, action, mods});
+    app->onMouseButtonEvent(MouseButtonEvent{(float)x, (float)y, button, action, mods});
 }
 
 void Application::init() {
@@ -95,8 +95,8 @@ void Application::run() {
         float currentTime = (float)glfwGetTime();
         float dt = currentTime - lastTime;
         lastTime = currentTime;
-
-        glClearColor(0.0f, 0.698f, 0.894f, 1.0f);
+        
+        glClearColor(0.7f, 0.877f, 0.917f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         game->update(dt);

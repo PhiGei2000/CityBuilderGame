@@ -1,15 +1,14 @@
 #pragma once
+#include "geometryData.hpp"
 
-#include "rendering/geometryData.hpp"
-
-struct Geometry {
-    unsigned int vbo;
-    unsigned int vao;
-    unsigned int ebo;
+class Geometry {
+    unsigned int vbo, vao, ebo;
 
     unsigned int drawCount;
 
+  public:
     Geometry();
+
     void fillBuffers(const GeometryData& data);
 
     void bind() const;
