@@ -25,7 +25,7 @@ void EnvironmentSystem::init() {
 
         glm::vec3 position = glm::vec3((float)rand() / RAND_MAX * 200 - 100, 0.0f, (float)rand() / RAND_MAX * 200 - 100);
         float angle = (float)rand() / RAND_MAX * 0.5f * M_PI;
-        glm::vec3 scale = glm::vec3((float)rand() / RAND_MAX * 0.5f + 0.5f);
+        glm::vec3 scale = glm::vec3((float)rand() / RAND_MAX * 0.5 + 1.5f);
 
         registry.emplace<MeshComponent>(entity, treeGeometry, meshShader, treeTexture);
         registry.emplace<TransformationComponent>(entity,

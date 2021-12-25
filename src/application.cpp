@@ -138,7 +138,7 @@ void Application::onMouseMoveEvent(const MouseMoveEvent& e) {
 }
 
 void Application::onMouseButtonEvent(const MouseButtonEvent& e) {
-    gui->handleMouseButtonEvent(e);
-
     game->raiseEvent(e);
+
+    gui->handleMouseButtonEvent(e);
 }

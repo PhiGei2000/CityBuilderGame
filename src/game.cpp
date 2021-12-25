@@ -21,14 +21,14 @@ void Game::loadResources() {
     resourceManager.setResource<Geometry>("GROUND_GEOMETRY", ModelLoader::load("res/models/ground.obj"));
     resourceManager.setResource<Geometry>("TREE_GEOMETRY", ModelLoader::load("res/models/tree.obj"));
     resourceManager.setResource<Geometry>("BUILDMARKER_GEOMETRY", ModelLoader::load("res/models/buildMarker.obj"));
+    resourceManager.setResource<Geometry>("STREET_STRAIGHT_GEOMETRY", ModelLoader::load("res/models/street_straight.obj"));
 
     // shaders
     resourceManager.setResource<Shader>("MESH_SHADER", new Shader("res/shaders/mesh.vert", "res/shaders/mesh.frag"));
-    resourceManager.setResource<Shader>("BUILDMARKER_SHADER", new Shader("res/shaders/mesh.vert", "res/shaders/buildMarker.frag"));
 
     // textures
     resourceManager.setResource<Texture>("GROUND_TEXTURE", new Texture("res/textures/ground.png"));
-    resourceManager.setResource<Texture>("STREET_TEXTURE", new Texture("res/textures/street_texture_array.png"));
+    resourceManager.setResource<Texture>("STREET_TEXTURE", new Texture("res/textures/street.png"));
     resourceManager.setResource<Texture>("TREE_TEXTURE", new Texture("res/textures/tree.png"));
     resourceManager.setResource<Texture>("BUILDMARKER_TEXTURE", new Texture("res/textures/buildMarker.png", GL_RGBA));
 }
