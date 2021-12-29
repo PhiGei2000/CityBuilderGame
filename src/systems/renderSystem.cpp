@@ -26,6 +26,9 @@ void RenderSystem::update(int dt) {
 
             mesh.shader->use();
             mesh.shader->setInt("diffuse", 0);
+            mesh.shader->setVector3("light.color", glm::vec3(0.9f));
+            mesh.shader->setVector3("light.direction", glm::normalize(glm::vec3(1, -1, 1)));
+            mesh.shader->setVector3("viewPos", cameraTransform.position);
 
             mesh.shader->setMatrix4("view", camera.viewMatrix);
             mesh.shader->setMatrix4("projection", camera.projectionMatrix);
@@ -41,6 +44,8 @@ void RenderSystem::update(int dt) {
 
                 mesh.shader->use();
                 mesh.shader->setInt("diffuse", 0);
+                mesh.shader->setVector3("light.color", glm::vec3(0.9f));
+                mesh.shader->setVector3("light.direction", glm::normalize(glm::vec3(1, 1, 1)));
 
                 mesh.shader->setMatrix4("view", camera.viewMatrix);
                 mesh.shader->setMatrix4("projection", camera.projectionMatrix);
