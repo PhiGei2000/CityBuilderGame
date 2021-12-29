@@ -14,9 +14,11 @@ SET(SOURCES ${SOURCES}
 ./src/gui/components/label.cpp
 ./src/modelLoader.cpp
 ./src/main.cpp
+./src/misc/utility.cpp
 ./src/components/cameraComponent.cpp
 ./src/components/transformationComponent.cpp
 ./src/resourceManager.cpp
+./src/systems/streetSystem.cpp
 ./src/systems/system.cpp
 ./src/systems/environmentSystem.cpp
 ./src/systems/cameraSystem.cpp

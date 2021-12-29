@@ -50,7 +50,16 @@ void Application::init() {
         exit(1);
     }
 
-    window = glfwCreateWindow(800, 600, "Traffic Simulation", NULL, NULL);
+#if DEBUG
+    window = glfwCreateWindow(800, 600, "City Building Game", NULL, NULL);
+#else    
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    
+    int x, y, width, height;
+    glfwGetMonitorWorkarea(monitor, &x, &y, &width, &height);
+
+    window = glfwCreateWindow(width, height, "City Building Game", monitor, NULL);    
+#endif
 
     if (window == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
@@ -95,7 +104,7 @@ void Application::run() {
         float currentTime = (float)glfwGetTime();
         float dt = currentTime - lastTime;
         lastTime = currentTime;
-        
+
         glClearColor(0.7f, 0.877f, 0.917f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

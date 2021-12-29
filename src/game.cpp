@@ -21,7 +21,13 @@ void Game::loadResources() {
     resourceManager.setResource<Geometry>("GROUND_GEOMETRY", ModelLoader::load("res/models/ground.obj"));
     resourceManager.setResource<Geometry>("TREE_GEOMETRY", ModelLoader::load("res/models/tree.obj"));
     resourceManager.setResource<Geometry>("BUILDMARKER_GEOMETRY", ModelLoader::load("res/models/buildMarker.obj"));
+
     resourceManager.setResource<Geometry>("STREET_STRAIGHT_GEOMETRY", ModelLoader::load("res/models/street_straight.obj"));
+    resourceManager.setResource<Geometry>("STREET_CURVE_GEOMETRY", ModelLoader::load("res/models/street_curve.obj"));
+    resourceManager.setResource<Geometry>("STREET_NOT_CONNECTED_GEOMETRY", ModelLoader::load("res/models/street_notConnected.obj"));
+    resourceManager.setResource<Geometry>("STREET_END_GEOMETRY", ModelLoader::load("res/models/street_end.obj"));
+    resourceManager.setResource<Geometry>("STREET_T_CROSSING_GEOMETRY", ModelLoader::load("res/models/street_t_crossing.obj"));
+    resourceManager.setResource<Geometry>("STREET_CROSSING_GEOMETRY", ModelLoader::load("res/models/street_crossing.obj"));
 
     // shaders
     resourceManager.setResource<Shader>("MESH_SHADER", new Shader("res/shaders/mesh.vert", "res/shaders/mesh.frag"));
@@ -37,6 +43,7 @@ void Game::init() {
     // init systems
     systems.push_back(new CameraSystem(this));
     systems.push_back(new BuildSystem(this));
+    systems.push_back(new StreetSystem(this));
     systems.push_back(new EnvironmentSystem(this));
     systems.push_back(new RenderSystem(this));
 
@@ -106,3 +113,4 @@ template void Game::raiseEvent<FramebufferSizeEvent>(const FramebufferSizeEvent&
 template void Game::raiseEvent<KeyEvent>(const KeyEvent&);
 template void Game::raiseEvent<MouseButtonEvent>(const MouseButtonEvent&);
 template void Game::raiseEvent<MouseMoveEvent>(const MouseMoveEvent&);
+template void Game::raiseEvent<BuildEvent>(const BuildEvent&);

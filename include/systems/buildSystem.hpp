@@ -12,13 +12,8 @@ class BuildSystem : public System {
     entt::entity cameraEntity;
     entt::entity buildMarkerEntity;
 
-    glm::ivec2 getGridPos(const glm::vec2& mousePos) const;
-
-    bool** usedSpace;
+    glm::ivec2 getGridPos(const glm::vec2& mousePos) const;    
   public:
-    static constexpr int gridSize = 5.0f;
-    static constexpr int worldSize = 100.0f;
-
     BuildSystem(Game* game);
 
     virtual void update(int dt) override;

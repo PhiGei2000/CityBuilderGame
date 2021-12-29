@@ -11,7 +11,7 @@ struct CameraComponent {
     float height = 600.0f;
     float fov = 60.0f;
 
-    float yaw = -90.0f, pitch = 0.0f;
+    float yaw = 0.0f, pitch = 0.0f;
 
     glm::mat4 projectionMatrix;
     glm::mat4 viewMatrix;

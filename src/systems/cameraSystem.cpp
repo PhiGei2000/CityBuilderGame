@@ -47,10 +47,10 @@ void CameraSystem::update(int dt) {
     if (game->getKey(GLFW_KEY_A) == GLFW_PRESS) {
         cameraMoveDirection -= xzCameraRight;
     }
-    if (game->getKey(GLFW_KEY_Q) == GLFW_PRESS) {
+    if (game->getKey(GLFW_KEY_E) == GLFW_PRESS) {
         cameraRotationDirection.x += 1;
     }
-    if (game->getKey(GLFW_KEY_E) == GLFW_PRESS) {
+    if (game->getKey(GLFW_KEY_Q) == GLFW_PRESS) {
         cameraRotationDirection.x -= 1;
     }
     if (game->getKey(GLFW_KEY_R) == GLFW_PRESS) {
