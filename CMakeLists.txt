@@ -5,6 +5,7 @@ include(CTest)
 enable_testing()
 
 set(CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 20)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("Create DEBUG definition")
@@ -20,13 +21,18 @@ set(OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)
-find_package(glm REQUIRED)
-find_package(Freetype REQUIRED)
+
+if (WIN32) 
+    include_directories(${GLM_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${STB_INCLUDE_DIRS})        
+else ()
+    find_package(glm REQUIRED)
+    find_package(Freetype REQUIRED)
+endif()
 
 add_executable(cityBuilderGame ${SOURCES})
 
 target_include_directories(cityBuilderGame PUBLIC
-    /usr/include/entt
+    ${ENTT_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS})
 
 target_link_libraries(cityBuilderGame
