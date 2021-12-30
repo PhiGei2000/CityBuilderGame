@@ -18,11 +18,11 @@ template<typename T>
 void ResourceManager::setResource(const std::string& resourceId, T* data) {
     const std::type_index type = std::type_index(typeid(T));
 
-    resources[resourceId] = Resource{type, data};
+    resources[resourceId] = Resource{type, std::shared_ptr<T>(data)};
 }
 
 template<typename T>
-T* ResourceManager::getResource(const std::string& resourceId) const {
+std::shared_ptr<T> ResourceManager::getResource(const std::string& resourceId) const {
     const std::type_index type = std::type_index(typeid(T));
     const Resource& resource = resources.at(resourceId);
 
@@ -32,13 +32,13 @@ T* ResourceManager::getResource(const std::string& resourceId) const {
         throw ResourceTypeException(message.append(type.name()).c_str());
     }
 
-    return reinterpret_cast<T*>(resource.data);
+    return std::reinterpret_pointer_cast<T>(resource.data);
 }
 
 template void ResourceManager::setResource<Texture>(const std::string&, Texture*);
 template void ResourceManager::setResource<Shader>(const std::string&, Shader*);
 template void ResourceManager::setResource<Geometry>(const std::string&, Geometry*);
 
-template Texture* ResourceManager::getResource<Texture>(const std::string&) const;
-template Shader* ResourceManager::getResource<Shader>(const std::string&) const;
-template Geometry* ResourceManager::getResource<Geometry>(const std::string&) const;
+template std::shared_ptr<Texture> ResourceManager::getResource<Texture>(const std::string&) const;
+template std::shared_ptr<Shader> ResourceManager::getResource<Shader>(const std::string&) const;
+template std::shared_ptr<Geometry> ResourceManager::getResource<Geometry>(const std::string&) const;

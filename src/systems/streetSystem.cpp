@@ -38,6 +38,7 @@ void StreetSystem::update(int dt) {
         TransformationComponent& transform = registry.get<TransformationComponent>(*it);
         transform.setRotation(glm::vec3(0));
 
+        std::shared_ptr<Geometry> geo;
         switch (street.type) {
         // end streets
         case StreetType::NOT_CONNECTED:

@@ -21,9 +21,9 @@ EnvironmentSystem::EnvironmentSystem(Game* game)
 
 void EnvironmentSystem::init() {
     const ResourceManager& resourceManager = game->getResourceManager();
-    Geometry* treeGeometry = resourceManager.getResource<Geometry>("TREE_GEOMETRY");
-    Texture* treeTexture = resourceManager.getResource<Texture>("TREE_TEXTURE");
-    Shader* meshShader = resourceManager.getResource<Shader>("MESH_SHADER");
+    std::shared_ptr<Geometry> treeGeometry = resourceManager.getResource<Geometry>("TREE_GEOMETRY");
+    std::shared_ptr<Texture> treeTexture = resourceManager.getResource<Texture>("TREE_TEXTURE");
+    std::shared_ptr<Shader> meshShader = resourceManager.getResource<Shader>("MESH_SHADER");
 
     for (int i = 0; i < 100; i++) {
         entt::entity entity = registry.create();

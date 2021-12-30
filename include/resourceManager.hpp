@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <typeindex>
 #include <unordered_map>
@@ -9,7 +10,7 @@ class ResourceManager {
     struct Resource {
         std::type_index type = std::type_index(typeid(void*));
 
-        void* data;
+        std::shared_ptr<void> data;
     };
 
     std::unordered_map<std::string, Resource> resources;
@@ -28,5 +29,5 @@ class ResourceManager {
     template<typename T>
     void setResource(const std::string& resourceId, T* data);
     template<typename T>
-    T* getResource(const std::string& resourceId) const;
+    std::shared_ptr<T> getResource(const std::string& resourceId) const;
 };

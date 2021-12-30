@@ -2,6 +2,7 @@
 
 #include "rendering/geometry.hpp"
 
+#include <memory>
 #include <sstream>
 #include <string>
 

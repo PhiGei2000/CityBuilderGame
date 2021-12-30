@@ -7,7 +7,7 @@
 #include <string>
 
 struct MeshComponent {
-    Geometry* geometry;
-    Shader* shader;
-    Texture* texture;
+    std::shared_ptr<Geometry> geometry;
+    std::shared_ptr<Shader> shader;
+    std::shared_ptr<Texture> texture;
 };
