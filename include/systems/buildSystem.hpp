@@ -16,7 +16,7 @@ class BuildSystem : public System {
   public:
     BuildSystem(Game* game);
 
-    virtual void update(int dt) override;
+    virtual void update(float dt) override;
 
     void handleMouseButtonEvent(const MouseButtonEvent& e);
 };

@@ -19,7 +19,7 @@ class CameraSystem : public System {
   public:
     CameraSystem(Game* game);
 
-    virtual void update(int dt) override;    
-    
+    virtual void update(float dt) override;
+
     void onFramebufferSize(const FramebufferSizeEvent& e);
 };

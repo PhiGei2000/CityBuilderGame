@@ -25,7 +25,7 @@ class StreetSystem : public System {
   public:
     StreetSystem(Game* game);
 
-    virtual void update(int dt) override;
+    virtual void update(float dt) override;
 
     void handle_buildEvent(const BuildEvent& e);
 };

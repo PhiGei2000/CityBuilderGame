@@ -16,7 +16,7 @@ RenderSystem::RenderSystem(Game* game)
     cameraEntity = registry.view<CameraComponent, TransformationComponent>().front();
 }
 
-void RenderSystem::update(int dt) {
+void RenderSystem::update(float dt) {
     const CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
 

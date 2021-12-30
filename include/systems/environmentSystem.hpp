@@ -14,7 +14,7 @@ class EnvironmentSystem : public System {
   public:
     EnvironmentSystem(Game* game);
 
-    virtual void update(int dt) override;
+    virtual void update(float dt) override;
 
     void handleBuildEvent(const BuildEvent& e);
 };

@@ -42,7 +42,7 @@ void EnvironmentSystem::init() {
     }
 }
 
-void EnvironmentSystem::update(int dt) {
+void EnvironmentSystem::update(float dt) {
     while (entitiesToDestroy.size() > 0) {
         auto entity = entitiesToDestroy.front();
 

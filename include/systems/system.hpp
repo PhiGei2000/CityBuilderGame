@@ -16,5 +16,5 @@ class System {
   public:
     System(Game* game);
 
-    virtual void update(int dt);
+    virtual void update(float dt);
 };

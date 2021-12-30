@@ -22,7 +22,7 @@ CameraSystem::CameraSystem(Game* game)
         .connect<&CameraSystem::onFramebufferSize>(*this);
 }
 
-void CameraSystem::update(int dt) {
+void CameraSystem::update(float dt) {
     CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     TransformationComponent& transform = registry.get<TransformationComponent>(cameraEntity);
 

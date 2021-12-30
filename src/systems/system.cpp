@@ -9,5 +9,5 @@ System::System(Game* game)
       eventDispatcher(game->getEventDispatcher()) {
 }
 
-void System::update(int dt) {
+void System::update(float dt) {
 }

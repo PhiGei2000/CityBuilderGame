@@ -20,6 +20,7 @@ SET(SOURCES ${SOURCES}
 ./src/resourceManager.cpp
 ./src/systems/streetSystem.cpp
 ./src/systems/system.cpp
+./src/systems/physicsSystem.cpp
 ./src/systems/environmentSystem.cpp
 ./src/systems/cameraSystem.cpp
 ./src/systems/renderSystem.cpp

@@ -10,5 +10,5 @@ class RenderSystem : public System {
   public:
     RenderSystem(Game* app);
 
-    void update(int dt) override;
+    void update(float dt) override;
 };

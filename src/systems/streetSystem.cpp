@@ -29,7 +29,7 @@ StreetType StreetSystem::getType(bool* connections) {
     return (StreetType)type;
 }
 
-void StreetSystem::update(int dt) {
+void StreetSystem::update(float dt) {
     const ResourceManager& resourceManager = game->getResourceManager();
 
     for (auto it = outdatedStreets.begin(); it != outdatedStreets.end();) {

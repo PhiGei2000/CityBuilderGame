@@ -45,6 +45,7 @@ void Game::init() {
     systems.push_back(new BuildSystem(this));
     systems.push_back(new StreetSystem(this));
     systems.push_back(new EnvironmentSystem(this));
+    systems.push_back(new PhysicsSystem(this));
     systems.push_back(new RenderSystem(this));
 
     // entities

@@ -29,7 +29,7 @@ void BuildSystem::init() {
                                     resourceManager.getResource<Texture>("BUILDMARKER_TEXTURE"));
 }
 
-void BuildSystem::update(int dt) {
+void BuildSystem::update(float dt) {
     BuildMarkerComponent& buildMarkerComponent = registry.get<BuildMarkerComponent>(buildMarkerEntity);
     TransformationComponent& transform = registry.get<TransformationComponent>(buildMarkerEntity);
 
