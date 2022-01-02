@@ -15,6 +15,7 @@ SET(SOURCES ${SOURCES}
 ./src/modelLoader.cpp
 ./src/main.cpp
 ./src/misc/utility.cpp
+./src/misc/streetGraph.cpp
 ./src/components/cameraComponent.cpp
 ./src/components/transformationComponent.cpp
 ./src/resourceManager.cpp

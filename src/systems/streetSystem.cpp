@@ -29,6 +29,37 @@ StreetType StreetSystem::getType(bool* connections) {
     return (StreetType)type;
 }
 
+void StreetSystem::createStreet(const glm::ivec2& position) {
+    auto it = streets.find(position);
+
+    // create new street
+    if (it == streets.end()) {
+        const ResourceManager& resourceManager = game->getResourceManager();
+
+        auto entity = registry.create();
+
+        registry.emplace<TransformationComponent>(entity,
+                                                  glm::vec3(Configuration::gridSize * (position.x + 0.5f), 0.0f, Configuration::gridSize * (position.y + 0.5f)),
+                                                  glm::quat(),
+                                                  glm::vec3(1.0f));
+
+        registry.emplace<MeshComponent>(entity,
+                                        resourceManager.getResource<Geometry>("STREET_NOT_CONNECTED_GEOMETRY"),
+                                        resourceManager.getResource<Shader>("MESH_SHADER"),
+                                        resourceManager.getResource<Texture>("STREET_TEXTURE"));
+
+        registry.emplace<StreetComponent>(entity, StreetType::NOT_CONNECTED);
+
+        outdatedConnections.push_back(position);
+        outdatedConnections.push_back(position + offsets[0]);
+        outdatedConnections.push_back(position + offsets[1]);
+        outdatedConnections.push_back(position + offsets[2]);
+        outdatedConnections.push_back(position + offsets[3]);
+
+        streets[position] = entity;
+    }
+}
+
 void StreetSystem::update(float dt) {
     const ResourceManager& resourceManager = game->getResourceManager();
 
@@ -113,13 +144,6 @@ void StreetSystem::update(float dt) {
         const glm::ivec2& pos = *it;
         auto jt = streets.find(pos);
         if (jt != streets.end()) {
-
-            constexpr glm::ivec2 offsets[4] = {
-                glm::ivec2(1, 0),
-                glm::ivec2(0, 1),
-                glm::ivec2(-1, 0),
-                glm::ivec2(0, -1)};
-
             bool connections[4];
             for (int i = 0; i < 4; i++) {
                 connections[i] = streets.find(pos + offsets[i]) != streets.end();
@@ -141,33 +165,6 @@ void StreetSystem::handle_buildEvent(const BuildEvent& e) {
     if (e.type == BuildingType::STREET) {
         const glm::ivec2& position = e.gridPosition;
 
-        auto it = streets.find(position);
-
-        // create new street
-        if (it == streets.end()) {
-            const ResourceManager& resourceManager = game->getResourceManager();
-
-            auto entity = registry.create();
-
-            registry.emplace<TransformationComponent>(entity,
-                                                      glm::vec3(Configuration::gridSize * (position.x + 0.5f), 0.0f, Configuration::gridSize * (position.y + 0.5f)),
-                                                      glm::quat(),
-                                                      glm::vec3(1.0f));
-
-            registry.emplace<MeshComponent>(entity,
-                                            resourceManager.getResource<Geometry>("STREET_NOT_CONNECTED_GEOMETRY"),
-                                            resourceManager.getResource<Shader>("MESH_SHADER"),
-                                            resourceManager.getResource<Texture>("STREET_TEXTURE"));
-
-            registry.emplace<StreetComponent>(entity, StreetType::NOT_CONNECTED);
-
-            outdatedConnections.push_back(position);
-            outdatedConnections.push_back(glm::ivec2(position.x - 1, position.y));
-            outdatedConnections.push_back(glm::ivec2(position.x + 1, position.y));
-            outdatedConnections.push_back(glm::ivec2(position.x, position.y - 1));
-            outdatedConnections.push_back(glm::ivec2(position.x, position.y + 1));
-
-            streets[position] = entity;
-        }
+        createStreet(position);
     }
 }

@@ -13,6 +13,12 @@ struct BuildEvent;
 
 class StreetSystem : public System {
   protected:
+    static constexpr glm::ivec2 offsets[4] = {
+        glm::ivec2(1, 0),
+        glm::ivec2(0, 1),
+        glm::ivec2(-1, 0),
+        glm::ivec2(0, -1)};
+
     std::unordered_map<glm::ivec2, entt::entity> streets;
 
     std::vector<entt::entity> outdatedStreets;
@@ -22,6 +28,7 @@ class StreetSystem : public System {
 
     static StreetType getType(bool* connections);
 
+    void createStreet(const glm::ivec2& gridPos);
   public:
     StreetSystem(Game* game);
 
