@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rendering/geometry.hpp"
+#include "rendering/geometryData.hpp"
 
 #include <memory>
 #include <sstream>
@@ -15,5 +15,5 @@ class ModelLoader {
     static FaceIndices parseVertexIndices(const std::string& str);
 
   public:
-    static Geometry* load(const std::string& filename);
+    static GeometryData load(const std::string& filename);
 };

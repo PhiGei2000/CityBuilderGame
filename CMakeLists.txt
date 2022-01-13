@@ -13,6 +13,11 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(DEBUG)
 endif()
 
+if (NOT WIN32) 
+    message("Create sourcelist")
+    execute_process(COMMAND /bin/bash ./createSourcelist.sh)
+endif()
+
 include_directories(./include/)
 include(sourcelist.cmake)
 

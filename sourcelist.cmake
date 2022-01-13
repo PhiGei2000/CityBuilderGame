@@ -3,6 +3,7 @@ SET(SOURCES ${SOURCES}
 ./src/rendering/geometry.cpp
 ./src/rendering/texture.cpp
 ./src/rendering/shader.cpp
+./src/rendering/geometryData.cpp
 ./src/rendering/renderQuad.cpp
 ./src/application.cpp
 ./src/gui/gui.cpp

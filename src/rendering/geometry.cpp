@@ -21,6 +21,11 @@ Geometry::Geometry() {
     glEnableVertexAttribArray(2);
 }
 
+Geometry::Geometry(const GeometryData& data)
+    : Geometry() {
+    fillBuffers(data);
+}
+
 void Geometry::fillBuffers(const GeometryData& data) {
     bind();
 

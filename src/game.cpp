@@ -18,16 +18,16 @@ Game::Game(Application* app)
 
 void Game::loadResources() {
     // models
-    resourceManager.setResource<Geometry>("GROUND_GEOMETRY", ModelLoader::load("res/models/ground.obj"));
-    resourceManager.setResource<Geometry>("TREE_GEOMETRY", ModelLoader::load("res/models/tree.obj"));
-    resourceManager.setResource<Geometry>("BUILDMARKER_GEOMETRY", ModelLoader::load("res/models/buildMarker.obj"));
+    resourceManager.setResource<Geometry>("GROUND_GEOMETRY", new Geometry(ModelLoader::load("res/models/ground.obj")));
+    resourceManager.setResource<Geometry>("TREE_GEOMETRY", new Geometry(ModelLoader::load("res/models/tree.obj")));
+    resourceManager.setResource<Geometry>("BUILDMARKER_GEOMETRY", new Geometry(ModelLoader::load("res/models/buildMarker.obj")));
 
-    resourceManager.setResource<Geometry>("STREET_STRAIGHT_GEOMETRY", ModelLoader::load("res/models/street_straight.obj"));
-    resourceManager.setResource<Geometry>("STREET_CURVE_GEOMETRY", ModelLoader::load("res/models/street_curve.obj"));
-    resourceManager.setResource<Geometry>("STREET_NOT_CONNECTED_GEOMETRY", ModelLoader::load("res/models/street_notConnected.obj"));
-    resourceManager.setResource<Geometry>("STREET_END_GEOMETRY", ModelLoader::load("res/models/street_end.obj"));
-    resourceManager.setResource<Geometry>("STREET_T_CROSSING_GEOMETRY", ModelLoader::load("res/models/street_t_crossing.obj"));
-    resourceManager.setResource<Geometry>("STREET_CROSSING_GEOMETRY", ModelLoader::load("res/models/street_crossing.obj"));
+    // resourceManager.setResource<Geometry>("STREET_STRAIGHT_GEOMETRY", ModelLoader::load("res/models/street_straight.obj"));
+    // resourceManager.setResource<Geometry>("STREET_CURVE_GEOMETRY", ModelLoader::load("res/models/street_curve.obj"));
+    // resourceManager.setResource<Geometry>("STREET_NOT_CONNECTED_GEOMETRY", ModelLoader::load("res/models/street_notConnected.obj"));
+    // resourceManager.setResource<Geometry>("STREET_END_GEOMETRY", ModelLoader::load("res/models/street_end.obj"));
+    // resourceManager.setResource<Geometry>("STREET_T_CROSSING_GEOMETRY", ModelLoader::load("res/models/street_t_crossing.obj"));
+    // resourceManager.setResource<Geometry>("STREET_CROSSING_GEOMETRY", ModelLoader::load("res/models/street_crossing.obj"));
 
     // shaders
     resourceManager.setResource<Shader>("MESH_SHADER", new Shader("res/shaders/mesh.vert", "res/shaders/mesh.frag"));

@@ -8,6 +8,7 @@ class Geometry {
 
   public:
     Geometry();
+    Geometry(const GeometryData& data);
 
     void fillBuffers(const GeometryData& data);
 
