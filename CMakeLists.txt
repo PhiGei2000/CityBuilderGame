@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12.0)
+cmake_minimum_required(VERSION 3.20.0)
 project(cityBuilderGame VERSION 0.1.0)
 
 include(CTest)
@@ -13,7 +13,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(DEBUG)
 endif()
 
-if (NOT WIN32) 
+if (NOT WIN32)
     message("Create sourcelist")
     execute_process(COMMAND /bin/bash ./createSourcelist.sh)
 endif()
@@ -24,15 +24,10 @@ include(sourcelist.cmake)
 set(OpenGL_GL_PREFERENCE LEGACY)
 
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
+find_package(glm REQUIRED)
 find_package(glfw3 REQUIRED)
-
-if (WIN32) 
-    include_directories(${GLM_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${STB_INCLUDE_DIRS})        
-else ()
-    find_package(glm REQUIRED)
-    find_package(Freetype REQUIRED)
-endif()
+find_package(Freetype REQUIRED)
+find_package(GLEW REQUIRED)
 
 add_executable(cityBuilderGame ${SOURCES})
 
@@ -40,11 +35,19 @@ target_include_directories(cityBuilderGame PUBLIC
     ${ENTT_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS})
 
+if (WIN32)
+    #cmake_path(SET GLEW_INCLUDE_DIRS NORMALIZE "${GLEW_DIR}/../../../include")     
+
+    target_include_directories(cityBuilderGame PUBLIC
+        ${GLM_INCLUDE_DIRS}        
+        ${STB_INCLUDE_DIRS})
+endif()
+
 target_link_libraries(cityBuilderGame
     ${OPENGL_LIBRARIES}
     glfw ${GLFW_LIBRARIES}
-    ${GLEW_LIBRARIES}   
-    ${FREETYPE_LIBRARIES} 
+    ${GLEW_LIBRARIES}
+    ${FREETYPE_LIBRARIES}
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

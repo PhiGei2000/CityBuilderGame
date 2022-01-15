@@ -6,6 +6,10 @@
 #include <sstream>
 #include <string>
 
+#if WIN32
+#include <array>
+#endif
+
 class ModelLoader {
   private:
     using FaceIndices = std::array<std::tuple<int unsigned, unsigned int, unsigned int>, 3>;

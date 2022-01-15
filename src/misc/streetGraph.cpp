@@ -42,7 +42,7 @@ StreetGraphNode* StreetGraph::getOrCreateNode(const glm::ivec2& position) {
     }
 
     nodes.emplace_back(StreetGraphNodeType::END, position);
-    return nodes.end().base();
+    return &nodes.back();
 }
 
 StreetGraphNode* StreetGraph::getOrCreateNode(int x, int y) {
