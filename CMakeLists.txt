@@ -35,9 +35,7 @@ target_include_directories(cityBuilderGame PUBLIC
     ${ENTT_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS})
 
-if (WIN32)
-    #cmake_path(SET GLEW_INCLUDE_DIRS NORMALIZE "${GLEW_DIR}/../../../include")     
-
+if (WIN32)    
     target_include_directories(cityBuilderGame PUBLIC
         ${GLM_INCLUDE_DIRS}        
         ${STB_INCLUDE_DIRS})

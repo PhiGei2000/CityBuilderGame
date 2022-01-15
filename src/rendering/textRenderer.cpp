@@ -11,8 +11,10 @@ void TextRenderer::init() {
         std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
     }
 
+    static constexpr const char* filename = "res/fonts/Hack-Regular.ttf";
+
     FT_Face face;
-    if (FT_New_Face(ft, "/usr/share/fonts/TTF/Hack-Regular.ttf", 0, &face)) {
+    if (FT_New_Face(ft, filename, 0, &face)) {
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
     }
 
