@@ -75,12 +75,5 @@
 		"variant": "cpp",
 		"qtcoredepends": "cpp",
 		"qtdbusdepends": "cpp"
-	},
-	"cmake.configureArgs": [
-		"-DCMAKE_PREFIX_PATH=C:/lib/glm/cmake/glm;C:/lib/GLFW/lib/cmake/glfw3;C:/lib/freetype2/lib/cmake/freetype;C:/lib/glew/lib/cmake/glew",
-		"-DFREETYPE_INCLUDE_DIRS=C:/lib/freetype/include",
-		"-DFREETYPE_LIBRARY=C:/lib/freetype/lib/freetyped.lib",
-		"-DENTT_INCLUDE_DIRS=C:/lib/EnTT/include",
-		"-DGLEW_INCLUDE_DIRS=C:/lib/glew/include"
-	]
+	}
 }

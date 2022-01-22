@@ -14,3 +14,26 @@ GeometryData GeometryData::merge(const GeometryData& first, const GeometryData& 
 
     return result;
 }
+
+void GeometryData::addData(const GeometryData& data) {
+    int indexOffset = indices.size();
+
+    for (const Vertex& vertex : data.vertices) {
+        this->vertices.push_back(vertex);
+    }
+
+    for (const int index : data.indices) {
+        this->indices.push_back(index + indexOffset);
+    }
+}
+
+GeometryData GeometryData::transformVertices(const GeometryData& data, const std::function<Vertex(const Vertex&)>& transform) {
+    GeometryData transformedData;
+    transformedData.indices = data.indices;
+
+    for (const Vertex& vert : data.vertices) {
+        transformedData.vertices.emplace_back(transform(vert));
+    }
+
+    return transformedData;
+}

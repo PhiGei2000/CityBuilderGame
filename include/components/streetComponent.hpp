@@ -1,13 +1,7 @@
 #pragma once
 
-#include "misc/streetTypes.hpp"
-
-#include <entt/entt.hpp>
-
-#include <vector>
+#include "misc/streetGraph.hpp"
 
 struct StreetComponent {
-    StreetType type;
-
-    std::vector<entt::entity> nextCrossings;
+    StreetGraph graph;
 };

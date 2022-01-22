@@ -7,6 +7,7 @@
 #include <glm/gtx/hash.hpp>
 
 #include <glm/glm.hpp>
+#include <queue>
 #include <unordered_map>
 
 struct BuildEvent;
@@ -19,16 +20,18 @@ class StreetSystem : public System {
         glm::ivec2(-1, 0),
         glm::ivec2(0, -1)};
 
-    std::unordered_map<glm::ivec2, entt::entity> streets;
-
-    std::vector<entt::entity> outdatedStreets;
-    std::vector<glm::ivec2> outdatedConnections;
-
     virtual void init() override;
 
-    static StreetType getType(bool* connections);
+    bool streetGeometryOutdated = true;
+    entt::entity streetEntity;
 
-    void createStreet(const glm::ivec2& gridPos);
+    glm::ivec2 streetBuildStart = glm::ivec2{0};
+    struct StreetBuildData {
+        glm::ivec2 start, end;
+    };
+
+    std::queue<StreetBuildData> buildData;
+
   public:
     StreetSystem(Game* game);
 

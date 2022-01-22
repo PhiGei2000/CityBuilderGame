@@ -2,11 +2,13 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
+#include <unordered_map>
 #include <vector>
 
 enum class StreetGraphNodeType
 {
     END,
+    END_NOT_CONNECTED,
     CURVE,
     T_CROSSING,
     CROSSING,
@@ -16,23 +18,26 @@ enum class StreetGraphNodeType
 struct StreetGraphNode {
     StreetGraphNodeType type = StreetGraphNodeType::END;
     glm::ivec2 position;
+    int rotation;
 };
 
 struct StreetGraphEdge {
-    StreetGraphNode *begin, *end;
+    glm::ivec2 begin, end;
 };
 
 struct StreetGraph {
   private:
     int getEdgeIndex(const glm::ivec2& position);
-    StreetGraphNode* splitEdge(StreetGraphEdge& edge, const glm::ivec2& position);
+    void splitEdge(StreetGraphEdge& edge, const glm::ivec2& position);
 
-    StreetGraphNode* getOrCreateNode(const glm::ivec2& position);
-    StreetGraphNode* getOrCreateNode(int x, int y);
+    void createNode(const glm::ivec2& position);
+    void createNode(int x, int y);
 
   public:
-    std::vector<StreetGraphNode> nodes;
+    std::unordered_map<glm::ivec2, StreetGraphNode> nodes;
     std::vector<StreetGraphEdge> edges;
 
     void addEdge(const glm::ivec2& start, const glm::ivec2& end, bool xFirst = true);
+
+    void updateNodes();
 };

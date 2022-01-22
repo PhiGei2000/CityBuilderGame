@@ -13,7 +13,7 @@
             "configurationProvider": "ms-vscode.cmake-tools"
         },
         {
-            "name": "Windows",
+            "name": "Win32",
             "includePath": [
                 "${default}",
                 "${workspaceFolder}/include"

@@ -6,6 +6,8 @@
 #include "misc/configuration.hpp"
 #include "misc/utility.hpp"
 
+#include "GLFW/glfw3.h"
+
 #include <iostream>
 
 BuildSystem::BuildSystem(Game* game)
@@ -72,14 +74,23 @@ glm::ivec2 BuildSystem::getGridPos(const glm::vec2& mousePos) const {
 }
 
 void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
-    if (game->getState() == GameState::BUILD_MODE) {
-        const BuildMarkerComponent& buildMarker = registry.get<BuildMarkerComponent>(buildMarkerEntity);
+    if (e.action == GLFW_RELEASE) {
+        if (game->getState() == GameState::BUILD_MODE) {
+            const BuildMarkerComponent& buildMarker = registry.get<BuildMarkerComponent>(buildMarkerEntity);
 
-        int x = buildMarker.pos.x, y = buildMarker.pos.y;
-        int grid = Configuration::worldSize / Configuration::gridSize;
+            int x = buildMarker.pos.x, y = buildMarker.pos.y;
+            int grid = Configuration::worldSize / Configuration::gridSize;
 
-        if (Utility::inRange(x, 0, grid) && Utility::inRange(y, 0, grid)) {
-            game->raiseEvent<BuildEvent>(BuildEvent{glm::ivec2{x, y}, BuildingType::STREET});
+            if (Utility::inRange(x, 0, grid) && Utility::inRange(y, 0, grid)) {
+                if (state == BuildSystemState::IDLE) {
+                    game->raiseEvent<BuildEvent>(BuildEvent{glm::ivec2{x, y}, BuildingType::STREET, BuildType::BEGIN});
+                    state = BuildSystemState::STREET;
+                }
+                else if (state == BuildSystemState::STREET) {
+                    game->raiseEvent<BuildEvent>(BuildEvent{glm::ivec2{x, y}, BuildingType::STREET, BuildType::END});
+                    state = BuildSystemState::IDLE;
+                }
+            }
         }
     }
 }
