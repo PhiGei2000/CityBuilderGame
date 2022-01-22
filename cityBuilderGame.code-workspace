@@ -12,8 +12,7 @@
 			"**/CVS": true,
 			"**/.DS_Store": true,
 			"**/Thumbs.db": true,
-			"**/*.blend": true,
-			"**/*.blend1": true
+			"**/*.blend*": true
 		},
 		"files.associations": {
 			"tuple": "cpp",

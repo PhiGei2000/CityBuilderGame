@@ -1,6 +1,8 @@
 #pragma once
 #include "resourceManager.hpp"
 
+#include "misc/typedefs.hpp"
+
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
@@ -33,6 +35,8 @@ class Game {
   public:
     Game(Application* app);
 
+    bool debugMode = false;
+    
     entt::registry& getRegistry();
     entt::dispatcher& getEventDispatcher();
     ResourceManager& getResourceManager();

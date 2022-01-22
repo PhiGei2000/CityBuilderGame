@@ -47,6 +47,7 @@ void Game::init() {
     systems.push_back(new EnvironmentSystem(this));
     systems.push_back(new PhysicsSystem(this));
     systems.push_back(new RenderSystem(this));
+    systems.push_back(new DebugSystem(this));
 
     // entities
     entt::entity groundEntity = registry.create();
