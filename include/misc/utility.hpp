@@ -3,9 +3,10 @@
 
 #include <glm/glm.hpp>
 
+template<int size, typename T>
+std::ostream& operator<<(std::ostream& os, const glm::vec<size, T>& vec);
+
 namespace Utility {
-    template<int size, typename T>
-    std::ostream& operator<<(std::ostream& os, const glm::vec<size, T>& vec);
 
     template<typename T>
     constexpr bool inRange(T value, T minValue, T maxValue) {

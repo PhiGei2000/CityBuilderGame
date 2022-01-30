@@ -29,6 +29,7 @@ void StreetSystem::update(float dt) {
     if (streetGeometryOutdated) {
         MeshComponent& streetMesh = registry.get<MeshComponent>(streetEntity);
 
+        street.graph.updateNodes();
         streetMesh.geometry = std::shared_ptr<Geometry>(StreetGeometryGenerator::create(street.graph));
         streetGeometryOutdated = false;
     }

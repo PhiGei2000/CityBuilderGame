@@ -14,6 +14,18 @@
 			"**/Thumbs.db": true,
 			"**/*.blend*": true
 		},
+		"cmake.debugConfig": {
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				},
+				{
+					"text": "source /home/philipp/Documents/gdb_prettyprint/pretty_print.py"
+				}
+			]
+		},
 		"files.associations": {
 			"tuple": "cpp",
 			"iostream": "cpp",
@@ -85,7 +97,15 @@
 			"valarray": "cpp",
 			"variant": "cpp",
 			"qtcoredepends": "cpp",
-			"qtdbusdepends": "cpp"
+			"qtdbusdepends": "cpp",
+			"csignal": "cpp",
+			"any": "cpp",
+			"strstream": "cpp",
+			"bitset": "cpp",
+			"codecvt": "cpp",
+			"complex": "cpp",
+			"ranges": "cpp",
+			"*.ipp": "cpp"
 		}
 	}
 }

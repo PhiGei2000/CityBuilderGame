@@ -16,7 +16,7 @@ GeometryData GeometryData::merge(const GeometryData& first, const GeometryData& 
 }
 
 void GeometryData::addData(const GeometryData& data) {
-    int indexOffset = indices.size();
+    int indexOffset = vertices.size();
 
     for (const Vertex& vertex : data.vertices) {
         this->vertices.push_back(vertex);

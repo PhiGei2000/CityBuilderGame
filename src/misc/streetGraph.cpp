@@ -2,11 +2,11 @@
 
 #include "misc/direction.hpp"
 
-int StreetGraph::getEdgeIndex(const glm::ivec2& position) {
+int StreetGraph::getEdge(const glm::ivec2& position) {
     for (int index = 0; index < edges.size(); index++) {
         const StreetGraphEdge& edge = edges[index];
 
-        const glm::ivec2& start = edge.begin;
+        const glm::ivec2& start = edge.start;
         const glm::ivec2& end = edge.end;
 
         glm::ivec2 edgeVector = end - start;
@@ -23,118 +23,106 @@ int StreetGraph::getEdgeIndex(const glm::ivec2& position) {
     return -1;
 }
 
-void StreetGraph::splitEdge(StreetGraphEdge& edge, const glm::ivec2& position) {
-    nodes.try_emplace(position, StreetGraphNodeType::EDGE_SEPARATOR, position, 0);
+void StreetGraph::splitEdge(int edgeIndex, const glm::ivec2& position) {
+    auto [it, success] = nodes.try_emplace(position, position);
 
-    edges.emplace_back(position, edge.end);
-    edge.end = position;
+    if (success) {
+        // get edge
+        const StreetGraphEdge& edge = edges[edgeIndex];
+        Direction edgeDirection = misc::getDirection(edge.end - edge.start);
+        StreetGraphNode& node = (*it).second;
+
+        // update node connections
+        if (edgeDirection == Direction::NORTH || edgeDirection == Direction::SOUTH) {
+            node.connections[0] = node.connections[2] = true;
+        }
+        else {
+            node.connections[1] = node.connections[3] = true;
+        }
+
+        addEdge(position, edge.end);
+        edges[edgeIndex].end = position;
+    }
 }
 
 void StreetGraph::createNode(const glm::ivec2& position) {
-    nodes.try_emplace(position, StreetGraphNodeType::END, position, 0);
+    nodes.try_emplace(position, position);
 }
 
 void StreetGraph::createNode(int x, int y) {
     return createNode(glm::ivec2(x, y));
 }
 
-void StreetGraph::addEdge(const glm::ivec2& start, const glm::ivec2& end, bool xFirst) {
-    createNode(start);
-    createNode(end);
+constexpr std::array<glm::ivec2, 4> StreetGraph::getNeighborPositions(const glm::ivec2& position) {
+    return std::array<glm::ivec2, 4>{
+        position + DirectionVectors[0],
+        position + DirectionVectors[1],
+        position + DirectionVectors[2],
+        position + DirectionVectors[3],
+    };
+}
 
+void StreetGraph::addEdge(const glm::ivec2& start, const glm::ivec2& end, bool xFirst) {
     if (start.x == end.x || start.y == end.y) {
-        edges.emplace_back(start, end);
+        int edgeIndex;
+
+        // if start node on another edge split edge
+        if ((edgeIndex = getEdge(start)) != -1) {
+            splitEdge(edgeIndex, start);
+        }
+        // if not create new simple node
+        else {
+            createNode(start);
+        }
+
+        // if end node on another edge split edge
+        if ((edgeIndex = getEdge(end)) != -1) {
+            splitEdge(edgeIndex, end);
+        }
+        else {
+            createNode(end);
+        }
+
+        // create edge
+        const glm::ivec2 edgeVector = end - start;
+        Direction edgeDir = misc::getDirection(end - start);
+        const glm::ivec2 edgeDirVector = DirectionVectors[static_cast<int>(edgeDir)];
+
+        // search for nodes on the new edge or edge intersections
+        std::vector<glm::ivec2> nodesOnEdge;
+        glm::ivec2 pos = start;
+        do {
+            auto it = nodes.find(pos);
+            if (it != nodes.end()) {
+                nodesOnEdge.push_back(pos);
+            }
+
+            int edgeIndex = getEdge(pos);
+            if (edgeIndex != -1) {
+                splitEdge(edgeIndex, pos);
+                nodesOnEdge.push_back(pos);
+            }
+
+            pos += edgeDirVector;
+        } while (pos != end + edgeDirVector);
+
+        // connect nodes
+        for (int i = 1; i < nodesOnEdge.size(); i++) {
+            edges.emplace_back(nodesOnEdge[i - 1], nodesOnEdge[i]);
+
+            // update node connections
+            nodes[nodesOnEdge[i - 1]].connections[static_cast<int>(edgeDir)] = true;
+            nodes[nodesOnEdge[i]].connections[static_cast<int>(misc::getInverse(edgeDir))] = true;
+        }
     }
     else {
         glm::ivec2 curvePos = xFirst ? glm::ivec2{start.x, end.y} : glm::ivec2{end.x, start.y};
 
         createNode(curvePos);
-        edges.emplace_back(start, curvePos);
-        edges.emplace_back(curvePos, end);
+        addEdge(start, curvePos);
+        addEdge(curvePos, end);
     }
 }
 
 void StreetGraph::updateNodes() {
-    std::unordered_map<glm::ivec2, std::array<bool, 4>> nodeConnections;
-
-    for (const auto& [edgeStart, edgeEnd] : edges) {
-        Direction edgeDirection = misc::getDirection(edgeEnd - edgeStart);
-
-        // add connections
-        nodeConnections[edgeStart][static_cast<byte>(edgeDirection)] = true;
-        nodeConnections[edgeEnd][static_cast<byte>(misc::getInverse(edgeDirection))] = true;
-    }
-
-    // update node type and rotation
-    for (auto& [pos, node] : nodes) {
-        const std::array<bool, 4>& connections = nodeConnections[pos];
-
-        int connectionsCount =
-            (connections[0] ? 1 : 0) +
-            (connections[1] ? 1 : 0) +
-            (connections[2] ? 1 : 0) +
-            (connections[3] ? 1 : 0);
-
-        switch (connectionsCount) {
-        case 0:
-            node.type = StreetGraphNodeType::END_NOT_CONNECTED;
-            node.rotation = 0;
-            break;
-        case 1:
-            node.type = StreetGraphNodeType::END;
-
-            // default rotation connected bottom
-            // north connected
-            if (connections[static_cast<int>(Direction::NORTH)]) {
-                node.rotation = 2;
-            }
-            // east connected
-            else if (connections[static_cast<int>(Direction::EAST)]) {
-                node.rotation = 3;
-            }
-            // south connected
-            else if (connections[static_cast<int>(Direction::SOUTH)]) {
-                node.rotation = 0;
-            }
-            // west connected
-            else if (connections[static_cast<int>(Direction::WEST)]) {
-                node.rotation = 1;
-            }
-            break;
-        case 2:
-            if (connections[static_cast<int>(Direction::NORTH)] && connections[static_cast<int>(Direction::SOUTH)]) {
-                node.type = StreetGraphNodeType::EDGE_SEPARATOR;
-                node.rotation = 0;
-            }
-            else if (connections[static_cast<int>(Direction::EAST)] && connections[static_cast<int>(Direction::WEST)]) {
-                node.type = StreetGraphNodeType::EDGE_SEPARATOR;
-                node.rotation = 1;
-            }
-            else {
-                node.type = StreetGraphNodeType::CURVE;
-                if (connections[static_cast<int>(Direction::NORTH)] && connections[static_cast<int>(Direction::EAST)]) {
-                    node.rotation = 0;
-                }
-                else if (connections[static_cast<int>(Direction::EAST)] && connections[static_cast<int>(Direction::SOUTH)]) {
-                    node.rotation = 1;
-                }
-                else if (connections[static_cast<int>(Direction::SOUTH)] && connections[static_cast<int>(Direction::WEST)]) {
-                    node.rotation = 2;
-                }
-                else if (connections[static_cast<int>(Direction::WEST)] && connections[static_cast<int>(Direction::NORTH)]) {
-                    node.rotation = 3;
-                }
-            }
-            break;
-        case 3:
-                node.type = StreetGraphNodeType::T_CROSSING;
-            if (connections[static_cast<int>(Direction::NORTH)] && connections[static_cast<int>(Direction::SOUTH)]) {
-                node.rotation = 0;
-            }
-            else if (connections[static_cast<int>(Direction::EAST)] && connections[static_cast<int>(Direction::WEST)]) {
-                node.type = StreetGraphNodeType::EDGE_SEPARATOR;
-                node.rotation = 1;
-            }
-        }
-    }
 }

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "misc/configuration.hpp"
 #include "rendering/geometry.hpp"
 #include "streetGraph.hpp"
 
@@ -16,6 +16,8 @@ class StreetGeometryGenerator {
         static constexpr glm::ivec2 South{-1, 0};
         static constexpr glm::ivec2 West{0, -1};
     };
+
+    static constexpr glm::vec3 gridCenterOffset = static_cast<float>(Configuration::gridSize) * glm::vec3{0.5, 0, 0.5};
 
     static GeometryData edgeData;
 
