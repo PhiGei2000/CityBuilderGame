@@ -1,4 +1,4 @@
-#version 330
+#version 450
 in vec4 AxisColor;
 
 out vec4 FragColor;

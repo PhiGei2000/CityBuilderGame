@@ -35,9 +35,7 @@ void DebugSystem::update(float dt) {
 
         const CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
         const glm::vec3& cameraPos = registry.get<TransformationComponent>(cameraEntity).position;
-
-        axisShader->setMatrix4("view", camera.viewMatrix);
-        axisShader->setMatrix4("projection", camera.projectionMatrix);
+        
         axisShader->setVector3("cameraTarget", cameraPos + 5.0f * camera.front);
 
         glBindVertexArray(vao);

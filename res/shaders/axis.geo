@@ -1,9 +1,12 @@
-#version 330
-layout (points) in;
-layout (line_strip, max_vertices = 2) out;
+#version 450
+layout(points) in;
+layout(line_strip, max_vertices = 2) out;
 
-uniform mat4 projection;
-uniform mat4 view;
+layout(std140, binding = 1) uniform Matrices {
+    mat4 view;
+    mat4 projection;
+};
+
 uniform vec3 cameraTarget;
 
 out vec4 AxisColor;
@@ -17,4 +20,3 @@ void main() {
     gl_Position = projection * view * vec4(vec3(cameraTarget), 1.0);
     EmitVertex();
 }
-
