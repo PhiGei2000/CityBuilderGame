@@ -35,7 +35,9 @@ void StreetSystem::update(float dt) {
         streetGeometryOutdated = false;
 
         entt::entity debugEntity = registry.view<DebugComponent>().front();
-        registry.get<DebugComponent>(debugEntity).streetDebugMesh.geometry.reset(StreetGeometryGenerator::createDebug(street.graph));
+        MultiMeshComponent& multiMesh = registry.get<MultiMeshComponent>(debugEntity);
+
+        multiMesh.meshes["streets"].geometry.reset(StreetGeometryGenerator::createDebug(street.graph));
     }
 
     while (buildData.size() > 0) {
