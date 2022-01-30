@@ -30,8 +30,12 @@ void StreetSystem::update(float dt) {
         MeshComponent& streetMesh = registry.get<MeshComponent>(streetEntity);
 
         street.graph.updateNodes();
-        streetMesh.geometry = std::shared_ptr<Geometry>(StreetGeometryGenerator::create(street.graph));
+
+        streetMesh.geometry.reset(StreetGeometryGenerator::create(street.graph));
         streetGeometryOutdated = false;
+
+        entt::entity debugEntity = registry.view<DebugComponent>().front();
+        registry.get<DebugComponent>(debugEntity).streetDebugMesh.geometry.reset(StreetGeometryGenerator::createDebug(street.graph));
     }
 
     while (buildData.size() > 0) {

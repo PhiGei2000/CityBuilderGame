@@ -28,4 +28,6 @@ class StreetGeometryGenerator {
 
   public:
     static Geometry* create(const StreetGraph& graph);
+
+    static Geometry* createDebug(const StreetGraph& graph);
 };

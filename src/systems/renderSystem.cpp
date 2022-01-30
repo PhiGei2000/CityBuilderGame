@@ -34,7 +34,9 @@ void RenderSystem::update(float dt) {
 
     registry.view<TransformationComponent, MeshComponent>(entt::exclude<BuildMarkerComponent>)
         .each([&](const TransformationComponent& transform, const MeshComponent& mesh) {
-            mesh.texture->use(0);
+            if (mesh.texture) {
+                mesh.texture->use(0);
+            }
 
             mesh.shader->use();
             mesh.shader->setInt("diffuse", 0);
@@ -45,6 +47,25 @@ void RenderSystem::update(float dt) {
             mesh.shader->setMatrix4("model", transform.transform);
 
             mesh.geometry->draw();
+        });
+
+    registry.view<TransformationComponent, MultiMeshComponent>(entt::exclude<DebugComponent>)
+        .each([&](const TransformationComponent& transform, const MultiMeshComponent& multiMesh) {
+            for (const Mesh& mesh : multiMesh.meshes) {
+                if (mesh.texture) {
+                    mesh.texture->use(0);
+                }
+
+                mesh.shader->use();
+                mesh.shader->setInt("diffuse", 0);
+                mesh.shader->setVector3("light.color", glm::vec3(0.9f));
+                mesh.shader->setVector3("light.direction", glm::normalize(glm::vec3(1, -1, 1)));
+                mesh.shader->setVector3("viewPos", cameraTransform.position);
+
+                mesh.shader->setMatrix4("model", transform.transform);
+
+                mesh.geometry->draw();
+            }
         });
 
     if (game->getState() == GameState::BUILD_MODE) {
@@ -61,5 +82,34 @@ void RenderSystem::update(float dt) {
 
                 mesh.geometry->draw();
             });
+    }
+
+    if (game->debugMode) {
+        entt::entity debugEntity = registry.view<DebugComponent>().front();
+
+        const DebugComponent& debug = registry.get<DebugComponent>(debugEntity);
+        const MultiMeshComponent& multiMesh = registry.get<MultiMeshComponent>(debugEntity);
+        const TransformationComponent& transform = registry.get<TransformationComponent>(debugEntity);
+
+        debug.streetDebugMesh.shader->use();
+        debug.streetDebugMesh.geometry->draw();
+
+        for (const Mesh& mesh : multiMesh.meshes) {
+            if (mesh.texture) {
+                mesh.texture->use(0);
+            }
+
+            mesh.shader->use();
+            mesh.shader->setInt("diffuse", 0);
+            mesh.shader->setVector3("light.color", glm::vec3(0.9f));
+            mesh.shader->setVector3("light.direction", glm::normalize(glm::vec3(1, -1, 1)));
+            mesh.shader->setVector3("viewPos", cameraTransform.position);
+
+            mesh.shader->setVector3("cameraTarget", cameraTransform.position + 5.0f * camera.front);
+
+            mesh.shader->setMatrix4("model", transform.transform);
+
+            mesh.geometry->draw();
+        }
     }
 }

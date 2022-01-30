@@ -170,5 +170,46 @@ Geometry* StreetGeometryGenerator::create(const StreetGraph& graph) {
         data.addData(getEdgeGeometry(edge));
     }
 
-    return new Geometry(data);
+    return new MeshGeometry(data);
+}
+
+Geometry* StreetGeometryGenerator::createDebug(const StreetGraph& graph) {
+    std::vector<float> vertexData;
+    std::vector<unsigned int> indices;
+
+    unsigned int index = 0;
+    for (auto& [pos, node] : graph.nodes) {
+        float x = Configuration::gridSize * (pos.x + 0.5f);
+        float z = Configuration::gridSize * (pos.y + 0.5f);
+
+        vertexData.insert(vertexData.end(), {x, 0.0f, z, 0.0f, 1.0f, 0.0f, 1.0f,
+                                             x, 2.0f, z, 0.0f, 1.0f, 0.0f, 1.0f});
+
+        indices.insert(indices.end(), {index, index + 1});
+
+        index += 2;
+    }
+
+    for (auto& [start, end] : graph.edges) {
+        float x1 = Configuration::gridSize * (start.x + 0.5f);
+        float z1 = Configuration::gridSize * (start.y + 0.5f);
+
+        float x2 = Configuration::gridSize * (end.x + 0.5f);
+        float z2 = Configuration::gridSize * (end.y + 0.5f);
+
+        vertexData.insert(vertexData.end(), {x1, 1.0f, z1, 0.0f, 0.0f, 1.0f, 1.0f,
+                                             x2, 1.0f, z2, 0.0f, 0.0f, 1.0f, 1.0f});
+
+        indices.insert(indices.end(), {index, index + 1});
+
+        index += 2;
+    }
+
+    Geometry* geometry = new Geometry(VertexAttributes{{
+        {3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0},
+        {4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3*sizeof(float))}
+    }}, GL_LINES);
+
+    geometry->fillBuffers(vertexData, indices);
+    return geometry;
 }
