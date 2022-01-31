@@ -40,8 +40,9 @@ void StreetGraph::splitEdge(int edgeIndex, const glm::ivec2& position) {
             node.connections[1] = node.connections[3] = true;
         }
 
-        addEdge(position, edge.end);
+        glm::ivec2 end = edge.end;
         edges[edgeIndex].end = position;
+        addEdge(position, end);
     }
 }
 
@@ -125,4 +126,48 @@ void StreetGraph::addEdge(const glm::ivec2& start, const glm::ivec2& end, bool x
 }
 
 void StreetGraph::updateNodes() {
+    // merge edges
+    for (auto it = nodes.begin(); it != nodes.end(); ) {
+        const auto& [pos, node] = *it;
+        if (node.connections[0] && !node.connections[1] && node.connections[2] && !node.connections[3] ||
+            !node.connections[0] && node.connections[1] && !node.connections[2] && node.connections[3]) {
+            int edge1 = -1, edge2 = -1;
+
+            StreetGraphEdge edge;
+            int i = 0;
+            while ((edge1 == -1 || edge2 == -1) && i < edges.size()) {
+                if (edge1 == -1) {
+                    if (edges[i].start == pos) {
+                        edge.start = edges[i].end;
+                        edge1 = i;
+                    }
+                    else if (edges[i].end == pos) {
+                        edge.start = edges[i].start;
+                        edge1 = i;
+                    }
+                }
+                else if (edge2 == -1) {
+                    if (edges[i].start == pos) {
+                        edge.end = edges[i].end;
+                        edge2 = i;
+                    }
+                    else if (edges[i].end == pos) {
+                        edge.end = edges[i].start;
+                        edge2 = i;
+                    }
+                }
+
+                i++;
+            }
+
+            edges.erase(edges.begin() + glm::max(edge1, edge2));
+            edges.erase(edges.begin() + glm::min(edge1, edge2));
+
+            edges.push_back(edge);
+            it = nodes.erase(it);
+        }
+        else {
+            it++;
+        }
+    }
 }
