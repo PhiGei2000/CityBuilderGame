@@ -2,13 +2,13 @@
 #include "misc/configuration.hpp"
 #include "rendering/geometry.hpp"
 #include "streetGraph.hpp"
+#include "misc/streetGeometryCrossSection.hpp"
 
 #include <map>
 
 class StreetGeometryGenerator {
   private:
-    static std::map<StreetGraphNodeType, GeometryData> nodeData;
-    static GeometryData streetStraight;
+    static StreetGeometryCrossSection streetGeometryCrossSection;
 
     struct Directions {
         static constexpr glm::ivec2 North{1, 0};
@@ -17,9 +17,9 @@ class StreetGeometryGenerator {
         static constexpr glm::ivec2 West{0, -1};
     };
 
-    static constexpr glm::vec3 gridCenterOffset = static_cast<float>(Configuration::gridSize) * glm::vec3{0.5, 0, 0.5};
+    static constexpr glm::vec3 gridCenterOffset = static_cast<float>(Configuration::gridSize) * glm::vec3{0.5, 0, 0.5};    
 
-    static GeometryData edgeData;
+    static GeometryData getStreetStraightGeometry();
 
     static GeometryData getNodeGeometry(const StreetGraphNode& node);
     static GeometryData getEdgeGeometry(const StreetGraphEdge& edge);
