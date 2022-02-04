@@ -1,7 +1,7 @@
 #pragma once
 
-#include "misc/streetTypes.hpp"
+#include "misc/streetGraph.hpp"
 
 struct StreetComponent {
-    StreetType type;
+    StreetGraph graph;
 };

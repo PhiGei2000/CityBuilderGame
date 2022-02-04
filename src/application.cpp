@@ -48,7 +48,7 @@ void Application::init() {
     if (!glfwInit()) {
         std::cerr << "failed to intialize GLFW!" << std::endl;
         exit(1);
-    }
+    }    
 
 #if DEBUG
     window = glfwCreateWindow(800, 600, "City Building Game", NULL, NULL);
@@ -63,6 +63,12 @@ void Application::init() {
 
     if (window == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
+
+        const char* buffer;
+        int code = glfwGetError(&buffer);
+
+        std::cerr << "Error Code " << code << std::endl;
+        std::cerr << buffer << std::endl;
         glfwTerminate();
 
         exit(1);

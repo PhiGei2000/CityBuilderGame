@@ -49,6 +49,9 @@ unsigned int Shader::compileShader(int shaderType, const std::string& filename) 
         else if (shaderType == GL_FRAGMENT_SHADER) {
             std::cout << "FRAGMENT::COMPILATION_FAILED\n";
         }
+        else if (shaderType == GL_GEOMETRY_SHADER) {
+            std::cout << "GEOMETRY::COMPILATION_FAILED\n";
+        }
         std::cout << infoLog << std::endl;
     }
 
@@ -77,6 +80,33 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
 
     glDeleteShader(vertex);
     glDeleteShader(fragment);
+}
+
+Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath) {
+    program = glCreateProgram();
+
+    unsigned int vertex = compileShader(GL_VERTEX_SHADER, vertexPath);
+    unsigned int fragment = compileShader(GL_FRAGMENT_SHADER, fragmentPath);
+    unsigned int geometry = compileShader(GL_GEOMETRY_SHADER, geometryPath);
+
+    glAttachShader(program, vertex);
+    glAttachShader(program, fragment);
+    glAttachShader(program, geometry);
+    glLinkProgram(program);
+
+    int success;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success) {
+        char infoLog[512];
+        glGetProgramInfoLog(program, 512, NULL, infoLog);
+
+        std::cout << "ERROR::SHADER::PROGRAM:LINKING_FAILED\n"
+                  << infoLog << std::endl;
+    }
+
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+    glDeleteShader(geometry);
 }
 
 void Shader::use() const {

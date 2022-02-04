@@ -4,6 +4,7 @@
 class RenderSystem : public System {
   protected:
     entt::entity cameraEntity;
+    unsigned int uboMatrices;
 
     void init() override;
 

@@ -12,7 +12,16 @@ class BuildSystem : public System {
     entt::entity cameraEntity;
     entt::entity buildMarkerEntity;
 
-    glm::ivec2 getGridPos(const glm::vec2& mousePos) const;    
+    enum class BuildSystemState
+    {
+        IDLE,
+        STREET
+    };
+
+    BuildSystemState state = BuildSystemState::IDLE;
+
+    glm::ivec2 getGridPos(const glm::vec2& mousePos) const;
+
   public:
     BuildSystem(Game* game);
 

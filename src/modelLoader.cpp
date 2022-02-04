@@ -42,7 +42,7 @@ void ModelLoader::processFaces(const std::vector<glm::vec3>& positions, const st
     }
 }
 
-Geometry* ModelLoader::load(const std::string& filename) {
+GeometryData ModelLoader::load(const std::string& filename) {
     std::ifstream file;
     file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
@@ -107,10 +107,7 @@ Geometry* ModelLoader::load(const std::string& filename) {
         GeometryData data;
         processFaces(positions, texCoords, normals, faceIndices, data);
 
-        Geometry* geo = new Geometry();
-        geo->fillBuffers(data);
-
-        return geo;
+        return data;
     }
     catch (std::ifstream::failure e) {
         std::cout << "ERROR:MODEL::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
