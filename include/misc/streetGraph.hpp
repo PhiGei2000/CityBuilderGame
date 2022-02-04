@@ -27,13 +27,15 @@ struct StreetGraphNode {
 
 struct StreetGraphEdge {
     glm::ivec2 start, end;
+
+    int length() const;
 };
 
 struct StreetGraph {
   private:
     int getEdge(const glm::ivec2& position);
-    
-    void splitEdge(int edgeIndex, const glm::ivec2& position);    
+
+    void splitEdge(int edgeIndex, const glm::ivec2& position);
 
     void createNode(const glm::ivec2& position);
     void createNode(int x, int y);

@@ -81,7 +81,7 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
             int x = buildMarker.pos.x, y = buildMarker.pos.y;
             int grid = Configuration::worldSize / Configuration::gridSize;
 
-            if (Utility::inRange(x, 0, grid) && Utility::inRange(y, 0, grid)) {
+            if (utility::inRange(x, 0, grid) && utility::inRange(y, 0, grid)) {
                 if (state == BuildSystemState::IDLE) {
                     game->raiseEvent<BuildEvent>(BuildEvent{glm::ivec2{x, y}, BuildingType::STREET, BuildType::BEGIN});
                     state = BuildSystemState::STREET;

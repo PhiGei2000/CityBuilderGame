@@ -31,6 +31,7 @@ void EnvironmentSystem::init() {
     std::shared_ptr<Texture> treeTexture = resourceManager.getResource<Texture>("TREE_TEXTURE");
     std::shared_ptr<Shader> meshShader = resourceManager.getResource<Shader>("MESH_SHADER");
 
+    // spawn trees
     for (int i = 0; i < 100; i++) {
         entt::entity entity = registry.create();
 

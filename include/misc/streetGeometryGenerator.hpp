@@ -19,9 +19,7 @@ class StreetGeometryGenerator {
     static constexpr glm::vec3 gridCenterOffset = static_cast<float>(Configuration::gridSize) * glm::vec3{0.5, 0, 0.5};        
 
     static GeometryData getNodeGeometry(const StreetGraphNode& node);
-    static GeometryData getEdgeGeometry(const StreetGraphEdge& edge);
-
-    static constexpr glm::vec3 toWorldCoords(const glm::ivec2& gridCoords);
+    static GeometryData getEdgeGeometry(const StreetGraphEdge& edge);    
 
   public:
     static Geometry* create(const StreetGraph& graph);

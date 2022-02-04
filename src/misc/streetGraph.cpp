@@ -2,6 +2,11 @@
 
 #include "misc/direction.hpp"
 
+int StreetGraphEdge::length() const {
+    glm::ivec2 dr = end - start;
+    return dr.x + dr.y;
+}
+
 int StreetGraph::getEdge(const glm::ivec2& position) {
     for (int index = 0; index < edges.size(); index++) {
         const StreetGraphEdge& edge = edges[index];

@@ -1,5 +1,7 @@
 #include "misc/streetGeometryGenerator.hpp"
+
 #include "modelLoader.hpp"
+#include "misc/utility.hpp"
 
 std::unordered_map<StreetGraphNodeType, GeometryData> StreetGeometryGenerator::geometryData = {
     std::make_pair<StreetGraphNodeType, GeometryData>(StreetGraphNodeType::END_NOT_CONNECTED, ModelLoader::load("res/models/street_notConnected.obj")),
@@ -91,7 +93,7 @@ GeometryData StreetGeometryGenerator::getNodeGeometry(const StreetGraphNode& nod
     }
 
     // transform vertex positions
-    const glm::vec3& worldCoords = toWorldCoords(node.position) + gridCenterOffset;
+    const glm::vec3& worldCoords = utility::toWorldCoords(node.position) + gridCenterOffset;
     float angle = glm::radians(rotation * 90.0f);
 
     const glm::mat3& rotationMat = glm::mat3{
@@ -107,10 +109,6 @@ GeometryData StreetGeometryGenerator::getNodeGeometry(const StreetGraphNode& nod
     return data;
 }
 
-constexpr glm::vec3 StreetGeometryGenerator::toWorldCoords(const glm::ivec2& gridCoords) {
-    return static_cast<float>(Configuration::gridSize) * glm::vec3{gridCoords.x, 0, gridCoords.y};
-}
-
 GeometryData StreetGeometryGenerator::getEdgeGeometry(const StreetGraphEdge& edge) {
     // get edge length and direction
     glm::ivec2 diff = edge.end - edge.start;
@@ -123,8 +121,8 @@ GeometryData StreetGeometryGenerator::getEdgeGeometry(const StreetGraphEdge& edg
     glm::ivec2 directionVec = diff / edgeLength;
 
     bool horizontal = directionVec.y != 0;
-    glm::vec3 beginOffset = toWorldCoords(edge.start) + gridCenterOffset;
-    glm::vec3 stepOffset = toWorldCoords(directionVec);
+    glm::vec3 beginOffset = utility::toWorldCoords(edge.start) + gridCenterOffset;
+    glm::vec3 stepOffset = utility::toWorldCoords(directionVec);
 
     // transform vertex data for each grid cell and merge them together
     GeometryData data;
