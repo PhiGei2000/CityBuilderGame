@@ -59,5 +59,8 @@ or
 | ESC | Main menu |
 | F3 | Enter debug mode |
 
+## Issues
+Feel free to report issues to the [issues section](https://github.com/PhiGei2000/CityBuilderGame/issues).
+
 ## License
 This code is licensed under the [GNU GLP license](LICENSE)
