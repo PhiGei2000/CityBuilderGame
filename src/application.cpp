@@ -50,6 +50,9 @@ void Application::init() {
         exit(1);
     }    
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+
 #if DEBUG
     window = glfwCreateWindow(800, 600, "City Building Game", NULL, NULL);
 #else    
