@@ -1,43 +1,14 @@
 #include "misc/streetGeometryGenerator.hpp"
 #include "modelLoader.hpp"
 
-StreetGeometryCrossSection StreetGeometryGenerator::streetGeometryCrossSection = StreetGeometryCrossSection(3.0f, 0.1f, 0.2f);
-
-GeometryData StreetGeometryGenerator::getStreetStraightGeometry() {
-    constexpr float halfGrid = Configuration::gridSize / 2.0f;
-
-    // street cross section
-    //  
-    //  ---------               ---------
-    //  |       |               |       |
-    //  |       -----------------       |
-    //  |                               |
-    //
-
-    // create vertex positions of the first quater
-    std::vector<glm::vec3> vertexPositions = {        
-        // left front bottom
-        glm::vec3(-halfGrid, -halfGrid, 0),
-        // left front top
-        glm::vec3(-halfGrid, -halfGrid, streetGeometryCrossSection.pathwayHeight),
-        // center left front top
-        glm::vec3(-halfGrid + streetGeometryCrossSection.pathwayWidth, -halfGrid, streetGeometryCrossSection.pathwayHeight),
-        // center left front bottom
-        glm::vec3(-halfGrid + streetGeometryCrossSection.pathwayWidth, -halfGrid, streetGeometryCrossSection.laneHeight)        
-    };
-
-    // reflect on y axis
-    for (int i = 0; i < 4; i++) {
-        vertexPositions.emplace_back(-vertexPositions[i].x, vertexPositions[i].y, vertexPositions[i].z);
-    }
-
-    // reflext on x axis
-    for (int i =0; i < 8; i++) {
-        vertexPositions.emplace_back(vertexPositions[i].x, -vertexPositions[i].y, vertexPositions[i].z);
-    }
-
-    
-}
+std::unordered_map<StreetGraphNodeType, GeometryData> StreetGeometryGenerator::geometryData = {
+    std::make_pair<StreetGraphNodeType, GeometryData>(StreetGraphNodeType::END_NOT_CONNECTED, ModelLoader::load("res/models/street_notConnected.obj")),
+    std::make_pair<StreetGraphNodeType, GeometryData>(StreetGraphNodeType::END, ModelLoader::load("res/models/street_end.obj")),
+    std::make_pair<StreetGraphNodeType, GeometryData>(StreetGraphNodeType::CURVE, ModelLoader::load("res/models/street_curve.obj")),
+    std::make_pair<StreetGraphNodeType, GeometryData>(StreetGraphNodeType::T_CROSSING, ModelLoader::load("res/models/street_t_crossing.obj")),
+    std::make_pair<StreetGraphNodeType, GeometryData>(StreetGraphNodeType::CROSSING, ModelLoader::load("res/models/street_crossing.obj")),
+    std::make_pair<StreetGraphNodeType, GeometryData>(StreetGraphNodeType::EDGE, ModelLoader::load("res/models/street_straight.obj"))
+};
 
 GeometryData StreetGeometryGenerator::getNodeGeometry(const StreetGraphNode& node) {
 
@@ -45,6 +16,7 @@ GeometryData StreetGeometryGenerator::getNodeGeometry(const StreetGraphNode& nod
 
     StreetGraphNodeType type = static_cast<StreetGraphNodeType>(connectionsCount);
     int rotation;
+    GeometryData data = geometryData[type];
 
     switch (type) {
     case StreetGraphNodeType::END:
@@ -64,6 +36,7 @@ GeometryData StreetGeometryGenerator::getNodeGeometry(const StreetGraphNode& nod
         else if (node.connections[3]) {
             rotation = 3;
         }
+
         break;
     case StreetGraphNodeType::CURVE:
         // north connected
@@ -117,9 +90,6 @@ GeometryData StreetGeometryGenerator::getNodeGeometry(const StreetGraphNode& nod
         break;
     }
 
-    // get geometry
-    GeometryData data = nodeData[type];
-
     // transform vertex positions
     const glm::vec3& worldCoords = toWorldCoords(node.position) + gridCenterOffset;
     float angle = glm::radians(rotation * 90.0f);
@@ -159,6 +129,8 @@ GeometryData StreetGeometryGenerator::getEdgeGeometry(const StreetGraphEdge& edg
     // transform vertex data for each grid cell and merge them together
     GeometryData data;
 
+    const GeometryData& edgeData = geometryData[StreetGraphNodeType::EDGE];
+
     if (horizontal) {
 
         const glm::mat3& rotation = glm::mat3{
@@ -167,7 +139,7 @@ GeometryData StreetGeometryGenerator::getEdgeGeometry(const StreetGraphEdge& edg
             static_cast<float>(1), static_cast<float>(0), static_cast<float>(0)};
 
         for (int i = 1; i < edgeLength; i++) {
-            data.addData(GeometryData::transformVertices(getStreetStraightGeometry(), [&](const Vertex& vert) {
+            data.addData(GeometryData::transformVertices(edgeData, [&](const Vertex& vert) {
                 return Vertex{
                     rotation * vert.position + beginOffset + static_cast<float>(i) * stepOffset,
                     vert.texCoord,
@@ -177,7 +149,7 @@ GeometryData StreetGeometryGenerator::getEdgeGeometry(const StreetGraphEdge& edg
     }
     else {
         for (int i = 1; i < edgeLength; i++) {
-            data.addData(GeometryData::transformVertices(streetStraight, [&](const Vertex& vert) {
+            data.addData(GeometryData::transformVertices(edgeData, [&](const Vertex& vert) {
                 return Vertex{
                     vert.position + beginOffset + static_cast<float>(i) * stepOffset,
                     vert.texCoord,

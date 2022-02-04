@@ -15,7 +15,7 @@ enum class StreetGraphNodeType
     CURVE,
     T_CROSSING,
     CROSSING,
-    EDGE_SEPARATOR
+    EDGE
 };
 
 struct StreetGraphNode {

@@ -112,8 +112,13 @@ void StreetGraph::addEdge(const glm::ivec2& start, const glm::ivec2& end, bool x
             edges.emplace_back(nodesOnEdge[i - 1], nodesOnEdge[i]);
 
             // update node connections
-            nodes[nodesOnEdge[i - 1]].connections[static_cast<int>(edgeDir)] = true;
-            nodes[nodesOnEdge[i]].connections[static_cast<int>(misc::getInverse(edgeDir))] = true;
+            if (nodes[nodesOnEdge[i - 1]].position != end) {
+                nodes[nodesOnEdge[i - 1]].connections[static_cast<int>(edgeDir)] = true;
+            }
+
+            if (nodes[nodesOnEdge[i]].position != start) {
+                nodes[nodesOnEdge[i]].connections[static_cast<int>(misc::getInverse(edgeDir))] = true;
+            }
         }
     }
     else {
@@ -127,10 +132,12 @@ void StreetGraph::addEdge(const glm::ivec2& start, const glm::ivec2& end, bool x
 
 void StreetGraph::updateNodes() {
     // merge edges
-    for (auto it = nodes.begin(); it != nodes.end(); ) {
+    for (auto it = nodes.begin(); it != nodes.end();) {
         const auto& [pos, node] = *it;
+        // if node is edge
         if (node.connections[0] && !node.connections[1] && node.connections[2] && !node.connections[3] ||
             !node.connections[0] && node.connections[1] && !node.connections[2] && node.connections[3]) {
+            // find the edges connected to this node
             int edge1 = -1, edge2 = -1;
 
             StreetGraphEdge edge;
@@ -160,9 +167,11 @@ void StreetGraph::updateNodes() {
                 i++;
             }
 
+            // delete edges
             edges.erase(edges.begin() + glm::max(edge1, edge2));
             edges.erase(edges.begin() + glm::min(edge1, edge2));
 
+            // create new edge and delete node
             edges.push_back(edge);
             it = nodes.erase(it);
         }
