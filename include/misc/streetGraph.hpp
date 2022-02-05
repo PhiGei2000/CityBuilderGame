@@ -8,18 +8,10 @@
 
 #include <glm/gtx/hash.hpp>
 
-enum class StreetGraphNodeType
-{
-    END_NOT_CONNECTED,
-    END,
-    CURVE,
-    T_CROSSING,
-    CROSSING,
-    EDGE
-};
+#include "streetTypes.hpp"
 
 struct StreetGraphNode {
-    // StreetGraphNodeType type = StreetGraphNodeType::END;
+    // StreetType type = StreetType::END;
     glm::ivec2 position;
     // int rotation;
     bool connections[4] = {false, false, false, false};

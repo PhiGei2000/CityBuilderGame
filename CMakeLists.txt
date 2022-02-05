@@ -30,6 +30,7 @@ find_package(glm REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(pugixml REQUIRED)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 
@@ -50,6 +51,7 @@ target_link_libraries(${PROJECT_NAME}
     glfw ${GLFW_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${FREETYPE_LIBRARIES}
+    pugixml
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

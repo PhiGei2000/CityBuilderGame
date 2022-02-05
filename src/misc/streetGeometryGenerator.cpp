@@ -1,27 +1,26 @@
 #include "misc/streetGeometryGenerator.hpp"
 
-#include "modelLoader.hpp"
 #include "misc/utility.hpp"
 
-std::unordered_map<StreetGraphNodeType, GeometryData> StreetGeometryGenerator::geometryData = {
-    std::make_pair<StreetGraphNodeType, GeometryData>(StreetGraphNodeType::END_NOT_CONNECTED, ModelLoader::load("res/models/street_notConnected.obj")),
-    std::make_pair<StreetGraphNodeType, GeometryData>(StreetGraphNodeType::END, ModelLoader::load("res/models/street_end.obj")),
-    std::make_pair<StreetGraphNodeType, GeometryData>(StreetGraphNodeType::CURVE, ModelLoader::load("res/models/street_curve.obj")),
-    std::make_pair<StreetGraphNodeType, GeometryData>(StreetGraphNodeType::T_CROSSING, ModelLoader::load("res/models/street_t_crossing.obj")),
-    std::make_pair<StreetGraphNodeType, GeometryData>(StreetGraphNodeType::CROSSING, ModelLoader::load("res/models/street_crossing.obj")),
-    std::make_pair<StreetGraphNodeType, GeometryData>(StreetGraphNodeType::EDGE, ModelLoader::load("res/models/street_straight.obj"))
+std::unordered_map<StreetType, GeometryData> StreetGeometryGenerator::geometryData = {
+    // std::make_pair<StreetType, GeometryData>(StreetType::NOT_CONNECTED, ModelLoader::load("res/models/street_notConnected.obj")),
+    // std::make_pair<StreetType, GeometryData>(StreetType::END, ModelLoader::load("res/models/street_end.obj")),
+    // std::make_pair<StreetType, GeometryData>(StreetType::CURVE, ModelLoader::load("res/models/street_curve.obj")),
+    // std::make_pair<StreetType, GeometryData>(StreetType::T_CROSSING, ModelLoader::load("res/models/street_t_crossing.obj")),
+    // std::make_pair<StreetType, GeometryData>(StreetType::CROSSING, ModelLoader::load("res/models/street_crossing.obj")),
+    // std::make_pair<StreetType, GeometryData>(StreetType::EDGE, ModelLoader::load("res/models/street_straight.obj"))
 };
 
 GeometryData StreetGeometryGenerator::getNodeGeometry(const StreetGraphNode& node) {
 
     int connectionsCount = (node.connections[0] ? 1 : 0) + (node.connections[1] ? 1 : 0) + (node.connections[2] ? 1 : 0) + (node.connections[3] ? 1 : 0);
 
-    StreetGraphNodeType type = static_cast<StreetGraphNodeType>(connectionsCount);
+    StreetType type = static_cast<StreetType>(connectionsCount);
     int rotation;
     GeometryData data = geometryData[type];
 
     switch (type) {
-    case StreetGraphNodeType::END:
+    case StreetType::END:
         // north connected
         if (node.connections[0]) {
             rotation = 0;
@@ -40,7 +39,7 @@ GeometryData StreetGeometryGenerator::getNodeGeometry(const StreetGraphNode& nod
         }
 
         break;
-    case StreetGraphNodeType::CURVE:
+    case StreetType::CURVE:
         // north connected
         if (node.connections[0]) {
             // east connected
@@ -64,7 +63,7 @@ GeometryData StreetGeometryGenerator::getNodeGeometry(const StreetGraphNode& nod
             }
         }
         break;
-    case StreetGraphNodeType::T_CROSSING:
+    case StreetType::T_CROSSING:
         // north and south connected
         if (node.connections[0] && node.connections[2]) {
             // east connected
@@ -127,7 +126,7 @@ GeometryData StreetGeometryGenerator::getEdgeGeometry(const StreetGraphEdge& edg
     // transform vertex data for each grid cell and merge them together
     GeometryData data;
 
-    const GeometryData& edgeData = geometryData[StreetGraphNodeType::EDGE];
+    const GeometryData& edgeData = geometryData[StreetType::EDGE];
 
     if (horizontal) {
 

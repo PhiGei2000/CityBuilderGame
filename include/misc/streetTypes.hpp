@@ -1,22 +1,12 @@
 #pragma once
-#include "typedefs.hpp"
 
-enum class StreetType : byte
+enum class StreetType
 {
     NOT_CONNECTED,
-    END_SOUTH,
-    END_WEST,
-    CURVE_NORTH_EAST,
-    END_NORTH,
-    VERTICAL,
-    CURVE_SOUTH_EAST,
-    CROSSING_VERTICAL_WEST,
-    END_EAST,
-    CURVE_NORTH_WEST,
-    HORIZONTAL,
-    CROSSING_HORIZONTAL_NORTH,
-    CURVE_SOUTH_WEST,
-    CROSSING_VERTICAL_EAST,
-    CROSSING_HORIZONTAL_SOUTH,
-    CROSSING_HORIZONTAL_VERTICAL
+    END,
+    CURVE,
+    T_CROSSING,
+    CROSSING,
+    EDGE,
+    CURVE_FULL
 };

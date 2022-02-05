@@ -9,6 +9,8 @@ class System {
     entt::registry& registry;
     entt::dispatcher& eventDispatcher;
 
+    ResourceManager& resourceManager;
+
     Game* game;
 
     virtual void init();

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "misc/typedefs.hpp"
+
+#include "rendering/geometry.hpp"
 #include "rendering/geometryData.hpp"
 
 #include <memory>
@@ -19,5 +22,5 @@ class ModelLoader {
     static FaceIndices parseVertexIndices(const std::string& str);
 
   public:
-    static GeometryData load(const std::string& filename);
+    static ResourcePtr<Geometry> load(const std::string& filename);
 };

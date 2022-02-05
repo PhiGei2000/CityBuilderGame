@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<resources>
+    <!-- models -->
+    <resource type="model" id="BUILDMARKER_GEOMETRY" filename="models/buildMarker.obj" />
+    <resource type="model" id="CAR_GEOMETRY" filename="models/car.obj" />
+    <resource type="model" id="GROUND_GEOMETRY" filename="models/ground.obj" />
+    <resource type="model" id="CAR_GEOMETRY" filename="models/car.obj" />
+    <resource type="model" id="TREE_GEOMETRY" filename="models/tree.obj" />
+
+    <!-- shaders -->
+    <resource type="shader" id="MESH_SHADER" filename="shaders/mesh" />
+    <resource type="shader" id="AXIS_SHADER" filename="shaders/axis" />
+    <resource type="shader" id="RENDER_QUAD_SHADER" filename="shaders/renderQuad" />
+    <resource type="shader" id="STREET_DEBUG_SHADER" filename="shaders/streetDebug" />
+
+    <!-- textures -->
+    <resource type="texture" id="BUILDMARKER_TEXTURE" filename="textures/buildMarker.png" rgba="true" />
+    <resource type="texture" id="CAR_TEXTURE" filename="textures/car.png" />
+    <resource type="texture" id="GROUND_TEXTURE" filename="textures/ground.png" />
+    <resource type="texture" id="STREET_TEXTURE" filename="textures/street.png" />
+    <resource type="texture" id="TREE_TEXTURE" filename="textures/tree.png" />
+
+    <!-- streets -->
+    <resource type="streetPack" id="BASIC_STREETS" filename="models/basic_streets/">
+        <shader id="MESH_SHADER" />
+        <texture id="STREET_TEXTURE" />
+    </resource>
+</resources>

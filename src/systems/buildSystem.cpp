@@ -20,7 +20,6 @@ BuildSystem::BuildSystem(Game* game)
 
 void BuildSystem::init() {
     cameraEntity = registry.view<CameraComponent, TransformationComponent>().front();
-    const ResourceManager& resourceManager = game->getResourceManager();
 
     buildMarkerEntity = registry.create();
     registry.emplace<BuildMarkerComponent>(buildMarkerEntity, glm::ivec2(0.0f), false);

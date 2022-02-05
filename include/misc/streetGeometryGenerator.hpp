@@ -7,7 +7,7 @@
 
 class StreetGeometryGenerator {
   private:    
-    static std::unordered_map<StreetGraphNodeType, GeometryData> geometryData;
+    static std::unordered_map<StreetType, GeometryData> geometryData;
 
     struct Directions {
         static constexpr glm::ivec2 North{1, 0};

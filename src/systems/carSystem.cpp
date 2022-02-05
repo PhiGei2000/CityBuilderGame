@@ -3,7 +3,7 @@
 #include "components/components.hpp"
 #include "misc/configuration.hpp"
 #include "misc/utility.hpp"
-#include "resourceManager.hpp"
+#include "resources/resourceManager.hpp"
 
 void CarSystem::init() {
     streetEntity = registry.view<StreetComponent>().front();
@@ -42,8 +42,7 @@ void CarSystem::spawnCar() {
             glm::vec3(-edgeDir.y, 0, edgeDir.x));
 
         entt::entity car = registry.create();
-
-        ResourceManager resourceManager = game->getResourceManager();
+        
         registry.emplace<CarComponent>(car);
         registry.emplace<TransformationComponent>(car, pos, glm::toQuat(rotation), glm::vec3{1.0f}).calculateTransform();
         registry.emplace<MeshComponent>(car, resourceManager.getResource<Geometry>("CAR_GEOMETRY"), resourceManager.getResource<Shader>("MESH_SHADER"), resourceManager.getResource<Texture>("CAR_TEXTURE"));

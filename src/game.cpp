@@ -3,35 +3,15 @@
 #include "application.hpp"
 #include "components/components.hpp"
 #include "events/events.hpp"
-#include "modelLoader.hpp"
 #include "rendering/geometry.hpp"
 #include "rendering/shader.hpp"
 #include "rendering/texture.hpp"
 #include "systems/systems.hpp"
 
 Game::Game(Application* app)
-    : app(app) {
-    loadResources();
+    : app(app), resourceManager("res/") {
 
     init();
-}
-
-void Game::loadResources() {
-    // models
-    resourceManager.setResource<Geometry>("GROUND_GEOMETRY", new MeshGeometry(ModelLoader::load("res/models/ground.obj")));
-    resourceManager.setResource<Geometry>("TREE_GEOMETRY", new MeshGeometry(ModelLoader::load("res/models/tree.obj")));
-    resourceManager.setResource<Geometry>("BUILDMARKER_GEOMETRY", new MeshGeometry(ModelLoader::load("res/models/buildMarker.obj")));    
-    resourceManager.setResource<Geometry>("CAR_GEOMETRY", new MeshGeometry(ModelLoader::load("res/models/car.obj")));
-
-    // shaders
-    resourceManager.setResource<Shader>("MESH_SHADER", new Shader("res/shaders/mesh.vert", "res/shaders/mesh.frag"));
-
-    // textures
-    resourceManager.setResource<Texture>("GROUND_TEXTURE", new Texture("res/textures/ground.png"));
-    resourceManager.setResource<Texture>("STREET_TEXTURE", new Texture("res/textures/street.png"));
-    resourceManager.setResource<Texture>("TREE_TEXTURE", new Texture("res/textures/tree.png"));
-    resourceManager.setResource<Texture>("BUILDMARKER_TEXTURE", new Texture("res/textures/buildMarker.png", GL_RGBA));
-    resourceManager.setResource<Texture>("CAR_TEXTURE", new Texture("res/textures/car.png"));
 }
 
 void Game::init() {

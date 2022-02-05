@@ -1,7 +1,5 @@
 #include "application.hpp"
 
-#include "modelLoader.hpp"
-
 #include "systems/cameraSystem.hpp"
 #include "systems/renderSystem.hpp"
 #include "systems/system.hpp"

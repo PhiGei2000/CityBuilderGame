@@ -1,4 +1,4 @@
-#include "modelLoader.hpp"
+#include "resources/modelLoader.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -42,7 +42,7 @@ void ModelLoader::processFaces(const std::vector<glm::vec3>& positions, const st
     }
 }
 
-GeometryData ModelLoader::load(const std::string& filename) {
+ResourcePtr<Geometry> ModelLoader::load(const std::string& filename) {
     std::ifstream file;
     file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
@@ -107,7 +107,7 @@ GeometryData ModelLoader::load(const std::string& filename) {
         GeometryData data;
         processFaces(positions, texCoords, normals, faceIndices, data);
 
-        return data;
+        return ResourcePtr<Geometry>(new MeshGeometry(data));
     }
     catch (std::ifstream::failure e) {
         std::cout << "ERROR:MODEL::FILE_NOT_SUCCESSFULLY_READ" << std::endl;

@@ -1,5 +1,5 @@
 #pragma once
-#include "resourceManager.hpp"
+#include "resources/resourceManager.hpp"
 
 #include "misc/typedefs.hpp"
 

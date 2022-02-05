@@ -1,19 +1,24 @@
 #pragma once
 
-#include <memory>
+#include "misc/typedefs.hpp"
+
 #include <string>
 #include <typeindex>
 #include <unordered_map>
 
+#include "modelLoader.hpp"
+
 class ResourceManager {
   private:
-    struct Resource {
+    struct ResourceHolder {
         std::type_index type = std::type_index(typeid(void*));
 
         std::shared_ptr<void> data;
     };
 
-    std::unordered_map<std::string, Resource> resources;
+    std::unordered_map<std::string, ResourceHolder> resources;    
+
+    void loadResources(const std::string& resouceFile);
 
   public:
     struct ResourceTypeException : public std::exception {
@@ -26,8 +31,11 @@ class ResourceManager {
         const char* what() const noexcept override;
     };
 
+    ResourceManager(const std::string& resourceDir);
+
+    template<typename T, typename ...TArgs>
+    void loadResource(const std::string& resourceId, const std::string& filename, TArgs... args);
+
     template<typename T>
-    void setResource(const std::string& resourceId, T* data);
-    template<typename T>
-    std::shared_ptr<T> getResource(const std::string& resourceId) const;
+    ResourcePtr<T> getResource(const std::string& resourceId) const;
 };

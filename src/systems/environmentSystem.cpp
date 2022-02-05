@@ -3,7 +3,7 @@
 #include "rendering/geometry.hpp"
 #include "rendering/shader.hpp"
 #include "rendering/texture.hpp"
-#include "resourceManager.hpp"
+#include "resources/resourceManager.hpp"
 
 #include "components/components.hpp"
 #include "events/events.hpp"
@@ -26,7 +26,6 @@ EnvironmentSystem::EnvironmentSystem(Game* game)
 }
 
 void EnvironmentSystem::init() {
-    const ResourceManager& resourceManager = game->getResourceManager();
     std::shared_ptr<Geometry> treeGeometry = resourceManager.getResource<Geometry>("TREE_GEOMETRY");
     std::shared_ptr<Texture> treeTexture = resourceManager.getResource<Texture>("TREE_TEXTURE");
     std::shared_ptr<Shader> meshShader = resourceManager.getResource<Shader>("MESH_SHADER");

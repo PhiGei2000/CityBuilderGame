@@ -14,8 +14,7 @@ StreetSystem::StreetSystem(Game* game)
         .connect<&StreetSystem::handle_buildEvent>(*this);
 }
 
-void StreetSystem::init() {
-    const ResourceManager& resourceManager = game->getResourceManager();
+void StreetSystem::init() {    
 
     streetEntity = registry.create();
     registry.emplace<MeshComponent>(streetEntity, nullptr, resourceManager.getResource<Shader>("MESH_SHADER"), resourceManager.getResource<Texture>("STREET_TEXTURE"));

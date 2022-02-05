@@ -24,6 +24,7 @@ Packages:
 - [Freetype2](https://github.com/ubawurinna/freetype-windows-binaries)
 - [stb image](https://github.com/nothings/stb/blob/master/stb_image.h)
 - [entt](https://github.com/skypjack/entt)
+- [pugixml](https://github.com/zeux/pugixml)
 
 ### Clone the repository
     git clone https://github.com/PhiGei2000/CityBuildingGame.git
