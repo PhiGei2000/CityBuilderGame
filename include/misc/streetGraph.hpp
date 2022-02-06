@@ -11,10 +11,10 @@
 #include "streetTypes.hpp"
 
 struct StreetGraphNode {
-    // StreetType type = StreetType::END;
     glm::ivec2 position;
     // int rotation;
     bool connections[4] = {false, false, false, false};
+    StreetType type = StreetType::END;
 };
 
 struct StreetGraphEdge {

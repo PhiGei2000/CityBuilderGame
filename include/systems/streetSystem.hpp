@@ -3,6 +3,8 @@
 
 #include "components/streetComponent.hpp"
 
+#include "misc/streetGeometryGenerator.hpp"
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 
@@ -31,6 +33,8 @@ class StreetSystem : public System {
     };
 
     std::queue<StreetBuildData> buildData;
+
+    StreetGeometryGenerator geometryGenerator;
 
   public:
     StreetSystem(Game* game);

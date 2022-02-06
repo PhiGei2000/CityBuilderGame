@@ -26,7 +26,7 @@ template<>
 void ResourceManager::loadResource<Geometry>(const std::string& id, const std::string& filename) {
     resources.emplace(std::piecewise_construct,
                       std::forward_as_tuple(id),
-                      std::forward_as_tuple(std::type_index(typeid(Geometry)), ModelLoader::load(filename)));
+                      std::forward_as_tuple(std::type_index(typeid(Geometry)), ResourcePtr<Geometry>(new MeshGeometry(ModelLoader::load(filename)))));
 }
 
 template<>
@@ -133,3 +133,4 @@ std::shared_ptr<T> ResourceManager::getResource(const std::string& resourceId) c
 template ResourcePtr<Texture> ResourceManager::getResource<Texture>(const std::string&) const;
 template ResourcePtr<Shader> ResourceManager::getResource<Shader>(const std::string&) const;
 template ResourcePtr<Geometry> ResourceManager::getResource<Geometry>(const std::string&) const;
+template ResourcePtr<StreetPack> ResourceManager::getResource<StreetPack>(const std::string&) const;

@@ -1,23 +1,20 @@
 #include "misc/streetGeometryGenerator.hpp"
 
 #include "misc/utility.hpp"
+#include "resources/resourceManager.hpp"
+#include "resources/streetPack.hpp"
 
-std::unordered_map<StreetType, GeometryData> StreetGeometryGenerator::geometryData = {
-    // std::make_pair<StreetType, GeometryData>(StreetType::NOT_CONNECTED, ModelLoader::load("res/models/street_notConnected.obj")),
-    // std::make_pair<StreetType, GeometryData>(StreetType::END, ModelLoader::load("res/models/street_end.obj")),
-    // std::make_pair<StreetType, GeometryData>(StreetType::CURVE, ModelLoader::load("res/models/street_curve.obj")),
-    // std::make_pair<StreetType, GeometryData>(StreetType::T_CROSSING, ModelLoader::load("res/models/street_t_crossing.obj")),
-    // std::make_pair<StreetType, GeometryData>(StreetType::CROSSING, ModelLoader::load("res/models/street_crossing.obj")),
-    // std::make_pair<StreetType, GeometryData>(StreetType::EDGE, ModelLoader::load("res/models/street_straight.obj"))
-};
+StreetGeometryGenerator::StreetGeometryGenerator(ResourceManager& resourceManager)
+    : resourceManager{resourceManager} {
+}
 
-GeometryData StreetGeometryGenerator::getNodeGeometry(const StreetGraphNode& node) {
+GeometryData StreetGeometryGenerator::getNodeGeometry(const StreetGraphNode& node, const StreetPack& pack) const {
 
     int connectionsCount = (node.connections[0] ? 1 : 0) + (node.connections[1] ? 1 : 0) + (node.connections[2] ? 1 : 0) + (node.connections[3] ? 1 : 0);
 
     StreetType type = static_cast<StreetType>(connectionsCount);
     int rotation;
-    GeometryData data = geometryData[type];
+    GeometryData data = pack.streetGeometries.at(type);
 
     switch (type) {
     case StreetType::END:
@@ -108,7 +105,7 @@ GeometryData StreetGeometryGenerator::getNodeGeometry(const StreetGraphNode& nod
     return data;
 }
 
-GeometryData StreetGeometryGenerator::getEdgeGeometry(const StreetGraphEdge& edge) {
+GeometryData StreetGeometryGenerator::getEdgeGeometry(const StreetGraphEdge& edge, const StreetPack& pack) const {
     // get edge length and direction
     glm::ivec2 diff = edge.end - edge.start;
 
@@ -126,7 +123,7 @@ GeometryData StreetGeometryGenerator::getEdgeGeometry(const StreetGraphEdge& edg
     // transform vertex data for each grid cell and merge them together
     GeometryData data;
 
-    const GeometryData& edgeData = geometryData[StreetType::EDGE];
+    const GeometryData& edgeData = pack.streetGeometries.at(StreetType::EDGE);
 
     if (horizontal) {
 
@@ -158,14 +155,16 @@ GeometryData StreetGeometryGenerator::getEdgeGeometry(const StreetGraphEdge& edg
     return data;
 }
 
-Geometry* StreetGeometryGenerator::create(const StreetGraph& graph) {
+Geometry* StreetGeometryGenerator::create(const StreetGraph& graph) const {
+    const StreetPack& pack = *(resourceManager.getResource<StreetPack>("BASIC_STREETS"));
     GeometryData data;
+
     for (const auto& [position, node] : graph.nodes) {
-        data.addData(getNodeGeometry(node));
+        data.addData(getNodeGeometry(node, pack));
     }
 
     for (const auto& edge : graph.edges) {
-        data.addData(getEdgeGeometry(edge));
+        data.addData(getEdgeGeometry(edge, pack));
     }
 
     return new MeshGeometry(data);
@@ -203,8 +202,10 @@ Geometry* StreetGeometryGenerator::createDebug(const StreetGraph& graph) {
         index += 2;
     }
 
-    Geometry* geometry = new Geometry(VertexAttributes{{{3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0},
-                                                        {4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float))}}},
+    Geometry* geometry = new Geometry(VertexAttributes{
+                                          {{3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0},
+                                           {4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float))}}
+    },
                                       GL_LINES);
 
     geometry->fillBuffers(vertexData, indices);

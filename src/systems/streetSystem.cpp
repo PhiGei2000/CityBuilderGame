@@ -4,17 +4,16 @@
 #include "events/events.hpp"
 
 #include "misc/configuration.hpp"
-#include "misc/streetGeometryGenerator.hpp"
 
 StreetSystem::StreetSystem(Game* game)
-    : System(game) {
+    : System(game), geometryGenerator(resourceManager) {
     init();
 
     eventDispatcher.sink<BuildEvent>()
         .connect<&StreetSystem::handle_buildEvent>(*this);
 }
 
-void StreetSystem::init() {    
+void StreetSystem::init() {
 
     streetEntity = registry.create();
     registry.emplace<MeshComponent>(streetEntity, nullptr, resourceManager.getResource<Shader>("MESH_SHADER"), resourceManager.getResource<Texture>("STREET_TEXTURE"));
@@ -30,7 +29,7 @@ void StreetSystem::update(float dt) {
 
         street.graph.updateNodes();
 
-        streetMesh.geometry.reset(StreetGeometryGenerator::create(street.graph));
+        streetMesh.geometry.reset(geometryGenerator.create(street.graph));
         streetGeometryOutdated = false;
 
         entt::entity debugEntity = registry.view<DebugComponent>().front();

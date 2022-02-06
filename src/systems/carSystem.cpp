@@ -1,7 +1,7 @@
 #include "systems/carSystem.hpp"
 
 #include "components/components.hpp"
-#include "misc/configuration.hpp"
+#include "misc/carPath.hpp"
 #include "misc/utility.hpp"
 #include "resources/resourceManager.hpp"
 
@@ -42,10 +42,12 @@ void CarSystem::spawnCar() {
             glm::vec3(-edgeDir.y, 0, edgeDir.x));
 
         entt::entity car = registry.create();
-        
+
         registry.emplace<CarComponent>(car);
         registry.emplace<TransformationComponent>(car, pos, glm::toQuat(rotation), glm::vec3{1.0f}).calculateTransform();
         registry.emplace<MeshComponent>(car, resourceManager.getResource<Geometry>("CAR_GEOMETRY"), resourceManager.getResource<Shader>("MESH_SHADER"), resourceManager.getResource<Texture>("CAR_TEXTURE"));
+
+        registry.emplace<MovementComponent>(car, -static_cast<float>(direction) * glm::vec3(edgeDir.x, 0.0f, edgeDir.y), glm::vec3{0.0f});
 
         cars.push_back(car);
     }
@@ -58,4 +60,42 @@ CarSystem::CarSystem(Game* game)
 
 void CarSystem::update(float dt) {
     spawnCar();
+
+    const static float detectionRange = 0.1f;
+    const StreetGraph& streetGraph = registry.get<StreetComponent>(streetEntity).graph;
+
+    registry.view<CarComponent, TransformationComponent, MovementComponent>().each(
+        [&](CarComponent& car, TransformationComponent& transform, MovementComponent& movement) {
+            if (!car.turning) {
+                const glm::vec2& carPos = glm::vec2(transform.position.x, transform.position.z);
+
+                const glm::vec2& gridPos = utility::toGridCoords(transform.position);
+                const glm::vec2& direction = glm::normalize(glm::vec2(movement.linearVelocity.x, movement.linearVelocity.z));
+
+                auto it = streetGraph.nodes.find(gridPos);
+                // car on node
+                if (it != streetGraph.nodes.end()) {
+                    const StreetGraphNode& node = it->second;
+
+                    glm::vec2 localPos = carPos - static_cast<float>(Configuration::gridSize) * gridPos;
+
+                    if (node.type == StreetType::END) {
+                        const static glm::vec2 turnPoint = glm::vec2(1.75f, 2.5f);
+
+                        if (glm::length(localPos - turnPoint) < detectionRange) {
+                            // get start point
+                            const glm::vec2& start = static_cast<float>(Configuration::gridSize) * gridPos + turnPoint;
+
+                            // create car path
+
+                            // set car position to start point
+                            transform.position = glm::vec3(start.x, 0.1f, start.y);
+                            // set angular velocity
+                            movement.angularVelocity = glm::vec3(0.0f, 1 / 0.75f, 0.0f);
+                            
+                        }
+                    }
+                }
+            }
+        });
 }

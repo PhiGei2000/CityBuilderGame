@@ -3,7 +3,6 @@
 #include "components/components.hpp"
 #include "events/events.hpp"
 
-#include "misc/configuration.hpp"
 #include "misc/utility.hpp"
 
 #include "GLFW/glfw3.h"
