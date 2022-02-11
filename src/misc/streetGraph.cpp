@@ -1,6 +1,8 @@
 #include "misc/streetGraph.hpp"
 
-#include "misc/direction.hpp"
+constexpr bool StreetGraphNode::connected(Direction direction) const {
+    return connections[static_cast<int>(direction)];
+}
 
 int StreetGraphEdge::length() const {
     glm::ivec2 dr = end - start;

@@ -9,12 +9,15 @@
 #include <glm/gtx/hash.hpp>
 
 #include "streetTypes.hpp"
+#include "misc/direction.hpp"
 
 struct StreetGraphNode {
     glm::ivec2 position;
     // int rotation;
     bool connections[4] = {false, false, false, false};
     StreetType type = StreetType::END;
+
+    constexpr bool connected(Direction direction) const;
 };
 
 struct StreetGraphEdge {
