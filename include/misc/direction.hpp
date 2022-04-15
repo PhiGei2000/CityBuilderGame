@@ -3,8 +3,7 @@
 
 #include <glm/glm.hpp>
 
-enum class Direction : byte
-{
+enum class Direction : byte {
     NORTH,
     EAST,
     SOUTH,
@@ -12,14 +11,15 @@ enum class Direction : byte
     UNDEFINED
 };
 
-static constexpr std::array<glm::ivec2, 4> DirectionVectors = {
-    glm::ivec2{1, 0},
-    glm::ivec2{0, 1},
-    glm::ivec2{-1, 0},
-    glm::ivec2{0, -1}};
+static std::map<Direction, glm::ivec2> DirectionVectors = {
+    std::make_pair<Direction, glm::ivec2>(Direction::NORTH, glm::ivec2{1, 0}),
+    std::make_pair<Direction, glm::ivec2>(Direction::EAST, glm::ivec2{0, 1}),
+    std::make_pair<Direction, glm::ivec2>(Direction::SOUTH, glm::ivec2{-1, 0}),
+    std::make_pair<Direction, glm::ivec2>(Direction::WEST, glm::ivec2{0, -1}),
+};
 
 namespace misc {
-    inline Direction getDirection(const glm::ivec2& vec) {
+    inline Direction getDirection(const glm::vec2& vec) {
         // (vec.x != 0) xor (vec.y != 0)
         if ((vec.x == 0) != (vec.y == 0)) {
             if (vec.x != 0) {

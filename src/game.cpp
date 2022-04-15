@@ -92,3 +92,4 @@ template void Game::raiseEvent<KeyEvent>(const KeyEvent&);
 template void Game::raiseEvent<MouseButtonEvent>(const MouseButtonEvent&);
 template void Game::raiseEvent<MouseMoveEvent>(const MouseMoveEvent&);
 template void Game::raiseEvent<BuildEvent>(const BuildEvent&);
+template void Game::raiseEvent<PositionEvent>(const PositionEvent&);

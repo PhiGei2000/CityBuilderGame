@@ -2,17 +2,23 @@
 
 #include "system.hpp"
 
+#include "events/events.hpp"
 #include "misc/direction.hpp"
+
+#include <glm/gtx/quaternion.hpp>
 
 class CarSystem : public System {
   protected:
     struct Movement {
-      glm::vec3 linearVelocity;
-      glm::vec3 angularVelocity;
+        glm::vec3 linearVelocity;
+        glm::vec3 angularVelocity;
     };
 
     enum class Turns {
-      LEFT, RIGHT, FULL, STAIGHT
+        FULL,
+        LEFT,
+        STAIGHT,
+        RIGHT
     };
 
     void init() override;
@@ -25,7 +31,18 @@ class CarSystem : public System {
 
     static glm::vec2 getDestination(Direction direction, const glm::ivec2& nodePosition);
 
-    static Movement getMovement(const glm::vec2& start, const glm::vec2& end);
+    static Direction getTurnEndDirection(Direction startDirection, Turns turns);
+
+    static glm::vec2 getTurnDestination(Direction startDirection, const glm::vec2& start, Turns turn);
+
+    std::vector<Turns> getPossibleTurns(Direction direction, const glm::vec2& position) const;
+
+    static glm::vec3 getAngularVelocity(Turns turn);
+
+    static glm::quat getCarRotation(Direction drivingDirection);
+
+    void handlePositionEvent(const PositionEvent& e) const;
+
   public:
     CarSystem(Game* game);
 

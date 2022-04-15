@@ -9,7 +9,7 @@ int StreetGraphEdge::length() const {
     return dr.x + dr.y;
 }
 
-int StreetGraph::getEdge(const glm::ivec2& position) {
+int StreetGraph::getEdge(const glm::ivec2& position) const {
     for (int index = 0; index < edges.size(); index++) {
         const StreetGraphEdge& edge = edges[index];
 
@@ -61,12 +61,12 @@ void StreetGraph::createNode(int x, int y) {
     return createNode(glm::ivec2(x, y));
 }
 
-constexpr std::array<glm::ivec2, 4> StreetGraph::getNeighborPositions(const glm::ivec2& position) {
+std::array<glm::ivec2, 4> StreetGraph::getNeighborPositions(const glm::ivec2& position) {
     return std::array<glm::ivec2, 4>{
-        position + DirectionVectors[0],
-        position + DirectionVectors[1],
-        position + DirectionVectors[2],
-        position + DirectionVectors[3],
+        position + DirectionVectors[Direction::NORTH],
+        position + DirectionVectors[Direction::EAST],
+        position + DirectionVectors[Direction::SOUTH],
+        position + DirectionVectors[Direction::WEST],
     };
 }
 
@@ -93,8 +93,8 @@ void StreetGraph::addEdge(const glm::ivec2& start, const glm::ivec2& end, bool x
 
         // create edge
         const glm::ivec2 edgeVector = end - start;
-        Direction edgeDir = misc::getDirection(end - start);
-        const glm::ivec2 edgeDirVector = DirectionVectors[static_cast<int>(edgeDir)];
+        const glm::ivec2 edgeDirVector = glm::normalize(glm::vec2(edgeVector));
+        Direction edgeDir = misc::getDirection(edgeVector);
 
         // search for nodes on the new edge or edge intersections
         std::vector<glm::ivec2> nodesOnEdge;
@@ -135,6 +135,27 @@ void StreetGraph::addEdge(const glm::ivec2& start, const glm::ivec2& end, bool x
         addEdge(start, curvePos);
         addEdge(curvePos, end);
     }
+}
+
+StreetGraphEdge StreetGraph::getEdge(const glm::ivec2& position, Direction direction) const {
+    auto it = nodes.find(position);
+
+    if (it != nodes.end()) {
+        glm::ivec2 edgePos = position + DirectionVectors[direction];
+
+        return edges[getEdge(edgePos)];
+    }
+    else {
+        return edges[getEdge(position)];
+    }
+}
+
+StreetGraphNode StreetGraph::getNextNode(const glm::ivec2& position, Direction direction) const {
+    const StreetGraphEdge& edge = getEdge(position, direction);
+
+    Direction edgeDir = misc::getDirection(edge.end - edge.start);
+
+    return nodes.at(edgeDir == direction ? edge.end : edge.start);
 }
 
 void StreetGraph::updateNodes() {

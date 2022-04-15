@@ -12,6 +12,12 @@ struct CarComponent {
     // current driving direction
     Direction drivingDirection = Direction::UNDEFINED;
 
+    // next destination
+    glm::vec2 destination;
+
     // car is driving
     bool driving = false;
+
+    // car is in turn
+    bool inTurn = false;
 };
