@@ -31,4 +31,8 @@ namespace utility {
         return toGridCoords(glm::vec2{position.x, position.z});
     }
 
+    constexpr glm::ivec2 interpolate(const glm::ivec2& start, const glm::ivec2& end, int value) {
+        return (end - start) * value + start;
+    }
+
 } // namespace utility

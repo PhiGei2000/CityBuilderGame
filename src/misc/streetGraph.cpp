@@ -1,210 +1,111 @@
 #include "misc/streetGraph.hpp"
 
-constexpr bool StreetGraphNode::connected(Direction direction) const {
-    return connections[static_cast<int>(direction)];
-}
+#include "misc/utility.hpp"
 
-int StreetGraphEdge::length() const {
-    glm::ivec2 dr = end - start;
-    return dr.x + dr.y;
-}
-
-int StreetGraph::getEdge(const glm::ivec2& position) const {
-    for (int index = 0; index < edges.size(); index++) {
-        const StreetGraphEdge& edge = edges[index];
-
-        const glm::ivec2& start = edge.start;
-        const glm::ivec2& end = edge.end;
-
-        glm::ivec2 edgeVector = end - start;
-        glm::ivec2 diffVector = position - start;
-
-        bool x = edgeVector.x != 0 ? (0 <= diffVector.x && diffVector.x < edgeVector.x) : start.x == position.x;
-        bool y = edgeVector.y != 0 ? (0 <= diffVector.y && diffVector.y < edgeVector.y) : start.y == position.y;
-
-        if (x && y) {
-            return index;
+int StreetGraph::getNodeIndex(const glm::ivec2& position) const {
+    const int nodesCount = nodes.size();
+    // iterate through all nodes and return index if node at specified position is found
+    for (int i = 0; i < nodesCount; i++) {
+        if (nodes[i].gridPosition == position) {
+            return i;
         }
     }
 
+    // return -1 if no node was found
     return -1;
 }
 
-void StreetGraph::splitEdge(int edgeIndex, const glm::ivec2& position) {
-    auto [it, success] = nodes.try_emplace(position, position);
+std::vector<int> StreetGraph::getEdges(const glm::ivec2& position) const {
+    std::vector<int> result;
 
-    if (success) {
-        // get edge
-        const StreetGraphEdge& edge = edges[edgeIndex];
-        Direction edgeDirection = misc::getDirection(edge.end - edge.start);
-        StreetGraphNode& node = (*it).second;
+    // iterate through all edges
+    for (int i = 0; i < edges.size(); i++) {
+        const auto& edge = edges[i];
 
-        // update node connections
-        if (edgeDirection == Direction::NORTH || edgeDirection == Direction::SOUTH) {
-            node.connections[0] = node.connections[2] = true;
+        // calculate edge length
+        const glm::ivec2& start = nodes[edge.startIndex].gridPosition;
+        const glm::ivec2& end = nodes[edge.endIndex].gridPosition;
+        float edgeLength = static_cast<float>(glm::length(end - start));
+
+        // search on edge if position is on edge
+        for (int j = 0; j <= edgeLength; j++) {
+            const glm::ivec2& edgePos = utility::interpolate(start, end, j / edgeLength);
+
+            // check if position is on edge
+            if (edgePos == position) {
+                // add edge index to result and stop search on current edge
+                result.push_back(i);
+                break;
+            }
         }
-        else {
-            node.connections[1] = node.connections[3] = true;
+    }
+
+    return result;
+}
+
+int StreetGraph::addNode(const glm::ivec2& position) {
+    // check if position is occupied
+    int index = getNodeIndex(position);
+    if (index != -1) {
+        // return found index if node already exists
+        return index;
+    }
+
+    // create a new node at the end
+    index = nodes.size();
+    nodes.emplace_back(position);
+
+    // return index of the created node
+    return index;
+}
+
+void StreetGraph::removeNode(const glm::ivec2& position) {
+    // get node index and check if node exists
+    int index = getNodeIndex(position);
+    if (index == -1)
+        return;
+
+    // remove node
+    nodes.erase(nodes.begin() + index);
+
+    // remove edges and update node indices
+    for (auto it = edges.begin(); it != edges.end();) {
+        auto& edge = *it;
+        // connected to removed node
+        if (edge.startIndex == index || edge.endIndex == index) {
+            // delte edge
+            it = edges.erase(it);
+            continue;
+        }
+        
+        // update edges with indices greater than removed node index
+        if (edge.startIndex > index) {
+            edge.startIndex--;
+        }
+        if (edge.endIndex > index) {
+            edge.endIndex--;
         }
 
-        glm::ivec2 end = edge.end;
-        edges[edgeIndex].end = position;
-        addEdge(position, end);
+        it++;
     }
 }
 
-void StreetGraph::createNode(const glm::ivec2& position) {
-    nodes.try_emplace(position, position);
-}
+void StreetGraph::addEdge(const glm::ivec2& start, const glm::ivec2& end) {
+    // check if edge is horizontal or vertical
+    if (!(start.x == end.x || start.y == end.y)) {
+        // insert node
+        // TODO: Add mode to determinate building order (north/south first of east/west first)
+        // north/south
+        const glm::ivec2& nodePos{end.x, start.y};
 
-void StreetGraph::createNode(int x, int y) {
-    return createNode(glm::ivec2(x, y));
-}
-
-std::array<glm::ivec2, 4> StreetGraph::getNeighborPositions(const glm::ivec2& position) {
-    return std::array<glm::ivec2, 4>{
-        position + DirectionVectors[Direction::NORTH],
-        position + DirectionVectors[Direction::EAST],
-        position + DirectionVectors[Direction::SOUTH],
-        position + DirectionVectors[Direction::WEST],
-    };
-}
-
-void StreetGraph::addEdge(const glm::ivec2& start, const glm::ivec2& end, bool xFirst) {
-    if (start.x == end.x || start.y == end.y) {
-        int edgeIndex;
-
-        // if start node on another edge split edge
-        if ((edgeIndex = getEdge(start)) != -1) {
-            splitEdge(edgeIndex, start);
-        }
-        // if not create new simple node
-        else {
-            createNode(start);
-        }
-
-        // if end node on another edge split edge
-        if ((edgeIndex = getEdge(end)) != -1) {
-            splitEdge(edgeIndex, end);
-        }
-        else {
-            createNode(end);
-        }
-
-        // create edge
-        const glm::ivec2 edgeVector = end - start;
-        const glm::ivec2 edgeDirVector = glm::normalize(glm::vec2(edgeVector));
-        Direction edgeDir = misc::getDirection(edgeVector);
-
-        // search for nodes on the new edge or edge intersections
-        std::vector<glm::ivec2> nodesOnEdge;
-        glm::ivec2 pos = start;
-        do {
-            auto it = nodes.find(pos);
-            if (it != nodes.end()) {
-                nodesOnEdge.push_back(pos);
-            }
-
-            int edgeIndex = getEdge(pos);
-            if (edgeIndex != -1) {
-                splitEdge(edgeIndex, pos);
-                nodesOnEdge.push_back(pos);
-            }
-
-            pos += edgeDirVector;
-        } while (pos != end + edgeDirVector);
-
-        // connect nodes
-        for (int i = 1; i < nodesOnEdge.size(); i++) {
-            edges.emplace_back(nodesOnEdge[i - 1], nodesOnEdge[i]);
-
-            // update node connections
-            if (nodes[nodesOnEdge[i - 1]].position != end) {
-                nodes[nodesOnEdge[i - 1]].connections[static_cast<int>(edgeDir)] = true;
-            }
-
-            if (nodes[nodesOnEdge[i]].position != start) {
-                nodes[nodesOnEdge[i]].connections[static_cast<int>(misc::getInverse(edgeDir))] = true;
-            }
-        }
+        addEdge(start, nodePos);
+        addEdge(nodePos, end);
     }
     else {
-        glm::ivec2 curvePos = xFirst ? glm::ivec2{start.x, end.y} : glm::ivec2{end.x, start.y};
+        // create start and end node if not exist
+        int startIndex = addNode(start);
+        int endIndex = addNode(end);
 
-        createNode(curvePos);
-        addEdge(start, curvePos);
-        addEdge(curvePos, end);
-    }
-}
-
-StreetGraphEdge StreetGraph::getEdge(const glm::ivec2& position, Direction direction) const {
-    auto it = nodes.find(position);
-
-    if (it != nodes.end()) {
-        glm::ivec2 edgePos = position + DirectionVectors[direction];
-
-        return edges[getEdge(edgePos)];
-    }
-    else {
-        return edges[getEdge(position)];
-    }
-}
-
-StreetGraphNode StreetGraph::getNextNode(const glm::ivec2& position, Direction direction) const {
-    const StreetGraphEdge& edge = getEdge(position, direction);
-
-    Direction edgeDir = misc::getDirection(edge.end - edge.start);
-
-    return nodes.at(edgeDir == direction ? edge.end : edge.start);
-}
-
-void StreetGraph::updateNodes() {
-    // merge edges
-    for (auto it = nodes.begin(); it != nodes.end();) {
-        const auto& [pos, node] = *it;
-        // if node is edge
-        if (node.connections[0] && !node.connections[1] && node.connections[2] && !node.connections[3] ||
-            !node.connections[0] && node.connections[1] && !node.connections[2] && node.connections[3]) {
-            // find the edges connected to this node
-            int edge1 = -1, edge2 = -1;
-
-            StreetGraphEdge edge;
-            int i = 0;
-            while ((edge1 == -1 || edge2 == -1) && i < edges.size()) {
-                if (edge1 == -1) {
-                    if (edges[i].start == pos) {
-                        edge.start = edges[i].end;
-                        edge1 = i;
-                    }
-                    else if (edges[i].end == pos) {
-                        edge.start = edges[i].start;
-                        edge1 = i;
-                    }
-                }
-                else if (edge2 == -1) {
-                    if (edges[i].start == pos) {
-                        edge.end = edges[i].end;
-                        edge2 = i;
-                    }
-                    else if (edges[i].end == pos) {
-                        edge.end = edges[i].start;
-                        edge2 = i;
-                    }
-                }
-
-                i++;
-            }
-
-            // delete edges
-            edges.erase(edges.begin() + glm::max(edge1, edge2));
-            edges.erase(edges.begin() + glm::min(edge1, edge2));
-
-            // create new edge and delete node
-            edges.push_back(edge);
-            it = nodes.erase(it);
-        }
-        else {
-            it++;
-        }
+        edges.emplace_back(startIndex, endIndex);
     }
 }

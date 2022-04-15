@@ -12,55 +12,34 @@
 #include "streetTypes.hpp"
 
 struct StreetGraphNode {
-    glm::ivec2 position;
-    // int rotation;
-    bool connections[4] = {false, false, false, false};
-    StreetType type = StreetType::END;
-
-    constexpr bool connected(Direction direction) const;
-
-    // relative node input positions
-    static constexpr glm::vec2 nodeInputs[] = {
-        glm::vec2{ 0.0f, 3.25f},
-        glm::vec2{1.75f,  0.0f},
-        glm::vec2{ 5.0f, 1.75f},
-        glm::vec2{3.25f,  5.0f},
-    };
-
-    // relative node output positions
-    static constexpr glm::vec2 nodeOutputs[] = {
-        glm::vec2{ 5.0f, 3.25f},
-        glm::vec2{1.75f,  5.0f},
-        glm::vec2{ 0.0f, 1.75f},
-        glm::vec2{3.25f,  0.0f},
-    };
+    glm::ivec2 gridPosition;
 };
 
 struct StreetGraphEdge {
-    glm::ivec2 start, end;
-
-    int length() const;
+    int startIndex, endIndex;
 };
 
 struct StreetGraph {
   private:
-    int getEdge(const glm::ivec2& position) const;
-
-    void splitEdge(int edgeIndex, const glm::ivec2& position);
-
-    void createNode(const glm::ivec2& position);
-    void createNode(int x, int y);
-
-    static std::array<glm::ivec2, 4> getNeighborPositions(const glm::ivec2& position);
-
-  public:
-    std::unordered_map<glm::ivec2, StreetGraphNode> nodes;
+    // set of nodes
+    std::vector<StreetGraphNode> nodes;
+    // set of edges
     std::vector<StreetGraphEdge> edges;
 
-    void addEdge(const glm::ivec2& start, const glm::ivec2& end, bool xFirst = true);
+  public:
+    // Returns the index of the node at the specified position or -1, if no node is found.
+    int getNodeIndex(const glm::ivec2& position) const;
 
-    StreetGraphEdge getEdge(const glm::ivec2& nodePosition, Direction direction) const;
-    StreetGraphNode getNextNode(const glm::ivec2& position, Direction direction) const;
+    // Returns the indcies of the edges at the specified position.
+    std::vector<int> getEdges(const glm::ivec2& position) const;
 
-    void updateNodes();
+    // Creates a new node at the specified position and returns the index of the created node. Does nothing if there is a node already.
+    int addNode(const glm::ivec2& position);
+
+    // Removes the node at the specified position and update edges
+    void removeNode(const glm::ivec2& position);
+
+    // Creates a new edge with endpoints at the specified positions. Creates new nodes at start- and endpoint if neccessary. Also creates nodes to create north/south and east/west edges only.
+    void addEdge(const glm::ivec2& start, const glm::ivec2& end);
+
 };
