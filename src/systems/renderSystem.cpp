@@ -99,7 +99,7 @@ void RenderSystem::update(float dt) {
             mesh.shader->use();
             mesh.shader->setInt("diffuse", 0);
             mesh.shader->setVector3("light.color", glm::vec3(0.9f));
-            mesh.shader->setVector3("light.direction", glm::normalize(glm::vec3(1, -1, 1)));
+            mesh.shader->setVector3("light.direction", glm::normalize(glm::vec3(0, 100, 10)));
             mesh.shader->setVector3("viewPos", cameraTransform.position);
 
             mesh.shader->setVector3("cameraTarget", cameraTransform.position + 5.0f * camera.front);

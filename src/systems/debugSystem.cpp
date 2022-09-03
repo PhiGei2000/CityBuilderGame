@@ -25,10 +25,10 @@ void DebugSystem::init() {
     registry.emplace<MultiMeshComponent>(debugEntity, std::unordered_map<std::string, Mesh>{
                                                           std::make_pair<std::string, Mesh>("axis", Mesh{std::shared_ptr<Geometry>(axisGeo),
                                                                                                          std::shared_ptr<Shader>(axisShader),
-                                                                                                         std::shared_ptr<Texture>(nullptr)}),
-                                                          std::make_pair<std::string, Mesh>("streets", Mesh{std::shared_ptr<Geometry>(nullptr),
+                                                                                                         std::shared_ptr<Texture>(nullptr)})/*,
+                                                        std::make_pair<std::string, Mesh>("streets", Mesh{std::shared_ptr<Geometry>(nullptr),
                                                                                                             std::shared_ptr<Shader>(new Shader("res/shaders/streetDebug.vert", "res/shaders/streetDebug.frag")),
-                                                                                                            std::shared_ptr<Texture>(nullptr)})});
+                                                                                                            std::shared_ptr<Texture>(nullptr)})*/});
     registry.emplace<DebugComponent>(debugEntity);
     registry.emplace<TransformationComponent>(debugEntity, glm::vec3{0}, glm::quat(), glm::vec3{1}).calculateTransform();
 }
