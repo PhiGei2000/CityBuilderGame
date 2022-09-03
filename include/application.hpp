@@ -45,8 +45,8 @@ class Application {
 
     GLFWwindow* getWindow() const;
 
-    void onKeyEvent(const KeyEvent& e);
-    void onFramebufferSizeEvent(const FramebufferSizeEvent& e);
-    void onMouseMoveEvent(const MouseMoveEvent& e);
-    void onMouseButtonEvent(const MouseButtonEvent& e);
+    void onKeyEvent(KeyEvent& e);
+    void onFramebufferSizeEvent(FramebufferSizeEvent& e);
+    void onMouseMoveEvent(MouseMoveEvent& e);
+    void onMouseButtonEvent(MouseButtonEvent& e);
 };

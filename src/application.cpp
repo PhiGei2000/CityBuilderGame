@@ -19,17 +19,20 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 
     Application* app = (Application*)glfwGetWindowUserPointer(window);
-    app->onFramebufferSizeEvent(FramebufferSizeEvent{width, height});
+    FramebufferSizeEvent event = FramebufferSizeEvent{width, height};
+    app->onFramebufferSizeEvent(event);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     Application* app = (Application*)glfwGetWindowUserPointer(window);
-    app->onKeyEvent(KeyEvent{key, scancode, action, mods});
+    KeyEvent event = KeyEvent{key, scancode, action, mods};
+    app->onKeyEvent(event);
 }
 
 void cursorPos_callback(GLFWwindow* window, double x, double y) {
     Application* app = (Application*)glfwGetWindowUserPointer(window);
-    app->onMouseMoveEvent(MouseMoveEvent{(float)x, (float)y, app->lastCursorPos.x, app->lastCursorPos.y});
+    MouseMoveEvent event = MouseMoveEvent{(float)x, (float)y, app->lastCursorPos.x, app->lastCursorPos.y};
+    app->onMouseMoveEvent(event);
 
     app->lastCursorPos = glm::vec2(x, y);
 }
@@ -39,27 +42,28 @@ void mouseButton_callback(GLFWwindow* window, int button, int action, int mods) 
     double x, y;
     glfwGetCursorPos(window, &x, &y);
 
-    app->onMouseButtonEvent(MouseButtonEvent{(float)x, (float)y, button, action, mods});
+    MouseButtonEvent event = MouseButtonEvent{(float)x, (float)y, button, action, mods};
+    app->onMouseButtonEvent(event);
 }
 
 void Application::init() {
     if (!glfwInit()) {
         std::cerr << "failed to intialize GLFW!" << std::endl;
         exit(1);
-    }    
+    }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
 #if DEBUG
     window = glfwCreateWindow(800, 600, "City Building Game", NULL, NULL);
-#else    
+#else
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-    
+
     int x, y, width, height;
     glfwGetMonitorWorkarea(monitor, &x, &y, &width, &height);
 
-    window = glfwCreateWindow(width, height, "City Building Game", monitor, NULL);    
+    window = glfwCreateWindow(width, height, "City Building Game", monitor, NULL);
 #endif
 
     if (window == NULL) {
@@ -137,23 +141,23 @@ GLFWwindow* Application::getWindow() const {
     return window;
 }
 
-void Application::onKeyEvent(const KeyEvent& e) {
+void Application::onKeyEvent(KeyEvent& e) {
     gui->handleKeyEvent(e);
 
     game->raiseEvent(e);
 }
 
-void Application::onFramebufferSizeEvent(const FramebufferSizeEvent& e) {
+void Application::onFramebufferSizeEvent(FramebufferSizeEvent& e) {
     gui->setScreenSize(e.width, e.height);
 
     game->raiseEvent(e);
 }
 
-void Application::onMouseMoveEvent(const MouseMoveEvent& e) {
+void Application::onMouseMoveEvent(MouseMoveEvent& e) {
     game->raiseEvent(e);
 }
 
-void Application::onMouseButtonEvent(const MouseButtonEvent& e) {
+void Application::onMouseButtonEvent(MouseButtonEvent& e) {
     game->raiseEvent(e);
 
     gui->handleMouseButtonEvent(e);

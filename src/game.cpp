@@ -17,9 +17,7 @@ Game::Game(Application* app)
 void Game::init() {
     // init systems
     systems.push_back(new CameraSystem(this));
-    systems.push_back(new BuildSystem(this));
-    systems.push_back(new StreetSystem(this));
-    systems.push_back(new CarSystem(this));
+    systems.push_back(new BuildSystem(this));    
     systems.push_back(new EnvironmentSystem(this));
     systems.push_back(new PhysicsSystem(this));
     systems.push_back(new DebugSystem(this));
@@ -81,15 +79,15 @@ GameState Game::getState() const {
 }
 
 template<typename Event>
-void Game::raiseEvent(const Event& e) {
+void Game::raiseEvent(Event& e) {
     if (state != GameState::PAUSED) {
-        eventDispatcher.trigger<Event>(e);
+        eventDispatcher.trigger<Event&>(e);
     }
 }
 
-template void Game::raiseEvent<FramebufferSizeEvent>(const FramebufferSizeEvent&);
-template void Game::raiseEvent<KeyEvent>(const KeyEvent&);
-template void Game::raiseEvent<MouseButtonEvent>(const MouseButtonEvent&);
-template void Game::raiseEvent<MouseMoveEvent>(const MouseMoveEvent&);
-template void Game::raiseEvent<BuildEvent>(const BuildEvent&);
-template void Game::raiseEvent<PositionEvent>(const PositionEvent&);
+template void Game::raiseEvent<FramebufferSizeEvent>(FramebufferSizeEvent&);
+template void Game::raiseEvent<KeyEvent>(KeyEvent&);
+template void Game::raiseEvent<MouseButtonEvent>(MouseButtonEvent&);
+template void Game::raiseEvent<MouseMoveEvent>(MouseMoveEvent&);
+template void Game::raiseEvent<BuildEvent>(BuildEvent&);
+template void Game::raiseEvent<PositionEvent>(PositionEvent&);

@@ -11,6 +11,13 @@ enum class Direction : byte {
     UNDEFINED
 };
 
+// component    | direction
+// ------------------------
+// positive x   | north
+// positive z   | east
+// negative x   | south
+// negative z   | west
+
 static std::map<Direction, glm::ivec2> DirectionVectors = {
     std::make_pair<Direction, glm::ivec2>(Direction::NORTH, glm::ivec2{1, 0}),
     std::make_pair<Direction, glm::ivec2>(Direction::EAST, glm::ivec2{0, 1}),

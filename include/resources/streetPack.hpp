@@ -10,6 +10,9 @@
 
 struct StreetPack {
     std::unordered_map<StreetType, GeometryData> streetGeometries;
+    // float height;
+    // float pathwayHeight;
+    // float pathwayWidth;
 
     ResourcePtr<Shader> shader;
     ResourcePtr<Texture> texture;

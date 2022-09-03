@@ -18,7 +18,7 @@ class DebugSystem : public System {
   public:
     DebugSystem(Game* game);
 
-    void update(float dt);
+    void update(float dt) override;
 
     void handleKeyEvent(const KeyEvent& e);
 };

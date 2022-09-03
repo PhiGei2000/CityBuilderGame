@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-struct MovementComponent {
+struct VelocityComponent {
     glm::vec3 linearVelocity;
     glm::vec3 angularVelocity;
 };

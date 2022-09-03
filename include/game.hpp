@@ -51,5 +51,5 @@ class Game {
     GameState getState() const;
 
     template<typename Event>
-    void raiseEvent(const Event& args);
+    void raiseEvent(Event& args);
 };

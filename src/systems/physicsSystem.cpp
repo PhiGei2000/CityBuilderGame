@@ -10,8 +10,8 @@ void PhysicsSystem::init() {
 }
 
 void PhysicsSystem::update(float dt) {
-    registry.view<TransformationComponent, MovementComponent>().each(
-        [&](TransformationComponent& transform, MovementComponent& movement) {
+    registry.view<TransformationComponent, VelocityComponent>().each(
+        [&](TransformationComponent& transform, VelocityComponent& movement) {
             // apply translation
             // dr = v dt
             transform.position += movement.linearVelocity * dt;
