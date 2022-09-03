@@ -5,10 +5,12 @@
 #include <filesystem>
 #include <iostream>
 #include <stdexcept>
+#include <utility>
 
 #include <pugixml.hpp>
 
 using namespace pugi;
+
 
 ResourceManager::ResourceManager(const std::string& resourceDir) {
     loadResources(resourceDir);
@@ -24,9 +26,9 @@ const char* ResourceManager::ResourceTypeException::what() const noexcept {
 
 template<>
 void ResourceManager::loadResource<Geometry>(const std::string& id, const std::string& filename) {
-    resources.emplace(std::piecewise_construct,
-                      std::forward_as_tuple(id),
-                      std::forward_as_tuple(std::type_index(typeid(Geometry)), ResourcePtr<Geometry>(new MeshGeometry(ModelLoader::load(filename)))));
+    ResourcePtr<Geometry> data = ResourcePtr<Geometry>(new MeshGeometry(ModelLoader::load(filename)));
+
+    resources[id] = ResourceHolder{std::type_index(typeid(Geometry)), data};
 }
 
 template<>
@@ -43,18 +45,14 @@ void ResourceManager::loadResource<Shader>(const std::string& id, const std::str
         shader = ResourcePtr<Shader>(new Shader(vertexPath, fragmentPath));
     }
 
-    resources.emplace(std::piecewise_construct,
-                      std::forward_as_tuple(id),
-                      std::forward_as_tuple(std::type_index(typeid(Shader)), shader));
+    resources[id] = ResourceHolder{std::type_index(typeid(Shader)), shader};
 }
 
 template<>
 void ResourceManager::loadResource<Texture>(const std::string& id, const std::string& filename, bool alpha) {
     ResourcePtr<Texture> texture(alpha ? new Texture(filename, GL_RGBA) : new Texture(filename));
 
-    resources.emplace(std::piecewise_construct,
-                      std::forward_as_tuple(id),
-                      std::forward_as_tuple(std::type_index(typeid(Texture)), texture));
+    resources[id] = ResourceHolder{std::type_index(typeid(Texture)), texture};
 }
 
 void ResourceManager::loadResources(const std::string& resourceDir) {
@@ -109,9 +107,7 @@ void ResourceManager::loadResources(const std::string& resourceDir) {
             pack->shader = getResource<Shader>(shaderId);
             pack->texture = getResource<Texture>(textureId);
 
-            resources.emplace(std::piecewise_construct,
-                              std::forward_as_tuple(id),
-                              std::forward_as_tuple(std::type_index(typeid(StreetPack)), ResourcePtr<StreetPack>(pack)));
+            resources[id] = ResourceHolder{std::type_index(typeid(StreetPack)), ResourcePtr<StreetPack>(pack)};
         }
     }
 }
