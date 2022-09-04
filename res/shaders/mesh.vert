@@ -7,9 +7,10 @@ out vec3 FragPos;
 out vec2 TexCoord;
 out vec3 Normal;
 
-layout(std140, binding = 1) uniform Matrices {
+layout(std140, binding = 1) uniform Camera {
     mat4 view;
     mat4 projection;
+    vec3 viewPos;
 };
 
 uniform mat4 model;

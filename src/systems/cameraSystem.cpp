@@ -1,6 +1,7 @@
 #include "systems/cameraSystem.hpp"
 
 #include "components/components.hpp"
+#include "events/cameraUpdateEvent.hpp"
 
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -60,20 +61,24 @@ void CameraSystem::update(float dt) {
         cameraRotationDirection.y -= 1;
     }
 
-    bool cameraModified = false;
+    bool cameraPositionUpdated = false;
     if (cameraMoveDirection.x != 0 || cameraMoveDirection.z != 0) {
         transform.position += cameraSpeed * glm::normalize(cameraMoveDirection);
-        cameraModified = true;
+        cameraPositionUpdated = true;
     }
 
+    bool cameraRotationUpdated = false;
     if (cameraRotationDirection.x != 0 || cameraRotationDirection.y != 0) {
         camera.yaw += cameraRotationDirection.x * cameraRotationSpeed;
         camera.pitch = glm::clamp(camera.pitch + cameraRotationDirection.y * cameraRotationSpeed, -89.0f, 89.0f);
-        cameraModified = true;
+        cameraRotationUpdated = true;
     }
 
-    if (cameraModified) {
+    if (cameraPositionUpdated || cameraRotationUpdated) {
         camera.calculateMatrices(transform);
+
+        CameraUpdateEvent event{cameraEntity, false, cameraPositionUpdated, cameraRotationUpdated};
+        game->raiseEvent<CameraUpdateEvent>(event);
     }
 }
 
@@ -85,4 +90,7 @@ void CameraSystem::onFramebufferSize(const FramebufferSizeEvent& e) {
     camera.height = e.height;
 
     camera.calculateMatrices(cameraTransform);
+
+    CameraUpdateEvent event{cameraEntity, true, false, false};
+    game->raiseEvent<CameraUpdateEvent>(event);
 }

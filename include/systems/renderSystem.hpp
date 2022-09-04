@@ -1,17 +1,21 @@
 #pragma once
 #include "systems/system.hpp"
+#include "events/events.hpp"
 
 struct MeshComponent;
 struct TransformationComponent;
 
 class RenderSystem : public System {
-  protected:
-    entt::entity cameraEntity;
-    unsigned int uboMatrices;
+  protected:    
+    unsigned int uboCamera;
+    unsigned int uboLight;
 
     void init() override;
 
-    void renderMesh(const MeshComponent& mesh, const glm::mat4& model, const TransformationComponent& cameraTransform, const glm::vec3& cameraFront) const;    
+    void renderMesh(const MeshComponent& mesh, const glm::mat4& model) const;        
+
+    void onCameraUpdated(CameraUpdateEvent& event) const;
+    void onEntityMoved(EntityMoveEvent& event) const;
 
   public:
     RenderSystem(Game* app);

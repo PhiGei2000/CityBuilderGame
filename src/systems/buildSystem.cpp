@@ -26,7 +26,7 @@ void BuildSystem::init() {
     registry.emplace<MeshComponent>(buildMarkerEntity,
                                     resourceManager.getResource<Geometry>("BUILDMARKER_GEOMETRY"),
                                     resourceManager.getResource<Shader>("MESH_SHADER"),
-                                    resourceManager.getResource<Texture>("BUILDMARKER_TEXTURE"));
+                                    resourceManager.getResource<Material>("BUILDMARKER_MATERIAL"));
 }
 
 void BuildSystem::update(float dt) {
@@ -34,11 +34,13 @@ void BuildSystem::update(float dt) {
     TransformationComponent& transform = registry.get<TransformationComponent>(buildMarkerEntity);
 
     if (game->getState() == GameState::BUILD_MODE) {
+        // get grid position
         const glm::vec2& mousePos = game->getMousePos();
         glm::ivec2 gridPos = getGridPos(mousePos);
 
+        // display build marker and update the build marker position
         buildMarkerComponent.visible = true;
-
+        
         if (gridPos != buildMarkerComponent.pos) {
             buildMarkerComponent.pos = gridPos;
             transform.position = glm::vec3(gridPos.x * Configuration::gridSize, 0.1f, gridPos.y * Configuration::gridSize);
@@ -71,6 +73,11 @@ glm::ivec2 BuildSystem::getGridPos(const glm::vec2& mousePos) const {
     return glm::ivec2(glm::floor(gridX), glm::floor(gridZ));
 }
 
+void BuildSystem::setState(BuildingType selectedType, bool building) {
+    state.building = building;
+    state.selectedBuildingType = selectedType;
+}
+
 void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
     if (e.action == GLFW_RELEASE) {
         if (game->getState() == GameState::BUILD_MODE) {
@@ -80,16 +87,11 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
             int grid = Configuration::worldSize / Configuration::gridSize;
 
             if (utility::inRange(x, 0, grid) && utility::inRange(y, 0, grid)) {
-                BuildEvent event = BuildEvent{glm::ivec2(x,y), BuildingType::STREET, BuildType::BEGIN};
+                BuildingType selectedType = state.selectedBuildingType;
+                BuildAction action = BuildAction::DEFAULT;
 
-                if (state == BuildSystemState::IDLE) {
-                    game->raiseEvent<BuildEvent>(event);
-                    state = BuildSystemState::STREET;
-                }
-                else if (state == BuildSystemState::STREET) {
-                    game->raiseEvent<BuildEvent>(event);
-                    state = BuildSystemState::IDLE;
-                }
+                BuildEvent event{buildMarker.pos, selectedType};
+                game->raiseEvent(event);
             }
         }
     }

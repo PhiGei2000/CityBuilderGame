@@ -4,4 +4,5 @@
 #include "framebufferSizeEvent.hpp"
 #include "keyEvent.hpp"
 #include "mouseEvents.hpp"
-#include "positionEvent.hpp"
+#include "cameraUpdateEvent.hpp"
+#include "entityMoveEvent.hpp"
