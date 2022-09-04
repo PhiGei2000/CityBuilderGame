@@ -30,6 +30,8 @@ void RenderSystem::renderMesh(const MeshComponent& mesh, const glm::mat4& model,
     mesh.shader->use();
     mesh.shader->setInt("material.diffuse", 0);
     mesh.shader->setFloat("material.ambientStrength", mesh.material->ambient);
+    mesh.shader->setFloat("material.specularStrenght", mesh.material->specularStrenght);
+    mesh.shader->setFloat("material.shininess", mesh.material->shininess);
 
     mesh.shader->setVector3("light.color", glm::vec3(0.9f));
     mesh.shader->setVector3("light.direction", glm::normalize(glm::vec3(1, -1, 1)));
