@@ -1,6 +1,8 @@
 #pragma once
 #include "system.hpp"
 
+#include "misc/buildingType.hpp"
+
 #include <glm/glm.hpp>
 
 struct MouseButtonEvent;
@@ -12,15 +14,19 @@ class BuildSystem : public System {
     entt::entity cameraEntity;
     entt::entity buildMarkerEntity;
 
-    enum class BuildSystemState
-    {
-        IDLE,
-        STREET
+    struct BuildSystemState {
+        // building process ongoing
+        bool building = false;
+
+        // selected building type
+        BuildingType selectedBuildingType = BuildingType::CLEAR;
     };
 
-    BuildSystemState state = BuildSystemState::IDLE;
+    BuildSystemState state{};
 
     glm::ivec2 getGridPos(const glm::vec2& mousePos) const;
+
+    void setState(BuildingType currentBuildingType, bool building = false);
 
   public:
     BuildSystem(Game* game);
