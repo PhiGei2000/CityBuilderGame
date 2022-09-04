@@ -24,6 +24,24 @@ RenderSystem::RenderSystem(Game* game)
     cameraEntity = registry.view<CameraComponent, TransformationComponent>().front();
 }
 
+void RenderSystem::renderMesh(const MeshComponent& mesh, const glm::mat4& model, const TransformationComponent& cameraTransform, const glm::vec3& cameraFront) const {
+    mesh.material->diffuse->use(0);
+
+    mesh.shader->use();
+    mesh.shader->setInt("material.diffuse", 0);
+    mesh.shader->setFloat("material.ambientStrength", mesh.material->ambient);
+
+    mesh.shader->setVector3("light.color", glm::vec3(0.9f));
+    mesh.shader->setVector3("light.direction", glm::normalize(glm::vec3(1, -1, 1)));
+    mesh.shader->setVector3("viewPos", cameraTransform.position);
+
+    mesh.shader->setVector3("cameraTarget", cameraTransform.position + 5.0f * cameraFront);
+
+    mesh.shader->setMatrix4("model", model);
+
+    mesh.geometry->draw();
+}
+
 void RenderSystem::update(float dt) {
     const CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
@@ -34,53 +52,20 @@ void RenderSystem::update(float dt) {
 
     registry.view<TransformationComponent, MeshComponent>(entt::exclude<BuildMarkerComponent>)
         .each([&](const TransformationComponent& transform, const MeshComponent& mesh) {
-            if (mesh.texture) {
-                mesh.texture->use(0);
-            }
-
-            mesh.shader->use();
-            mesh.shader->setInt("diffuse", 0);
-            mesh.shader->setVector3("light.color", glm::vec3(0.9f));
-            mesh.shader->setVector3("light.direction", glm::normalize(glm::vec3(1, -1, 1)));
-            mesh.shader->setVector3("viewPos", cameraTransform.position);
-
-            mesh.shader->setMatrix4("model", transform.transform);
-
-            mesh.geometry->draw();
+            renderMesh(mesh, transform.transform, cameraTransform, camera.front);
         });
 
     registry.view<TransformationComponent, MultiMeshComponent>(entt::exclude<DebugComponent>)
         .each([&](const TransformationComponent& transform, const MultiMeshComponent& multiMesh) {
             for (const auto& [id, mesh] : multiMesh.meshes) {
-                if (mesh.texture) {
-                    mesh.texture->use(0);
-                }
-
-                mesh.shader->use();
-                mesh.shader->setInt("diffuse", 0);
-                mesh.shader->setVector3("light.color", glm::vec3(0.9f));
-                mesh.shader->setVector3("light.direction", glm::normalize(glm::vec3(1, -1, 1)));
-                mesh.shader->setVector3("viewPos", cameraTransform.position);
-
-                mesh.shader->setMatrix4("model", transform.transform);
-
-                mesh.geometry->draw();
+                renderMesh(mesh, transform.transform, cameraTransform, camera.front);
             }
         });
 
     if (game->getState() == GameState::BUILD_MODE) {
         registry.view<TransformationComponent, MeshComponent, BuildMarkerComponent>()
             .each([&](const TransformationComponent& transform, const MeshComponent& mesh, const BuildMarkerComponent& buildMarker) {
-                mesh.texture->use(0);
-
-                mesh.shader->use();
-                mesh.shader->setInt("diffuse", 0);
-                mesh.shader->setVector3("light.color", glm::vec3(0.9f));
-                mesh.shader->setVector3("light.direction", glm::normalize(glm::vec3(1, 1, 1)));
-
-                mesh.shader->setMatrix4("model", transform.transform);
-
-                mesh.geometry->draw();
+                renderMesh(mesh, transform.transform, cameraTransform, camera.front);
             });
     }
 
@@ -92,21 +77,7 @@ void RenderSystem::update(float dt) {
         const TransformationComponent& transform = registry.get<TransformationComponent>(debugEntity);
 
         for (const auto& [id, mesh] : multiMesh.meshes) {
-            if (mesh.texture) {
-                mesh.texture->use(0);
-            }
-
-            mesh.shader->use();
-            mesh.shader->setInt("diffuse", 0);
-            mesh.shader->setVector3("light.color", glm::vec3(0.9f));
-            mesh.shader->setVector3("light.direction", glm::normalize(glm::vec3(0, 100, 10)));
-            mesh.shader->setVector3("viewPos", cameraTransform.position);
-
-            mesh.shader->setVector3("cameraTarget", cameraTransform.position + 5.0f * camera.front);
-
-            mesh.shader->setMatrix4("model", transform.transform);
-
-            mesh.geometry->draw();
+            renderMesh(mesh, transform.transform, cameraTransform, camera.front);
         }
     }
 }

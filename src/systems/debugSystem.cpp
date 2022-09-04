@@ -12,7 +12,8 @@ void DebugSystem::init() {
     debugEntity = registry.create();
 
     Geometry* axisGeo = new Geometry(VertexAttributes{
-                                         VertexAttribute{3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0}},
+                                         VertexAttribute{3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0}
+    },
                                      GL_POINTS);
 
     const static std::vector<float> vertices = {
@@ -22,13 +23,10 @@ void DebugSystem::init() {
 
     axisGeo->fillBuffers(vertices, {0, 1, 2});
 
-    registry.emplace<MultiMeshComponent>(debugEntity, std::unordered_map<std::string, Mesh>{
-                                                          std::make_pair<std::string, Mesh>("axis", Mesh{std::shared_ptr<Geometry>(axisGeo),
-                                                                                                         std::shared_ptr<Shader>(axisShader),
-                                                                                                         std::shared_ptr<Texture>(nullptr)})/*,
-                                                        std::make_pair<std::string, Mesh>("streets", Mesh{std::shared_ptr<Geometry>(nullptr),
-                                                                                                            std::shared_ptr<Shader>(new Shader("res/shaders/streetDebug.vert", "res/shaders/streetDebug.frag")),
-                                                                                                            std::shared_ptr<Texture>(nullptr)})*/});
+    registry.emplace<MultiMeshComponent>(debugEntity, std::unordered_map<std::string, MeshComponent>{
+                                                          std::make_pair<std::string, MeshComponent>("axis", MeshComponent{std::shared_ptr<Geometry>(axisGeo),
+                                                                                                                           std::shared_ptr<Shader>(axisShader),
+                                                                                                                           std::shared_ptr<Material>(nullptr)})});
     registry.emplace<DebugComponent>(debugEntity);
     registry.emplace<TransformationComponent>(debugEntity, glm::vec3{0}, glm::quat(), glm::vec3{1}).calculateTransform();
 }

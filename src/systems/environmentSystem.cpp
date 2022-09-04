@@ -27,7 +27,7 @@ EnvironmentSystem::EnvironmentSystem(Game* game)
 
 void EnvironmentSystem::init() {
     std::shared_ptr<Geometry> treeGeometry = resourceManager.getResource<Geometry>("TREE_GEOMETRY");
-    std::shared_ptr<Texture> treeTexture = resourceManager.getResource<Texture>("TREE_TEXTURE");
+    std::shared_ptr<Material> treeMaterial = resourceManager.getResource<Material>("TREE_MATERIAL");
     std::shared_ptr<Shader> meshShader = resourceManager.getResource<Shader>("MESH_SHADER");
 
     // spawn trees
@@ -38,7 +38,7 @@ void EnvironmentSystem::init() {
         float angle = (float)rand() / static_cast<float>(RAND_MAX) * 0.5f * M_PI;
         glm::vec3 scale = glm::vec3((float)rand() / static_cast<float>(RAND_MAX) * 0.5 + 1.5f);
 
-        registry.emplace<MeshComponent>(entity, treeGeometry, meshShader, treeTexture);
+        registry.emplace<MeshComponent>(entity, treeGeometry, meshShader, treeMaterial);
         registry.emplace<TransformationComponent>(entity,
                                                   position,
                                                   glm::quat(cos(angle * 0.5f), 0, sin(angle * 0.5f), 0),

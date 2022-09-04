@@ -1,10 +1,16 @@
 #pragma once
-#include "rendering/mesh.hpp"
+#include "rendering/geometry.hpp"
+#include "rendering/shader.hpp"
+#include "rendering/material.hpp"
 
 #include <string>
 
-typedef Mesh MeshComponent;
+struct MeshComponent {
+    std::shared_ptr<Geometry> geometry;
+    std::shared_ptr<Shader> shader;
+    std::shared_ptr<Material> material;
+};
 
 struct MultiMeshComponent {
-    std::unordered_map<std::string, Mesh> meshes;
+    std::unordered_map<std::string, MeshComponent> meshes;    
 };

@@ -1,6 +1,7 @@
 #include "resources/resourceManager.hpp"
 
 #include "resources/streetPack.hpp"
+#include "rendering/material.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -10,7 +11,6 @@
 #include <pugixml.hpp>
 
 using namespace pugi;
-
 
 ResourceManager::ResourceManager(const std::string& resourceDir) {
     loadResources(resourceDir);
@@ -81,14 +81,23 @@ void ResourceManager::loadResources(const std::string& resourceDir) {
             bool rgba = resourceNode.attribute("rgba").as_bool();
             loadResource<Texture>(id, filename, rgba);
         }
-        else if (type == "streetPack") {
-            const std::string& shaderId = resourceNode.child("shader").attribute("id").as_string();
-            const std::string& textureId = resourceNode.child("texture").attribute("id").as_string();
+        else if (type == "material") {
+            const std::string& diffuse = resourceNode.attribute("diffuse").as_string();
+            float ambientStrenght = resourceNode.attribute("ambientStrenght").as_float();
+            float specularStrenght = resourceNode.attribute("specularStrenght").as_float();
+            float shininess = resourceNode.attribute("shininess").as_float();
 
-            static struct {
-                StreetType type;
-                std::string filename;
-            } filenames[] = {
+            ResourcePtr<Texture> diffuseTexture = getResource<Texture>(diffuse);
+
+            Material* material = new Material{diffuseTexture, ambientStrenght, specularStrenght, shininess};
+
+            resources[id] = ResourceHolder{std::type_index(typeid(Material)), ResourcePtr<Material>(material)};
+        }
+        else if (type == "streetPack") {
+            const std::string& shaderId = resourceNode.attribute("shader").as_string();
+            const std::string& materialId = resourceNode.attribute("material").as_string();
+
+            static std::pair<StreetType, std::string> filenames[] = {
                 {StreetType::NOT_CONNECTED, "street_not_connected.obj"},
                 {          StreetType::END,           "street_end.obj"},
                 {        StreetType::CURVE,         "street_curve.obj"},
@@ -105,7 +114,7 @@ void ResourceManager::loadResources(const std::string& resourceDir) {
             }
 
             pack->shader = getResource<Shader>(shaderId);
-            pack->texture = getResource<Texture>(textureId);
+            pack->material = getResource<Material>(materialId);
 
             resources[id] = ResourceHolder{std::type_index(typeid(StreetPack)), ResourcePtr<StreetPack>(pack)};
         }
@@ -130,3 +139,4 @@ template ResourcePtr<Texture> ResourceManager::getResource<Texture>(const std::s
 template ResourcePtr<Shader> ResourceManager::getResource<Shader>(const std::string&) const;
 template ResourcePtr<Geometry> ResourceManager::getResource<Geometry>(const std::string&) const;
 template ResourcePtr<StreetPack> ResourceManager::getResource<StreetPack>(const std::string&) const;
+template ResourcePtr<Material> ResourceManager::getResource<Material>(const std::string&) const;

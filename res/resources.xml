@@ -20,9 +20,13 @@
     <resource type="texture" id="STREET_TEXTURE" filename="textures/street.png" />
     <resource type="texture" id="TREE_TEXTURE" filename="textures/tree.png" />
 
+    <!-- materials -->
+    <resource type="material" id="GROUND_MATERIAL" diffuse="GROUND_TEXTURE" ambientStrenght="0.75" shininess="8.0" specularStrenght="0.5" />
+    <resource type="material" id="TREE_MATERIAL" diffuse="TREE_TEXTURE" ambientStrenght="0.75" shininess="8.0" specularStrenght="0.5" />
+    <resource type="material" id="STREET_MATERIAL" diffuse="STREET_TEXTURE" ambientStrenght="0.75" shininess="8.0" specularStrenght="0.5" />
+    <resource type="material" id="CAR_MATERIAL" diffuse="CAR_TEXTURE" ambientStrenght="0.75" shininess="8.0" specularStrenght="0.5" />
+    <resource type="material" id="BUILDMARKER_MATERIAL" diffuse="BUILDMARKER_TEXTURE" ambientStrenght="0.75" shininess="8.0" specularStrenght="0.5" />
+
     <!-- streets -->
-    <resource type="streetPack" id="BASIC_STREETS" filename="models/basic_streets/">
-        <shader id="MESH_SHADER" />
-        <texture id="STREET_TEXTURE" />
-    </resource>
+    <resource type="streetPack" id="BASIC_STREETS" filename="models/basic_streets/" shader="MESH_SHADER" material="STREET_MATERIAL" />            
 </resources>

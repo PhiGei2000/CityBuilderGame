@@ -28,7 +28,7 @@ void Game::init() {
     registry.emplace<MeshComponent>(groundEntity,
                                     resourceManager.getResource<Geometry>("GROUND_GEOMETRY"),
                                     resourceManager.getResource<Shader>("MESH_SHADER"),
-                                    resourceManager.getResource<Texture>("GROUND_TEXTURE"));
+                                    resourceManager.getResource<Material>("GROUND_MATERIAL"));
 
     registry.emplace<TransformationComponent>(groundEntity, glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
 }

@@ -5,6 +5,7 @@
 #include "rendering/geometryData.hpp"
 #include "rendering/shader.hpp"
 #include "rendering/texture.hpp"
+#include "rendering/material.hpp"
 
 #include "unordered_map"
 
@@ -15,5 +16,5 @@ struct StreetPack {
     // float pathwayWidth;
 
     ResourcePtr<Shader> shader;
-    ResourcePtr<Texture> texture;
+    ResourcePtr<Material> material;
 };
