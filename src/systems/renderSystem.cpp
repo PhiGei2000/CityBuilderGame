@@ -72,11 +72,7 @@ void RenderSystem::onCameraUpdated(CameraUpdateEvent& event) const {
     // camera position
     glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), sizeof(glm::vec3), glm::value_ptr(cameraTransform.position));
     // camera target
-    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4) + sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(cameraTarget));
-
-    // print variables
-    std::cout << "Camera pos: " << cameraTransform.position.x << ", " << cameraTransform.position.y << ", " << cameraTransform.position.z << "\t";
-    std::cout << "Camera target: " << cameraTarget.x << ", " << cameraTarget.y << ", " << cameraTarget.z << std::endl;
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4) + sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(cameraTarget));    
 }
 
 void RenderSystem::onEntityMoved(EntityMoveEvent& event) const {

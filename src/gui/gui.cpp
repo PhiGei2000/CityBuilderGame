@@ -155,15 +155,17 @@ void Gui::handleMouseButtonEvent(const MouseButtonEvent& e) {
 
 void Gui::handleKeyEvent(const KeyEvent& e) {
     if (e.action == GLFW_PRESS) {
-        switch (e.key) {
-        case GLFW_KEY_ESCAPE:
-            if (!navigation.empty()) {
-                popMenu();
+        if (app->getGameState() == GameState::RUNNING) {
+            switch (e.key) {
+            case GLFW_KEY_ESCAPE:
+                if (!navigation.empty()) {
+                    popMenu();
+                }
+                else {
+                    showMenu(GameMenus::PAUSE_MENU);
+                }
+                break;
             }
-            else {
-                showMenu(GameMenus::PAUSE_MENU);
-            }
-            break;
         }
     }
 }

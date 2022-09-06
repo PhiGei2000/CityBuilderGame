@@ -10,6 +10,8 @@ class DebugSystem : public System {
   protected:    
     unsigned int vbo, vao;
 
+    Geometry* axisGeo;
+
     entt::entity cameraEntity;
     entt::entity debugEntity;
 
@@ -17,6 +19,7 @@ class DebugSystem : public System {
 
   public:
     DebugSystem(Game* game);
+    ~DebugSystem();
 
     void update(float dt) override;
 

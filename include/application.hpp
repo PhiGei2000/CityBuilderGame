@@ -42,6 +42,10 @@ class Application {
     inline void setGameState(GameState state) {
         game->setState(state);
     }
+    
+    inline GameState getGameState() const {
+      return game->getState();
+    }
 
     GLFWwindow* getWindow() const;
 

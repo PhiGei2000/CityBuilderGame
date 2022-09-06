@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 
 struct MouseButtonEvent;
+struct KeyEvent;
 
 class BuildSystem : public System {
   protected:
@@ -34,4 +35,6 @@ class BuildSystem : public System {
     virtual void update(float dt) override;
 
     void handleMouseButtonEvent(const MouseButtonEvent& e);
+
+    void handleKeyEvent(const KeyEvent& e);
 };

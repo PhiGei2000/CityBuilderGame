@@ -9,7 +9,7 @@ void DebugSystem::init() {
     cameraEntity = registry.view<CameraComponent>().front();
     debugEntity = registry.create();
 
-    Geometry* axisGeo = new Geometry(VertexAttributes{
+    axisGeo = new Geometry(VertexAttributes{
                                          VertexAttribute{3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0}
     },
                                      GL_POINTS);
@@ -34,6 +34,10 @@ DebugSystem::DebugSystem(Game* game)
     init();
 
     eventDispatcher.sink<KeyEvent>().connect<&DebugSystem::handleKeyEvent>(*this);
+}
+
+DebugSystem::~DebugSystem() {
+    delete axisGeo;
 }
 
 void DebugSystem::update(float dt) {

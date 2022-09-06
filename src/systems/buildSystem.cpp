@@ -15,6 +15,9 @@ BuildSystem::BuildSystem(Game* game)
 
     eventDispatcher.sink<MouseButtonEvent>()
         .connect<&BuildSystem::handleMouseButtonEvent>(*this);
+
+    eventDispatcher.sink<KeyEvent>()
+        .connect<&BuildSystem::handleKeyEvent>(*this);
 }
 
 void BuildSystem::init() {
@@ -40,7 +43,7 @@ void BuildSystem::update(float dt) {
 
         // display build marker and update the build marker position
         buildMarkerComponent.visible = true;
-        
+
         if (gridPos != buildMarkerComponent.pos) {
             buildMarkerComponent.pos = gridPos;
             transform.position = glm::vec3(gridPos.x * Configuration::gridSize, 0.1f, gridPos.y * Configuration::gridSize);
@@ -92,6 +95,23 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
 
                 BuildEvent event{buildMarker.pos, selectedType};
                 game->raiseEvent(event);
+            }
+        }
+    }
+}
+
+void BuildSystem::handleKeyEvent(const KeyEvent& e) {
+    if (e.action == GLFW_PRESS) {
+        GameState state = game->getState();
+
+        if (e.key == GLFW_KEY_B) {
+            if (state == GameState::RUNNING) {
+                game->setState(GameState::BUILD_MODE);                
+            }
+        }
+        else if (e.key == GLFW_KEY_ESCAPE) {
+            if (state == GameState::BUILD_MODE) {
+                game->setState(GameState::RUNNING);                
             }
         }
     }

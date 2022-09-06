@@ -30,7 +30,7 @@ class Game {
 
     void init();
 
-    GameState state;
+    GameState state = GameState::RUNNING;
 
   public:
     entt::entity sun;
