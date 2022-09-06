@@ -14,12 +14,10 @@ void CameraComponent::calculateMatrices(const TransformationComponent& transform
 }
 
 void CameraComponent::calculateVectors() {
-    glm::vec3 direction = glm::vec3(
+    front = glm::vec3(
         cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
         sin(glm::radians(pitch)),
         sin(glm::radians(yaw)) * cos(glm::radians(pitch)));
-
-    front = glm::normalize(direction);
 
     constexpr glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
     right = glm::normalize(glm::cross(front, up));

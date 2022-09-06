@@ -35,7 +35,7 @@ template<>
 void ResourceManager::loadResource<Shader>(const std::string& id, const std::string& filename) {
     const std::string& vertexPath = filename + ".vert";
     const std::string& fragmentPath = filename + ".frag";
-    const std::string& geometryPath = filename + ".geo";
+    const std::string& geometryPath = filename + ".geom";
 
     ResourcePtr<Shader> shader;
     if (std::filesystem::exists(geometryPath)) {

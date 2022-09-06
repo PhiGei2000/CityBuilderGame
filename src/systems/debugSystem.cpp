@@ -6,8 +6,6 @@
 #include "GLFW/glfw3.h"
 
 void DebugSystem::init() {
-    Shader* axisShader = new Shader("res/shaders/axis.vert", "res/shaders/axis.frag", "res/shaders/axis.geo");
-
     cameraEntity = registry.view<CameraComponent>().front();
     debugEntity = registry.create();
 
@@ -25,7 +23,7 @@ void DebugSystem::init() {
 
     registry.emplace<MultiMeshComponent>(debugEntity, std::unordered_map<std::string, MeshComponent>{
                                                           std::make_pair<std::string, MeshComponent>("axis", MeshComponent{std::shared_ptr<Geometry>(axisGeo),
-                                                                                                                           std::shared_ptr<Shader>(axisShader),
+                                                                                                                           resourceManager.getResource<Shader>("AXIS_SHADER"),
                                                                                                                            std::shared_ptr<Material>(nullptr)})});
     registry.emplace<DebugComponent>(debugEntity);
     registry.emplace<TransformationComponent>(debugEntity, glm::vec3{0}, glm::quat(), glm::vec3{1}).calculateTransform();

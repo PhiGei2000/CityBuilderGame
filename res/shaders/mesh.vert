@@ -10,7 +10,9 @@ out vec3 Normal;
 layout(std140, binding = 1) uniform Camera {
     mat4 view;
     mat4 projection;
+
     vec3 viewPos;
+    vec3 cameraTarget;
 };
 
 uniform mat4 model;

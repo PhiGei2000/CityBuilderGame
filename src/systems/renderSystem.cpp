@@ -15,13 +15,17 @@ void RenderSystem::init() {
     // camera buffer
     glGenBuffers(1, &uboCamera);
     glBindBuffer(GL_UNIFORM_BUFFER, uboCamera);
-    glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4) + 2 * sizeof(glm::vec3), NULL, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4) + 2 * sizeof(glm::vec4), NULL, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    // sun light buffer    
+    entt::entity camera = registry.view<CameraComponent, TransformationComponent>().front();
+    CameraUpdateEvent e{camera, true, true, true};
+    onCameraUpdated(e);
+
+    // sun light buffer
     glGenBuffers(1, &uboLight);
     glBindBuffer(GL_UNIFORM_BUFFER, uboLight);
-    glBufferData(GL_UNIFORM_BUFFER, 4 * sizeof(glm::vec3), NULL, GL_STATIC_DRAW);        
+    glBufferData(GL_UNIFORM_BUFFER, 4 * sizeof(glm::vec3), NULL, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
@@ -31,21 +35,21 @@ RenderSystem::RenderSystem(Game* game)
 
     eventDispatcher.sink<CameraUpdateEvent>()
         .connect<&RenderSystem::onCameraUpdated>(*this);
+
+    eventDispatcher.sink<EntityMoveEvent>()
+        .connect<&RenderSystem::onEntityMoved>(*this);
 }
 
 void RenderSystem::renderMesh(const MeshComponent& mesh, const glm::mat4& model) const {
-    mesh.material->diffuse->use(0);
-
     mesh.shader->use();
-    mesh.shader->setInt("material.diffuse", 0);
-    mesh.shader->setFloat("material.ambientStrength", mesh.material->ambient);
-    mesh.shader->setFloat("material.specularStrenght", mesh.material->specularStrenght);
-    mesh.shader->setFloat("material.shininess", mesh.material->shininess);
 
-    mesh.shader->setVector3("light.color", glm::vec3(0.9f));
-    mesh.shader->setVector3("light.direction", glm::normalize(glm::vec3(1, -1, 1)));
+    if (mesh.material) {
+        mesh.material->diffuse->use(0);
 
-    // mesh.shader->setVector3("cameraTarget", cameraTransform.position + 5.0f * cameraFront);
+        mesh.shader->setInt("material.diffuse", 0);
+        mesh.shader->setFloat("material.specularStrenght", mesh.material->specularStrenght);
+        mesh.shader->setFloat("material.shininess", mesh.material->shininess);
+    }
 
     mesh.shader->setMatrix4("model", model);
 
@@ -57,19 +61,37 @@ void RenderSystem::onCameraUpdated(CameraUpdateEvent& event) const {
     const CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
 
-    // set camera buffer
+    const glm::vec3& cameraTarget = cameraTransform.position + camera.front;
+
+    // bind camera buffer to location 1
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboCamera);
+    // view matrix
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(camera.viewMatrix));
+    // projection matrix
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(camera.projectionMatrix));
+    // camera position
     glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), sizeof(glm::vec3), glm::value_ptr(cameraTransform.position));
-    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4) + sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(camera.front));
+    // camera target
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4) + sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(cameraTarget));
+
+    // print variables
+    std::cout << "Camera pos: " << cameraTransform.position.x << ", " << cameraTransform.position.y << ", " << cameraTransform.position.z << "\t";
+    std::cout << "Camera target: " << cameraTarget.x << ", " << cameraTarget.y << ", " << cameraTarget.z << std::endl;
 }
 
 void RenderSystem::onEntityMoved(EntityMoveEvent& event) const {
-    
+    if (event.entity == game->sun) {
+        const LightComponent& sunLight = registry.get<LightComponent>(game->sun);
+
+        glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboLight);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec3), glm::value_ptr(sunLight.direction));
+        glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(sunLight.ambient));
+        glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(sunLight.diffuse));
+        glBufferSubData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(sunLight.specular));
+    }
 }
 
-void RenderSystem::update(float dt) {    
+void RenderSystem::update(float dt) {
     registry.view<TransformationComponent, MeshComponent>(entt::exclude<BuildMarkerComponent>)
         .each([&](const TransformationComponent& transform, const MeshComponent& mesh) {
             renderMesh(mesh, transform.transform);

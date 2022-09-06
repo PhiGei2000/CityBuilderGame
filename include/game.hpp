@@ -33,10 +33,12 @@ class Game {
     GameState state;
 
   public:
+    entt::entity sun;
+
     Game(Application* app);
 
     bool debugMode = false;
-    
+
     entt::registry& getRegistry();
     entt::dispatcher& getEventDispatcher();
     ResourceManager& getResourceManager();

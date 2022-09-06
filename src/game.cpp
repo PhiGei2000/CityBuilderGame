@@ -17,7 +17,7 @@ Game::Game(Application* app)
 void Game::init() {
     // init systems
     systems.push_back(new CameraSystem(this));
-    systems.push_back(new BuildSystem(this));    
+    systems.push_back(new BuildSystem(this));
     systems.push_back(new EnvironmentSystem(this));
     systems.push_back(new PhysicsSystem(this));
     systems.push_back(new DebugSystem(this));
@@ -31,6 +31,16 @@ void Game::init() {
                                     resourceManager.getResource<Material>("GROUND_MATERIAL"));
 
     registry.emplace<TransformationComponent>(groundEntity, glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
+
+    sun = registry.create();
+    registry.emplace<LightComponent>(sun,
+        glm::vec3{0, -1, 0},
+        glm::vec3(0.5f),
+        glm::vec3(0.9f),
+        glm::vec3(0.4f));
+
+    EntityMoveEvent moveEvent{sun};
+    raiseEvent(moveEvent);
 }
 
 entt::registry& Game::getRegistry() {

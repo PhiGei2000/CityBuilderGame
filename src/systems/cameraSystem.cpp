@@ -7,7 +7,7 @@
 #include <iostream>
 
 void CameraSystem::init() {
-    entt::entity cameraEntity = registry.create();
+    cameraEntity = registry.create();
 
     const TransformationComponent& transform = registry.emplace<TransformationComponent>(cameraEntity, glm::vec3(0.0f, 10.0f, 0.0f), glm::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
     registry.emplace<CameraComponent>(cameraEntity).calculateMatrices(transform);
@@ -17,7 +17,6 @@ CameraSystem::CameraSystem(Game* game)
     : System(game) {
 
     init();
-    cameraEntity = registry.view<CameraComponent, TransformationComponent>().front();
 
     eventDispatcher.sink<FramebufferSizeEvent>()
         .connect<&CameraSystem::onFramebufferSize>(*this);
