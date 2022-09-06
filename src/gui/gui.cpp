@@ -33,6 +33,12 @@ void Gui::init() {
     _continue->constraints.width = RelativeConstraint(0.9f);
     mainMenuPanel->addChild(_continue);
 
+    Label* options = new Label("mainMenu_options", this, colors::anthraziteGrey, "Options");
+    options->constraints.x = CenterConstraint();
+    options->constraints.height = RelativeConstraint(0.5f);
+    options->constraints.width = RelativeConstraint(0.9f);
+    mainMenuPanel->addChild(options);
+
     Label* saveAndExit = new Label("mainMenu_saveExit", this, colors::anthraziteGrey, "Save and Exit");
     saveAndExit->constraints.x = CenterConstraint();
     saveAndExit->constraints.height = RelativeConstraint(0.5f);
