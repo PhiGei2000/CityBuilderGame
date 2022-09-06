@@ -5,11 +5,11 @@
 #include <GL/glew.h>
 
 Icon::Icon(const std::string& id, Gui* gui, Texture* texture, const glm::vec4& backgroundColor)
-    : GuiElement(id, gui, backgroundColor), texture(texture) {
+    : Widget(id, gui, backgroundColor), texture(texture) {
 }
 
 void Icon::render() const {
-    GuiElement::render();
+    Widget::render();
 
     glActiveTexture(GL_TEXTURE0);
 

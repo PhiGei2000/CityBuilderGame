@@ -1,10 +1,10 @@
 #pragma once
-#include "guiElement.hpp"
+#include "widget.hpp"
 #include "gui/colors.hpp"
 
 #include "rendering/texture.hpp"
 
-class Icon : public GuiElement {
+class Icon : public Widget {
   protected:
     Texture* texture;
 

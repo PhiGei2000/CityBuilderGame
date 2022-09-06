@@ -1,30 +1,74 @@
-#include "gui/components/guiElement.hpp"
+#include "gui/components/widget.hpp"
 
 #include "gui/gui.hpp"
 
+#include "events/mouseEvents.hpp"
+
 #include <iostream>
 
-GuiElement::GuiElement(const std::string& id, Gui* gui, const glm::vec4& backgroundColor)
+Widget::Widget(const std::string& id, Gui* gui, const glm::vec4& backgroundColor)
     : id{id}, gui{gui}, backgroundColor{backgroundColor} {
 }
 
-void GuiElement::render() const {
+void Widget::handleMouseButtonEvent(const MouseButtonEvent& event) {
+}
+
+void Widget::handleMouseMoveEvent(const MouseMoveEvent& event) {
+    if (!visible)
+        return;
+
+    const Rectangle& area = getBox();
+
+    // mouse enter
+    if (area.pointInside(event.lastX, event.lastY)) {
+        if (area.pointInside(event.x, event.y)) {
+            onMouseEnter.invoke(event);
+        }
+    }
+
+    // mouse leave
+    else if (area.pointInside(event.x, event.y)) {
+        if (area.pointInside(event.lastX, event.lastY)) {
+            onMouseLeave.invoke(event);
+        }
+    }
+}
+
+void Widget::show() {
+    visible = true;
+}
+
+void Widget::hide() {
+    visible = false;
+}
+
+bool Widget::isVisible() const {
+    return visible;
+}
+
+void Widget::render() const {
+    if (!visible) {
+        return;
+    }
+
     if (!constraints.valid()) {
         return;
     }
 
     Rectangle area = getBox();
 
-    Shader* guiShader = gui->guiShader;
+    Shader* guiShader = gui->getShader();
     guiShader->setVector4("color", backgroundColor);
 
-    gui->quad.draw(area.x, area.y, area.width, area.height);
+    const RenderQuad& quad = gui->getRenderQuad();
+    quad.draw(area.x, area.y, area.width, area.height);
 }
 
-Rectangle GuiElement::getBox() const {
+Rectangle Widget::getBox() const {
     Rectangle parentBox;
     if (parent == nullptr) {
-        parentBox = Rectangle{0, 0, gui->width, gui->height};
+        // friend class Widget
+        parentBox = gui->getBox();
     }
     else {
         parentBox = parent->getBox();
@@ -87,10 +131,12 @@ Rectangle GuiElement::getBox() const {
     return Rectangle{x, y, width, height};
 }
 
-const GuiElement* GuiElement::getElementAt(float x, float y) const {
-    const Rectangle& area = getBox();
-    if (area.pointInside(x, y)) {
-        return this;
+const Widget* Widget::getElementAt(float x, float y) const {
+    if (visible) {
+        const Rectangle& area = getBox();
+        if (area.pointInside(x, y)) {
+            return this;
+        }
     }
 
     return nullptr;

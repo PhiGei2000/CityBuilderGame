@@ -1,9 +1,12 @@
 #include "gui/gui.hpp"
 
-#include "gui/components/guiElement.hpp"
 #include "gui/components/icon.hpp"
 #include "gui/components/label.hpp"
 #include "gui/components/stackPanel.hpp"
+#include "gui/components/widget.hpp"
+
+#include "gui/menus/gamePauseMenu.hpp"
+#include "gui/menus/optionsMenu.hpp"
 
 #include "events/keyEvent.hpp"
 #include "events/mouseEvents.hpp"
@@ -23,46 +26,29 @@ Gui::Gui(Application* app)
 }
 
 void Gui::init() {
-    StackPanel* mainMenuPanel = new StackPanel("mainMenu", this, StackPanel::StackOrientation::COLUMN, colors::transparent);
-    mainMenuPanel->constraints.width = RelativeConstraint(0.6);
-    mainMenuPanel->constraints.height = RelativeConstraint(0.5);
+    gamePauseMenu = new GamePauseMenu(this);
+    optionsMenu = new OptionsMenu(this);
 
-    Label* _continue = new Label("mainMenu_continue", this, colors::anthraziteGrey, "Back to game");
-    _continue->constraints.x = CenterConstraint();
-    _continue->constraints.height = RelativeConstraint(0.5f);
-    _continue->constraints.width = RelativeConstraint(0.9f);
-    mainMenuPanel->addChild(_continue);
+    // StackPanel* toolboxPanel = new StackPanel("toolbox", this, StackPanel::StackOrientation::ROW, colors::transparent);
+    // toolboxPanel->constraints.x = AbsoluteConstraint(50);
+    // toolboxPanel->constraints.y = AbsoluteConstraint(50);
+    // toolboxPanel->constraints.height = AbsoluteConstraint(48);
 
-    Label* options = new Label("mainMenu_options", this, colors::anthraziteGrey, "Options");
-    options->constraints.x = CenterConstraint();
-    options->constraints.height = RelativeConstraint(0.5f);
-    options->constraints.width = RelativeConstraint(0.9f);
-    mainMenuPanel->addChild(options);
+    // Texture* streetBuilderIconTexture = new Texture("res/gui/streetBuilder_icon.png", GL_RGBA);
+    // Icon* streetBuilder = new Icon("toolbox_streetBuilder", this, streetBuilderIconTexture, colors::anthraziteGrey);
+    // streetBuilder->constraints.x = AbsoluteConstraint(0);
+    // streetBuilder->constraints.y = AbsoluteConstraint(0);
+    // streetBuilder->constraints.height = AbsoluteConstraint(48);
+    // streetBuilder->constraints.width = AspectConstraint(1);
+    // toolboxPanel->addChild(streetBuilder);
 
-    Label* saveAndExit = new Label("mainMenu_saveExit", this, colors::anthraziteGrey, "Save and Exit");
-    saveAndExit->constraints.x = CenterConstraint();
-    saveAndExit->constraints.height = RelativeConstraint(0.5f);
-    saveAndExit->constraints.width = RelativeConstraint(0.9f);
-    mainMenuPanel->addChild(saveAndExit);
-
-    mainMenu = mainMenuPanel;
-
-    StackPanel* toolboxPanel = new StackPanel("toolbox", this, StackPanel::StackOrientation::ROW, colors::transparent);
-    toolboxPanel->constraints.x = AbsoluteConstraint(50);
-    toolboxPanel->constraints.y = AbsoluteConstraint(50);
-    toolboxPanel->constraints.height = AbsoluteConstraint(48);
-
-    Texture* streetBuilderIconTexture = new Texture("res/gui/streetBuilder_icon.png", GL_RGBA);
-    Icon* streetBuilder = new Icon("toolbox_streetBuilder", this, streetBuilderIconTexture, colors::anthraziteGrey);
-    streetBuilder->constraints.x = AbsoluteConstraint(0);
-    streetBuilder->constraints.y = AbsoluteConstraint(0);
-    streetBuilder->constraints.height = AbsoluteConstraint(48);
-    streetBuilder->constraints.width = AspectConstraint(1);
-    toolboxPanel->addChild(streetBuilder);
-
-    toolbox = toolboxPanel;
+    // toolbox = toolboxPanel;
 
     textRenderer.init();
+}
+
+Application* Gui::getApp() const {
+    return app;
 }
 
 Shader* Gui::getShader() const {
@@ -80,6 +66,10 @@ void Gui::setScreenSize(float width, float height) {
     textRenderer.setScreenSize(width, height);
 }
 
+Rectangle Gui::getBox() const {
+    return Rectangle{0, 0, width, height};
+}
+
 void Gui::render() const {
     guiShader->use();
 
@@ -94,76 +84,56 @@ void Gui::render() const {
     guiShader->setBool("flipV", false);
     guiShader->setInt("tex", 0);
 
-    if (mainMenuVisible) {
-        mainMenu->render();
-    }
-
-    if (toolboxVisible) {
-        toolbox->render();
-    }
+    gamePauseMenu->render();
 
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 }
 
-const GuiElement* Gui::getElement(float x, float y) const {
-    const GuiElement* element = nullptr;
+const Widget* Gui::getElement(float x, float y) const {
+    const Widget* element = nullptr;
 
-    if (mainMenuVisible) {
-        element = mainMenu->getElementAt(x, height - y);
-    }    
-
-    if (element == nullptr && toolboxVisible) {
-        element = toolbox->getElementAt(x, height - y);
+    if (gamePauseMenu->isVisible()) {
+        element = gamePauseMenu->getElementAt(x, height - y);
     }
+
+    // if (element == nullptr && toolboxVisible) {
+    //     element = toolbox->getElementAt(x, height - y);
+    // }
 
     return element;
 }
 
 void Gui::handleMouseButtonEvent(const MouseButtonEvent& e) {
-    if (e.action != GLFW_PRESS) {
-        return;
-    }
+    MouseButtonEvent event(e);
+    event.y = height - e.y;
 
-    const GuiElement* element = getElement(e.x, e.y);
-    if (element == nullptr) {
-        return;
-    }
-
-    if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
-        if (mainMenuVisible) {
-            if (element->id == "mainMenu_saveExit") {
-                // stop the application
-                app->stop();
-            }
-            else if (element->id == "mainMenu_continue") {
-                // close gui
-                mainMenuVisible = false;
-                app->setGameState(GameState::RUNNING);
-            }
-        }
-
-        if (toolboxVisible) {
-            if (element->id == "toolbox_streetBuilder") {
-                app->setGameState(GameState::BUILD_MODE);
-            }
-        }
-    }
+    gamePauseMenu->handleMouseButtonEvent(event);
+    optionsMenu->handleMouseButtonEvent(event);
 }
 
 void Gui::handleKeyEvent(const KeyEvent& e) {
     if (e.action == GLFW_PRESS) {
         switch (e.key) {
         case GLFW_KEY_ESCAPE:
-            if (mainMenuVisible) {
-                mainMenuVisible = false;
+            if (gamePauseMenu->isVisible()) {
+                gamePauseMenu->hide();
                 app->setGameState(GameState::RUNNING);
             }
             else {
-                mainMenuVisible = true;
+                gamePauseMenu->show();
                 app->setGameState(GameState::PAUSED);
             }
             break;
         }
     }
+}
+
+void Gui::handleMouseMoveEvent(const MouseMoveEvent& e) {
+    MouseMoveEvent event(e);
+    event.y = height - e.y;
+    event.lastY = height - e.lastY;
+
+    gamePauseMenu->handleMouseMoveEvent(event);
+    optionsMenu->handleMouseMoveEvent(event);
 }

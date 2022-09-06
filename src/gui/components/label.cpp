@@ -2,11 +2,15 @@
 #include "gui/gui.hpp"
 
 Label::Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text)
-    : GuiElement(id, gui, backgroundColor), text(text) {
+    : Widget(id, gui, backgroundColor), text(text) {
 }
 
 void Label::render() const {
-    GuiElement::render();
+    if (!visible) {
+        return;
+    }
+    
+    Widget::render();
 
     const Rectangle& box = getBox();
     Shader* guiShader = gui->getShader();
