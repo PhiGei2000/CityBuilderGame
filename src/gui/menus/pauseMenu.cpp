@@ -1,11 +1,11 @@
-#include "gui/menus/gamePauseMenu.hpp"
+#include "gui/menus/pauseMenu.hpp"
 
 #include "gui/components/button.hpp"
 #include "gui/gui.hpp"
 
 #include "application.hpp"
 
-GamePauseMenu::GamePauseMenu(Gui* gui) 
+PauseMenu::PauseMenu(Gui* gui) 
     : StackPanel("game_menu", gui, StackOrientation::COLUMN, colors::transparent){
         
     constraints.width = RelativeConstraint(0.6);
@@ -24,17 +24,31 @@ GamePauseMenu::GamePauseMenu(Gui* gui)
     options->constraints.x = CenterConstraint();
     options->constraints.height = RelativeConstraint(0.5f);
     options->constraints.width = RelativeConstraint(0.9f);
+    options->onClick += [&](const MouseButtonEvent& e) {
+        this->onOptionsButtonClick(e);
+    };
     addChild(options);
 
     Button* saveAndExit = new Button("mainMenu_saveExit", gui, colors::anthraziteGrey, "Save and Exit");
     saveAndExit->constraints.x = CenterConstraint();
     saveAndExit->constraints.height = RelativeConstraint(0.5f);
     saveAndExit->constraints.width = RelativeConstraint(0.9f);
+    saveAndExit->onClick += [&](const MouseButtonEvent& e){
+        this->onExitButtonClick(e);
+    };
     addChild(saveAndExit);
 }
 
-void GamePauseMenu::onResumeButtonClick(const MouseButtonEvent& event) {
-    hide();
+void PauseMenu::onResumeButtonClick(const MouseButtonEvent& event) {
+    gui->showMenu(GameMenus::NONE);
+}
 
-    gui->getApp()->setGameState(GameState::RUNNING);
+void PauseMenu::onOptionsButtonClick(const MouseButtonEvent& event) {
+    gui->showMenu(GameMenus::OPTIONS_MENU);
+}
+
+void PauseMenu::onExitButtonClick(const MouseButtonEvent& event) {
+    // TODO: Add save progress
+    
+    gui->getApp()->stop();
 }

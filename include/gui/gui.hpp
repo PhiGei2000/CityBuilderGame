@@ -5,14 +5,23 @@
 #include "rendering/shader.hpp"
 #include "rendering/textRenderer.hpp"
 
+#include <stack>
+
 class Application;
 
-class GamePauseMenu;
+class PauseMenu;
 class OptionsMenu;
 
 struct KeyEvent;
 struct MouseButtonEvent;
 struct MouseMoveEvent;
+
+enum class GameMenus {
+  NONE,
+  MAIN_MENU,
+  PAUSE_MENU,
+  OPTIONS_MENU
+};
 
 class Gui {
   private:
@@ -21,8 +30,10 @@ class Gui {
     RenderQuad quad;
     float width, height;
 
-    GamePauseMenu* gamePauseMenu;
+    PauseMenu* pauseMenu;
     OptionsMenu* optionsMenu;
+
+    std::stack<Widget*> navigation;    
 
     Shader* guiShader = new Shader("res/shaders/renderQuad.vert", "res/shaders/renderQuad.frag");
 
@@ -32,6 +43,9 @@ class Gui {
     Gui(Application* app);
 
     TextRenderer textRenderer;
+
+    void showMenu(GameMenus gameMenu);
+    void popMenu();
 
     Application* getApp() const;
     Shader* getShader() const;

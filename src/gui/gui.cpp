@@ -5,8 +5,8 @@
 #include "gui/components/stackPanel.hpp"
 #include "gui/components/widget.hpp"
 
-#include "gui/menus/gamePauseMenu.hpp"
 #include "gui/menus/optionsMenu.hpp"
+#include "gui/menus/pauseMenu.hpp"
 
 #include "events/keyEvent.hpp"
 #include "events/mouseEvents.hpp"
@@ -26,7 +26,7 @@ Gui::Gui(Application* app)
 }
 
 void Gui::init() {
-    gamePauseMenu = new GamePauseMenu(this);
+    pauseMenu = new PauseMenu(this);
     optionsMenu = new OptionsMenu(this);
 
     // StackPanel* toolboxPanel = new StackPanel("toolbox", this, StackPanel::StackOrientation::ROW, colors::transparent);
@@ -45,6 +45,44 @@ void Gui::init() {
     // toolbox = toolboxPanel;
 
     textRenderer.init();
+}
+
+void Gui::showMenu(GameMenus menu) {
+    if (!navigation.empty())
+        navigation.top()->hide();
+
+    switch (menu) {
+    case GameMenus::PAUSE_MENU:
+        // set game state and show menu
+        app->setGameState(GameState::PAUSED);
+        navigation.push(pauseMenu);
+        break;
+    case GameMenus::OPTIONS_MENU:
+        // set game state and show menu
+        app->setGameState(GameState::PAUSED);
+        navigation.push(optionsMenu);
+        break;
+    default:
+        return;
+    }
+
+    navigation.top()->show();
+    app->setGameState(GameState::PAUSED);
+}
+
+void Gui::popMenu() {
+    if (navigation.empty())
+        return;
+
+    navigation.top()->hide();
+    navigation.pop();
+
+    if (!navigation.empty()) {
+        navigation.top()->show();
+    }
+    else {
+        app->setGameState(GameState::RUNNING);
+    }
 }
 
 Application* Gui::getApp() const {
@@ -84,7 +122,9 @@ void Gui::render() const {
     guiShader->setBool("flipV", false);
     guiShader->setInt("tex", 0);
 
-    gamePauseMenu->render();
+    if (!navigation.empty()) {
+        navigation.top()->render();
+    }
 
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
@@ -93,8 +133,8 @@ void Gui::render() const {
 const Widget* Gui::getElement(float x, float y) const {
     const Widget* element = nullptr;
 
-    if (gamePauseMenu->isVisible()) {
-        element = gamePauseMenu->getElementAt(x, height - y);
+    if (pauseMenu->isVisible()) {
+        element = pauseMenu->getElementAt(x, height - y);
     }
 
     // if (element == nullptr && toolboxVisible) {
@@ -108,21 +148,20 @@ void Gui::handleMouseButtonEvent(const MouseButtonEvent& e) {
     MouseButtonEvent event(e);
     event.y = height - e.y;
 
-    gamePauseMenu->handleMouseButtonEvent(event);
-    optionsMenu->handleMouseButtonEvent(event);
+    if (!navigation.empty()) {
+        navigation.top()->handleMouseButtonEvent(event);
+    }
 }
 
 void Gui::handleKeyEvent(const KeyEvent& e) {
     if (e.action == GLFW_PRESS) {
         switch (e.key) {
         case GLFW_KEY_ESCAPE:
-            if (gamePauseMenu->isVisible()) {
-                gamePauseMenu->hide();
-                app->setGameState(GameState::RUNNING);
+            if (!navigation.empty()) {
+                popMenu();
             }
             else {
-                gamePauseMenu->show();
-                app->setGameState(GameState::PAUSED);
+                showMenu(GameMenus::PAUSE_MENU);
             }
             break;
         }
@@ -134,6 +173,7 @@ void Gui::handleMouseMoveEvent(const MouseMoveEvent& e) {
     event.y = height - e.y;
     event.lastY = height - e.lastY;
 
-    gamePauseMenu->handleMouseMoveEvent(event);
-    optionsMenu->handleMouseMoveEvent(event);
+    if (!navigation.empty()) {
+        navigation.top()->handleMouseMoveEvent(event);
+    }
 }
