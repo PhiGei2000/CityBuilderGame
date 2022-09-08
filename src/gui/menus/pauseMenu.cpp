@@ -11,7 +11,7 @@ PauseMenu::PauseMenu(Gui* gui)
     constraints.width = RelativeConstraint(0.6);
     constraints.height = RelativeConstraint(0.5);
 
-    Button* _continue = new Button("mainMenu_continue", gui, colors::anthraziteGrey, "Back to game");
+    TextButton* _continue = new TextButton("mainMenu_continue", gui, colors::anthraziteGrey, "Back to game");
     _continue->constraints.x = CenterConstraint();
     _continue->constraints.height = RelativeConstraint(0.5f);
     _continue->constraints.width = RelativeConstraint(0.9f);
@@ -20,7 +20,7 @@ PauseMenu::PauseMenu(Gui* gui)
     };
     addChild(_continue);
 
-    Button* options = new Button("mainMenu_options", gui, colors::anthraziteGrey, "Options");
+    TextButton* options = new TextButton("mainMenu_options", gui, colors::anthraziteGrey, "Options");
     options->constraints.x = CenterConstraint();
     options->constraints.height = RelativeConstraint(0.5f);
     options->constraints.width = RelativeConstraint(0.9f);
@@ -29,7 +29,7 @@ PauseMenu::PauseMenu(Gui* gui)
     };
     addChild(options);
 
-    Button* saveAndExit = new Button("mainMenu_saveExit", gui, colors::anthraziteGrey, "Save and Exit");
+    TextButton* saveAndExit = new TextButton("mainMenu_saveExit", gui, colors::anthraziteGrey, "Save and Exit");
     saveAndExit->constraints.x = CenterConstraint();
     saveAndExit->constraints.height = RelativeConstraint(0.5f);
     saveAndExit->constraints.width = RelativeConstraint(0.9f);

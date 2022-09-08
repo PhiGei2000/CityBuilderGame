@@ -9,7 +9,7 @@ OptionsMenu::OptionsMenu(Gui* gui)
         
     StackPanel* row = new StackPanel("options_menu.last_row", gui, StackOrientation::ROW, colors::transparent);
 
-    Button* back = new Button("options_menu.back", gui, colors::anthraziteGrey, "Back");
+    TextButton* back = new TextButton("options_menu.back", gui, colors::anthraziteGrey, "Back");
     back->constraints.x = CenterConstraint();
     back->constraints.height = RelativeConstraint(0.5f);
     back->constraints.width = RelativeConstraint(0.9f);
@@ -18,7 +18,7 @@ OptionsMenu::OptionsMenu(Gui* gui)
     };
     row->addChild(back);
 
-    Button* done = new Button("options_menu.done", gui, colors::anthraziteGrey, "Done");
+    TextButton* done = new TextButton("options_menu.done", gui, colors::anthraziteGrey, "Done");
     done->constraints.x = CenterConstraint();
     done->constraints.height = RelativeConstraint(0.5f);
     done->constraints.width = RelativeConstraint(0.9f);

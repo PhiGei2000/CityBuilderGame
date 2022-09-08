@@ -18,6 +18,9 @@ BuildSystem::BuildSystem(Game* game)
 
     eventDispatcher.sink<KeyEvent>()
         .connect<&BuildSystem::handleKeyEvent>(*this);
+
+    eventDispatcher.sink<BuildEvent>()
+        .connect<&BuildSystem::handleBuildEvent>(*this);
 }
 
 void BuildSystem::init() {
@@ -41,13 +44,17 @@ void BuildSystem::update(float dt) {
         const glm::vec2& mousePos = game->getMousePos();
         glm::ivec2 gridPos = getGridPos(mousePos);
 
-        // display build marker and update the build marker position
-        buildMarkerComponent.visible = true;
+        if (this->state.building) {
+        }
+        else {
+            // display build marker and update the build marker position
+            buildMarkerComponent.visible = true;
 
-        if (gridPos != buildMarkerComponent.pos) {
-            buildMarkerComponent.pos = gridPos;
-            transform.position = glm::vec3(gridPos.x * Configuration::gridSize, 0.1f, gridPos.y * Configuration::gridSize);
-            transform.calculateTransform();
+            if (gridPos != buildMarkerComponent.pos) {
+                buildMarkerComponent.pos = gridPos;
+                transform.position = glm::vec3(gridPos.x * Configuration::gridSize, 0.1f, gridPos.y * Configuration::gridSize);
+                transform.calculateTransform();
+            }
         }
     }
     else {
@@ -106,13 +113,21 @@ void BuildSystem::handleKeyEvent(const KeyEvent& e) {
 
         if (e.key == GLFW_KEY_B) {
             if (state == GameState::RUNNING) {
-                game->setState(GameState::BUILD_MODE);                
+                game->setState(GameState::BUILD_MODE);
             }
         }
         else if (e.key == GLFW_KEY_ESCAPE) {
             if (state == GameState::BUILD_MODE) {
-                game->setState(GameState::RUNNING);                
+                game->setState(GameState::RUNNING);
             }
         }
     }
+}
+
+void BuildSystem::handleBuildEvent(const BuildEvent& e) {
+    if (e.action != BuildAction::SELECT) {
+        return;
+    }
+
+    setState(e.type, false);
 }

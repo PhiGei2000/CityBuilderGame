@@ -7,7 +7,8 @@ enum class BuildAction
 {
     DEFAULT,
     BEGIN,
-    END
+    END,
+    SELECT
 };
 
 struct BuildEvent {

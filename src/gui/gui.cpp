@@ -5,6 +5,7 @@
 #include "gui/components/stackPanel.hpp"
 #include "gui/components/widget.hpp"
 
+#include "gui/menus/buildMenu.hpp"
 #include "gui/menus/optionsMenu.hpp"
 #include "gui/menus/pauseMenu.hpp"
 
@@ -29,20 +30,7 @@ void Gui::init() {
     pauseMenu = new PauseMenu(this);
     optionsMenu = new OptionsMenu(this);
 
-    // StackPanel* toolboxPanel = new StackPanel("toolbox", this, StackPanel::StackOrientation::ROW, colors::transparent);
-    // toolboxPanel->constraints.x = AbsoluteConstraint(50);
-    // toolboxPanel->constraints.y = AbsoluteConstraint(50);
-    // toolboxPanel->constraints.height = AbsoluteConstraint(48);
-
-    // Texture* streetBuilderIconTexture = new Texture("res/gui/streetBuilder_icon.png", GL_RGBA);
-    // Icon* streetBuilder = new Icon("toolbox_streetBuilder", this, streetBuilderIconTexture, colors::anthraziteGrey);
-    // streetBuilder->constraints.x = AbsoluteConstraint(0);
-    // streetBuilder->constraints.y = AbsoluteConstraint(0);
-    // streetBuilder->constraints.height = AbsoluteConstraint(48);
-    // streetBuilder->constraints.width = AspectConstraint(1);
-    // toolboxPanel->addChild(streetBuilder);
-
-    // toolbox = toolboxPanel;
+    buildMenu = new BuildMenu(this);    
 
     textRenderer.init();
 }
@@ -60,10 +48,10 @@ void Gui::showMenu(GameMenus menu) {
         }
         app->setGameState(GameState::RUNNING);
         return;
-    case GameMenus::PAUSE_MENU:        
+    case GameMenus::PAUSE_MENU:
         navigation.push(pauseMenu);
         break;
-    case GameMenus::OPTIONS_MENU:        
+    case GameMenus::OPTIONS_MENU:
         navigation.push(optionsMenu);
         break;
     default:
@@ -136,6 +124,14 @@ void Gui::render() const {
     // render top menu
     if (!navigation.empty()) {
         navigation.top()->render();
+    }
+
+    if (app->getGameState() == GameState::BUILD_MODE) {
+        buildMenu->show();
+        buildMenu->render();
+    }
+    else {
+        buildMenu->hide();
     }
 
     // enable depth test and disable blend

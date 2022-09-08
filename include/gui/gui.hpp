@@ -11,6 +11,7 @@ class Application;
 
 class PauseMenu;
 class OptionsMenu;
+class BuildMenu;
 
 struct KeyEvent;
 struct MouseButtonEvent;
@@ -32,6 +33,8 @@ class Gui {
 
     PauseMenu* pauseMenu;
     OptionsMenu* optionsMenu;
+
+    BuildMenu* buildMenu;
 
     std::stack<Widget*> navigation;    
 

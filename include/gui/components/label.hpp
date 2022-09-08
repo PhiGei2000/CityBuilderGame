@@ -3,7 +3,7 @@
 
 #include <string>
 
-class Label : public Widget {
+class Label : public virtual Widget {
   public:
     std::string text;
     Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text);

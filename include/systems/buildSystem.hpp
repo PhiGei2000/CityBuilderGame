@@ -7,6 +7,7 @@
 
 struct MouseButtonEvent;
 struct KeyEvent;
+struct BuildEvent;
 
 class BuildSystem : public System {
   protected:
@@ -37,4 +38,6 @@ class BuildSystem : public System {
     void handleMouseButtonEvent(const MouseButtonEvent& e);
 
     void handleKeyEvent(const KeyEvent& e);
+
+    void handleBuildEvent(const BuildEvent& e);
 };

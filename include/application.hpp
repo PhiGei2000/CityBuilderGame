@@ -39,12 +39,16 @@ class Application {
 
     void stop();
 
+    inline Game* getGame() const {
+        return game;
+    }
+
     inline void setGameState(GameState state) {
         game->setState(state);
     }
-    
+
     inline GameState getGameState() const {
-      return game->getState();
+        return game->getState();
     }
 
     GLFWwindow* getWindow() const;

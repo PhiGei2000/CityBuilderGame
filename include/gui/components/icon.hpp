@@ -4,7 +4,7 @@
 
 #include "rendering/texture.hpp"
 
-class Icon : public Widget {
+class Icon : public virtual Widget {
   protected:
     Texture* texture;
 
