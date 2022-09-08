@@ -48,24 +48,29 @@ void Gui::init() {
 }
 
 void Gui::showMenu(GameMenus menu) {
+    // hide the menu at the top of the navigation stack
     if (!navigation.empty())
         navigation.top()->hide();
 
     switch (menu) {
-    case GameMenus::PAUSE_MENU:
-        // set game state and show menu
-        app->setGameState(GameState::PAUSED);
+    case GameMenus::NONE:
+        // clear the navigation and set game state to running
+        while (!navigation.empty()) {
+            navigation.pop();
+        }
+        app->setGameState(GameState::RUNNING);
+        return;
+    case GameMenus::PAUSE_MENU:        
         navigation.push(pauseMenu);
         break;
-    case GameMenus::OPTIONS_MENU:
-        // set game state and show menu
-        app->setGameState(GameState::PAUSED);
+    case GameMenus::OPTIONS_MENU:        
         navigation.push(optionsMenu);
         break;
     default:
         return;
     }
 
+    // show the top menu on the navigation stack and set the game state to paused
     navigation.top()->show();
     app->setGameState(GameState::PAUSED);
 }
@@ -74,13 +79,16 @@ void Gui::popMenu() {
     if (navigation.empty())
         return;
 
+    // hide the top menu and remove it from the navigation stack
     navigation.top()->hide();
     navigation.pop();
 
+    // if the navigation is not empty show the menu at the top
     if (!navigation.empty()) {
         navigation.top()->show();
     }
     else {
+        // if the navigation stack is empty set the game state to running
         app->setGameState(GameState::RUNNING);
     }
 }
@@ -98,6 +106,7 @@ const RenderQuad& Gui::getRenderQuad() const {
 }
 
 void Gui::setScreenSize(float width, float height) {
+    // set new screen size and update the text renderer screen size
     this->width = width;
     this->height = height;
 
@@ -109,8 +118,10 @@ Rectangle Gui::getBox() const {
 }
 
 void Gui::render() const {
+    // bind the shader
     guiShader->use();
 
+    // disable depth test and enable blend
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
 
@@ -122,26 +133,14 @@ void Gui::render() const {
     guiShader->setBool("flipV", false);
     guiShader->setInt("tex", 0);
 
+    // render top menu
     if (!navigation.empty()) {
         navigation.top()->render();
     }
 
+    // enable depth test and disable blend
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
-}
-
-const Widget* Gui::getElement(float x, float y) const {
-    const Widget* element = nullptr;
-
-    if (pauseMenu->isVisible()) {
-        element = pauseMenu->getElementAt(x, height - y);
-    }
-
-    // if (element == nullptr && toolboxVisible) {
-    //     element = toolbox->getElementAt(x, height - y);
-    // }
-
-    return element;
 }
 
 void Gui::handleMouseButtonEvent(const MouseButtonEvent& e) {

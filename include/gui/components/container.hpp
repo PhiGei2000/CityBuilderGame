@@ -16,8 +16,6 @@ class ContainerItem : public Widget {
 
     void render() const override;
 
-    const Widget* getElementAt(float x, float y) const override;
-
     void handleMouseButtonEvent(const MouseButtonEvent& e) override;
     void handleMouseMoveEvent(const MouseMoveEvent& e) override;
 };
@@ -36,8 +34,6 @@ class Container : public Widget {
     void render() const override;
 
     virtual void setChildConstraints() = 0;
-
-    const Widget* getElementAt(float x, float y) const override;
 
     void handleMouseButtonEvent(const MouseButtonEvent& e) override;
     void handleMouseMoveEvent(const MouseMoveEvent& e) override;

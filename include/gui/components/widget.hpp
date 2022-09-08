@@ -39,8 +39,6 @@ class Widget {
 
     Rectangle getBox() const;
 
-    virtual const Widget* getElementAt(float x, float y) const;
-
     virtual void handleMouseButtonEvent(const MouseButtonEvent& e);
     virtual void handleMouseMoveEvent(const MouseMoveEvent& e);
 };

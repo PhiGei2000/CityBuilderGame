@@ -130,14 +130,3 @@ Rectangle Widget::getBox() const {
 
     return Rectangle{x, y, width, height};
 }
-
-const Widget* Widget::getElementAt(float x, float y) const {
-    if (visible) {
-        const Rectangle& area = getBox();
-        if (area.pointInside(x, y)) {
-            return this;
-        }
-    }
-
-    return nullptr;
-}

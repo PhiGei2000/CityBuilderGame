@@ -44,15 +44,6 @@ void ContainerItem::render() const {
     element->render();
 }
 
-const Widget* ContainerItem::getElementAt(float x, float y) const {
-    const Widget* base = Widget::getElementAt(x, y);
-
-    if (base == nullptr)
-        return nullptr;
-
-    return element->getElementAt(x, y);
-}
-
 Container::Container(const std::string& id, Gui* gui, const glm::vec4& backgroundColor)
     : Widget(id, gui, backgroundColor) {
 }
@@ -109,19 +100,4 @@ void Container::render() const {
     for (const Widget* child : children) {
         child->render();
     }
-}
-
-const Widget* Container::getElementAt(float x, float y) const {
-    const Rectangle& area = getBox();
-
-    if (area.pointInside(x, y)) {
-        for (auto it = children.begin(); it != children.end(); it++) {
-            const Widget* element = (*it)->getElementAt(x, y);
-            if (element != nullptr) {
-                return element;
-            }
-        }
-    }
-
-    return nullptr;
 }

@@ -56,8 +56,6 @@ class Gui {
 
     void render() const;
 
-    const Widget* getElement(float x, float y) const;
-
     void handleMouseButtonEvent(const MouseButtonEvent& e);
     void handleKeyEvent(const KeyEvent& e);
     void handleMouseMoveEvent(const MouseMoveEvent& e);
