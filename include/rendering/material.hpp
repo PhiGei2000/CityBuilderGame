@@ -5,8 +5,5 @@
 
 struct Material {
     ResourcePtr<Texture> diffuse;    
-
-    float ambient;
-    float specularStrenght;
-    float shininess;
+    ResourcePtr<Texture> specular;    
 };

@@ -1,7 +1,7 @@
 #include "resources/resourceManager.hpp"
 
-#include "resources/streetPack.hpp"
 #include "rendering/material.hpp"
+#include "resources/streetPack.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -83,13 +83,12 @@ void ResourceManager::loadResources(const std::string& resourceDir) {
         }
         else if (type == "material") {
             const std::string& diffuse = resourceNode.attribute("diffuse").as_string();
-            float ambientStrenght = resourceNode.attribute("ambientStrenght").as_float();
-            float specularStrenght = resourceNode.attribute("specularStrenght").as_float();
-            float shininess = resourceNode.attribute("shininess").as_float();
+            const std::string& specular = resourceNode.attribute("specular").as_string();
 
             ResourcePtr<Texture> diffuseTexture = getResource<Texture>(diffuse);
+            ResourcePtr<Texture> specularTexture = getResource<Texture>(specular);
 
-            Material* material = new Material{diffuseTexture, ambientStrenght, specularStrenght, shininess};
+            Material* material = new Material{diffuseTexture, specularTexture};
 
             resources[id] = ResourceHolder{std::type_index(typeid(Material)), ResourcePtr<Material>(material)};
         }

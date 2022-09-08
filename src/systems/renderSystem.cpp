@@ -33,6 +33,7 @@ RenderSystem::RenderSystem(Game* game)
     : System(game) {
     init();
 
+    // connect event handlers
     eventDispatcher.sink<CameraUpdateEvent>()
         .connect<&RenderSystem::onCameraUpdated>(*this);
 
@@ -41,22 +42,27 @@ RenderSystem::RenderSystem(Game* game)
 }
 
 void RenderSystem::renderMesh(const MeshComponent& mesh, const glm::mat4& model) const {
+    // bind shader
     mesh.shader->use();
 
+    // bind and upload material textures if material exists
     if (mesh.material) {
         mesh.material->diffuse->use(0);
+        mesh.material->specular->use(1);
 
         mesh.shader->setInt("material.diffuse", 0);
-        mesh.shader->setFloat("material.specularStrenght", mesh.material->specularStrenght);
-        mesh.shader->setFloat("material.shininess", mesh.material->shininess);
+        mesh.shader->setInt("material.specular", 1);        
     }
 
+    // upload model matrix
     mesh.shader->setMatrix4("model", model);
 
+    // draw the vertices
     mesh.geometry->draw();
 }
 
 void RenderSystem::onCameraUpdated(CameraUpdateEvent& event) const {
+    // get components and calculate camera target
     const entt::entity& cameraEntity = event.entity;
     const CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
@@ -76,6 +82,7 @@ void RenderSystem::onCameraUpdated(CameraUpdateEvent& event) const {
 }
 
 void RenderSystem::onEntityMoved(EntityMoveEvent& event) const {
+    // update sun uniform buffer
     if (event.entity == game->sun) {
         const LightComponent& sunLight = registry.get<LightComponent>(game->sun);
 
