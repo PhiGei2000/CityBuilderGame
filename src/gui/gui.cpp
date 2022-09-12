@@ -27,22 +27,7 @@ Gui::Gui(Application* app)
 
 void Gui::init() {
     pauseMenu = new PauseMenu(this);
-    optionsMenu = new OptionsMenu(this);
-
-    // StackPanel* toolboxPanel = new StackPanel("toolbox", this, StackPanel::StackOrientation::ROW, colors::transparent);
-    // toolboxPanel->constraints.x = AbsoluteConstraint(50);
-    // toolboxPanel->constraints.y = AbsoluteConstraint(50);
-    // toolboxPanel->constraints.height = AbsoluteConstraint(48);
-
-    // Texture* streetBuilderIconTexture = new Texture("res/gui/streetBuilder_icon.png", GL_RGBA);
-    // Icon* streetBuilder = new Icon("toolbox_streetBuilder", this, streetBuilderIconTexture, colors::anthraziteGrey);
-    // streetBuilder->constraints.x = AbsoluteConstraint(0);
-    // streetBuilder->constraints.y = AbsoluteConstraint(0);
-    // streetBuilder->constraints.height = AbsoluteConstraint(48);
-    // streetBuilder->constraints.width = AspectConstraint(1);
-    // toolboxPanel->addChild(streetBuilder);
-
-    // toolbox = toolboxPanel;
+    optionsMenu = new OptionsMenu(this);    
 
     textRenderer.init();
 }

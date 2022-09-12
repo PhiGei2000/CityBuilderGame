@@ -59,6 +59,9 @@ void Widget::render() const {
 
     Shader* guiShader = gui->getShader();
     guiShader->setVector4("color", backgroundColor);
+    guiShader->setVector2("widgetArea.position", glm::vec2{area.x, area.y});
+    guiShader->setVector2("widgetArea.size", glm::vec2{area.width, area.height});
+    guiShader->setFloat("cornerRadius", cornerRadius);
 
     const RenderQuad& quad = gui->getRenderQuad();
     quad.draw(area.x, area.y, area.width, area.height);
