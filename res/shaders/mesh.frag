@@ -21,7 +21,7 @@ layout(std140, binding = 2) uniform Light {
 
 struct Material {
     sampler2D diffuse;
-    sampler2D specular;    
+    sampler2D specular;
 };
 
 out vec4 FragColor;
@@ -33,7 +33,7 @@ void main() {
     vec3 specularColor = texture(material.specular, TexCoord).xyz;
 
     float specularStrenght = specularColor.x;
-    float shininess = 1.0 / (1.0 - specularColor.y);    
+    float shininess = 1.0 / (1.0 - specularColor.y);
 
     // ambient
     vec3 ambient = lightAmbient * diffuseColor;
@@ -44,9 +44,9 @@ void main() {
 
     // specular
     vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(lightDirection, Normal);
+    vec3 halfwayDir = normalize(viewDir - lightDirection);
 
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+    float spec = pow(max(dot(Normal, halfwayDir), 0.0), shininess);
     vec3 specular = specularStrenght * lightSpecular * spec;
 
     vec3 result = ambient + diffuse + specular;
