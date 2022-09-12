@@ -28,7 +28,7 @@ Gui::Gui(Application* app)
 
 void Gui::init() {
     pauseMenu = new PauseMenu(this);
-    optionsMenu = new OptionsMenu(this);
+    optionsMenu = new OptionsMenu(this);    
 
     buildMenu = new BuildMenu(this);    
 

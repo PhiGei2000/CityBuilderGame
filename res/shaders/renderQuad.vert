@@ -6,8 +6,10 @@ uniform mat4 projection;
 uniform bool flipV;
 
 out vec2 texCoord;
+out vec2 fragPosition;
 
 void main() {
+    fragPosition = aPos;
     gl_Position = projection * vec4(aPos.xy, 0.0, 1.0);
 
     if (flipV) {
