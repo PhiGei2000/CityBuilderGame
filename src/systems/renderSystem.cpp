@@ -51,7 +51,9 @@ void RenderSystem::renderMesh(const MeshComponent& mesh, const glm::mat4& model)
         mesh.material->specular->use(1);
 
         mesh.shader->setInt("material.diffuse", 0);
-        mesh.shader->setInt("material.specular", 1);        
+        mesh.shader->setInt("material.specular", 1);
+        mesh.shader->setFloat("material.shininess", mesh.material->shininess);
+        mesh.shader->setFloat("material.specularStrength", mesh.material->specularStrength);
     }
 
     // upload model matrix
@@ -78,7 +80,7 @@ void RenderSystem::onCameraUpdated(CameraUpdateEvent& event) const {
     // camera position
     glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), sizeof(glm::vec3), glm::value_ptr(cameraTransform.position));
     // camera target
-    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4) + sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(cameraTarget));    
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4) + sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(cameraTarget));
 }
 
 void RenderSystem::onEntityMoved(EntityMoveEvent& event) const {
