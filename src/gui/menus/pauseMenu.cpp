@@ -5,37 +5,37 @@
 
 #include "application.hpp"
 
-PauseMenu::PauseMenu(Gui* gui) 
-    : StackPanel("game_menu", gui, StackOrientation::COLUMN, colors::transparent){
-        
-    constraints.width = RelativeConstraint(0.6);
-    constraints.height = RelativeConstraint(0.5);
+PauseMenu::PauseMenu(Gui* gui)
+    : StackPanel("game_menu", gui, StackOrientation::COLUMN, colors::transparent) {
 
-    TextButton* _continue = new TextButton("mainMenu_continue", gui, colors::anthraziteGrey, "Back to game");
-    _continue->constraints.x = CenterConstraint();
-    _continue->constraints.height = RelativeConstraint(0.5f);
+    constraints.width = RelativeConstraint(0.6);
+    constraints.height = AbsoluteConstraint(195.0f);
+
+    TextButton* _continue = new TextButton("mainMenu_continue", gui, colors::anthraziteGrey, "Back to game");    
+    _continue->constraints.height = AbsoluteConstraint(45.0f);
     _continue->constraints.width = RelativeConstraint(0.9f);
     _continue->onClick += [&](const MouseButtonEvent& e) {
         this->onResumeButtonClick(e);
     };
+    _continue->cornerRadius = 15.0f;
     addChild(_continue);
 
-    TextButton* options = new TextButton("mainMenu_options", gui, colors::anthraziteGrey, "Options");
-    options->constraints.x = CenterConstraint();
-    options->constraints.height = RelativeConstraint(0.5f);
+    TextButton* options = new TextButton("mainMenu_options", gui, colors::anthraziteGrey, "Options");    
+    options->constraints.height = AbsoluteConstraint(45.0f);
     options->constraints.width = RelativeConstraint(0.9f);
     options->onClick += [&](const MouseButtonEvent& e) {
         this->onOptionsButtonClick(e);
     };
+    options->cornerRadius = 15.0f;
     addChild(options);
 
-    TextButton* saveAndExit = new TextButton("mainMenu_saveExit", gui, colors::anthraziteGrey, "Save and Exit");
-    saveAndExit->constraints.x = CenterConstraint();
-    saveAndExit->constraints.height = RelativeConstraint(0.5f);
+    TextButton* saveAndExit = new TextButton("mainMenu_saveExit", gui, colors::anthraziteGrey, "Save and Exit");    
+    saveAndExit->constraints.height = AbsoluteConstraint(45.0f);
     saveAndExit->constraints.width = RelativeConstraint(0.9f);
-    saveAndExit->onClick += [&](const MouseButtonEvent& e){
+    saveAndExit->onClick += [&](const MouseButtonEvent& e) {
         this->onExitButtonClick(e);
     };
+    saveAndExit->cornerRadius = 15.0f;
     addChild(saveAndExit);
 }
 
@@ -49,6 +49,6 @@ void PauseMenu::onOptionsButtonClick(const MouseButtonEvent& event) {
 
 void PauseMenu::onExitButtonClick(const MouseButtonEvent& event) {
     // TODO: Add save progress
-    
+
     gui->getApp()->stop();
 }
