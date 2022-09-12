@@ -155,6 +155,8 @@ void Application::onFramebufferSizeEvent(FramebufferSizeEvent& e) {
 
 void Application::onMouseMoveEvent(MouseMoveEvent& e) {
     game->raiseEvent(e);
+
+    gui->handleMouseMoveEvent(e);
 }
 
 void Application::onMouseButtonEvent(MouseButtonEvent& e) {

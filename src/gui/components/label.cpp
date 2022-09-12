@@ -1,8 +1,8 @@
 #include "gui/components/label.hpp"
 #include "gui/gui.hpp"
 
-Label::Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text)
-    : Widget(id, gui, backgroundColor), text(text) {
+Label::Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, const glm::vec4& textColor)
+    : Widget(id, gui, backgroundColor), text(text), textColor(textColor) {
 }
 
 void Label::render() const {
@@ -17,7 +17,7 @@ void Label::render() const {
 
     guiShader->setBool("flipV", true);
     guiShader->setBool("text", true);
-    guiShader->setVector4("color", colors::white);
+    guiShader->setVector4("color", textColor);
 
     gui->textRenderer.renderText(text, box, 0.5f);
 

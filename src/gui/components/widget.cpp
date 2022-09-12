@@ -25,9 +25,9 @@ void Widget::handleMouseMoveEvent(const MouseMoveEvent& event) {
             onMouseEnter.invoke(event);
         }
     }
-
+    
     // mouse leave
-    else if (area.pointInside(event.x, event.y)) {
+    if (!area.pointInside(event.x, event.y)) {
         if (area.pointInside(event.lastX, event.lastY)) {
             onMouseLeave.invoke(event);
         }
