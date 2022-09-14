@@ -25,12 +25,16 @@
 
     <!-- materials -->
     <resource type="material" filename="materials/ground.mtl">
-        <material name="Ground" id="GROUND_MATERIAL" />
+        <material name="ground" id="GROUND_MATERIAL" />
     </resource>
-    <resource type="material" id="TREE_MATERIAL" diffuse="TREE_DIFFUSE" specular="TREE_SPECULAR" specularStrength="0.5" shininess="8" />
+    <resource type="material" filename="materials/tree.mtl" >
+        <material name="tree" id="TREE_MATERIAL" />
+    </resource>
     <!-- <resource type="material" id="STREET_MATERIAL" diffuse="STREET_DIFFUSE" ambientStrenght="0.75" shininess="8.0" specularStrenght="0.5" /> -->
     <!-- <resource type="material" id="CAR_MATERIAL" diffuse="CAR_DIFFUSE" ambientStrenght="0.75" shininess="8.0" specularStrenght="0.5" /> -->
-    <resource type="material" id="BUILDMARKER_MATERIAL" diffuse="BUILDMARKER_DIFFUSE" specular="TREE_SPECULAR" specularStrength="0.5" shininess="8" />
+    <resource type="material" filename="materials/buildmarker.mtl" >
+        <material name="buildmarker" id="BUILDMARKER_MATERIAL" />
+    </resource>
 
     <!-- streets -->
     <!-- <resource type="streetPack" id="BASIC_STREETS" filename="models/basic_streets/" shader="MESH_SHADER" material="STREET_MATERIAL" />             -->
