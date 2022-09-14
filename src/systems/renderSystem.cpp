@@ -46,14 +46,8 @@ void RenderSystem::renderMesh(const MeshComponent& mesh, const glm::mat4& model)
     mesh.shader->use();
 
     // bind and upload material textures if material exists
-    if (mesh.material) {
-        mesh.material->diffuseTexture->use(0);
-        mesh.material->specularTexture->use(1);
-
-        mesh.shader->setInt("material.diffuse", 0);
-        mesh.shader->setInt("material.specular", 1);
-        mesh.shader->setFloat("material.shininess", mesh.material->shininess);
-        mesh.shader->setFloat("material.specularStrength", mesh.material->specularStrength);
+    if (mesh.material) {        
+        mesh.material->use(mesh.shader.get());
     }
 
     // upload model matrix

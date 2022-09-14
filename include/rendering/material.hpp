@@ -5,6 +5,8 @@
 
 #include <glm/glm.hpp>
 
+class Shader;
+
 struct Material {
     // colors
     glm::vec3 ambientColor = glm::vec3(1.0f);
@@ -24,14 +26,9 @@ struct Material {
     // model of illumination 0 - 2
     int illuminationModel = 2;
 
-    Material() {
-    }
+    Material();
+    Material(ResourcePtr<Texture> diffuse, ResourcePtr<Texture> specular);
+    Material(ResourcePtr<Texture> diffuse, ResourcePtr<Texture> specular, float specularStrength, float shininess);
 
-    Material(ResourcePtr<Texture> diffuse, ResourcePtr<Texture> specular)
-        : diffuseTexture(diffuse), specularTexture(specular) {
-    }
-
-    Material(ResourcePtr<Texture> diffuse, ResourcePtr<Texture> specular, float specularStrength, float shininess)
-        : diffuseTexture(diffuse), specularTexture(specular), specularStrength(specularStrength), shininess(shininess) {
-    }
+    void use(Shader* shader) const;
 };

@@ -6,8 +6,6 @@
 #include <typeindex>
 #include <unordered_map>
 
-#include "modelLoader.hpp"
-
 class ResourceManager {
   private:
     struct ResourceHolder {

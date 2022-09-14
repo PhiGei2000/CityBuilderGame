@@ -2,6 +2,8 @@
 
 #include "rendering/material.hpp"
 #include "resources/streetPack.hpp"
+#include "rendering/geometry.hpp"
+#include "resources/modelLoader.hpp"
 
 #include <filesystem>
 #include <iostream>

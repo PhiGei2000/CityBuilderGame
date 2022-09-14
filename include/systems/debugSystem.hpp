@@ -3,6 +3,7 @@
 
 #include "events/events.hpp"
 #include "rendering/shader.hpp"
+#include "rendering/geometry.hpp"
 
 #include <glm/glm.hpp>
 

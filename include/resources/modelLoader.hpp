@@ -15,8 +15,6 @@
 #include <array>
 #endif
 
-class ResourceManager;
-
 class ModelLoader {
   private:
     using FaceIndices = std::array<std::tuple<int unsigned, unsigned int, unsigned int>, 3>;
