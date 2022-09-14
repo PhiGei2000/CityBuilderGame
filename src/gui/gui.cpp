@@ -6,6 +6,7 @@
 #include "gui/components/widget.hpp"
 
 #include "gui/menus/buildMenu.hpp"
+#include "gui/menus/debugPanel.hpp"
 #include "gui/menus/optionsMenu.hpp"
 #include "gui/menus/pauseMenu.hpp"
 
@@ -21,16 +22,18 @@
 
 #include <GL/glew.h>
 
-Gui::Gui(Application* app)
-    : app(app) {
+Gui::Gui(Application* app, float width, float height)
+    : app(app), width(width), height(height) {
     init();
 }
 
 void Gui::init() {
     pauseMenu = new PauseMenu(this);
-    optionsMenu = new OptionsMenu(this);    
+    optionsMenu = new OptionsMenu(this);
 
-    buildMenu = new BuildMenu(this);    
+    buildMenu = new BuildMenu(this);
+
+    debugPanel = new DebugPanel(this);
 
     textRenderer.init();
 }
@@ -114,11 +117,10 @@ void Gui::render() const {
     glEnable(GL_BLEND);
 
     // set default uniforms
-    glm::mat4 projection = glm::ortho(0.0f, width, 0.0f, height);
+    glm::mat4 projection = glm::ortho(0.0f, width, height, 0.0f);
     guiShader->setMatrix4("projection", projection);
     guiShader->setBool("text", false);
     guiShader->setBool("useTexture", false);
-    guiShader->setBool("flipV", false);
     guiShader->setInt("tex", 0);
 
     // render top menu
@@ -134,17 +136,20 @@ void Gui::render() const {
         buildMenu->hide();
     }
 
+    debugPanel->render();
+
     // enable depth test and disable blend
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 }
 
-void Gui::handleMouseButtonEvent(const MouseButtonEvent& e) {
-    MouseButtonEvent event(e);
-    event.y = height - e.y;
-
+void Gui::handleMouseButtonEvent(const MouseButtonEvent& event) {
     if (!navigation.empty()) {
         navigation.top()->handleMouseButtonEvent(event);
+    }
+
+    if (debugPanel->isVisible()) {
+        debugPanel->handleMouseButtonEvent(event);
     }
 }
 
@@ -160,17 +165,25 @@ void Gui::handleKeyEvent(const KeyEvent& e) {
                     showMenu(GameMenus::PAUSE_MENU);
                 }
                 break;
+            case GLFW_KEY_F1:
+                if (debugPanel->isVisible()) {
+                    debugPanel->hide();
+                }
+                else {
+                    debugPanel->show();
+                }
             }
         }
     }
 }
 
-void Gui::handleMouseMoveEvent(const MouseMoveEvent& e) {
-    MouseMoveEvent event(e);
-    event.y = height - e.y;
-    event.lastY = height - e.lastY;
+void Gui::handleMouseMoveEvent(const MouseMoveEvent& event) {
 
     if (!navigation.empty()) {
         navigation.top()->handleMouseMoveEvent(event);
+    }
+
+    if (debugPanel->isVisible()) {
+        debugPanel->handleMouseMoveEvent(event);
     }
 }

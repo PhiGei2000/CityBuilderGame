@@ -93,7 +93,9 @@
 			"codecvt": "cpp",
 			"complex": "cpp",
 			"ranges": "cpp",
-			"*.ipp": "cpp"
+			"*.ipp": "cpp",
+			"source_location": "cpp",
+			"span": "cpp"
 		}
 	}
 }

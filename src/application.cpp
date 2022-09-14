@@ -1,3 +1,4 @@
+
 #include "application.hpp"
 
 #include "systems/cameraSystem.hpp"
@@ -96,8 +97,7 @@ void Application::init() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // init gui
-    gui = new Gui(this);
-    gui->setScreenSize(800, 600);
+    gui = new Gui(this, 800, 600);    
 
     // init game
     game = new Game(this);

@@ -12,6 +12,7 @@ class Application;
 class PauseMenu;
 class OptionsMenu;
 class BuildMenu;
+class DebugPanel;
 
 struct KeyEvent;
 struct MouseButtonEvent;
@@ -32,9 +33,11 @@ class Gui {
     float width, height;
 
     PauseMenu* pauseMenu;
-    OptionsMenu* optionsMenu;
-
+    OptionsMenu* optionsMenu;    
+    
     BuildMenu* buildMenu;
+
+    DebugPanel* debugPanel;
 
     std::stack<Widget*> navigation;    
 
@@ -43,7 +46,7 @@ class Gui {
     void init();
 
   public:
-    Gui(Application* app);
+    Gui(Application* app, float width, float height);
 
     TextRenderer textRenderer;
 

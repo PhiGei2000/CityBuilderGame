@@ -4,45 +4,49 @@
 
 #include <sstream>
 
-ContainerItem::ContainerItem(const std::string& id, Gui* gui, Widget* element, const glm::vec4 backgroundColor)
-    : Widget(id, gui, backgroundColor), element(element) {
-    element->parent = this;
-}
+// ContainerItem::ContainerItem(const std::string& id, Gui* gui, Widget* element, const glm::vec4 backgroundColor)
+//     : Widget(id, gui, backgroundColor), element(element) {
+//     element->parent = this;
+// }
 
-void ContainerItem::handleMouseButtonEvent(const MouseButtonEvent& e) {
-    if (!visible)
-        return;
+// void ContainerItem::handleMouseButtonEvent(const MouseButtonEvent& e) {
+//     if (!visible)
+//         return;
 
-    const Rectangle& area = getBox();
-    if (area.pointInside(e.x, e.y)) {
-        element->handleMouseButtonEvent(e);
-    }
-}
+//     const Rectangle& area = getBox();
+//     if (area.pointInside(e.x, e.y)) {
+//         element->handleMouseButtonEvent(e);
+//     }
+// }
 
-void ContainerItem::handleMouseMoveEvent(const MouseMoveEvent& e) {
-    if (!visible)
-        return;
+// void ContainerItem::handleMouseMoveEvent(const MouseMoveEvent& e) {
+//     if (!visible)
+//         return;
 
-    element->handleMouseMoveEvent(e);
-}
+//     element->handleMouseMoveEvent(e);
+// }
 
-void ContainerItem::show() {
-    Widget::show();
+// void ContainerItem::show() {
+//     Widget::show();
 
-    element->show();
-}
+//     element->show();
+// }
 
-void ContainerItem::hide() {
-    Widget::hide();
+// void ContainerItem::hide() {
+//     Widget::hide();
 
-    element->hide();
-}
+//     element->hide();
+// }
 
-void ContainerItem::render() const {
-    Widget::render();
+// Rectangle ContainerItem::getBox() const {
+//     return element->getBox();
+// }
 
-    element->render();
-}
+// void ContainerItem::render() const {
+//     Widget::render();
+
+//     element->render();
+// }
 
 Container::Container(const std::string& id, Gui* gui, const glm::vec4& backgroundColor)
     : Widget(id, gui, backgroundColor) {
@@ -67,13 +71,14 @@ void Container::handleMouseMoveEvent(const MouseMoveEvent& e) {
 }
 
 void Container::addChild(Widget* child) {
-    std::stringstream ss;
-    ss << id << "Item" << children.size();
+    // std::stringstream ss;
+    // ss << id << "Item" << children.size();
 
-    ContainerItem* item = new ContainerItem(ss.str(), gui, child);
-    item->parent = this;
+    // ContainerItem* item = new ContainerItem(ss.str(), gui, child);
+    // item->parent = this;
 
-    children.push_back(item);
+    children.push_back(child);
+    child->parent = this;
 
     setChildConstraints();
 }

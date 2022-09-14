@@ -4,10 +4,12 @@
 
 #include "rendering/geometry.hpp"
 #include "rendering/geometryData.hpp"
+#include "rendering/material.hpp"
 
 #include <memory>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 
 #if WIN32
 #include <array>
@@ -23,4 +25,6 @@ class ModelLoader {
 
   public:
     static GeometryData load(const std::string& filename);
+
+    static std::unordered_map<std::string, Material> loadMaterials(const std::string& filename);
 };

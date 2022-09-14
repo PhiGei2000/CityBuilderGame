@@ -29,7 +29,7 @@ class Widget {
 
     Widget* parent = nullptr;
     glm::vec4 backgroundColor;
-    float cornerRadius = 0.0f;
+    float cornerRadius = 15.0f;
     Constraints constraints;
 
     virtual void show();
@@ -38,7 +38,7 @@ class Widget {
 
     virtual void render() const;
 
-    Rectangle getBox() const;
+    virtual Rectangle getBox() const;
 
     virtual void handleMouseButtonEvent(const MouseButtonEvent& e);
     virtual void handleMouseMoveEvent(const MouseMoveEvent& e);

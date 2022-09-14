@@ -104,7 +104,7 @@ Rectangle Widget::getBox() const {
         width = height * constraints.width.value;
     }
 
-    // set coordinates of lower left corner
+    // set coordinates of top left corner
     float x = parentBox.x;
     float y = parentBox.y;
     switch (constraints.x.type) {

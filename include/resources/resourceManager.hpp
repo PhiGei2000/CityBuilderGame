@@ -18,7 +18,10 @@ class ResourceManager {
 
     std::unordered_map<std::string, ResourceHolder> resources;
 
-    void loadResources(const std::string& resouceFile);
+    void loadResources(const std::string& resouceDir);
+
+    template<typename T>
+    void setResource(const std::string& id, T* data);
 
   public:
     struct ResourceTypeException : public std::exception {
@@ -31,11 +34,13 @@ class ResourceManager {
         const char* what() const noexcept override;
     };
 
-    ResourceManager(const std::string& resourceDir);
+    ResourceManager(const std::string& resourceDir);    
 
     template<typename T, typename... TArgs>
     void loadResource(const std::string& resourceId, const std::string& filename, TArgs... args);
 
     template<typename T>
     ResourcePtr<T> getResource(const std::string& resourceId) const;
+
+    void reload(const std::string& resourceFile);
 };

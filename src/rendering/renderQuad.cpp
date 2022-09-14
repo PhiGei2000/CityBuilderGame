@@ -27,13 +27,13 @@ void RenderQuad::draw(float xMin, float yMin, float width, float height) const {
     glBindVertexArray(vao);
 
     float vertices[] = {
-        xMin, yMin, 0.0f, 0.0f,                     // bottom left
-        xMin + width, yMin + height, 1.0f, 1.0f,    // top right
-        xMin, yMin + height, 0.0f, 1.0f,            // top left
+        xMin, yMin + height, 0.0f, 0.0f,            // bottom left
+        xMin + width, yMin, 1.0f, 1.0f,             // top right
+        xMin, yMin, 0.0f, 1.0f,                     // top left
 
-        xMin, yMin, 0.0f, 0.0f,                     // bottom left
-        xMin + width, yMin, 1.0f, 0.0f,             // bottom right
-        xMin + width, yMin + height, 1.0f, 1.0f};   // top right
+        xMin, yMin + height, 0.0f, 0.0f,            // bottom left
+        xMin + width, yMin + height, 1.0f, 0.0f,    // bottom right
+        xMin + width, yMin, 1.0f, 1.0f};            // top right
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);

@@ -1,14 +1,20 @@
 #pragma once
-#include "renderQuad.hpp"
-#include "shader.hpp"
 #include "gui/colors.hpp"
 #include "gui/rectangle.hpp"
+#include "renderQuad.hpp"
+#include "shader.hpp"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <glm/glm.hpp>
 
 #include <map>
+
+enum class TextAlign {
+    BEGIN,
+    CENTER,
+    END
+};
 
 class TextRenderer {
   private:
@@ -19,7 +25,7 @@ class TextRenderer {
         unsigned int advance;
     };
 
-    RenderQuad quad;    
+    RenderQuad quad;
     float screenWidth, screenHeight;
 
     std::map<char, Character> characters;
@@ -33,5 +39,5 @@ class TextRenderer {
     float getWidth(const std::string& text, float scale) const;
     float getHeight(const std::string& text, float scale, float* baseLineOffset) const;
 
-    void renderText(const std::string& text, const Rectangle& rect, float maxScale) const;
+    void renderText(const std::string& text, const Rectangle& rect, float maxScale, TextAlign align) const;
 };

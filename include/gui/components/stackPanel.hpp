@@ -3,17 +3,25 @@
 
 class StackPanel : public Container {
   public:
-    enum class StackOrientation
-    {
+    enum class StackOrientation {
         ROW,
         COLUMN,
         ROW_REVERSE,
         COLUMN_REVERSE
     };
 
-    StackOrientation orientation;
+    enum class ItemAligment {
+        BEGIN,
+        END,
+        CENTER,
+        STRECH
+    };
 
-    StackPanel(const std::string& id, Gui* gui, StackOrientation orientation, const glm::vec4 backgroundColor);    
+    StackOrientation orientation;
+    ItemAligment itemAligment;
+    float spacing = 30.0f;
+
+    StackPanel(const std::string& id, Gui* gui, StackOrientation orientation, const glm::vec4 backgroundColor, ItemAligment itemAligment = ItemAligment::CENTER);
 
     void setChildConstraints() override;
 };

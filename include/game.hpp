@@ -26,7 +26,6 @@ class Game {
 
     Application* app;
 
-    void loadResources();
 
     void init();
 
@@ -44,6 +43,7 @@ class Game {
     ResourceManager& getResourceManager();
 
     void update(float dt);
+    void reloadResources();
 
     int getKey(int key) const;
 
@@ -53,5 +53,5 @@ class Game {
     GameState getState() const;
 
     template<typename Event>
-    void raiseEvent(Event& args);
+    void raiseEvent(Event& args);    
 };

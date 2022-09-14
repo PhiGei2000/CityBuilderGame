@@ -68,6 +68,10 @@ void Game::update(float dt) {
     }
 }
 
+void Game::reloadResources() {
+    resourceManager.reload("res/");
+}
+
 int Game::getKey(int key) const {
     return glfwGetKey(app->getWindow(), key);
 }

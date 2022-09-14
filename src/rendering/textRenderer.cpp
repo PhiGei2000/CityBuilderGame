@@ -93,7 +93,7 @@ float TextRenderer::getHeight(const std::string& text, float scale, float* basel
     return height * scale;
 }
 
-void TextRenderer::renderText(const std::string& text, const Rectangle& rect, float maxScale) const {
+void TextRenderer::renderText(const std::string& text, const Rectangle& rect, float maxScale, TextAlign align) const {
     // get width and height of non scaled text
     float baselineOffset;
     float scale = maxScale;
@@ -103,21 +103,34 @@ void TextRenderer::renderText(const std::string& text, const Rectangle& rect, fl
 
     // adjust text size if it not fits into the rectangle
     if (width > rect.width) {
-        scale = rect.width / width;
+        scale *= rect.width / width * 0.9;
 
-        width *= scale;
-        height *= scale;
+        width = getWidth(text, scale);
+        height = getHeight(text, scale, &baselineOffset);
     }
 
     if (height > rect.height) {
-        scale = rect.height / height;
+        scale *= rect.height / height * 0.9;
 
-        width *= scale;
-        height *= scale;
+        width = getWidth(text, scale);
+        height = getHeight(text, scale, &baselineOffset);
     }
 
-    float currentX = rect.x + (rect.width - width) * 0.5f;
-    float currentY = rect.y + baselineOffset + (rect.height - height) * 0.5f;
+    float currentX;
+    switch (align) {
+    case TextAlign::BEGIN:
+        currentX = rect.x + (rect.width - width) * 0.05f;
+        break;
+    case TextAlign::CENTER:
+        currentX = rect.x + (rect.width - width) * 0.5f;
+        break;
+    case TextAlign::END:
+        currentX = rect.x + (rect.width - width) * 0.95f;
+        break;
+    default:
+        break;
+    }
+    float currentY = rect.y + rect.height - (baselineOffset + (rect.height - height) * 0.5f);
 
     glActiveTexture(GL_TEXTURE0);
 
@@ -125,7 +138,7 @@ void TextRenderer::renderText(const std::string& text, const Rectangle& rect, fl
         Character character = characters.at(*it);
 
         float xPos = currentX + character.bearing.x * scale;
-        float yPos = currentY - (character.size.y - character.bearing.y) * scale;
+        float yPos = currentY - character.bearing.y * scale;
 
         float charHeight = character.size.y * scale;
         float charWidth = character.size.x * scale;

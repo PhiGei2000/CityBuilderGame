@@ -11,7 +11,7 @@
     <resource type="shader" id="MESH_SHADER" filename="shaders/mesh" />
     <resource type="shader" id="AXIS_SHADER" filename="shaders/axis" />
     <resource type="shader" id="RENDER_QUAD_SHADER" filename="shaders/renderQuad" />
-    <resource type="shader" id="STREET_DEBUG_SHADER" filename="shaders/streetDebug" />
+    <resource type="shader" id="STREET_DEBUG_SHADER" filename="shaders/streetDebug" />    
 
     <!-- textures -->
     <resource type="texture" id="BUILDMARKER_DIFFUSE" filename="textures/buildMarker_diffuse.png" />
@@ -19,16 +19,16 @@
     <!-- <resource type="texture" id="CAR_DIFFUSE" filename="textures/car_diffuse.png" /> -->
     <resource type="texture" id="GROUND_DIFFUSE" filename="textures/ground_diffuse.png" />
     <resource type="texture" id="GROUND_SPECULAR" filename="textures/ground_specular.png" />
-    <!-- <resource type="texture" id="STREET_DIFFUSE" filename="textures/street_diffuse.png" /> -->
+    <resource type="texture" id="STREET_DIFFUSE" filename="textures/street_diffuse.png" />
     <resource type="texture" id="TREE_DIFFUSE" filename="textures/tree_diffuse.png" />
     <resource type="texture" id="TREE_SPECULAR" filename="textures/tree_specular.png" />
 
     <!-- materials -->
-    <resource type="material" id="GROUND_MATERIAL" diffuse="GROUND_DIFFUSE" specular="GROUND_SPECULAR" />
-    <resource type="material" id="TREE_MATERIAL" diffuse="TREE_DIFFUSE" specular="TREE_SPECULAR" />
+    <resource type="material" id="GROUND_MATERIAL" diffuse="GROUND_DIFFUSE" specular="GROUND_SPECULAR" specularStrength="0.5" shininess="8" />
+    <resource type="material" id="TREE_MATERIAL" diffuse="TREE_DIFFUSE" specular="TREE_SPECULAR" specularStrength="0.5" shininess="8" />
     <!-- <resource type="material" id="STREET_MATERIAL" diffuse="STREET_DIFFUSE" ambientStrenght="0.75" shininess="8.0" specularStrenght="0.5" /> -->
     <!-- <resource type="material" id="CAR_MATERIAL" diffuse="CAR_DIFFUSE" ambientStrenght="0.75" shininess="8.0" specularStrenght="0.5" /> -->
-    <resource type="material" id="BUILDMARKER_MATERIAL" diffuse="BUILDMARKER_DIFFUSE" specular="TREE_SPECULAR" />
+    <resource type="material" id="BUILDMARKER_MATERIAL" diffuse="BUILDMARKER_DIFFUSE" specular="TREE_SPECULAR" specularStrength="0.5" shininess="8" />
 
     <!-- streets -->
     <!-- <resource type="streetPack" id="BASIC_STREETS" filename="models/basic_streets/" shader="MESH_SHADER" material="STREET_MATERIAL" />             -->
