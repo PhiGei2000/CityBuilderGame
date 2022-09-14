@@ -12,12 +12,10 @@
 
 using namespace pugi;
 
-ResourceManager::ResourceManager(const std::string& resourceDir) {
-    loadResources(resourceDir);
-}
+ResourceManager::ResourceManager(const std::string& resourceDir)
+    : resourceDir(resourceDir) {
 
-void ResourceManager::reload(const std::string& resourceDir) {
-    loadResources(resourceDir);
+    loadResources();
 }
 
 ResourceManager::ResourceTypeException::ResourceTypeException(const char* message)
@@ -42,14 +40,14 @@ void ResourceManager::setResource(const std::string& id, T* data) {
 
 template<>
 void ResourceManager::loadResource<Geometry>(const std::string& id, const std::string& filename) {
-    setResource(id, new MeshGeometry(ModelLoader::load(filename)));
+    setResource<Geometry>(id, new MeshGeometry(ModelLoader::load(resourceDir + filename)));
 }
 
 template<>
 void ResourceManager::loadResource<Shader>(const std::string& id, const std::string& filename) {
-    const std::string& vertexPath = filename + ".vert";
-    const std::string& fragmentPath = filename + ".frag";
-    const std::string& geometryPath = filename + ".geom";
+    const std::string& vertexPath = resourceDir + filename + ".vert";
+    const std::string& fragmentPath = resourceDir + filename + ".frag";
+    const std::string& geometryPath = resourceDir + filename + ".geom";
 
     Shader* shader;
     if (std::filesystem::exists(geometryPath)) {
@@ -64,48 +62,12 @@ void ResourceManager::loadResource<Shader>(const std::string& id, const std::str
 
 template<>
 void ResourceManager::loadResource<Texture>(const std::string& id, const std::string& filename, bool alpha) {
-    Texture* texture = alpha ? new Texture(filename, GL_RGBA) : new Texture(filename);
+    Texture* texture = alpha ? new Texture(resourceDir + filename, GL_RGBA) : new Texture(resourceDir + filename);
 
     setResource(id, texture);
 }
 
-template<>
-void ResourceManager::loadResource<Material>(const std::string& id, const std::string& filename, float specularStrength, float shininess) {
-    const std::string& diffuse = filename + "DIFFUSE";
-    
-    ResourcePtr<Texture> diffuseTexture = getResource<Texture>(diffuse);
-    ResourcePtr<Texture> specularTexture = getResource<Texture>(specular);
-
-    Material* material = new Material(diffuseTexture, specularTexture, specularStrength, shininess);
-
-    setResource(id, material);
-}
-
-template<>
-void ResourceManager::loadResource<StreetPack>(const std::string& id, const std::string& filename, const std::string& shader, const std::string& material) {
-    static std::pair<StreetType, std::string> filenames[] = {
-        {StreetType::NOT_CONNECTED, "street_not_connected.obj"},
-        {          StreetType::END,           "street_end.obj"},
-        {        StreetType::CURVE,         "street_curve.obj"},
-        {   StreetType::T_CROSSING,    "street_t_crossing.obj"},
-        {     StreetType::CROSSING,      "street_crossing.obj"},
-        {         StreetType::EDGE,      "street_straight.obj"},
-        {   StreetType::CURVE_FULL,    "street_curve_full.obj"}
-    };
-
-    StreetPack* pack = new StreetPack();
-
-    for (auto& [type, streetFilename] : filenames) {
-        pack->streetGeometries.emplace(type, ModelLoader::load(filename + streetFilename));
-    }
-
-    pack->shader = getResource<Shader>(shader);
-    pack->material = getResource<Material>(material);
-
-    setResource(id, pack);
-}
-
-void ResourceManager::loadResources(const std::string& resourceDir) {
+void ResourceManager::loadResources() {
     xml_document doc;
     xml_parse_result result = doc.load_file((resourceDir + "resources.xml").c_str());
 
@@ -119,7 +81,7 @@ void ResourceManager::loadResources(const std::string& resourceDir) {
         const std::string& type = resourceNode.attribute("type").as_string();
 
         const std::string& id = resourceNode.attribute("id").as_string();
-        const std::string& filename = resourceDir + resourceNode.attribute("filename").as_string();
+        const std::string& filename = resourceNode.attribute("filename").as_string();
 
         if (type == "model") {
             loadResource<Geometry>(id, filename);
@@ -132,18 +94,48 @@ void ResourceManager::loadResources(const std::string& resourceDir) {
             loadResource<Texture>(id, filename, rgba);
         }
         else if (type == "material") {
-            const std::string& diffuse = resourceNode.attribute("diffuse").as_string();
-            const std::string& specular = resourceNode.attribute("specular").as_string();
+            std::unordered_map<std::string, Material*> materials = ModelLoader::loadMaterials(resourceDir + filename, this);
 
-            float specularStrength = resourceNode.attribute("specularStrength").as_float();
-            float shininess = resourceNode.attribute("shininess").as_float();
-            loadResource<Material>(id, diffuse, specular, specularStrength, shininess);
+            for (const auto& materialNode : resourceNode.children("material")) {
+                const std::string& materialName = materialNode.attribute("name").as_string();
+                const std::string& materialId = materialNode.attribute("id").as_string();
+
+                try {
+                    Material* material = materials.at(materialName);
+
+                    setResource(materialId, material);
+                }
+                catch (std::out_of_range e) {
+                    std::cerr << "Material \"" << materialName << "\" not found in file \"" << filename << "\"" << std::endl;
+
+                    throw e;
+                }
+            }
         }
         else if (type == "streetPack") {
             const std::string& shaderId = resourceNode.attribute("shader").as_string();
             const std::string& materialId = resourceNode.attribute("material").as_string();
 
-            loadResource<StreetPack>(id, filename, shaderId, materialId);
+            static std::pair<StreetType, std::string> filenames[] = {
+                {StreetType::NOT_CONNECTED, "street_not_connected.obj"},
+                {          StreetType::END,           "street_end.obj"},
+                {        StreetType::CURVE,         "street_curve.obj"},
+                {   StreetType::T_CROSSING,    "street_t_crossing.obj"},
+                {     StreetType::CROSSING,      "street_crossing.obj"},
+                {         StreetType::EDGE,      "street_straight.obj"},
+                {   StreetType::CURVE_FULL,    "street_curve_full.obj"}
+            };
+
+            StreetPack* pack = new StreetPack();
+
+            for (auto& [type, streetFilename] : filenames) {
+                pack->streetGeometries.emplace(type, ModelLoader::load(resourceDir + filename + streetFilename));
+            }
+
+            pack->shader = getResource<Shader>(shaderId);
+            pack->material = getResource<Material>(materialId);
+
+            setResource(id, pack);
         }
     }
 }

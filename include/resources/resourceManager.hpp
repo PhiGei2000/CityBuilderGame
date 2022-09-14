@@ -11,14 +11,14 @@
 class ResourceManager {
   private:
     struct ResourceHolder {
-        std::type_index type = std::type_index(typeid(void));
+        std::type_index type = std::type_index(typeid(void));        
 
         std::shared_ptr<void> data;
     };
 
+    const std::string resourceDir;
     std::unordered_map<std::string, ResourceHolder> resources;
 
-    void loadResources(const std::string& resouceDir);
 
     template<typename T>
     void setResource(const std::string& id, T* data);
@@ -36,11 +36,11 @@ class ResourceManager {
 
     ResourceManager(const std::string& resourceDir);    
 
+    void loadResources();
+
     template<typename T, typename... TArgs>
     void loadResource(const std::string& resourceId, const std::string& filename, TArgs... args);
 
     template<typename T>
     ResourcePtr<T> getResource(const std::string& resourceId) const;
-
-    void reload(const std::string& resourceFile);
 };

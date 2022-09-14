@@ -1,5 +1,7 @@
 #include "resources/modelLoader.hpp"
 
+#include "resources/resourceManager.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -106,11 +108,127 @@ GeometryData ModelLoader::load(const std::string& filename) {
 
         GeometryData data;
         processFaces(positions, texCoords, normals, faceIndices, data);
+        file.close();
 
         return data;
     }
     catch (std::ifstream::failure e) {
-        std::cout << "ERROR:MODEL::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
+        std::cout << "ERROR:MODEL:FILE_NOT_SUCCESSFULLY_READ" << std::endl;
+
+        throw e;
+    }
+}
+
+std::unordered_map<std::string, Material*> ModelLoader::loadMaterials(const std::string& filename, const ResourceManager* resourceManager) {
+    std::ifstream file;
+    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+    try {
+        file.open(filename);
+
+        std::stringstream ss;
+        ss << file.rdbuf();
+
+        std::unordered_map<std::string, Material*> materials;
+
+        Material* mtl;
+        std::string prefix;
+        std::string materialName;
+        float r, g, b;
+
+        for (std::string line; std::getline(ss, line);) {
+            std::stringstream sline(line);
+
+            sline >> prefix;
+            // new material
+            if (prefix == "newmtl") {
+                if (!materials.empty()) {
+                    materials.emplace(materialName, mtl);
+                }
+
+                mtl = new Material();
+                sline >> materialName;
+            }
+            // ambient color
+            else if (prefix == "Ka") {
+                sline >> r;
+                sline >> g;
+                sline >> b;
+
+                mtl->ambientColor = glm::vec3(r, g, b);
+            }
+            // diffuse color
+            else if (prefix == "Kd" || prefix == "Ke") {
+                sline >> r;
+                sline >> g;
+                sline >> b;
+
+                mtl->diffuseColor = glm::vec3(r, g, b);
+            }
+            // specular color
+            else if (prefix == "Ks") {
+                sline >> r;
+                sline >> g;
+                sline >> b;
+
+                mtl->specularColor = glm::vec3(r, g, b);
+            }
+            // specular highlights aka shininess
+            else if (prefix == "Ns") {
+                sline >> mtl->shininess;
+            }
+            // optical density aka index of refraction
+            else if (prefix == "Ni") {
+                float ior;
+                sline >> ior;
+
+                mtl->specularStrength = pow((ior - 1) / (ior + 1), 2) / 0.08f;
+            }
+            // dissolve
+            else if (prefix == "d") {
+                sline >> mtl->dissolve;
+            }
+            // illumination model
+            else if (prefix == "illum") {
+                int value;
+                sline >> value;
+
+                if (value < 0 && value > 2) {
+                    std::cerr << "Failed to load material \"" << materialName << "\". Illumination model " << value << " not supported";
+
+                    throw std::invalid_argument("Illumination model value out of range");
+                }
+
+                mtl->illuminationModel = value;
+            }
+            // ambient map
+            else if (prefix == "map_Ka") {
+                std::string filename;
+                sline >> filename;
+
+                mtl->ambientTexture = resourceManager->getResource<Texture>(filename);
+            }
+            // diffuse map 
+            else if (prefix == "map_Kd" || prefix == "map_Ke") {
+                std::string filename;
+                sline >> filename;
+
+                mtl->diffuseTexture = resourceManager->getResource<Texture>(filename);
+            }
+            else if (prefix == "map_Ks") {
+                std::string filename;
+                sline >> filename;
+
+                mtl->specularTexture = resourceManager->getResource<Texture>(filename);
+            }
+        }
+
+        materials.emplace(materialName, mtl);
+
+        return materials;
+    }
+    catch (std::ifstream::failure e) {
+        std::cout << "ERROR:MATERIAL:FILE_NOT_SUCCESSFULLY_READ" << std::endl;
 
         throw e;
     }

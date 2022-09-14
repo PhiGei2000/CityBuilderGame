@@ -15,6 +15,8 @@
 #include <array>
 #endif
 
+class ResourceManager;
+
 class ModelLoader {
   private:
     using FaceIndices = std::array<std::tuple<int unsigned, unsigned int, unsigned int>, 3>;
@@ -23,8 +25,8 @@ class ModelLoader {
 
     static FaceIndices parseVertexIndices(const std::string& str);
 
-  public:
+  public:    
     static GeometryData load(const std::string& filename);
 
-    static std::unordered_map<std::string, Material> loadMaterials(const std::string& filename);
+    static std::unordered_map<std::string, Material*> loadMaterials(const std::string& filename, const ResourceManager* resourceManager);
 };

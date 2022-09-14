@@ -69,7 +69,7 @@ void Game::update(float dt) {
 }
 
 void Game::reloadResources() {
-    resourceManager.reload("res/");
+    resourceManager.loadResources();
 }
 
 int Game::getKey(int key) const {

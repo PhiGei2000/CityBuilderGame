@@ -12,6 +12,7 @@ struct Material {
     glm::vec3 specularColor = glm::vec3(1.0f);
 
     // texture maps
+    ResourcePtr<Texture> ambientTexture = ResourcePtr<Texture>(nullptr);
     ResourcePtr<Texture> diffuseTexture = ResourcePtr<Texture>(nullptr);
     ResourcePtr<Texture> specularTexture = ResourcePtr<Texture>(nullptr);
 
