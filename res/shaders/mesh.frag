@@ -51,17 +51,17 @@ void main() {
     // init colors
     vec3 ambientColor = material.ambientColor;
     if (material.useAmbientTexture) {
-        ambientColor *= texture2D(material.ambientTexture, TexCoord).rgb;
+        ambientColor = ambientColor * texture2D(material.ambientTexture, TexCoord).rgb;
     }
 
     vec3 diffuseColor = material.diffuseColor;
     if (material.useDiffuseTexture) {
-        diffuseColor *= texture2D(material.diffuseTexture, TexCoord).rgb;
+        diffuseColor = texture2D(material.diffuseTexture, TexCoord).rgb;
     }
 
     vec3 specularColor = material.specularColor;
     if (material.useSpecularTexture) {
-        specularColor *= texture2D(material.specularTexture, TexCoord).rgb;
+        specularColor = texture2D(material.specularTexture, TexCoord).rgb;
     }
 
     vec3 ambient, diffuse, specular;
@@ -96,5 +96,5 @@ vec3 calcSpecularLight(vec3 specularColor) {
     vec3 halfwayDir = normalize(viewDir - lightDirection);
 
     float spec = pow(max(dot(Normal, halfwayDir), 0.0), material.shininess);
-    return material.specularStrength * spec * lightSpecular * specularColor;
+    return spec * lightSpecular * specularColor;
 }
