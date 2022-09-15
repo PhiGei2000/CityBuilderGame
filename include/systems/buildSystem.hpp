@@ -20,6 +20,9 @@ class BuildSystem : public System {
         // building process ongoing
         bool building = false;
 
+        // start position of the current building process
+        glm::ivec2 startPosition;
+
         // selected building type
         BuildingType selectedBuildingType = BuildingType::CLEAR;
     };
@@ -28,7 +31,7 @@ class BuildSystem : public System {
 
     glm::ivec2 getGridPos(const glm::vec2& mousePos) const;
 
-    void setState(BuildingType currentBuildingType, bool building = false);
+    void setState(BuildingType currentBuildingType, bool building = false, const glm::ivec2& startPosition = glm::ivec2(-1));
 
   public:
     BuildSystem(Game* game);

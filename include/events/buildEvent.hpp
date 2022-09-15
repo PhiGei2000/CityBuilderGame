@@ -3,8 +3,7 @@
 
 #include <glm/glm.hpp>
 
-enum class BuildAction
-{
+enum class BuildAction {
     DEFAULT,
     BEGIN,
     END,
@@ -16,4 +15,5 @@ struct BuildEvent {
     BuildingType type;
 
     BuildAction action;
+    glm::ivec2 buildingStartPosition = glm::ivec2(-1);
 };

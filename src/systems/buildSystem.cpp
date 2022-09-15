@@ -83,8 +83,9 @@ glm::ivec2 BuildSystem::getGridPos(const glm::vec2& mousePos) const {
     return glm::ivec2(glm::floor(gridX), glm::floor(gridZ));
 }
 
-void BuildSystem::setState(BuildingType selectedType, bool building) {
+void BuildSystem::setState(BuildingType selectedType, bool building, const glm::ivec2& startPosition) {
     state.building = building;
+    state.startPosition = building ? startPosition : glm::ivec2(-1);
     state.selectedBuildingType = selectedType;
 }
 
@@ -100,7 +101,17 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
                 BuildingType selectedType = state.selectedBuildingType;
                 BuildAction action = BuildAction::DEFAULT;
 
-                BuildEvent event{buildMarker.pos, selectedType};
+                BuildEvent event;
+                switch (selectedType) {
+                    case BuildingType::ROAD:
+                        action = state.building ? BuildAction::END : BuildAction::BEGIN;
+                        setState(selectedType, !state.building, buildMarker.pos);
+                        break;
+                    default:
+                        break;
+                }
+
+                event = BuildEvent{buildMarker.pos, selectedType, action};
                 game->raiseEvent(event);
             }
         }

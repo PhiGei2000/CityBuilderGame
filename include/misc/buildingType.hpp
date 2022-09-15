@@ -2,5 +2,5 @@
 
 enum class BuildingType : unsigned int {
     CLEAR = 1,
-    STREET = 2
+    ROAD = 2
 };

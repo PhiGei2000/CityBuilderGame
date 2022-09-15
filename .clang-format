@@ -19,6 +19,7 @@
  AllowShortLambdasOnASingleLine: All
  BreakStringLiterals: false
  ColumnLimit: 0
+ IndentCaseLabels: true
  NamespaceIndentation: All
  SpacesInAngles: false
  SpaceAfterTemplateKeyword: false

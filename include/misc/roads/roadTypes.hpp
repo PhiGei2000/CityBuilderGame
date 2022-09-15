@@ -1,6 +1,6 @@
 #pragma once
 
-enum class StreetType
+enum class RoadType
 {
     NOT_CONNECTED,
     END,
@@ -8,5 +8,6 @@ enum class StreetType
     T_CROSSING,
     CROSSING,
     EDGE,
-    CURVE_FULL
+    CURVE_FULL,
+    UNDEFINED = -1
 };

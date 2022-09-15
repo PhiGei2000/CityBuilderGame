@@ -1,5 +1,5 @@
 #pragma once
-#include "misc/streetTypes.hpp"
+#include "misc/roads/roadTypes.hpp"
 #include "misc/typedefs.hpp"
 
 #include "rendering/geometryData.hpp"
@@ -10,7 +10,7 @@
 #include "unordered_map"
 
 struct StreetPack {
-    std::unordered_map<StreetType, GeometryData> streetGeometries;
+    std::unordered_map<RoadType, GeometryData> streetGeometries;
     // float height;
     // float pathwayHeight;
     // float pathwayWidth;

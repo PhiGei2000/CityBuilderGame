@@ -16,7 +16,7 @@ BuildMenu::BuildMenu(Gui* gui)
     streetButton->constraints.width = AbsoluteConstraint(64);
     streetButton->constraints.height = AbsoluteConstraint(64);
     streetButton->onClick += [&](const MouseButtonEvent& e) {
-        this->selectBuildingType(BuildingType::STREET);
+        this->selectBuildingType(BuildingType::ROAD);
     };
 
     addChild(streetButton);

@@ -118,14 +118,14 @@ void ResourceManager::loadResources() {
             const std::string& shaderId = resourceNode.attribute("shader").as_string();
             const std::string& materialId = resourceNode.attribute("material").as_string();
 
-            static std::pair<StreetType, std::string> filenames[] = {
-                {StreetType::NOT_CONNECTED, "street_not_connected.obj"},
-                {          StreetType::END,           "street_end.obj"},
-                {        StreetType::CURVE,         "street_curve.obj"},
-                {   StreetType::T_CROSSING,    "street_t_crossing.obj"},
-                {     StreetType::CROSSING,      "street_crossing.obj"},
-                {         StreetType::EDGE,      "street_straight.obj"},
-                {   StreetType::CURVE_FULL,    "street_curve_full.obj"}
+            static std::pair<RoadType, std::string> filenames[] = {
+                {RoadType::NOT_CONNECTED, "street_not_connected.obj"},
+                {          RoadType::END,           "street_end.obj"},
+                {        RoadType::CURVE,         "street_curve.obj"},
+                {   RoadType::T_CROSSING,    "street_t_crossing.obj"},
+                {     RoadType::CROSSING,      "street_crossing.obj"},
+                {         RoadType::EDGE,      "street_straight.obj"},
+                {   RoadType::CURVE_FULL,    "street_curve_full.obj"}
             };
 
             StreetPack* pack = new StreetPack();
