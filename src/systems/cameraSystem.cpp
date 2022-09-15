@@ -29,8 +29,8 @@ void CameraSystem::update(float dt) {
     glm::vec3 xzCameraFront = glm::vec3(camera.front.x, 0.0f, camera.front.z);
     glm::vec3 xzCameraRight = glm::vec3(camera.right.x, 0.0f, camera.right.z);
 
-    const static float cameraSpeed = 0.01f;
-    const static float cameraRotationSpeed = 0.01f;
+    const static float cameraSpeed = 10.0f;
+    const static float cameraRotationSpeed = 10.0f;
 
     glm::vec3 cameraMoveDirection = glm::vec3(0.0f);
     glm::vec2 cameraRotationDirection = glm::vec2(0.0f);
@@ -62,14 +62,14 @@ void CameraSystem::update(float dt) {
 
     bool cameraPositionUpdated = false;
     if (cameraMoveDirection.x != 0 || cameraMoveDirection.z != 0) {
-        transform.position += cameraSpeed * glm::normalize(cameraMoveDirection);
+        transform.position += dt * cameraSpeed * glm::normalize(cameraMoveDirection);
         cameraPositionUpdated = true;
     }
 
     bool cameraRotationUpdated = false;
     if (cameraRotationDirection.x != 0 || cameraRotationDirection.y != 0) {
-        camera.yaw += cameraRotationDirection.x * cameraRotationSpeed;
-        camera.pitch = glm::clamp(camera.pitch + cameraRotationDirection.y * cameraRotationSpeed, -89.0f, 89.0f);
+        camera.yaw += dt * cameraRotationDirection.x * cameraRotationSpeed;
+        camera.pitch = glm::clamp(camera.pitch + cameraRotationDirection.y * dt * cameraRotationSpeed, -89.0f, 89.0f);
         cameraRotationUpdated = true;
     }
 
