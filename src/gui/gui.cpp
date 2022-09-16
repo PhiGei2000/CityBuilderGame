@@ -151,6 +151,10 @@ void Gui::handleMouseButtonEvent(const MouseButtonEvent& event) {
     if (debugPanel->isVisible()) {
         debugPanel->handleMouseButtonEvent(event);
     }
+
+    if (buildMenu->isVisible()) {
+        buildMenu->handleMouseButtonEvent(event);
+    }
 }
 
 void Gui::handleKeyEvent(const KeyEvent& e) {

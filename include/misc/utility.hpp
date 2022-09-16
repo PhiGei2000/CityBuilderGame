@@ -3,10 +3,17 @@
 
 #include <glm/glm.hpp>
 
+#include "../misc/buildingType.hpp"
 #include "configuration.hpp"
 
-template<int size, typename T>
-std::ostream& operator<<(std::ostream& os, const glm::vec<size, T>& vec);
+template<typename T, glm::qualifier Q>
+std::ostream& operator<<(std::ostream& os, const glm::vec<2, T, Q>& vec);
+template<typename T, glm::qualifier Q>
+std::ostream& operator<<(std::ostream& os, const glm::vec<3, T, Q>& vec);
+template<typename T, glm::qualifier Q>
+std::ostream& operator<<(std::ostream& os, const glm::vec<4, T, Q>& vec);
+
+std::ostream& operator<<(std::ostream& os, BuildingType type);
 
 namespace utility {
 
@@ -36,3 +43,12 @@ namespace utility {
     }
 
 } // namespace utility
+
+namespace glm {
+    template<>
+    GLM_FUNC_QUALIFIER vec<2, int, packed_highp> normalize(const vec<2, int, packed_highp>& v) {
+        return vec<2, int, packed_highp>(
+            v.x == 0 ? 0 : v.x / v.x,
+            v.y == 0 ? 0 : v.y / v.y);
+    }
+} // namespace glm

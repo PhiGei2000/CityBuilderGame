@@ -11,7 +11,7 @@
     <resource type="shader" id="MESH_SHADER" filename="shaders/mesh" />
     <resource type="shader" id="AXIS_SHADER" filename="shaders/axis" />
     <resource type="shader" id="RENDER_QUAD_SHADER" filename="shaders/renderQuad" />
-    <resource type="shader" id="STREET_DEBUG_SHADER" filename="shaders/streetDebug" />    
+    <resource type="shader" id="STREET_DEBUG_SHADER" filename="shaders/streetDebug" />
 
     <!-- textures -->
     <resource type="texture" id="BUILDMARKER_DIFFUSE" filename="textures/buildMarker_diffuse.png" />
@@ -27,15 +27,16 @@
     <resource type="material" filename="materials/ground.mtl">
         <material name="ground" id="GROUND_MATERIAL" />
     </resource>
-    <resource type="material" filename="materials/tree.mtl" >
+    <resource type="material" filename="materials/tree.mtl">
         <material name="tree" id="TREE_MATERIAL" />
     </resource>
-    <!-- <resource type="material" id="STREET_MATERIAL" diffuse="STREET_DIFFUSE" ambientStrenght="0.75" shininess="8.0" specularStrenght="0.5" /> -->
     <!-- <resource type="material" id="CAR_MATERIAL" diffuse="CAR_DIFFUSE" ambientStrenght="0.75" shininess="8.0" specularStrenght="0.5" /> -->
-    <resource type="material" filename="materials/buildmarker.mtl" >
+    <resource type="material" filename="materials/buildmarker.mtl">
         <material name="buildmarker" id="BUILDMARKER_MATERIAL" />
     </resource>
-
+    <resource type="material" filename="materials/basic_street.mtl">
+        <material name="basic_street" id="BASIC_STREET_MATERIAL" />
+    </resource>
     <!-- streets -->
-    <!-- <resource type="streetPack" id="BASIC_STREETS" filename="models/basic_streets/" shader="MESH_SHADER" material="STREET_MATERIAL" />             -->
+    <resource type="streetPack" id="BASIC_STREETS" filename="models/basic_streets/" shader="MESH_SHADER" material="BASIC_STREET_MATERIAL" />
 </resources>

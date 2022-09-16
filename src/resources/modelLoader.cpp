@@ -137,6 +137,9 @@ std::unordered_map<std::string, Material*> ModelLoader::loadMaterials(const std:
         float r, g, b;
 
         for (std::string line; std::getline(ss, line);) {
+            if (line.empty())
+                continue;
+                
             std::stringstream sline(line);
 
             sline >> prefix;
@@ -208,7 +211,7 @@ std::unordered_map<std::string, Material*> ModelLoader::loadMaterials(const std:
 
                 mtl->ambientTexture = resourceManager->getResource<Texture>(filename);
             }
-            // diffuse map 
+            // diffuse map
             else if (prefix == "map_Kd" || prefix == "map_Ke") {
                 std::string filename;
                 sline >> filename;

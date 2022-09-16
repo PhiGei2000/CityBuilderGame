@@ -8,8 +8,8 @@
 BuildMenu::BuildMenu(Gui* gui)
     : StackPanel("build_menu", gui, StackOrientation::ROW, colors::transparent) {
 
-    constraints.height = AbsoluteConstraint(64.0f);
-    constraints.y = RelativeConstraint(0.0f);
+    constraints.height = AbsoluteConstraint(0.1f);
+    constraints.y = RelativeConstraint(0.9f);
 
     streetButtonTexture = new Texture("res/gui/streetBuilder_icon.png");
     streetButton = new IconButton("build_menu.button_street", gui, colors::anthraziteGrey, streetButtonTexture);

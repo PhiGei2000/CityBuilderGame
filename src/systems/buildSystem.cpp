@@ -7,6 +7,7 @@
 
 #include "GLFW/glfw3.h"
 
+#include <array>
 #include <iostream>
 
 BuildSystem::BuildSystem(Game* game)
@@ -44,18 +45,18 @@ void BuildSystem::update(float dt) {
         const glm::vec2& mousePos = game->getMousePos();
         glm::ivec2 gridPos = getGridPos(mousePos);
 
-        if (this->state.building) {
-        }
-        else {
-            // display build marker and update the build marker position
-            buildMarkerComponent.visible = true;
+        // if (this->state.building) {
+        // }
+        // else {
+        // display build marker and update the build marker position
+        buildMarkerComponent.visible = true;
 
-            if (gridPos != buildMarkerComponent.pos) {
-                buildMarkerComponent.pos = gridPos;
-                transform.position = glm::vec3(gridPos.x * Configuration::gridSize, 0.1f, gridPos.y * Configuration::gridSize);
-                transform.calculateTransform();
-            }
+        if (gridPos != buildMarkerComponent.pos) {
+            buildMarkerComponent.pos = gridPos;
+            transform.position = glm::vec3(gridPos.x * Configuration::gridSize, 0.1f, gridPos.y * Configuration::gridSize);
+            transform.calculateTransform();
         }
+        // }
     }
     else {
         buildMarkerComponent.visible = false;
@@ -100,18 +101,28 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
             if (utility::inRange(x, 0, grid) && utility::inRange(y, 0, grid)) {
                 BuildingType selectedType = state.selectedBuildingType;
                 BuildAction action = BuildAction::DEFAULT;
+                glm::ivec2 start;
 
                 BuildEvent event;
                 switch (selectedType) {
                     case BuildingType::ROAD:
                         action = state.building ? BuildAction::END : BuildAction::BEGIN;
+                        if (action == BuildAction::END) {
+                            start = state.startPosition;
+                        }
+
                         setState(selectedType, !state.building, buildMarker.pos);
                         break;
                     default:
                         break;
                 }
 
-                event = BuildEvent{buildMarker.pos, selectedType, action};
+                event = BuildEvent{buildMarker.pos, selectedType, action, start};
+#if DEBUG
+                static std::string actionNames[] = {"DEFAULT", "BEGIN", "END"};
+
+                std::cout << "Raising Build Event: {pos: (" << buildMarker.pos << "), type: " << selectedType << ", action: " << actionNames[(unsigned int)action] << ", start: (" << start << ")}" << std::endl;
+#endif
                 game->raiseEvent(event);
             }
         }
@@ -139,6 +150,11 @@ void BuildSystem::handleBuildEvent(const BuildEvent& e) {
     if (e.action != BuildAction::SELECT) {
         return;
     }
+
+#if DEBUG
+
+    std::cout << "Build type selected: " << e.type << std::endl;
+#endif
 
     setState(e.type, false);
 }
