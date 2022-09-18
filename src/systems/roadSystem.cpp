@@ -5,6 +5,7 @@
 #include "components/transformationComponent.hpp"
 #include "events/buildEvent.hpp"
 #include "misc/configuration.hpp"
+#include "misc/direction.hpp"
 #include "misc/utility.hpp"
 #include "resources/streetPack.hpp"
 
@@ -33,12 +34,19 @@ void RoadSystem::update(float dt) {
     if (sectionsToBuild.size() > 0) {
 
         while (sectionsToBuild.size() > 0) {
-            const RoadSection& section = sectionsToBuild.front();
+            const auto& [start, end] = sectionsToBuild.front();
 
-            const std::vector<RoadSection>& sections = createSection(section.start, section.end);
+            const std::vector<RoadSection>& sections = createSection(start, end);
 
             for (const auto& roadSection : sections) {
-                roadComponent.sections.emplace(roadSection.start, roadSection);
+                if (roadComponent.sections.contains(roadSection.position)) {
+                    for (int i = 0; i < 4; i++) {
+                        roadComponent.sections.at(roadSection.position).connections[i] |= roadSection.connections[i];
+                    }
+                }
+                else {
+                    roadComponent.sections.emplace(roadSection.position, roadSection);
+                }
             }
 
             sectionsToBuild.pop();
@@ -49,17 +57,22 @@ void RoadSystem::update(float dt) {
 }
 
 std::vector<RoadSection> RoadSystem::createSection(const glm::ivec2& start, const glm::ivec2& end) const {
-    const glm::ivec2& direction = glm::normalize(end - start);
+    const glm::ivec2& directionVec = glm::normalize(end - start);
     std::vector<RoadSection> sections;
+    Direction dir = utility::getDirection(directionVec);
 
-    // start
-    sections.emplace_back(start, start, RoadType::END);
+    // start tile
+    std::array<bool, 4> startConnections({false, false, false, false});
+    startConnections[(unsigned int)dir] = true;
+    sections.emplace_back(start, startConnections);
 
-    // connection
-    sections.emplace_back(start + direction, end - direction, RoadType::EDGE);
+    // connection road section
+    sections.emplace_back(start + directionVec, end - directionVec);
 
-    // end
-    sections.emplace_back(end, end, RoadType::END);
+    // end tile
+    std::array<bool, 4> endConnections({false, false, false, false});
+    endConnections[((unsigned int)dir + 2) % 4] = true;
+    sections.emplace_back(end, endConnections);
 
     return sections;
 }
@@ -72,26 +85,37 @@ void RoadSystem::createRoadMesh() {
 
     std::shared_ptr<StreetPack> pack = resourceManager.getResource<StreetPack>("BASIC_STREETS");
     for (const auto& [pos, section] : roadComponent.sections) {
-        const GeometryData& sectionData = pack->streetGeometries[section.type];
+        RoadType type = section.getType();
+        const GeometryData& sectionData = pack->streetGeometries[type];
 
-        const glm::vec3& sectionPos = utility::toWorldCoords(section.start) + static_cast<float>(Configuration::gridSize) * glm::vec3(0.5f, 0.0f, 0.5f);
-        if (section.type == RoadType::EDGE) {
-            const glm::ivec2& sectionVec = glm::abs(section.end - section.start);
-            const glm::ivec2& direction = glm::normalize(section.end - section.start);
-            int length = glm::max(sectionVec.x, sectionVec.y);
+        const glm::vec3& sectionPos = utility::toWorldCoords(section.position) + static_cast<float>(Configuration::gridSize) * glm::vec3(0.5f, 0.0f, 0.5f);
+        if (type == RoadType::EDGE) {
+
+            const glm::ivec2& direction = glm::normalize(section.sectionVector);
+            int length = section.getLength();
+            bool rotate = direction.x == 0;
 
             const glm::vec3& offset = utility::toWorldCoords(direction);
             for (int i = 0; i <= length; i++) {
 
-                data.addData(GeometryData::transformVertices(sectionData, [&](const Vertex& vert) {
-                    return Vertex(sectionPos + vert.position + static_cast<float>(i) * offset, vert.texCoord, vert.normal);
-                }));
+                glm::mat4 transform(1.0f);
+
+                transform = glm::translate(transform, sectionPos + static_cast<float>(i) * offset);
+                if (rotate) {
+                    transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                }
+
+                data.addData(sectionData.transformVertices(transform));
             }
         }
         else {
-            data.addData(GeometryData::transformVertices(sectionData, [&](const Vertex& vert) {
-                return Vertex(sectionPos + vert.position, vert.texCoord, vert.normal);
-            }));
+            int rotation = section.getRotation();
+            glm::mat4 transform(1.0f);
+
+            transform = glm::translate(transform, sectionPos);
+            transform = glm::rotate(transform, rotation * glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+            data.addData(sectionData.transformVertices(transform));
         }
     }
 
@@ -104,10 +128,6 @@ void RoadSystem::handleBuildEvent(const BuildEvent& event) {
         return;
 
     if (event.action == BuildAction::END) {
-        // end of the road section
-        sectionsToBuild.emplace(RoadSection{
-            event.buildingStartPosition,
-            event.gridPosition,
-            RoadType::UNDEFINED});
+        sectionsToBuild.emplace(event.buildingStartPosition, event.gridPosition);
     }
 }

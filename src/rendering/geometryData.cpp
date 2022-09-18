@@ -27,12 +27,27 @@ void GeometryData::addData(const GeometryData& data) {
     }
 }
 
-GeometryData GeometryData::transformVertices(const GeometryData& data, const std::function<Vertex(const Vertex&)>& transform) {
+GeometryData GeometryData::transformVertices(const std::function<Vertex(const Vertex&)>& transform) const {
     GeometryData transformedData;
-    transformedData.indices = data.indices;
+    transformedData.indices = indices;
 
-    for (const Vertex& vert : data.vertices) {
+    for (const Vertex& vert : vertices) {
         transformedData.vertices.emplace_back(transform(vert));
+    }
+
+    return transformedData;
+}
+
+GeometryData GeometryData::transformVertices(const glm::mat4& transform) const {
+    GeometryData transformedData;
+    transformedData.indices = indices;
+
+    const glm::mat3& normalMatrix = glm::mat3(glm::transpose(glm::inverse(transform)));
+    for (const Vertex& vert : vertices) {
+        const glm::vec3& position = glm::vec3(transform * glm::vec4(vert.position, 1.0f));
+        const glm::vec3& normal = normalMatrix * vert.normal;
+
+        transformedData.vertices.emplace_back(position, vert.texCoord, normal);
     }
 
     return transformedData;

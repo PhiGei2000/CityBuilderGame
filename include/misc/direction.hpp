@@ -2,6 +2,7 @@
 #include "typedefs.hpp"
 
 #include <glm/glm.hpp>
+#include <map>
 
 enum class Direction : byte {
     NORTH,
@@ -25,7 +26,7 @@ static std::map<Direction, glm::ivec2> DirectionVectors = {
     std::make_pair<Direction, glm::ivec2>(Direction::WEST, glm::ivec2{0, -1}),
 };
 
-namespace misc {
+namespace utility {
     inline Direction getDirection(const glm::vec2& vec) {
         // (vec.x != 0) xor (vec.y != 0)
         if ((vec.x == 0) != (vec.y == 0)) {

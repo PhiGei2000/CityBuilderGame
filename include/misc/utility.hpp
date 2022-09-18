@@ -48,7 +48,12 @@ namespace glm {
     template<>
     GLM_FUNC_QUALIFIER vec<2, int, packed_highp> normalize(const vec<2, int, packed_highp>& v) {
         return vec<2, int, packed_highp>(
-            v.x == 0 ? 0 : v.x / v.x,
-            v.y == 0 ? 0 : v.y / v.y);
+            v.x == 0 ? 0 : v.x / glm::abs(v.x),
+            v.y == 0 ? 0 : v.y / glm::abs(v.y));
+    }
+
+    template<>
+    GLM_FUNC_QUALIFIER GLM_CONSTEXPR int dot(const vec<2, int, packed_highp>& x, const vec<2, int, packed_highp>& y) {
+        return x.x * y.x + x.y * y.x;
     }
 } // namespace glm

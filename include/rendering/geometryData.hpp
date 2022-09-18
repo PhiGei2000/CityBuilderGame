@@ -13,5 +13,6 @@ struct GeometryData {
 
     void addData(const GeometryData& data);
 
-    static GeometryData transformVertices(const GeometryData& data, const std::function<Vertex(const Vertex&)>& transformation);
+    GeometryData transformVertices(const std::function<Vertex(const Vertex&)>& transformation) const;
+    GeometryData transformVertices(const glm::mat4& transform) const;
 };

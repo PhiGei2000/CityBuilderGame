@@ -2,6 +2,7 @@
 #include "system.hpp"
 
 #include <queue>
+#include <tuple>
 
 struct BuildEvent;
 struct RoadSection;
@@ -10,7 +11,7 @@ class RoadSystem : public System {
     private:
         void init();
 
-        std::queue<RoadSection> sectionsToBuild;
+        std::queue<std::tuple<glm::ivec2, glm::ivec2>> sectionsToBuild;
         std::queue<RoadSection> sectionsToCreateMesh;
 
         entt::entity roadEntity;
