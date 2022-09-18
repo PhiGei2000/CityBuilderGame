@@ -1,10 +1,10 @@
 #pragma once
 #include "misc/roads/roadSection.hpp"
 
-#include <glm/glm.hpp>
-#include <glm/gtx/hash.hpp>
 #include <unordered_map>
+#include <map>
 
 struct RoadComponent {
-    std::unordered_map<glm::ivec2, RoadSection> sections;    
+    std::unordered_map<glm::ivec2, unsigned int> keys;
+    std::map<unsigned int, RoadSection> sections;    
 };

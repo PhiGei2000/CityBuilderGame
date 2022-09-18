@@ -6,6 +6,7 @@
 
 struct BuildEvent;
 struct RoadSection;
+struct RoadComponent;
 
 class RoadSystem : public System {
     private:
@@ -14,7 +15,7 @@ class RoadSystem : public System {
         std::queue<std::tuple<glm::ivec2, glm::ivec2>> sectionsToBuild;
         std::queue<RoadSection> sectionsToCreateMesh;
 
-        entt::entity roadEntity;
+        entt::entity roadEntity;        
 
     public:
         RoadSystem(Game* game);

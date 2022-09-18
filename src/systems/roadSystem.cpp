@@ -21,7 +21,7 @@ RoadSystem::RoadSystem(Game* game)
 void RoadSystem::init() {
     roadEntity = registry.create();
 
-    registry.emplace<RoadComponent>(roadEntity, std::unordered_map<glm::ivec2, RoadSection>());
+    registry.emplace<RoadComponent>(roadEntity);
     registry.emplace<MeshComponent>(roadEntity, std::shared_ptr<Geometry>(new MeshGeometry()),
                                     resourceManager.getResource<Shader>("MESH_SHADER"),
                                     resourceManager.getResource<Material>("BASIC_STREET_MATERIAL"));
@@ -39,13 +39,18 @@ void RoadSystem::update(float dt) {
             const std::vector<RoadSection>& sections = createSection(start, end);
 
             for (const auto& roadSection : sections) {
-                if (roadComponent.sections.contains(roadSection.position)) {
+                unsigned int key;
+                // check if there is a road on the specified position
+                if (roadComponent.keys.contains(roadSection.position)) {
+                    key = roadComponent.keys[roadSection.position];
                     for (int i = 0; i < 4; i++) {
-                        roadComponent.sections.at(roadSection.position).connections[i] |= roadSection.connections[i];
+                        roadComponent.sections.at(key).connections[i] |= roadSection.connections[i];
                     }
                 }
                 else {
-                    roadComponent.sections.emplace(roadSection.position, roadSection);
+                    
+
+                        roadComponent.sections.emplace(roadSection.position, roadSection);
                 }
             }
 
@@ -84,7 +89,7 @@ void RoadSystem::createRoadMesh() {
     GeometryData data{std::vector<Vertex>(), std::vector<unsigned int>()};
 
     std::shared_ptr<StreetPack> pack = resourceManager.getResource<StreetPack>("BASIC_STREETS");
-    for (const auto& [pos, section] : roadComponent.sections) {
+    for (const auto& [_, section] : roadComponent.sections) {
         RoadType type = section.getType();
         const GeometryData& sectionData = pack->streetGeometries[type];
 

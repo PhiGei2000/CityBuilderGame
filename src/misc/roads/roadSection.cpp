@@ -1,5 +1,9 @@
 #include "misc/roads/roadSection.hpp"
 
+RoadSection::RoadSection()
+    : RoadSection(undefinedPosition) {
+}
+
 RoadSection::RoadSection(const glm::ivec2& position, const std::array<bool, 4>& connections)
     : position(position), connections(connections) {
 }
@@ -102,3 +106,5 @@ bool RoadSection::containsPosition(const glm::ivec2& pos) const {
 
     return lambda >= 0 && pl <= sl;
 }
+
+std::vector<glm::ivec2>& 
