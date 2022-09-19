@@ -10,10 +10,17 @@ enum class BuildAction {
     SELECT
 };
 
+enum class BuildShape {
+    POINT,
+    LINE,
+    AREA
+};
+
 struct BuildEvent {
     glm::ivec2 gridPosition;
     BuildingType type;
 
     BuildAction action;
     glm::ivec2 buildingStartPosition = glm::ivec2(-1);
+    BuildShape shape = BuildShape::LINE;
 };

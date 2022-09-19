@@ -1,13 +1,13 @@
 #pragma once
 #include "system.hpp"
 
+#include "events/buildEvent.hpp"
 #include "misc/buildingType.hpp"
 
 #include <glm/glm.hpp>
 
 struct MouseButtonEvent;
 struct KeyEvent;
-struct BuildEvent;
 
 class BuildSystem : public System {
   protected:
@@ -32,6 +32,8 @@ class BuildSystem : public System {
     glm::ivec2 getGridPos(const glm::vec2& mousePos) const;
 
     void setState(BuildingType currentBuildingType, bool building = false, const glm::ivec2& startPosition = glm::ivec2(-1));
+
+    static constexpr BuildShape getShape(const glm::ivec2& start, const glm::ivec2& end);
 
   public:
     BuildSystem(Game* game);

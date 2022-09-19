@@ -90,6 +90,21 @@ void BuildSystem::setState(BuildingType selectedType, bool building, const glm::
     state.selectedBuildingType = selectedType;
 }
 
+constexpr BuildShape BuildSystem::getShape(const glm::ivec2& start, const glm::ivec2& end) {
+    bool x = start.x == end.x;
+    bool y = start.y == end.y;
+
+    if (x && y) {
+        return BuildShape::POINT;
+    }
+    else if (x || y) {
+        return BuildShape::LINE;
+    }
+    else {
+        return BuildShape::AREA;
+    }
+}
+
 void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
     if (e.action == GLFW_RELEASE) {
         if (game->getState() == GameState::BUILD_MODE) {
@@ -101,14 +116,18 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
             if (utility::inRange(x, 0, grid) && utility::inRange(y, 0, grid)) {
                 BuildingType selectedType = state.selectedBuildingType;
                 BuildAction action = BuildAction::DEFAULT;
+                BuildShape shape = BuildShape::POINT;
                 glm::ivec2 start;
 
                 BuildEvent event;
                 switch (selectedType) {
                     case BuildingType::ROAD:
                         action = state.building ? BuildAction::END : BuildAction::BEGIN;
+
                         if (action == BuildAction::END) {
                             start = state.startPosition;
+
+                            shape = getShape(start, buildMarker.pos);
                         }
 
                         setState(selectedType, !state.building, buildMarker.pos);
@@ -117,7 +136,7 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
                         break;
                 }
 
-                event = BuildEvent{buildMarker.pos, selectedType, action, start};
+                event = BuildEvent{buildMarker.pos, selectedType, action, start, shape};
 #if DEBUG
                 static std::string actionNames[] = {"DEFAULT", "BEGIN", "END"};
 
@@ -152,7 +171,6 @@ void BuildSystem::handleBuildEvent(const BuildEvent& e) {
     }
 
 #if DEBUG
-
     std::cout << "Build type selected: " << e.type << std::endl;
 #endif
 
