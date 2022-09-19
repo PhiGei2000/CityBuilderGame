@@ -1,31 +1,19 @@
-#include "misc/roads/roadSection.hpp"
+#include "misc/roads/roadTile.hpp"
 
-RoadSection::RoadSection()
-    : RoadSection(undefinedPosition) {
+RoadTile::RoadTile()
+    : RoadTile(undefinedPosition) {
 }
 
-RoadSection::RoadSection(const glm::ivec2& position, const std::array<bool, 4>& connections)
+RoadTile::RoadTile(const glm::ivec2& position, const std::array<bool, 4>& connections)
     : position(position), connections(connections) {
 }
 
-RoadSection::RoadSection(const glm::ivec2& start, const glm::ivec2& end)
-    : position(start) {
-    sectionVector = end - start;
-
-    if (sectionVector.x == 0) {
-        connections = {false, true, false, true};
-    }
-    else {
-        connections = {true, false, true, false};
-    }
-}
-
-int RoadSection::getRotation() const {
+int RoadTile::getRotation() const {
     RoadType type = getType();
 
     switch (type) {
         case RoadType::EDGE:
-            return connections[0] ? 1 : 0;
+            return connections[0] ? 0 : 1;
         case RoadType::END: {
             int i = 0;
             while (!connections[i])
@@ -57,15 +45,7 @@ int RoadSection::getRotation() const {
     }
 }
 
-int RoadSection::getLength() const {
-    return glm::abs(sectionVector.x) + glm::abs(sectionVector.y);
-}
-
-RoadType RoadSection::getType() const {
-    if (getLength() != 0) {
-        return RoadType::EDGE;
-    }
-
+RoadType RoadTile::getType() const {
     int connectionsCount = (connections[0] ? 1 : 0) + (connections[1] ? 1 : 0) + (connections[2] ? 1 : 0) + (connections[3] ? 1 : 0);
 
     switch (connectionsCount) {
@@ -89,22 +69,9 @@ RoadType RoadSection::getType() const {
     }
 }
 
-bool RoadSection::containsPosition(const glm::ivec2& pos) const {
-    if (getLength() == 0) {
-        return position == pos;
-    }
-
-    const glm::ivec2& p = pos - position;
-    const glm::ivec2& normal = glm::ivec2(sectionVector.y, sectionVector.x);
-
-    if (p.x * normal.x + p.y * normal.y != 0)
-        return false;
-
-    int lambda = p.x * sectionVector.x + p.y * sectionVector.x;
-    int pl = glm::abs(p.x) + glm::abs(p.y);
-    int sl = getLength();
-
-    return lambda >= 0 && pl <= sl;
+void RoadTile::addConnections(const Connections& connections) {
+    this->connections[0] |= connections[0];
+    this->connections[1] |= connections[1];
+    this->connections[2] |= connections[2];
+    this->connections[3] |= connections[3];
 }
-
-std::vector<glm::ivec2>& 

@@ -5,7 +5,7 @@
 #include <tuple>
 
 struct BuildEvent;
-struct RoadSection;
+struct RoadTile;
 struct RoadComponent;
 
 class RoadSystem : public System {
@@ -13,7 +13,7 @@ class RoadSystem : public System {
         void init();
 
         std::queue<std::tuple<glm::ivec2, glm::ivec2>> sectionsToBuild;
-        std::queue<RoadSection> sectionsToCreateMesh;
+        std::queue<RoadTile> sectionsToCreateMesh;
 
         entt::entity roadEntity;        
 
@@ -22,7 +22,7 @@ class RoadSystem : public System {
 
         void update(float dt);
 
-        std::vector<RoadSection> createSection(const glm::ivec2& start, const glm::ivec2& end) const;
+        std::vector<RoadTile> createTiles(const glm::ivec2& start, const glm::ivec2& end) const;
         void createRoadMesh();
 
         void handleBuildEvent(const BuildEvent& event);

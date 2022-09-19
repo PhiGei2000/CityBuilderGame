@@ -36,21 +36,16 @@ void RoadSystem::update(float dt) {
         while (sectionsToBuild.size() > 0) {
             const auto& [start, end] = sectionsToBuild.front();
 
-            const std::vector<RoadSection>& sections = createSection(start, end);
+            const std::vector<RoadTile>& sections = createTiles(start, end);
 
-            for (const auto& roadSection : sections) {
-                unsigned int key;
-                // check if there is a road on the specified position
-                if (roadComponent.keys.contains(roadSection.position)) {
-                    key = roadComponent.keys[roadSection.position];
-                    for (int i = 0; i < 4; i++) {
-                        roadComponent.sections.at(key).connections[i] |= roadSection.connections[i];
-                    }
+            for (const auto& section : sections) {
+                const glm::ivec2& pos = section.position;
+
+                if (roadComponent.tiles.contains(pos)) {
+                    roadComponent.tiles[pos].addConnections(section.connections);
                 }
                 else {
-                    
-
-                        roadComponent.sections.emplace(roadSection.position, roadSection);
+                    roadComponent.tiles.emplace(pos, section);
                 }
             }
 
@@ -61,23 +56,29 @@ void RoadSystem::update(float dt) {
     }
 }
 
-std::vector<RoadSection> RoadSystem::createSection(const glm::ivec2& start, const glm::ivec2& end) const {
-    const glm::ivec2& directionVec = glm::normalize(end - start);
-    std::vector<RoadSection> sections;
+std::vector<RoadTile> RoadSystem::createTiles(const glm::ivec2& start, const glm::ivec2& end) const {
+    const glm::ivec2& sectionVec = end - start;
+    int length = glm::abs(sectionVec.x) + glm::abs(sectionVec.y);
+
+    const glm::ivec2& directionVec = glm::normalize(sectionVec);
     Direction dir = utility::getDirection(directionVec);
 
+    std::vector<RoadTile> sections;
+
+    RoadTile::Connections connections = {false, false, false, false};
     // start tile
-    std::array<bool, 4> startConnections({false, false, false, false});
-    startConnections[(unsigned int)dir] = true;
-    sections.emplace_back(start, startConnections);
+    connections[(unsigned int)dir] = true;
+    sections.emplace_back(start, connections);
 
     // connection road section
-    sections.emplace_back(start + directionVec, end - directionVec);
+    connections[((unsigned int)dir + 2) % 4] = true;
+    for (int i = 1; i < length; i++) {
+        sections.emplace_back(start + i * directionVec, connections);
+    }
 
     // end tile
-    std::array<bool, 4> endConnections({false, false, false, false});
-    endConnections[((unsigned int)dir + 2) % 4] = true;
-    sections.emplace_back(end, endConnections);
+    connections[(unsigned int)dir] = false;
+    sections.emplace_back(end, connections);
 
     return sections;
 }
@@ -89,39 +90,19 @@ void RoadSystem::createRoadMesh() {
     GeometryData data{std::vector<Vertex>(), std::vector<unsigned int>()};
 
     std::shared_ptr<StreetPack> pack = resourceManager.getResource<StreetPack>("BASIC_STREETS");
-    for (const auto& [_, section] : roadComponent.sections) {
-        RoadType type = section.getType();
+    for (const auto& [_, tile] : roadComponent.tiles) {
+        RoadType type = tile.getType();
         const GeometryData& sectionData = pack->streetGeometries[type];
 
-        const glm::vec3& sectionPos = utility::toWorldCoords(section.position) + static_cast<float>(Configuration::gridSize) * glm::vec3(0.5f, 0.0f, 0.5f);
-        if (type == RoadType::EDGE) {
+        const glm::vec3& sectionPos = utility::toWorldCoords(tile.position) + static_cast<float>(Configuration::gridSize) * glm::vec3(0.5f, 0.0f, 0.5f);
 
-            const glm::ivec2& direction = glm::normalize(section.sectionVector);
-            int length = section.getLength();
-            bool rotate = direction.x == 0;
+        int rotation = tile.getRotation();
+        glm::mat4 transform(1.0f);
 
-            const glm::vec3& offset = utility::toWorldCoords(direction);
-            for (int i = 0; i <= length; i++) {
+        transform = glm::translate(transform, sectionPos);
+        transform = glm::rotate(transform, rotation * glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-                glm::mat4 transform(1.0f);
-
-                transform = glm::translate(transform, sectionPos + static_cast<float>(i) * offset);
-                if (rotate) {
-                    transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-                }
-
-                data.addData(sectionData.transformVertices(transform));
-            }
-        }
-        else {
-            int rotation = section.getRotation();
-            glm::mat4 transform(1.0f);
-
-            transform = glm::translate(transform, sectionPos);
-            transform = glm::rotate(transform, rotation * glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-            data.addData(sectionData.transformVertices(transform));
-        }
+        data.addData(sectionData.transformVertices(transform));
     }
 
     MeshGeometry* geometry = static_cast<MeshGeometry*>(meshComponent.geometry.get());
