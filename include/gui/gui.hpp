@@ -39,7 +39,8 @@ class Gui {
 
     DebugPanel* debugPanel;
 
-    std::stack<Widget*> navigation;    
+    std::stack<Widget*> navigation;  
+    std::vector<Widget*> widgets;  
 
     Shader* guiShader = new Shader("res/shaders/renderQuad.vert", "res/shaders/renderQuad.frag");
 

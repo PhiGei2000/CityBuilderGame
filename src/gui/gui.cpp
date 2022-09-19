@@ -30,10 +30,10 @@ Gui::Gui(Application* app, float width, float height)
 void Gui::init() {
     pauseMenu = new PauseMenu(this);
     optionsMenu = new OptionsMenu(this);
-
     buildMenu = new BuildMenu(this);
-
     debugPanel = new DebugPanel(this);
+
+    widgets = {pauseMenu, optionsMenu, buildMenu, debugPanel};
 
     textRenderer.init();
 }
@@ -44,21 +44,21 @@ void Gui::showMenu(GameMenus menu) {
         navigation.top()->hide();
 
     switch (menu) {
-    case GameMenus::NONE:
-        // clear the navigation and set game state to running
-        while (!navigation.empty()) {
-            navigation.pop();
-        }
-        app->setGameState(GameState::RUNNING);
-        return;
-    case GameMenus::PAUSE_MENU:
-        navigation.push(pauseMenu);
-        break;
-    case GameMenus::OPTIONS_MENU:
-        navigation.push(optionsMenu);
-        break;
-    default:
-        return;
+        case GameMenus::NONE:
+            // clear the navigation and set game state to running
+            while (!navigation.empty()) {
+                navigation.pop();
+            }
+            app->setGameState(GameState::RUNNING);
+            return;
+        case GameMenus::PAUSE_MENU:
+            navigation.push(pauseMenu);
+            break;
+        case GameMenus::OPTIONS_MENU:
+            navigation.push(optionsMenu);
+            break;
+        default:
+            return;
     }
 
     // show the top menu on the navigation stack and set the game state to paused
@@ -102,6 +102,14 @@ void Gui::setScreenSize(float width, float height) {
     this->height = height;
 
     textRenderer.setScreenSize(width, height);
+
+    // update widgets
+    for (const auto& widget : widgets) {
+        Container* container;
+        if ((container = dynamic_cast<Container*>(widget)) != nullptr) {
+            container->setChildConstraints();
+        }
+    }
 }
 
 Rectangle Gui::getBox() const {
@@ -161,21 +169,21 @@ void Gui::handleKeyEvent(const KeyEvent& e) {
     if (e.action == GLFW_PRESS) {
         if (app->getGameState() == GameState::RUNNING) {
             switch (e.key) {
-            case GLFW_KEY_ESCAPE:
-                if (!navigation.empty()) {
-                    popMenu();
-                }
-                else {
-                    showMenu(GameMenus::PAUSE_MENU);
-                }
-                break;
-            case GLFW_KEY_F1:
-                if (debugPanel->isVisible()) {
-                    debugPanel->hide();
-                }
-                else {
-                    debugPanel->show();
-                }
+                case GLFW_KEY_ESCAPE:
+                    if (!navigation.empty()) {
+                        popMenu();
+                    }
+                    else {
+                        showMenu(GameMenus::PAUSE_MENU);
+                    }
+                    break;
+                case GLFW_KEY_F1:
+                    if (debugPanel->isVisible()) {
+                        debugPanel->hide();
+                    }
+                    else {
+                        debugPanel->show();
+                    }
             }
         }
     }
