@@ -1,9 +1,11 @@
 #include "resources/resourceManager.hpp"
 
-#include "rendering/material.hpp"
-#include "resources/streetPack.hpp"
+#include "misc/roads/roadSpecs.hpp"
 #include "rendering/geometry.hpp"
+#include "rendering/material.hpp"
 #include "resources/modelLoader.hpp"
+#include "resources/roadGeometryGenerator.hpp"
+#include "resources/roadPack.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -114,25 +116,16 @@ void ResourceManager::loadResources() {
                 }
             }
         }
-        else if (type == "streetPack") {
+        else if (type == "streetGeometry") {
             const std::string& shaderId = resourceNode.attribute("shader").as_string();
             const std::string& materialId = resourceNode.attribute("material").as_string();
 
-            static std::pair<RoadType, std::string> filenames[] = {
-                {RoadType::NOT_CONNECTED, "street_not_connected.obj"},
-                {          RoadType::END,           "street_end.obj"},
-                {        RoadType::CURVE,         "street_curve.obj"},
-                {   RoadType::T_CROSSING,    "street_t_crossing.obj"},
-                {     RoadType::CROSSING,      "street_crossing.obj"},
-                {         RoadType::EDGE,      "street_straight.obj"},
-                {   RoadType::CURVE_FULL,    "street_curve_full.obj"}
-            };
+            float roadwayWidth = resourceNode.attribute("roadwayWidth").as_float();
+            float roadwayHeight = resourceNode.attribute("roadwayHeight").as_float();
+            float sidewalkHeight = resourceNode.attribute("sidewalkHeight").as_float();
 
-            StreetPack* pack = new StreetPack();
-
-            for (auto& [type, streetFilename] : filenames) {
-                pack->streetGeometries.emplace(type, ModelLoader::load(resourceDir + filename + streetFilename));
-            }
+            RoadPack* pack = new RoadPack();
+            pack->roadGeometries = RoadGeometryGenerator::generateRoadPackGeometries(RoadSpecs{roadwayWidth, roadwayHeight, sidewalkHeight});
 
             pack->shader = getResource<Shader>(shaderId);
             pack->material = getResource<Material>(materialId);
@@ -159,11 +152,11 @@ std::shared_ptr<T> ResourceManager::getResource(const std::string& resourceId) c
 template ResourcePtr<Texture> ResourceManager::getResource<Texture>(const std::string&) const;
 template ResourcePtr<Shader> ResourceManager::getResource<Shader>(const std::string&) const;
 template ResourcePtr<Geometry> ResourceManager::getResource<Geometry>(const std::string&) const;
-template ResourcePtr<StreetPack> ResourceManager::getResource<StreetPack>(const std::string&) const;
+template ResourcePtr<RoadPack> ResourceManager::getResource<RoadPack>(const std::string&) const;
 template ResourcePtr<Material> ResourceManager::getResource<Material>(const std::string&) const;
 
 template void ResourceManager::setResource<Texture>(const std::string&, Texture*);
 template void ResourceManager::setResource<Shader>(const std::string&, Shader*);
 template void ResourceManager::setResource<Geometry>(const std::string&, Geometry*);
-template void ResourceManager::setResource<StreetPack>(const std::string&, StreetPack*);
+template void ResourceManager::setResource<RoadPack>(const std::string&, RoadPack*);
 template void ResourceManager::setResource<Material>(const std::string&, Material*);

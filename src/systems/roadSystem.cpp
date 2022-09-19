@@ -7,7 +7,7 @@
 #include "misc/configuration.hpp"
 #include "misc/direction.hpp"
 #include "misc/utility.hpp"
-#include "resources/streetPack.hpp"
+#include "resources/roadPack.hpp"
 
 RoadSystem::RoadSystem(Game* game)
     : System(game) {
@@ -89,10 +89,10 @@ void RoadSystem::createRoadMesh() {
 
     GeometryData data{std::vector<Vertex>(), std::vector<unsigned int>()};
 
-    std::shared_ptr<StreetPack> pack = resourceManager.getResource<StreetPack>("BASIC_STREETS");
+    std::shared_ptr<RoadPack> pack = resourceManager.getResource<RoadPack>("BASIC_STREETS");
     for (const auto& [_, tile] : roadComponent.tiles) {
         RoadType type = tile.getType();
-        const GeometryData& sectionData = pack->streetGeometries[type];
+        const GeometryData& sectionData = pack->roadGeometries[type];
 
         const glm::vec3& sectionPos = utility::toWorldCoords(tile.position) + static_cast<float>(Configuration::gridSize) * glm::vec3(0.5f, 0.0f, 0.5f);
 

@@ -38,5 +38,5 @@
         <material name="basic_street" id="BASIC_STREET_MATERIAL" />
     </resource>
     <!-- streets -->
-    <resource type="streetPack" id="BASIC_STREETS" filename="models/basic_streets/" shader="MESH_SHADER" material="BASIC_STREET_MATERIAL" />
+    <resource type="streetGeometry" id="BASIC_STREETS" roadwayWidth="3.0" roadwayHeight="0.1" sidewalkHeight="0.2" shader="MESH_SHADER" material="BASIC_STREET_MATERIAL" />    
 </resources>

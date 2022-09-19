@@ -7,13 +7,10 @@
 #include "rendering/texture.hpp"
 #include "rendering/material.hpp"
 
-#include "unordered_map"
+#include <map>
 
-struct StreetPack {
-    std::unordered_map<RoadType, GeometryData> streetGeometries;
-    // float height;
-    // float pathwayHeight;
-    // float pathwayWidth;
+struct RoadPack {
+    std::map<RoadType, GeometryData> roadGeometries;    
 
     ResourcePtr<Shader> shader;
     ResourcePtr<Material> material;
