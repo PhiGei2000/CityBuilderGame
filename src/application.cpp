@@ -56,6 +56,9 @@ void Application::init() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
+    // anti-aliasing
+    glfwWindowHint(GLFW_SAMPLES, 4);
+
 #if DEBUG
     window = glfwCreateWindow(800, 600, "City Building Game", NULL, NULL);
 #else
@@ -93,6 +96,7 @@ void Application::init() {
     glewInit();
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
