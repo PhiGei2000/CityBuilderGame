@@ -123,9 +123,10 @@ void ResourceManager::loadResources() {
             float roadwayWidth = resourceNode.attribute("roadwayWidth").as_float();
             float roadwayHeight = resourceNode.attribute("roadwayHeight").as_float();
             float sidewalkHeight = resourceNode.attribute("sidewalkHeight").as_float();
+            unsigned int verticesPerCircle = resourceNode.attribute("verticesPerCircle").as_uint();
 
             RoadPack* pack = new RoadPack();
-            pack->roadGeometries = RoadGeometryGenerator::generateRoadPackGeometries(RoadSpecs{roadwayWidth, roadwayHeight, sidewalkHeight});
+            pack->roadGeometries = RoadGeometryGenerator::generateRoadPackGeometries(RoadSpecs{roadwayWidth, roadwayHeight, sidewalkHeight, verticesPerCircle});
 
             pack->shader = getResource<Shader>(shaderId);
             pack->material = getResource<Material>(materialId);
