@@ -24,4 +24,5 @@ struct BuildEvent {
     BuildAction action;
     glm::ivec2 buildingStartPosition = glm::ivec2(-1);
     BuildShape shape = BuildShape::LINE;
+    bool xFirst = false;
 };

@@ -25,7 +25,7 @@ class RoadSystem : public System {
 
         std::vector<RoadTile> createTiles(const glm::ivec2& start, const glm::ivec2& end) const;
         void createRoadMesh();
-        void createRoadMesh(std::queue<RoadTile>& sections, MeshGeometry* geometry);
+        void createRoadMesh(std::unordered_map<glm::ivec2, RoadTile>& sections, MeshGeometry* geometry);
 
         void handleBuildEvent(const BuildEvent& event);
 };

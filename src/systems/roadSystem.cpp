@@ -68,20 +68,28 @@ void RoadSystem::update(float dt) {
 
     // sections to preview
     if (sectionsToPreview.size() > 0) {
-        std::queue<RoadTile> previewTiles;
+        std::unordered_map<glm::ivec2, RoadTile> previewTiles;
         while (sectionsToPreview.size() > 0) {
             const auto& [start, end] = sectionsToPreview.front();
 
-            const std::vector<RoadTile>& sections = createTiles(start, end);
+            std::vector<RoadTile> sections = createTiles(start, end);
 
-            for (const auto& section : sections) {             
-                previewTiles.push(section);
+            for (auto& section : sections) {
+                if (roadComponent.tiles.contains(section.position)) {
+                    section.addConnections(roadComponent.tiles[section.position].connections);
+                }
+
+                if (previewTiles.contains(section.position)) {
+                    previewTiles[section.position].addConnections(section.connections);
+                }
+                else {
+                    previewTiles.emplace(section.position, section);
+                }
             }
 
             sectionsToPreview.pop();
         }
 
-        
         createRoadMesh(previewTiles, reinterpret_cast<MeshGeometry*>(multiMesh.meshes["BASIC_ROADS_PREVIEW"].geometry.get()));
     }
 }
@@ -140,13 +148,12 @@ void RoadSystem::createRoadMesh() {
     geometry->fillBuffers(data);
 }
 
-void RoadSystem::createRoadMesh(std::queue<RoadTile>& tiles, MeshGeometry* geometry) {
+void RoadSystem::createRoadMesh(std::unordered_map<glm::ivec2, RoadTile>& tiles, MeshGeometry* geometry) {
     const RoadComponent& roadComponent = registry.get<RoadComponent>(roadEntity);
 
     GeometryData data;
     std::shared_ptr<RoadPack> pack = resourceManager.getResource<RoadPack>("BASIC_STREETS_PREVIEW");
-    while (tiles.size() > 0) {
-        const RoadTile& tile = tiles.front();
+    for (const auto& [_, tile] : tiles) {
         const GeometryData& sectionData = pack->roadGeometries[tile.getType()];
 
         const glm::vec3& sectionPos = utility::toWorldCoords(tile.position) + static_cast<float>(Configuration::gridSize) * glm::vec3(0.5f, 0.0f, 0.5f);
@@ -158,8 +165,6 @@ void RoadSystem::createRoadMesh(std::queue<RoadTile>& tiles, MeshGeometry* geome
         transform = glm::rotate(transform, rotation * glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
         data.addData(sectionData.transformVertices(transform));
-
-        tiles.pop();
     }
 
     geometry->fillBuffers(data);
@@ -169,10 +174,31 @@ void RoadSystem::handleBuildEvent(const BuildEvent& event) {
     if (event.type != BuildingType::ROAD)
         return;
 
+    std::vector<std::pair<glm::ivec2, glm::ivec2>> sections;
+    if (event.shape == BuildShape::LINE) {
+        sections.emplace_back(event.buildingStartPosition, event.gridPosition);
+    }
+    else {
+        glm::ivec2 p;
+        if (event.xFirst) {
+            p = glm::ivec2(event.gridPosition.x, event.buildingStartPosition.y);
+        }
+        else {
+            p = glm::ivec2(event.buildingStartPosition.x, event.gridPosition.y);
+        }
+
+        sections.emplace_back(event.buildingStartPosition, p);
+        sections.emplace_back(p, event.gridPosition);
+    }
+
     if (event.action == BuildAction::END) {
-        sectionsToBuild.emplace(event.buildingStartPosition, event.gridPosition);
+        for (const auto& section : sections) {
+            sectionsToBuild.push(section);
+        }
     }
     else if (event.action == BuildAction::PREVIEW) {
-        sectionsToPreview.emplace(event.buildingStartPosition, event.gridPosition);
+        for (const auto& section : sections) {
+            sectionsToPreview.push(section);
+        }
     }
 }

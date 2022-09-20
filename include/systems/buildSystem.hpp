@@ -17,21 +17,27 @@ class BuildSystem : public System {
     entt::entity buildMarkerEntity;
 
     struct BuildSystemState {
-        // building process ongoing
+        /// @brief building process ongoing
         bool building = false;
 
-        // start position of the current building process
+        /// @brief Current position of the build marker
+        glm::ivec2 currentPosition;
+
+        /// @brief start position of the current building process
         glm::ivec2 startPosition;
 
-        // selected building type
+        /// @brief selected building type
         BuildingType selectedBuildingType = BuildingType::CLEAR;
+
+        //
+        bool xFirst = true;
     };
 
     BuildSystemState state{};
 
     glm::ivec2 getGridPos(const glm::vec2& mousePos) const;
 
-    void setState(BuildingType currentBuildingType, bool building = false, const glm::ivec2& startPosition = glm::ivec2(-1));
+    void setState(BuildingType currentBuildingType, const glm::ivec2& currentPosition, bool building = false, const glm::ivec2& startPosition = glm::ivec2(-1), bool xFirst = true);
 
     static constexpr BuildShape getShape(const glm::ivec2& start, const glm::ivec2& end);
 
