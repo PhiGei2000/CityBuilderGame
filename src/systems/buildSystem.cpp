@@ -45,9 +45,6 @@ void BuildSystem::update(float dt) {
         const glm::vec2& mousePos = game->getMousePos();
         glm::ivec2 gridPos = getGridPos(mousePos);
 
-        // if (this->state.building) {
-        // }
-        // else {
         // display build marker and update the build marker position
         buildMarkerComponent.visible = true;
 
@@ -55,8 +52,14 @@ void BuildSystem::update(float dt) {
             buildMarkerComponent.pos = gridPos;
             transform.position = glm::vec3(gridPos.x * Configuration::gridSize, 0.1f, gridPos.y * Configuration::gridSize);
             transform.calculateTransform();
+
+            if (this->state.building) {
+                // render building preview
+                BuildEvent event = BuildEvent{gridPos, state.selectedBuildingType, BuildAction::PREVIEW, state.startPosition, getShape(state.startPosition, gridPos)};
+
+                game->raiseEvent(event);
+            }
         }
-        // }
     }
     else {
         buildMarkerComponent.visible = false;

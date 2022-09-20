@@ -116,7 +116,7 @@ void ResourceManager::loadResources() {
                 }
             }
         }
-        else if (type == "streetGeometry") {
+        else if (type == "streetPack") {
             const std::string& shaderId = resourceNode.attribute("shader").as_string();
             const std::string& materialId = resourceNode.attribute("material").as_string();
 

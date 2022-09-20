@@ -36,7 +36,9 @@
     </resource>
     <resource type="material" filename="materials/basic_street.mtl">
         <material name="basic_street" id="BASIC_STREET_MATERIAL" />
+        <material name="basic_street_preview" id="BASIC_STREET_PREVIEW_MATERIAL" />
     </resource>
     <!-- streets -->
-    <resource type="streetGeometry" id="BASIC_STREETS" roadwayWidth="3.0" roadwayHeight="0.1" sidewalkHeight="0.2" verticesPerCircle="32" shader="MESH_SHADER" material="BASIC_STREET_MATERIAL" />
+    <resource type="streetPack" id="BASIC_STREETS" roadwayWidth="3.0" roadwayHeight="0.1" sidewalkHeight="0.2" verticesPerCircle="32" shader="MESH_SHADER" material="BASIC_STREET_MATERIAL" />
+    <resource type="streetPack" id="BASIC_STREETS_PREVIEW" roadwayWidth="3.0" roadwayHeight="0.1" sidewalkHeight="0.2" verticesPerCircle="32" shader="MESH_SHADER" material="BASIC_STREET_PREVIEW_MATERIAL" />
 </resources>

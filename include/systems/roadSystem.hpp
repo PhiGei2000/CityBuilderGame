@@ -7,15 +7,16 @@
 struct BuildEvent;
 struct RoadTile;
 struct RoadComponent;
+struct MeshGeometry;
 
 class RoadSystem : public System {
     private:
         void init();
 
         std::queue<std::tuple<glm::ivec2, glm::ivec2>> sectionsToBuild;
-        std::queue<RoadTile> sectionsToCreateMesh;
+        std::queue<std::tuple<glm::ivec2, glm::ivec2>> sectionsToPreview;        
 
-        entt::entity roadEntity;        
+        entt::entity roadEntity;              
 
     public:
         RoadSystem(Game* game);
@@ -24,6 +25,7 @@ class RoadSystem : public System {
 
         std::vector<RoadTile> createTiles(const glm::ivec2& start, const glm::ivec2& end) const;
         void createRoadMesh();
+        void createRoadMesh(std::queue<RoadTile>& sections, MeshGeometry* geometry);
 
         void handleBuildEvent(const BuildEvent& event);
 };

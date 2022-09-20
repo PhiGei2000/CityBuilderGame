@@ -131,7 +131,7 @@ std::unordered_map<std::string, Material*> ModelLoader::loadMaterials(const std:
 
         std::unordered_map<std::string, Material*> materials;
 
-        Material* mtl;
+        Material* mtl = nullptr;
         std::string prefix;
         std::string materialName;
         float r, g, b;
@@ -145,7 +145,7 @@ std::unordered_map<std::string, Material*> ModelLoader::loadMaterials(const std:
             sline >> prefix;
             // new material
             if (prefix == "newmtl") {
-                if (!materials.empty()) {
+                if (mtl != nullptr) {
                     materials.emplace(materialName, mtl);
                 }
 

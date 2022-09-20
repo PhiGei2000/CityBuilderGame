@@ -7,7 +7,8 @@ enum class BuildAction {
     DEFAULT,
     BEGIN,
     END,
-    SELECT
+    SELECT,
+    PREVIEW
 };
 
 enum class BuildShape {
