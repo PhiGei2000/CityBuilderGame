@@ -12,15 +12,44 @@ using RoadPackGeometry = std::map<RoadType, GeometryData>;
 
 class RoadGeometryGenerator {
   private:
+    struct UVArea {
+        float u, v;
+        float sizeU, sizeV;
+    };
+
     static constexpr float halfGrid = Configuration::gridSize / 2.0f;
 
-    static GeometryData generateQuad(const glm::vec3& pos, const glm::vec3& first, const glm::vec3& second);
+    static constexpr UVArea roadwayUVArea = {0.0f, 0.0f, 0.5f, 0.5f};
+    static constexpr UVArea halfRoadwayUVArea = {0.0f, 0.0f, 0.5f, 0.25f};
+    static constexpr UVArea sidewalkStraightUVAreas[] = {
+        {  0.5f, 0.0f, 0.125f, 0.5f},
+        {0.625f, 0.0f,  0.25f, 0.5f},
+        {0.875f, 0.0f, 0.125f, 0.5f}
+    };
+    static constexpr UVArea halfSidewalkStraightUVAreas[] = {
+        {  0.5f, 0.0f, 0.125f, 0.25f},
+        {0.625f, 0.0f,  0.25f, 0.25f},
+        {0.875f, 0.0f, 0.125f, 0.25f}
+    };
+    static constexpr UVArea sidewalkRoundUVAreas[] = {
+        {  0.5f, 0.5f, 0.125f,   0.5f},
+        {0.625f, 0.5f, 0.375f, 0.375f}
+    };
+    static constexpr UVArea crossingRoadwayUVAreas[] = {
+        {  0.0f,   1.0f,    0.5f, -0.125f}, // top
+        {  0.5f,   1.0f, -0.125f,   -0.5f}, // right
+        {  0.5f,   0.5f,   -0.5f,  0.125f}, // bottom
+        {  0.0f,   0.5f,  0.125f,    0.5f}, // left
+        {0.125f, 0.625f,   0.25f,   0.25f}  // center
+    };
 
-    static GeometryData generateAnnulus(const glm::vec3& center, float outerRadius, float innerRadius, unsigned int verticesCount);
-    static GeometryData generateQuadCircle(const glm::vec3& center, float height, float radius, unsigned int verticesCount, bool normalsInside = false);
+    static GeometryData generateQuad(const glm::vec3& pos, const glm::vec3& first, const glm::vec3& second, const UVArea& uvs);
 
-    static GeometryData generateAnnulusSector(const glm::vec3& center, float outerRadius, float innerRadius, unsigned int verticesCount, float startAngle, float endAngle);
-    static GeometryData generateQuadCircleSector(const glm::vec3& center, float height, float radius, unsigned int verticesCount, float startAngle, float endAngle, bool normalsInside = false);
+    static GeometryData generateAnnulus(const glm::vec3& center, float outerRadius, float innerRadius, unsigned int verticesCount, const UVArea& uvs);
+    static GeometryData generateQuadCircle(const glm::vec3& center, float height, float radius, unsigned int verticesCount, const UVArea& uvs, bool normalsInside = false);
+
+    static GeometryData generateAnnulusSector(const glm::vec3& center, float outerRadius, float innerRadius, unsigned int verticesCount, float startAngle, float endAngle, const UVArea& uvs);
+    static GeometryData generateQuadCircleSector(const glm::vec3& center, float height, float radius, unsigned int verticesCount, float startAngle, float endAngle, const UVArea& uvs, bool normalsInside = false);
 
     static GeometryData generateNotConnected(const RoadSpecs& specs);
     static GeometryData generateStraight(const RoadSpecs& specs);
