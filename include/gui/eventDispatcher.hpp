@@ -3,16 +3,16 @@
 
 template<typename Event>
 class EventDispatcher {
-    public:
-        typedef std::function<void(const Event&)> EventDelegate;
-    
-    private:
-        std::vector<EventDelegate> subscribers;
+  public:
+    using EventDelegate = std::function<void(Event&)>;
 
-    public:
-        void subscribe(EventDelegate&& function);
+  private:
+    std::vector<EventDelegate> subscribers;
 
-        EventDispatcher& operator +=(EventDelegate&& delegate);
+  public:
+    void subscribe(EventDelegate&& function);
 
-        void invoke(const Event& event) const;
+    EventDispatcher& operator+=(EventDelegate&& delegate);
+
+    void invoke(Event& event) const;
 };

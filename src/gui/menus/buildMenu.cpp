@@ -2,6 +2,7 @@
 
 #include "application.hpp"
 #include "events/buildEvent.hpp"
+#include "events/mouseEvents.hpp"
 #include "gui/components/button.hpp"
 #include "gui/gui.hpp"
 
@@ -15,8 +16,10 @@ BuildMenu::BuildMenu(Gui* gui)
     streetButton = new IconButton("build_menu.button_street", gui, colors::anthraziteGrey, streetButtonTexture);
     streetButton->constraints.width = AbsoluteConstraint(64);
     streetButton->constraints.height = AbsoluteConstraint(64);
-    streetButton->onClick += [&](const MouseButtonEvent& e) {
+    streetButton->onClick += [&](MouseButtonEvent& e) {
         this->selectBuildingType(BuildingType::ROAD);
+
+        e.handled = true;
     };
 
     addChild(streetButton);

@@ -19,6 +19,6 @@ class Container : public Widget {
 
     virtual void setChildConstraints() = 0;
 
-    void handleMouseButtonEvent(const MouseButtonEvent& e) override;
-    void handleMouseMoveEvent(const MouseMoveEvent& e) override;
+    void handleMouseButtonEvent(MouseButtonEvent& e) override;
+    void handleMouseMoveEvent(MouseMoveEvent& e) override;
 };

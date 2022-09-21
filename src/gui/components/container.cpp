@@ -8,7 +8,7 @@ Container::Container(const std::string& id, Gui* gui, const glm::vec4& backgroun
     : Widget(id, gui, backgroundColor) {
 }
 
-void Container::handleMouseButtonEvent(const MouseButtonEvent& e) {
+void Container::handleMouseButtonEvent(MouseButtonEvent& e) {
     if (!visible)
         return;
 
@@ -17,7 +17,7 @@ void Container::handleMouseButtonEvent(const MouseButtonEvent& e) {
     }
 }
 
-void Container::handleMouseMoveEvent(const MouseMoveEvent& e) {
+void Container::handleMouseMoveEvent(MouseMoveEvent& e) {
     if (!visible)
         return;
 

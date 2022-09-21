@@ -16,7 +16,7 @@ Button::Button(const std::string& id, Gui* gui, const glm::vec4& backgroundColor
     };
 }
 
-void Button::handleMouseButtonEvent(const MouseButtonEvent& event) {
+void Button::handleMouseButtonEvent(MouseButtonEvent& event) {
     if (!visible)
         return;
 
@@ -26,8 +26,8 @@ void Button::handleMouseButtonEvent(const MouseButtonEvent& event) {
         return;
     }
 
-    if (event.action == GLFW_PRESS && event.button == GLFW_MOUSE_BUTTON_LEFT) {
-        onClick.invoke(event);
+    if (event.action == GLFW_RELEASE && event.button == GLFW_MOUSE_BUTTON_LEFT) {
+        onClick.invoke(event);        
     }
 }
 

@@ -130,7 +130,6 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
                 BuildShape shape = BuildShape::POINT;
                 glm::ivec2 start;
 
-                BuildEvent event;
                 switch (selectedType) {
                     case BuildingType::ROAD:
                         action = state.building ? BuildAction::END : BuildAction::BEGIN;
@@ -147,7 +146,7 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
                         break;
                 }
 
-                event = BuildEvent{state.currentPosition, selectedType, action, start, shape, state.xFirst};
+                BuildEvent event = BuildEvent{state.currentPosition, selectedType, action, start, shape, state.xFirst};
 #if DEBUG
                 static std::string actionNames[] = {"DEFAULT", "BEGIN", "END"};
 

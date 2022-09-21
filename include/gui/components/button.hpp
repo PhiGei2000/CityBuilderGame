@@ -10,7 +10,7 @@ class Button : public virtual Widget {
 
     Button(const std::string& id, Gui* gui, const glm::vec4& backgroundColor);
 
-    void handleMouseButtonEvent(const MouseButtonEvent& e) override;
+    void handleMouseButtonEvent(MouseButtonEvent& e) override;
 };
 
 class TextButton : public Label, public Button {

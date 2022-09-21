@@ -63,7 +63,7 @@ class Gui {
 
     void render() const;
 
-    void handleMouseButtonEvent(const MouseButtonEvent& e);
-    void handleKeyEvent(const KeyEvent& e);
-    void handleMouseMoveEvent(const MouseMoveEvent& e);
+    void handleMouseButtonEvent(MouseButtonEvent& e);
+    void handleKeyEvent(KeyEvent& e);
+    void handleMouseMoveEvent(MouseMoveEvent& e);
 };

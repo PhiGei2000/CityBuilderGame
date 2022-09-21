@@ -20,13 +20,13 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 
     Application* app = (Application*)glfwGetWindowUserPointer(window);
-    FramebufferSizeEvent event = FramebufferSizeEvent{width, height};
+    FramebufferSizeEvent event = FramebufferSizeEvent(width, height);
     app->onFramebufferSizeEvent(event);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     Application* app = (Application*)glfwGetWindowUserPointer(window);
-    KeyEvent event = KeyEvent{key, scancode, action, mods};
+    KeyEvent event = KeyEvent(key, scancode, action, mods);
     app->onKeyEvent(event);
 }
 
@@ -101,7 +101,7 @@ void Application::init() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // init gui
-    gui = new Gui(this, 800, 600);    
+    gui = new Gui(this, 800, 600);
 
     // init game
     game = new Game(this);
@@ -148,7 +148,9 @@ GLFWwindow* Application::getWindow() const {
 void Application::onKeyEvent(KeyEvent& e) {
     gui->handleKeyEvent(e);
 
-    game->raiseEvent(e);
+    if (!e.handled) {
+        game->raiseEvent(e);
+    }
 }
 
 void Application::onFramebufferSizeEvent(FramebufferSizeEvent& e) {
@@ -164,7 +166,9 @@ void Application::onMouseMoveEvent(MouseMoveEvent& e) {
 }
 
 void Application::onMouseButtonEvent(MouseButtonEvent& e) {
-    game->raiseEvent(e);
-
     gui->handleMouseButtonEvent(e);
+
+    if (!e.handled) {
+        game->raiseEvent(e);
+    }
 }

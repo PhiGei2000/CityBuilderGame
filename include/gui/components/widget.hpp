@@ -40,6 +40,6 @@ class Widget {
 
     virtual Rectangle getBox() const;
 
-    virtual void handleMouseButtonEvent(const MouseButtonEvent& e);
-    virtual void handleMouseMoveEvent(const MouseMoveEvent& e);
+    virtual void handleMouseButtonEvent(MouseButtonEvent& e);
+    virtual void handleMouseMoveEvent(MouseMoveEvent& e);
 };

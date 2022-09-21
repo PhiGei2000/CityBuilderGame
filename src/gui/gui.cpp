@@ -151,7 +151,7 @@ void Gui::render() const {
     glDisable(GL_BLEND);
 }
 
-void Gui::handleMouseButtonEvent(const MouseButtonEvent& event) {
+void Gui::handleMouseButtonEvent(MouseButtonEvent& event) {
     if (!navigation.empty()) {
         navigation.top()->handleMouseButtonEvent(event);
     }
@@ -165,7 +165,7 @@ void Gui::handleMouseButtonEvent(const MouseButtonEvent& event) {
     }
 }
 
-void Gui::handleKeyEvent(const KeyEvent& e) {
+void Gui::handleKeyEvent(KeyEvent& e) {
     if (e.action == GLFW_PRESS) {
         if (app->getGameState() == GameState::RUNNING) {
             switch (e.key) {
@@ -176,6 +176,8 @@ void Gui::handleKeyEvent(const KeyEvent& e) {
                     else {
                         showMenu(GameMenus::PAUSE_MENU);
                     }
+
+                    e.handled = true;
                     break;
                 case GLFW_KEY_F1:
                     if (debugPanel->isVisible()) {
@@ -184,12 +186,14 @@ void Gui::handleKeyEvent(const KeyEvent& e) {
                     else {
                         debugPanel->show();
                     }
+                    e.handled = true;
+                    break;
             }
         }
     }
 }
 
-void Gui::handleMouseMoveEvent(const MouseMoveEvent& event) {
+void Gui::handleMouseMoveEvent(MouseMoveEvent& event) {
 
     if (!navigation.empty()) {
         navigation.top()->handleMouseMoveEvent(event);

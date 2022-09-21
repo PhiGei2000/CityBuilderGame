@@ -10,10 +10,10 @@ Widget::Widget(const std::string& id, Gui* gui, const glm::vec4& backgroundColor
     : id{id}, gui{gui}, backgroundColor{backgroundColor} {
 }
 
-void Widget::handleMouseButtonEvent(const MouseButtonEvent& event) {
+void Widget::handleMouseButtonEvent(MouseButtonEvent& event) {
 }
 
-void Widget::handleMouseMoveEvent(const MouseMoveEvent& event) {
+void Widget::handleMouseMoveEvent(MouseMoveEvent& event) {
     if (!visible)
         return;
 

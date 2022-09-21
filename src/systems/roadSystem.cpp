@@ -176,18 +176,18 @@ void RoadSystem::handleBuildEvent(const BuildEvent& event) {
 
     std::vector<std::pair<glm::ivec2, glm::ivec2>> sections;
     if (event.shape == BuildShape::LINE) {
-        sections.emplace_back(event.buildingStartPosition, event.gridPosition);
+        sections.emplace_back(event.startPosition, event.gridPosition);
     }
     else {
         glm::ivec2 p;
         if (event.xFirst) {
-            p = glm::ivec2(event.gridPosition.x, event.buildingStartPosition.y);
+            p = glm::ivec2(event.gridPosition.x, event.startPosition.y);
         }
         else {
-            p = glm::ivec2(event.buildingStartPosition.x, event.gridPosition.y);
+            p = glm::ivec2(event.startPosition.x, event.gridPosition.y);
         }
 
-        sections.emplace_back(event.buildingStartPosition, p);
+        sections.emplace_back(event.startPosition, p);
         sections.emplace_back(p, event.gridPosition);
     }
 
