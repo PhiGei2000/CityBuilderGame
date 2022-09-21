@@ -46,6 +46,11 @@ namespace utility {
 
 namespace glm {
     template<>
+    GLM_FUNC_QUALIFIER int length(const vec<2, int, packed_highp>& v) {
+        return abs(v.x) + abs(v.y);
+    }
+
+    template<>
     GLM_FUNC_QUALIFIER vec<2, int, packed_highp> normalize(const vec<2, int, packed_highp>& v) {
         return vec<2, int, packed_highp>(
             v.x == 0 ? 0 : v.x / glm::abs(v.x),

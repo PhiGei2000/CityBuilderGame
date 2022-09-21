@@ -51,11 +51,21 @@ void RoadSystem::update(float dt) {
             for (const auto& section : sections) {
                 const glm::ivec2& pos = section.position;
 
+                NodeUpdateInfo info{section.connections};
                 if (roadComponent.tiles.contains(pos)) {
                     roadComponent.tiles[pos].addConnections(section.connections);
+
+                    if (roadComponent.tiles[pos].getType() != RoadType::EDGE) {
+                        nodesChanged.emplace(pos, info);
+                    }
                 }
                 else {
                     roadComponent.tiles.emplace(pos, section);
+
+                    if (roadComponent.tiles[pos].getType() != RoadType::EDGE) {
+                        // create new node if not exists
+                        roadComponent.graph.insertNode(pos);
+                    }                    
                 }
             }
 
@@ -64,6 +74,8 @@ void RoadSystem::update(float dt) {
 
         createRoadMesh();
         multiMesh.meshes["BASIC_ROADS_PREVIEW"].geometry->fillBuffers({}, {});
+
+        updateRoadGraph(roadComponent);
     }
 
     // sections to preview
@@ -168,6 +180,26 @@ void RoadSystem::createRoadMesh(std::unordered_map<glm::ivec2, RoadTile>& tiles,
     }
 
     geometry->fillBuffers(data);
+}
+
+void RoadSystem::updateRoadGraph(RoadComponent& component) {
+    auto it = nodesChanged.begin();
+
+    while (it != nodesChanged.end()) {
+        const auto& [position, updateInfo] = *it;
+
+        for (int i = 0; i < 4; i++) {
+            if (updateInfo.connections[i]) {
+                if (!component.tiles[position].connections[i])
+                    continue;
+
+                // update node connections
+                component.graph.updateNodeConnection(position, (Direction)i);
+            }
+        }
+
+        it = nodesChanged.erase(it);
+    }
 }
 
 void RoadSystem::handleBuildEvent(const BuildEvent& event) {
