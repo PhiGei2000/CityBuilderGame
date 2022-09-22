@@ -2,8 +2,9 @@
 #include "misc/direction.hpp"
 #include "misc/roads/roadTypes.hpp"
 
-#include <set>
+#include <array>
 #include <unordered_map>
+#include <queue>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
@@ -25,6 +26,9 @@ struct RoadGraphNode {
     RoadGraphNode();
     RoadGraphNode(const glm::ivec2& position);
 
+    /// @brief Checks if the node has a connection in the specified direction.
+    /// @param dir The direction to check
+    /// @return True if the node is conntected, false otherwise
     bool connected(Direction dir) const;
 
     /// @brief Determines how often the road tile has to rotated by 90 degrees to fit the connected roads.
@@ -34,6 +38,11 @@ struct RoadGraphNode {
     /// @brief Determines the road type based on the connections
     /// @return The determined road type
     RoadType getType() const;
+
+    /// @brief Returns the destination of the connection in the specified direction.
+    /// @param dir The direction.
+    /// @return The destination of the connection
+    const glm::ivec2& getDestination(Direction dir) const;
 };
 
 struct RoadGraph {  
@@ -44,4 +53,6 @@ struct RoadGraph {
     void updateNodeConnection(const glm::ivec2& position, Direction dir);  
 
     void clear();  
+
+    std::vector<glm::ivec2> getRoute(const glm::ivec2& start, const glm::ivec2& end) const;
 };

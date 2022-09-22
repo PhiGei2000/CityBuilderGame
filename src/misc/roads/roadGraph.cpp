@@ -2,6 +2,8 @@
 
 #include "misc/utility.hpp"
 
+#include <unordered_set>
+
 RoadGraphEdge::RoadGraphEdge()
     : length(0) {
 }
@@ -97,6 +99,13 @@ RoadType RoadGraphNode::getType() const {
     }
 }
 
+const glm::ivec2& RoadGraphNode::getDestination(Direction dir) const {
+    if (!connected(dir))
+        return position;
+
+    return edges[(int)dir].start == position ? edges[(int)dir].end : edges[(int)dir].start;
+}
+
 void RoadGraph::insertNode(const glm::ivec2& position) {
     if (!nodes.contains(position)) {
         nodes[position] = RoadGraphNode(position);
@@ -125,4 +134,70 @@ void RoadGraph::updateNodeConnection(const glm::ivec2& start, Direction dir) {
 
 void RoadGraph::clear() {
     nodes.clear();
+}
+
+std::vector<glm::ivec2> RoadGraph::getRoute(const glm::ivec2& start, const glm::ivec2& end) const {
+    struct Node {
+        int distance = INT_MAX;
+        Node* last = nullptr;
+
+        glm::ivec2 pos;
+    };
+
+    std::unordered_set<glm::ivec2> unvisitedNodes;
+    for (const auto& [pos, _] : nodes) {
+        unvisitedNodes.emplace(pos);
+    }
+
+    std::unordered_map<glm::ivec2, Node> nodeDistances;
+    nodeDistances[end] = {0, nullptr, end};
+
+    Node* currentNode = &nodeDistances[end];
+    Node* lastNode = &nodeDistances[end];
+
+    // while any nodes are unvisited
+    while (unvisitedNodes.size() > 0) {
+        const glm::ivec2 currentPos = currentNode->pos;
+        if (currentPos == start)
+            break;
+
+        // node was visited
+        unvisitedNodes.erase(currentPos);
+
+        const RoadGraphNode& graphNode = nodes.at(currentPos);
+
+        // calculate distance for unvisited and select node with min distance
+        int minDistance = INT_MAX;
+        Node* nextNode;
+
+        for (Direction dir = Direction::NORTH; dir != Direction::UNDEFINED; dir++) {
+            if (currentNode != lastNode && graphNode.connected(dir)) {
+                const glm::ivec2& destination = graphNode.getDestination(dir);
+
+                int distanceSum = lastNode->distance + graphNode.edges[(int)dir].length;
+                if (distanceSum < nodeDistances[destination].distance) {
+                    nodeDistances[destination] = {distanceSum, &nodeDistances[currentPos], destination};
+
+                    // select unvisited node with minimal distance for the next iteration
+                    if (distanceSum < minDistance && unvisitedNodes.contains(destination)) {
+                        nextNode = &nodeDistances[destination];
+                        minDistance = distanceSum;
+                    }
+                }
+            }
+        }
+
+        lastNode = currentNode;
+        currentNode = nextNode;
+    }
+
+    // iterate through nodes and generate path
+    std::vector<glm::ivec2> path;
+    do {
+        path.push_back(currentNode->pos);
+
+        currentNode = currentNode->last;
+    } while (currentNode->last != nullptr);
+
+    return path;
 }
