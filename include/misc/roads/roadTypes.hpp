@@ -7,7 +7,7 @@ enum class RoadType
     CURVE,
     T_CROSSING,
     CROSSING,
-    EDGE,
+    STRAIGHT,
     CURVE_FULL,
     UNDEFINED = -1
 };

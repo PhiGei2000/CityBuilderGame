@@ -46,159 +46,111 @@ void RoadSystem::update(float dt) {
         while (sectionsToBuild.size() > 0) {
             const auto& [start, end] = sectionsToBuild.front();
 
-            const std::vector<RoadTile>& sections = createTiles(start, end);
+            roadComponent.graph.insertNode(start);
+            roadComponent.graph.insertNode(end);
 
-            for (const auto& section : sections) {
-                const glm::ivec2& pos = section.position;
-
-                NodeUpdateInfo info{section.connections};
-                if (roadComponent.tiles.contains(pos)) {
-                    roadComponent.tiles[pos].addConnections(section.connections);
-
-                    if (roadComponent.tiles[pos].getType() != RoadType::EDGE) {
-                        nodesChanged.emplace(pos, info);
-                    }
-                }
-                else {
-                    roadComponent.tiles.emplace(pos, section);
-
-                    if (roadComponent.tiles[pos].getType() != RoadType::EDGE) {
-                        // create new node if not exists
-                        roadComponent.graph.insertNode(pos);
-                    }                    
-                }
+            for (Direction dir = Direction::NORTH; dir < Direction::UNDEFINED; dir++) {
+                roadComponent.graph.updateNodeConnection(end, dir);
+                roadComponent.graph.updateNodeConnection(start, dir);
             }
 
             sectionsToBuild.pop();
         }
 
-        createRoadMesh();
-        multiMesh.meshes["BASIC_ROADS_PREVIEW"].geometry->fillBuffers({}, {});
+        createRoadMesh(roadComponent.graph, reinterpret_cast<MeshGeometry*>(multiMesh.meshes["BASIC_ROADS"].geometry.get()), resourceManager.getResource<RoadPack>("BASIC_STREETS"));
 
-        updateRoadGraph(roadComponent);
+        multiMesh.meshes["BASIC_ROADS_PREVIEW"].geometry->fillBuffers({}, {});
     }
 
     // sections to preview
     if (sectionsToPreview.size() > 0) {
-        std::unordered_map<glm::ivec2, RoadTile> previewTiles;
         while (sectionsToPreview.size() > 0) {
             const auto& [start, end] = sectionsToPreview.front();
 
-            std::vector<RoadTile> sections = createTiles(start, end);
+            Direction dir = utility::getDirection(end - start);
+            previewGraph.insertNode(start);
+            previewGraph.insertNode(end);
 
-            for (auto& section : sections) {
-                if (roadComponent.tiles.contains(section.position)) {
-                    section.addConnections(roadComponent.tiles[section.position].connections);
-                }
-
-                if (previewTiles.contains(section.position)) {
-                    previewTiles[section.position].addConnections(section.connections);
-                }
-                else {
-                    previewTiles.emplace(section.position, section);
-                }
+            for (Direction dir = Direction::NORTH; dir < Direction::UNDEFINED; dir++) {
+                previewGraph.updateNodeConnection(end, dir);
+                previewGraph.updateNodeConnection(start, dir);
             }
 
             sectionsToPreview.pop();
         }
 
-        createRoadMesh(previewTiles, reinterpret_cast<MeshGeometry*>(multiMesh.meshes["BASIC_ROADS_PREVIEW"].geometry.get()));
+        createRoadMesh(previewGraph, reinterpret_cast<MeshGeometry*>(multiMesh.meshes["BASIC_ROADS_PREVIEW"].geometry.get()), resourceManager.getResource<RoadPack>("BASIC_STREETS_PREVIEW"));
     }
 }
 
-std::vector<RoadTile> RoadSystem::createTiles(const glm::ivec2& start, const glm::ivec2& end) const {
-    const glm::ivec2& sectionVec = end - start;
-    int length = glm::abs(sectionVec.x) + glm::abs(sectionVec.y);
-
-    const glm::ivec2& directionVec = glm::normalize(sectionVec);
-    Direction dir = utility::getDirection(directionVec);
-
-    std::vector<RoadTile> sections;
-
-    RoadTile::Connections connections = {false, false, false, false};
-    // start tile
-    connections[(unsigned int)dir] = true;
-    sections.emplace_back(start, connections);
-
-    // connection road section
-    connections[((unsigned int)dir + 2) % 4] = true;
-    for (int i = 1; i < length; i++) {
-        sections.emplace_back(start + i * directionVec, connections);
-    }
-
-    // end tile
-    connections[(unsigned int)dir] = false;
-    sections.emplace_back(end, connections);
-
-    return sections;
-}
-
-void RoadSystem::createRoadMesh() {
-    RoadComponent& roadComponent = registry.get<RoadComponent>(roadEntity);
-    MultiMeshComponent& meshComponent = registry.get<MultiMeshComponent>(roadEntity);
-
-    // basic streets
+void RoadSystem::createRoadMesh(const RoadGraph& graph, MeshGeometry* geometry, ResourcePtr<RoadPack> pack) const {
     GeometryData data;
+    for (const auto& [_, node] : graph.nodes) {
+        // road node
+        RoadType type = node.getType();
+        const GeometryData& nodeData = pack->roadGeometries[type];
 
-    std::shared_ptr<RoadPack> pack = resourceManager.getResource<RoadPack>("BASIC_STREETS");
-    for (const auto& [_, tile] : roadComponent.tiles) {
-        RoadType type = tile.getType();
-        const GeometryData& sectionData = pack->roadGeometries[type];
+        const glm::vec3& sectionPos = utility::toWorldCoords(node.position) + static_cast<float>(Configuration::gridSize) * glm::vec3(0.5f, 0.0f, 0.5f);
 
-        const glm::vec3& sectionPos = utility::toWorldCoords(tile.position) + static_cast<float>(Configuration::gridSize) * glm::vec3(0.5f, 0.0f, 0.5f);
-
-        int rotation = tile.getRotation();
+        int rotation = node.getRotation();
         glm::mat4 transform(1.0f);
 
         transform = glm::translate(transform, sectionPos);
         transform = glm::rotate(transform, rotation * glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-        data.addData(sectionData.transformVertices(transform));
-    }
+        data.addData(nodeData.transformVertices(transform));
 
-    MeshGeometry* geometry = static_cast<MeshGeometry*>(meshComponent.meshes["BASIC_ROADS"].geometry.get());
-    geometry->fillBuffers(data);
-}
+        // edges
+        for (const auto& edge : node.edges) {
+            if (edge.start == node.position) {
+                Direction dir = utility::getDirection(edge.end - edge.start);
 
-void RoadSystem::createRoadMesh(std::unordered_map<glm::ivec2, RoadTile>& tiles, MeshGeometry* geometry) {
-    const RoadComponent& roadComponent = registry.get<RoadComponent>(roadEntity);
+                bool rotate = utility::isEastWest(dir);
+                const GeometryData& edgeData = pack->roadGeometries[RoadType::STRAIGHT];
 
-    GeometryData data;
-    std::shared_ptr<RoadPack> pack = resourceManager.getResource<RoadPack>("BASIC_STREETS_PREVIEW");
-    for (const auto& [_, tile] : tiles) {
-        const GeometryData& sectionData = pack->roadGeometries[tile.getType()];
+                for (int i = 1; i < edge.length; i++) {
+                    const glm::vec3& edgePos = utility::toWorldCoords(edge.start + i * DirectionVectors[dir]) + static_cast<float>(Configuration::gridSize) * glm::vec3(0.5f, 0.0f, 0.5f);
 
-        const glm::vec3& sectionPos = utility::toWorldCoords(tile.position) + static_cast<float>(Configuration::gridSize) * glm::vec3(0.5f, 0.0f, 0.5f);
+                    glm::mat4 edgeTransform(1.0f);
+                    edgeTransform = glm::translate(edgeTransform, edgePos);
 
-        int rotation = tile.getRotation();
-        glm::mat4 transform(1.0f);
+                    if (rotate) {
+                        edgeTransform = glm::rotate(edgeTransform, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                    }
 
-        transform = glm::translate(transform, sectionPos);
-        transform = glm::rotate(transform, rotation * glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-        data.addData(sectionData.transformVertices(transform));
-    }
-
-    geometry->fillBuffers(data);
-}
-
-void RoadSystem::updateRoadGraph(RoadComponent& component) {
-    auto it = nodesChanged.begin();
-
-    while (it != nodesChanged.end()) {
-        const auto& [position, updateInfo] = *it;
-
-        for (int i = 0; i < 4; i++) {
-            if (updateInfo.connections[i]) {
-                if (!component.tiles[position].connections[i])
-                    continue;
-
-                // update node connections
-                component.graph.updateNodeConnection(position, (Direction)i);
+                    data.addData(edgeData.transformVertices(edgeTransform));
+                }
             }
         }
+    }
 
-        it = nodesChanged.erase(it);
+    geometry->fillBuffers(data);
+}
+
+void RoadSystem::clearRoadGraph(RoadGraph& graph) const {
+    // remove edge nodes
+    for (auto it = graph.nodes.begin(); it != graph.nodes.end();) {
+        if (it->second.getType() == RoadType::STRAIGHT) {
+            RoadGraphNode& node = it->second;
+            glm::ivec2 start, end;
+
+            if (node.getRotation() == 0) {
+                start = node.edges[2].start != node.position ? node.edges[2].start : node.edges[2].end;
+                end = node.edges[0].start != node.position ? node.edges[0].start : node.edges[0].end;
+
+                graph.nodes[start].edges[0] = RoadGraphEdge(start, end);
+                graph.nodes[end].edges[2] = RoadGraphEdge(start, end);
+            }
+            else {
+                start = node.edges[3].start != node.position ? node.edges[3].start : node.edges[3].end;
+                end = node.edges[1].start != node.position ? node.edges[1].start : node.edges[1].end;
+
+                graph.nodes[start].edges[1] = RoadGraphEdge(start, end);
+                graph.nodes[end].edges[3] = RoadGraphEdge(start, end);
+            }
+
+            it = graph.nodes.erase(it);
+        }
     }
 }
 
@@ -229,6 +181,8 @@ void RoadSystem::handleBuildEvent(const BuildEvent& event) {
         }
     }
     else if (event.action == BuildAction::PREVIEW) {
+        previewGraph.clear();
+
         for (const auto& section : sections) {
             sectionsToPreview.push(section);
         }

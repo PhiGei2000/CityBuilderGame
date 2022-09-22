@@ -56,4 +56,25 @@ namespace utility {
                    ? dir
                    : static_cast<Direction>((static_cast<byte>(dir) + 2) % 4);
     }
-} // namespace misc
+
+    inline bool isNorthSouth(Direction dir) {
+        return dir == Direction::NORTH || dir == Direction::SOUTH;
+    }
+
+    inline bool isEastWest(Direction dir) {
+        return dir == Direction::EAST || dir == Direction::WEST;
+    }
+} // namespace utility
+
+inline Direction operator-(const Direction& other) {
+    return utility::getInverse(other);
+}
+
+inline Direction operator++(Direction& dir, int i) {
+    Direction tmp = dir;
+    int newDir = (int)dir + 1;
+
+    dir = newDir < 5 ? (Direction)newDir : Direction::UNDEFINED;
+
+    return tmp;
+}

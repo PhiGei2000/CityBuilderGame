@@ -9,7 +9,7 @@ RoadPackGeometry RoadGeometryGenerator::generateRoadPackGeometries(const RoadSpe
     RoadPackGeometry geometries;
 
     geometries[RoadType::NOT_CONNECTED] = generateNotConnected(specs);
-    geometries[RoadType::EDGE] = generateStraight(specs);
+    geometries[RoadType::STRAIGHT] = generateStraight(specs);
     geometries[RoadType::CURVE] = generateCurve(specs);
     geometries[RoadType::T_CROSSING] = generateTCrossing(specs);
     geometries[RoadType::CROSSING] = generateCrossing(specs);
