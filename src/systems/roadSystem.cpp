@@ -45,14 +45,17 @@ void RoadSystem::update(float dt) {
     if (sectionsToBuild.size() > 0) {
         while (sectionsToBuild.size() > 0) {
             const auto& [start, end] = sectionsToBuild.front();
+            Direction dir = utility::getDirection(end - start);
 
             roadComponent.graph.insertNode(start);
             roadComponent.graph.insertNode(end);
 
-            for (Direction dir = Direction::NORTH; dir < Direction::UNDEFINED; dir++) {
-                roadComponent.graph.updateNodeConnection(end, dir);
-                roadComponent.graph.updateNodeConnection(start, dir);
-            }
+            // connect nodes
+            /*for (Direction d = Direction::NORTH; d != Direction::UNDEFINED; d++) {
+                roadComponent.graph.updateNodeConnection(start, d, d == dir);
+                roadComponent.graph.updateNodeConnection(end, d, d == -dir);
+            }*/
+            roadComponent.graph.connectNodes(start, end);
 
             sectionsToBuild.pop();
         }

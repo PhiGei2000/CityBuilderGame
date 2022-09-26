@@ -3,13 +3,20 @@
 #include "misc/roads/roadTypes.hpp"
 
 #include <array>
-#include <unordered_map>
 #include <queue>
+#include <unordered_map>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
 
 struct RoadGraphEdge {
+    struct RoadGraphEdgeIntersectionInfo {
+        bool intersects;
+        bool parallel;
+
+        glm::ivec2 pos;
+    };
+
     glm::ivec2 start, end;
     int length;
 
@@ -17,6 +24,11 @@ struct RoadGraphEdge {
     RoadGraphEdge(const glm::ivec2& start, const glm::ivec2& end);
 
     bool contains(const glm::ivec2& position) const;
+
+    RoadGraphEdgeIntersectionInfo intersects(const RoadGraphEdge& other) const;
+
+    bool isHorzontal() const;
+    bool isVertical() const;
 };
 
 struct RoadGraphNode {
@@ -25,6 +37,8 @@ struct RoadGraphNode {
 
     RoadGraphNode();
     RoadGraphNode(const glm::ivec2& position);
+
+    RoadGraphEdge& operator[](const Direction& dir);
 
     /// @brief Checks if the node has a connection in the specified direction.
     /// @param dir The direction to check
@@ -45,14 +59,21 @@ struct RoadGraphNode {
     const glm::ivec2& getDestination(Direction dir) const;
 };
 
-struct RoadGraph {  
+struct RoadGraph {
+  private:
+  public:
     std::unordered_map<glm::ivec2, RoadGraphNode> nodes;
 
+    /// @brief If no node exists at the specified position, a new node is created at the specified position.
+    /// @param position The position of the node
     void insertNode(const glm::ivec2& position);
 
-    void updateNodeConnection(const glm::ivec2& position, Direction dir);  
+    void updateNodeConnection(const glm::ivec2& position, Direction dir, bool createNew = true);
+    void updateNodeConnections(const glm::ivec2& position, bool createNew = true);
 
-    void clear();  
+    void connectNodes(const glm::ivec2& start, const glm::ivec2& end);
+
+    void clear();
 
     std::vector<glm::ivec2> getRoute(const glm::ivec2& start, const glm::ivec2& end) const;
 };

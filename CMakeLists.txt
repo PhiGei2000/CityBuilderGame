@@ -20,7 +20,7 @@ file(GLOB RECOURSE)
 if(WIN32)
     include(./variablesWin.cmake)
 
-    message("${CMAKE_PREFIX_PATH}")
+    message("${CMAKE_PREFIX_PATH}")    
 endif()
 
 set(OpenGL_GL_PREFERENCE LEGACY)
@@ -32,26 +32,33 @@ find_package(Freetype REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(pugixml REQUIRED)
 
+
 file(GLOB_RECURSE SOURCES src/*.cpp)
 
 add_executable(cityBuilderGame ${SOURCES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC
-    ${ENTT_INCLUDE_DIRS}
-    ${FREETYPE_INCLUDE_DIRS})
+if(WIN32)
+    find_package(EnTT REQUIRED)
 
-if (WIN32)
-    target_include_directories(${PROJECT_NAME} PUBLIC
+    target_include_directories(${PROJECT_NAME} PUBLIC 
+        ${GLEW_INCLUDE_DIRS}
+        ${ENTT_INCLUDE_DIRS}
+        ${FREETYPE_INCLUDE_DIRS}
         ${GLM_INCLUDE_DIRS}
         ${STB_INCLUDE_DIRS})
+else()
+    target_include_directories(${PROJECT_NAME} PUBLIC
+        ${ENTT_INCLUDE_DIRS}
+        ${FREETYPE_INCLUDE_DIRS})
 endif()
+
 
 target_link_libraries(${PROJECT_NAME}
     ${OPENGL_LIBRARIES}
     glfw ${GLFW_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    pugixml
+    pugixml    
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
