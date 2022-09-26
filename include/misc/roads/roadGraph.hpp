@@ -9,14 +9,30 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
 
+namespace std {
+    template<>
+    struct less<glm::ivec2> {
+        constexpr bool operator()(const glm::ivec2& lhs, const glm::ivec2& rhs) const;
+    };
+}
+
 struct RoadGraphEdge {
-    struct RoadGraphEdgeIntersectionInfo {
+  public:
+    struct IntersectionInfo {
         bool intersects;
         bool parallel;
 
-        glm::ivec2 pos;
+        glm::ivec2 position;
+
+        IntersectionInfo();
+        IntersectionInfo(bool intersects, bool parallel, const glm::ivec2& position);
     };
 
+  private:
+      template<int coordinate>
+    IntersectionInfo getParallelEdgeIntersectionPosition(const RoadGraphEdge& other) const;
+
+  public:
     glm::ivec2 start, end;
     int length;
 
@@ -25,10 +41,13 @@ struct RoadGraphEdge {
 
     bool contains(const glm::ivec2& position) const;
 
-    RoadGraphEdgeIntersectionInfo intersects(const RoadGraphEdge& other) const;
+    IntersectionInfo intersects(const RoadGraphEdge& other) const;
 
     bool isHorzontal() const;
     bool isVertical() const;
+
+    bool operator==(const RoadGraphEdge& other) const;
+    bool operator!=(const RoadGraphEdge& other) const;
 };
 
 struct RoadGraphNode {

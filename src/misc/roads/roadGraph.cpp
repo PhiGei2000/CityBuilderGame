@@ -2,15 +2,30 @@
 
 #include "misc/utility.hpp"
 
+#include <set>
 #include <unordered_set>
 
+using IntersectionInfo = RoadGraphEdge::IntersectionInfo;
+
+constexpr bool std::less<glm::ivec2>::operator()(const glm::ivec2& lhs, const glm::ivec2& rhs) const {
+    return lhs.x < rhs.x || lhs.y < rhs.y;
+}
+
+IntersectionInfo::IntersectionInfo()
+    : intersects(false), parallel(false), position(-1) {
+}
+
+IntersectionInfo::IntersectionInfo(bool intersects, bool parallel, const glm::ivec2& position)
+    : intersects(intersects), parallel(parallel), position(position) {
+}
+
 RoadGraphEdge::RoadGraphEdge()
-    : length(0) {
+    : length(0), start(-1), end(-1) {
 }
 
 RoadGraphEdge::RoadGraphEdge(const glm::ivec2& start, const glm::ivec2& end) {
     length = glm::length(end - start);
-    
+
     if (start.y == end.y) {
         if (start.x < end.x) {
             this->start = start;
@@ -36,54 +51,92 @@ RoadGraphEdge::RoadGraphEdge(const glm::ivec2& start, const glm::ivec2& end) {
     }
 }
 
+template<>
+IntersectionInfo RoadGraphEdge::getParallelEdgeIntersectionPosition<1>(const RoadGraphEdge& other) const {
+    IntersectionInfo info(false, true, glm::ivec2(-1));
+
+    if (start.y == other.start.y) {
+        if (utility::inRange(other.start.x, start.x, end.x)) {
+            info.intersects = true;
+            info.position = other.start;
+        }
+        else if (utility::inRange(other.end.x, start.x, end.x)) {
+            info.intersects = true;
+            info.position = start;
+        }
+    }
+
+    return info;
+}
+
+template<>
+IntersectionInfo RoadGraphEdge::getParallelEdgeIntersectionPosition<2>(const RoadGraphEdge& other) const {
+    IntersectionInfo info = {false, true, glm::ivec2(-1)};
+
+    if (start.x == other.start.x) {
+        if (utility::inRange(other.start.y, start.y, end.y)) {
+            info.intersects = true;
+            info.position = other.start;
+        }
+        else if (utility::inRange(other.end.y, start.y, end.y)) {
+            info.intersects = true;
+            info.position = start;
+        }
+    }
+
+    return info;
+}
+
 bool RoadGraphEdge::contains(const glm::ivec2& position) const {
     if (start.x == end.x) {
         // east <-> west
-        return utility::inRange(position.y, glm::min(start.y, end.y), glm::max(start.y, end.y));
+        return start.x == position.x && utility::inRange(position.y, start.y, end.y);
     }
     else if (start.y == end.y) {
         // north <-> south
-        return utility::inRange(position.x, glm::min(start.x, end.x), glm::max(start.x, end.x));
+        return start.y == position.y && utility::inRange(position.x, start.x, end.x);
     }
 
     return false;
 }
 
-RoadGraphEdge::RoadGraphEdgeIntersectionInfo RoadGraphEdge::intersects(const RoadGraphEdge& other) const {
+IntersectionInfo RoadGraphEdge::intersects(const RoadGraphEdge& other) const {
     bool horizontal = isHorzontal();
     bool otherHorizontal = other.isHorzontal();
 
-    bool intersects = false;
-    bool parallel = horizontal == otherHorizontal;
-    glm::ivec2 pos = glm::ivec2(-1);
+    IntersectionInfo info;
+    info.parallel = horizontal == otherHorizontal;
 
     if (horizontal) {
-        if (!otherHorizontal) {                
-            intersects = utility::inRange(other.start.x, start.x, end.x);
+        if (!otherHorizontal) {
+            info.intersects = utility::inRange(other.start.x, start.x, end.x);
 
-            if (intersects) {
-                pos = glm::ivec2(other.start.x, start.y);
-            }            
-        }     
+            if (info.intersects) {
+                info.position = glm::ivec2(other.start.x, start.y);
+            }
+        }
         else {
-            intersects = start.y == other.start.y && (utility::inRange(other.start.x, start.x, end.x) || utility::inRange(other.end.x, start.x, end.x));
+            if (start.y == other.start.y) {
+                info = getParallelEdgeIntersectionPosition<1>(other);
+            }
         }
     }
     else {
         if (otherHorizontal) {
-            intersects = utility::inRange(other.start.y, start.y, end.y);
+            info.intersects = utility::inRange(other.start.y, start.y, end.y);
 
-            if (intersects) {
-                pos.x = start.x;
-                pos.y = other.start.y;
-            }            
+            if (info.intersects) {
+                info.position = glm::ivec2(start.x, other.start.y);
+            }
         }
         else {
-            intersects = start.x == other.start.x && (utility::inRange(other.start.y, start.y, end.y) || utility::inRange(other.end.y, start.y, end.y));
+            if (start.x == other.start.x) {
+                info = getParallelEdgeIntersectionPosition<2>(other);
+            }
         }
     }
 
-    return RoadGraphEdgeIntersectionInfo{intersects, parallel, pos};
+    return info;
 }
 
 bool RoadGraphEdge::isHorzontal() const {
@@ -92,6 +145,14 @@ bool RoadGraphEdge::isHorzontal() const {
 
 bool RoadGraphEdge::isVertical() const {
     return start.x == end.x;
+}
+
+bool RoadGraphEdge::operator==(const RoadGraphEdge& other) const {
+    return start == other.start && end == other.end;
+}
+
+bool RoadGraphEdge::operator!=(const RoadGraphEdge& other) const {
+    return !(this->operator==(other));
 }
 
 RoadGraphNode::RoadGraphNode()
@@ -181,6 +242,10 @@ const glm::ivec2& RoadGraphNode::getDestination(Direction dir) const {
 void RoadGraph::insertNode(const glm::ivec2& position) {
     if (!nodes.contains(position)) {
         nodes[position] = RoadGraphNode(position);
+
+#if DEBUG
+        std::cout << "Node at: (" << position << ") inserted" << std::endl;       
+#endif
     }
 }
 
@@ -200,15 +265,18 @@ void RoadGraph::updateNodeConnection(const glm::ivec2& start, Direction dir, boo
         pos += direction;
     }
 
+    const RoadGraphEdge& edge = RoadGraphEdge(start, pos);
+    Direction edgeDir = utility::getDirection(edge.end - edge.start);
+
     if (createNew) {
-        nodes[start].edges[(int)dir] = RoadGraphEdge(start, pos);
-        nodes[pos].edges[((int)dir + 2) % 4] = RoadGraphEdge(start, pos);
+        nodes[edge.start][edgeDir] = edge;
+        nodes[edge.end][-edgeDir] = edge;
     }
     else {
         // update the connection only if the connection already exisits
-        if (nodes[pos][-dir].length > 0 || nodes[start][dir].length > 0) {
-            nodes[start][dir] = RoadGraphEdge(start, pos);
-            nodes[pos][-dir] = RoadGraphEdge(start, pos);
+        if (nodes[edge.end][-edgeDir].length > 0 || nodes[edge.start][edgeDir].length > 0) {
+            nodes[edge.start][edgeDir] = edge;
+            nodes[edge.end][-edgeDir] = edge;
         }
     }
 }
@@ -223,14 +291,38 @@ void RoadGraph::connectNodes(const glm::ivec2& start, const glm::ivec2& end) {
     const RoadGraphEdge& newEdge = RoadGraphEdge(start, end);
     Direction dir = utility::getDirection(end - start);
 
-    nodes[start][dir] = newEdge;
-    nodes[end][-dir] = newEdge;
+    std::set<glm::ivec2> nodesOnNewEdge;
 
-    // check if edges intersects and create a new node
-    for (const auto& [pos, node] : nodes) {
-        
+    // determine existing nodes and edge intersections on the new edge
+    for (auto& [pos, node] : nodes) {
+        if (newEdge.contains(pos)) {
+            nodesOnNewEdge.insert(pos);
+        }
+
+        for (auto& edge : node.edges) {
+            IntersectionInfo info = newEdge.intersects(edge);
+            if (info.intersects) {
+                insertNode(info.position);
+                updateNodeConnections(info.position, false);
+
+                nodesOnNewEdge.insert(info.position);
+            }
+        }
     }
 
+    // connect nodes
+    for (auto it = nodesOnNewEdge.begin(); std::next(it) != nodesOnNewEdge.end(); it++) {
+        const glm::ivec2& start = *it;
+        const glm::ivec2& end = *std::next(it);
+        const RoadGraphEdge& edge = RoadGraphEdge(start, end);
+
+        #if DEBUG
+        std::cout << "Create new edge from: " << edge.start << " to:" << edge.end << std::endl;
+        #endif
+
+        nodes[start][dir] = edge;
+        nodes[end][-dir] = edge;
+    }
 }
 
 void RoadGraph::clear() {
