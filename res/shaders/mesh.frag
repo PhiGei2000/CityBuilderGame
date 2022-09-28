@@ -51,17 +51,17 @@ void main() {
     // init colors
     vec3 ambientColor = material.ambientColor;
     if (material.useAmbientTexture) {
-        ambientColor = ambientColor * texture2D(material.ambientTexture, TexCoord).rgb;
+        ambientColor = ambientColor * texture(material.ambientTexture, TexCoord).rgb;
     }
 
     vec3 diffuseColor = material.diffuseColor;
     if (material.useDiffuseTexture) {
-        diffuseColor = texture2D(material.diffuseTexture, TexCoord).rgb;
+        diffuseColor = texture(material.diffuseTexture, TexCoord).rgb;
     }
 
     vec3 specularColor = material.specularColor;
     if (material.useSpecularTexture) {
-        specularColor = texture2D(material.specularTexture, TexCoord).rgb;
+        specularColor = texture(material.specularTexture, TexCoord).rgb;
     }
 
     vec3 ambient, diffuse, specular;
