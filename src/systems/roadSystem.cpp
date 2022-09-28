@@ -23,7 +23,7 @@ void RoadSystem::init() {
 
     registry.emplace<RoadComponent>(roadEntity);
     registry.emplace<TransformationComponent>(roadEntity, glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-    registry.emplace<MultiMeshComponent>(roadEntity, std::unordered_map<std::string, MeshComponent>{
+    registry.emplace<MultiMeshComponent>(roadEntity, std::initializer_list<std::pair<const std::string, MeshComponent>>{
                                                          std::make_pair("BASIC_ROADS", MeshComponent{
                                                                                            std::shared_ptr<Geometry>(new MeshGeometry()),
                                                                                            resourceManager.getResource<Shader>("MESH_SHADER"),
@@ -56,9 +56,9 @@ void RoadSystem::update(float dt) {
             sectionsToBuild.pop();
         }
 
-        createRoadMesh(roadComponent.graph, reinterpret_cast<MeshGeometry*>(multiMesh.meshes["BASIC_ROADS"].geometry.get()), resourceManager.getResource<RoadPack>("BASIC_STREETS"));
+        createRoadMesh(roadComponent.graph, reinterpret_cast<MeshGeometry*>(multiMesh.meshes.at("BASIC_ROADS").geometry.get()), resourceManager.getResource<RoadPack>("BASIC_STREETS"));
 
-        multiMesh.meshes["BASIC_ROADS_PREVIEW"].geometry->fillBuffers({}, {});
+        multiMesh.meshes.at("BASIC_ROADS_PREVIEW").geometry->fillBuffers({}, {});
     }
 
     // sections to preview
@@ -78,7 +78,7 @@ void RoadSystem::update(float dt) {
             sectionsToPreview.pop();
         }
 
-        createRoadMesh(previewGraph, reinterpret_cast<MeshGeometry*>(multiMesh.meshes["BASIC_ROADS_PREVIEW"].geometry.get()), resourceManager.getResource<RoadPack>("BASIC_STREETS_PREVIEW"));
+        createRoadMesh(previewGraph, reinterpret_cast<MeshGeometry*>(multiMesh.meshes.at("BASIC_ROADS_PREVIEW").geometry.get()), resourceManager.getResource<RoadPack>("BASIC_STREETS_PREVIEW"));
     }
 }
 

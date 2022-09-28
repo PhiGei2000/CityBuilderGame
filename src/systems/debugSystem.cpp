@@ -10,9 +10,9 @@ void DebugSystem::init() {
     debugEntity = registry.create();
 
     axisGeo = new Geometry(VertexAttributes{
-                                         VertexAttribute{3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0}
+                               VertexAttribute{3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0}
     },
-                                     GL_POINTS);
+                           GL_POINTS);
 
     const static std::vector<float> vertices = {
         1.0, 0.0, 0.0,
@@ -20,11 +20,11 @@ void DebugSystem::init() {
         0.0, 0.0, 1.0};
 
     axisGeo->fillBuffers(vertices, {0, 1, 2});
+    std::pair<const std::string, MeshComponent> axisMesh = std::make_pair<const std::string, MeshComponent>("axis", MeshComponent(std::shared_ptr<Geometry>(axisGeo),
+                                                                                                                                  resourceManager.getResource<Shader>("AXIS_SHADER"),
+                                                                                                                                  std::shared_ptr<Material>(nullptr)));
 
-    registry.emplace<MultiMeshComponent>(debugEntity, std::unordered_map<std::string, MeshComponent>{
-                                                          std::make_pair<std::string, MeshComponent>("axis", MeshComponent{std::shared_ptr<Geometry>(axisGeo),
-                                                                                                                           resourceManager.getResource<Shader>("AXIS_SHADER"),
-                                                                                                                           std::shared_ptr<Material>(nullptr)})});
+    registry.emplace<MultiMeshComponent>(debugEntity, std::initializer_list<std::pair<const std::string, MeshComponent>>{axisMesh});
     registry.emplace<DebugComponent>(debugEntity);
     registry.emplace<TransformationComponent>(debugEntity, glm::vec3{0}, glm::quat(), glm::vec3{1}).calculateTransform();
 }

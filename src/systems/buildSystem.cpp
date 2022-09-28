@@ -48,8 +48,8 @@ void BuildSystem::update(float dt) {
         // display build marker and update the build marker position
         buildMarkerComponent.visible = true;
 
-        if (gridPos != buildMarkerComponent.pos) {
-            buildMarkerComponent.pos = gridPos;
+        if (gridPos != buildMarkerComponent.position) {
+            buildMarkerComponent.position = gridPos;
             transform.position = glm::vec3(gridPos.x * Configuration::gridSize, 0.1f, gridPos.y * Configuration::gridSize);
             transform.calculateTransform();
 
@@ -121,7 +121,7 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
         if (game->getState() == GameState::BUILD_MODE) {
             const BuildMarkerComponent& buildMarker = registry.get<BuildMarkerComponent>(buildMarkerEntity);
 
-            int x = buildMarker.pos.x, y = buildMarker.pos.y;
+            int x = buildMarker.position.x, y = buildMarker.position.y;
             int grid = Configuration::worldSize / Configuration::gridSize;
 
             if (utility::inRange(x, 0, grid) && utility::inRange(y, 0, grid)) {
@@ -137,10 +137,10 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
                         if (action == BuildAction::END) {
                             start = state.startPosition;
 
-                            shape = getShape(start, buildMarker.pos);
+                            shape = getShape(start, buildMarker.position);
                         }
 
-                        setState(selectedType, buildMarker.pos, !state.building, buildMarker.pos, state.xFirst);
+                        setState(selectedType, buildMarker.position, !state.building, buildMarker.position, state.xFirst);
                         break;
                     default:
                         break;
@@ -150,7 +150,7 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
 #if DEBUG
                 static std::string actionNames[] = {"DEFAULT", "BEGIN", "END"};
 
-                std::cout << "Raising Build Event: {pos: (" << buildMarker.pos << "), type: " << selectedType << ", action: " << actionNames[(unsigned int)action] << ", start: (" << start << ")}" << std::endl;
+                std::cout << "Raising Build Event: {pos: (" << buildMarker.position << "), type: " << selectedType << ", action: " << actionNames[(unsigned int)action] << ", start: (" << start << ")}" << std::endl;
 #endif
                 game->raiseEvent(event);
             }
