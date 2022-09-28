@@ -52,7 +52,9 @@ void EnvironmentSystem::update(float dt) {
     while (entitiesToDestroy.size() > 0) {
         auto entity = entitiesToDestroy.front();
 
-        registry.destroy(entity);
+        if (registry.valid(entity)) {
+            registry.destroy(entity);
+        }
 
         entitiesToDestroy.pop();
     }

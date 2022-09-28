@@ -51,10 +51,6 @@ void RoadSystem::update(float dt) {
             roadComponent.graph.insertNode(end);
 
             // connect nodes
-            /*for (Direction d = Direction::NORTH; d != Direction::UNDEFINED; d++) {
-                roadComponent.graph.updateNodeConnection(start, d, d == dir);
-                roadComponent.graph.updateNodeConnection(end, d, d == -dir);
-            }*/
             roadComponent.graph.connectNodes(start, end);
 
             sectionsToBuild.pop();

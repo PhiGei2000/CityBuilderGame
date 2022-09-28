@@ -147,6 +147,10 @@ bool RoadGraphEdge::isVertical() const {
     return start.x == end.x;
 }
 
+Direction RoadGraphEdge::getDirection() const {
+    return utility::getDirection(end - start);
+}
+
 bool RoadGraphEdge::operator==(const RoadGraphEdge& other) const {
     return start == other.start && end == other.end;
 }
@@ -244,7 +248,7 @@ void RoadGraph::insertNode(const glm::ivec2& position) {
         nodes[position] = RoadGraphNode(position);
 
 #if DEBUG
-        std::cout << "Node at: (" << position << ") inserted" << std::endl;       
+        std::cout << "Node at: (" << position << ") inserted" << std::endl;
 #endif
     }
 }
@@ -266,7 +270,7 @@ void RoadGraph::updateNodeConnection(const glm::ivec2& start, Direction dir, boo
     }
 
     const RoadGraphEdge& edge = RoadGraphEdge(start, pos);
-    Direction edgeDir = utility::getDirection(edge.end - edge.start);
+    Direction edgeDir = edge.getDirection();
 
     if (createNew) {
         nodes[edge.start][edgeDir] = edge;
@@ -289,7 +293,7 @@ void RoadGraph::updateNodeConnections(const glm::ivec2& position, bool createNew
 
 void RoadGraph::connectNodes(const glm::ivec2& start, const glm::ivec2& end) {
     const RoadGraphEdge& newEdge = RoadGraphEdge(start, end);
-    Direction dir = utility::getDirection(end - start);
+    Direction dir = utility::getDirection(newEdge.end - newEdge.start);
 
     std::set<glm::ivec2> nodesOnNewEdge;
 

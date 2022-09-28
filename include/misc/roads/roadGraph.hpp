@@ -46,6 +46,8 @@ struct RoadGraphEdge {
     bool isHorzontal() const;
     bool isVertical() const;
 
+    Direction getDirection() const;
+
     bool operator==(const RoadGraphEdge& other) const;
     bool operator!=(const RoadGraphEdge& other) const;
 };
