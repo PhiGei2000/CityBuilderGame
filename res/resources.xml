@@ -16,7 +16,7 @@
     <!-- textures -->
     <resource type="texture" id="BUILDMARKER_DIFFUSE" filename="textures/buildMarker_diffuse.png" />
     <resource type="texture" id="BUILDMARKER_SPECULAR" filename="textures/buildMarker_specular.png" />
-    <!-- <resource type="texture" id="CAR_DIFFUSE" filename="textures/car_diffuse.png" /> -->
+    <resource type="texture" id="CAR_DIFFUSE" filename="textures/car_diffuse.png" />
     <resource type="texture" id="GROUND_DIFFUSE" filename="textures/ground_diffuse.png" />
     <resource type="texture" id="GROUND_SPECULAR" filename="textures/ground_specular.png" />
     <resource type="texture" id="STREET_DIFFUSE" filename="textures/street_diffuse.png" />
@@ -37,6 +37,9 @@
     <resource type="material" filename="materials/basic_street.mtl">
         <material name="basic_street" id="BASIC_STREET_MATERIAL" />
         <material name="basic_street_preview" id="BASIC_STREET_PREVIEW_MATERIAL" />
+    </resource>
+    <resource type="material" filename="materials/car.mtl">
+        <material name="car" id="CAR_MATERIAL" />
     </resource>
     <!-- streets -->
     <resource type="streetPack" id="BASIC_STREETS" roadwayWidth="3.0" roadwayHeight="0.1" sidewalkHeight="0.2" verticesPerCircle="32" shader="MESH_SHADER" material="BASIC_STREET_MATERIAL" />

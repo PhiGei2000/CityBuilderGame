@@ -19,6 +19,7 @@ void Game::init() {
     systems.push_back(new CameraSystem(this));
     systems.push_back(new BuildSystem(this));
     systems.push_back(new RoadSystem(this));
+    systems.push_back(new CarSystem(this));
     systems.push_back(new EnvironmentSystem(this));
     systems.push_back(new PhysicsSystem(this));
     systems.push_back(new DebugSystem(this));
