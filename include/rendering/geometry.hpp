@@ -1,6 +1,8 @@
 #pragma once
 #include "geometryData.hpp"
 
+#include "misc/typedefs.hpp"
+
 #include <GL/glew.h>
 
 struct VertexAttribute {
@@ -40,3 +42,5 @@ class MeshGeometry : public Geometry {
 
     void fillBuffers(const GeometryData& data);
 };
+
+using GeometryPtr = ResourcePtr<Geometry>;

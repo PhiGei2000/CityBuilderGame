@@ -3,9 +3,10 @@
 #include "misc/roads/roadSpecs.hpp"
 #include "rendering/geometry.hpp"
 #include "rendering/material.hpp"
-#include "resources/modelLoader.hpp"
+#include "resources/meshLoader.hpp"
 #include "resources/roadGeometryGenerator.hpp"
 #include "resources/roadPack.hpp"
+#include "resources/mesh.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -40,11 +41,6 @@ void ResourceManager::setResource(const std::string& id, T* data) {
     else {
         resources[id] = ResourceHolder{std::type_index(typeid(T)), dataPtr};
     }
-}
-
-template<>
-void ResourceManager::loadResource<Geometry>(const std::string& id, const std::string& filename) {
-    setResource<Geometry>(id, new MeshGeometry(ModelLoader::load(resourceDir + filename)));
 }
 
 template<>
@@ -87,10 +83,11 @@ void ResourceManager::loadResources() {
         const std::string& id = resourceNode.attribute("id").as_string();
         const std::string& filename = resourceNode.attribute("filename").as_string();
 
-        if (type == "model") {
-            loadResource<Geometry>(id, filename);
-        }
-        else if (type == "shader") {
+        // if (type == "model") {
+        //     loadResource<Geometry>(id, filename);
+        // }
+        // else
+        if (type == "shader") {
             loadResource<Shader>(id, filename);
         }
         else if (type == "texture") {
@@ -98,16 +95,16 @@ void ResourceManager::loadResources() {
             loadResource<Texture>(id, filename, rgba);
         }
         else if (type == "material") {
-            std::unordered_map<std::string, Material*> materials = ModelLoader::loadMaterials(resourceDir + filename, this);
+            std::unordered_map<std::string, MaterialPtr> materials = MeshLoader::loadMaterials(resourceDir + filename);
 
             for (const auto& materialNode : resourceNode.children("material")) {
                 const std::string& materialName = materialNode.attribute("name").as_string();
                 const std::string& materialId = materialNode.attribute("id").as_string();
 
                 try {
-                    Material* material = materials.at(materialName);
+                    MaterialPtr material = materials.at(materialName);
 
-                    setResource(materialId, material);
+                    setResource(materialId, material.get());
                 }
                 catch (std::out_of_range e) {
                     std::cerr << "Material \"" << materialName << "\" not found in file \"" << filename << "\"" << std::endl;
@@ -115,6 +112,15 @@ void ResourceManager::loadResources() {
                     throw e;
                 }
             }
+        }
+        else if(type == "mesh") {
+            const std::string& shaderId = resourceNode.attribute("shader").as_string("MESH_SHADER");
+
+            ShaderPtr shader = getResource<Shader>(shaderId);
+
+            MeshPtr mesh = MeshLoader::loadMesh(resourceDir + filename, shader);
+
+            setResource(id, mesh.get());
         }
         else if (type == "streetPack") {
             const std::string& shaderId = resourceNode.attribute("shader").as_string();
@@ -152,12 +158,14 @@ std::shared_ptr<T> ResourceManager::getResource(const std::string& resourceId) c
 
 template ResourcePtr<Texture> ResourceManager::getResource<Texture>(const std::string&) const;
 template ResourcePtr<Shader> ResourceManager::getResource<Shader>(const std::string&) const;
-template ResourcePtr<Geometry> ResourceManager::getResource<Geometry>(const std::string&) const;
+// template ResourcePtr<Geometry> ResourceManager::getResource<Geometry>(const std::string&) const;
 template ResourcePtr<RoadPack> ResourceManager::getResource<RoadPack>(const std::string&) const;
 template ResourcePtr<Material> ResourceManager::getResource<Material>(const std::string&) const;
+template ResourcePtr<Mesh> ResourceManager::getResource<Mesh>(const std::string&) const;
 
 template void ResourceManager::setResource<Texture>(const std::string&, Texture*);
 template void ResourceManager::setResource<Shader>(const std::string&, Shader*);
-template void ResourceManager::setResource<Geometry>(const std::string&, Geometry*);
+// template void ResourceManager::setResource<Geometry>(const std::string&, Geometry*);
 template void ResourceManager::setResource<RoadPack>(const std::string&, RoadPack*);
 template void ResourceManager::setResource<Material>(const std::string&, Material*);
+template void ResourceManager::setResource<Mesh>(const std::string&, Mesh*);

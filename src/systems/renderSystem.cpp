@@ -41,22 +41,6 @@ RenderSystem::RenderSystem(Game* game)
         .connect<&RenderSystem::onEntityMoved>(*this);
 }
 
-void RenderSystem::renderMesh(const MeshComponent& mesh, const glm::mat4& model) const {
-    // bind shader
-    mesh.shader->use();
-
-    // bind and upload material textures if material exists
-    if (mesh.material) {        
-        mesh.material->use(mesh.shader.get());
-    }
-
-    // upload model matrix
-    mesh.shader->setMatrix4("model", model);
-
-    // draw the vertices
-    mesh.geometry->draw();
-}
-
 void RenderSystem::onCameraUpdated(CameraUpdateEvent& event) const {
     // get components and calculate camera target
     const entt::entity& cameraEntity = event.entity;
@@ -93,20 +77,13 @@ void RenderSystem::onEntityMoved(EntityMoveEvent& event) const {
 void RenderSystem::update(float dt) {
     registry.view<TransformationComponent, MeshComponent>(entt::exclude<BuildMarkerComponent>)
         .each([&](const TransformationComponent& transform, const MeshComponent& mesh) {
-            renderMesh(mesh, transform.transform);
-        });
-
-    registry.view<TransformationComponent, MultiMeshComponent>(entt::exclude<DebugComponent>)
-        .each([&](const TransformationComponent& transform, const MultiMeshComponent& multiMesh) {
-            for (const auto& [id, mesh] : multiMesh.meshes) {
-                renderMesh(mesh, transform.transform);
-            }
+            mesh.mesh->render(transform.transform);
         });
 
     if (game->getState() == GameState::BUILD_MODE) {
         registry.view<TransformationComponent, MeshComponent, BuildMarkerComponent>()
             .each([&](const TransformationComponent& transform, const MeshComponent& mesh, const BuildMarkerComponent& buildMarker) {
-                renderMesh(mesh, transform.transform);
+                mesh.mesh->render(transform.transform);
             });
     }
 
@@ -114,11 +91,9 @@ void RenderSystem::update(float dt) {
         entt::entity debugEntity = registry.view<DebugComponent>().front();
 
         // const DebugComponent& debug = registry.get<DebugComponent>(debugEntity);
-        const MultiMeshComponent& multiMesh = registry.get<MultiMeshComponent>(debugEntity);
+        const MeshComponent& mesh = registry.get<MeshComponent>(debugEntity);
         const TransformationComponent& transform = registry.get<TransformationComponent>(debugEntity);
 
-        for (const auto& [id, mesh] : multiMesh.meshes) {
-            renderMesh(mesh, transform.transform);
-        }
+        mesh.mesh->render(transform.transform);
     }
 }

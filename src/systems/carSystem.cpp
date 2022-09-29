@@ -23,6 +23,6 @@ void CarSystem::spawnCar(const glm::vec3& position, Direction drivingDirection) 
 
     registry.emplace<TransformationComponent>(entity, position, glm::vec3(0.0f, angle, 0.0f), glm::vec3(1.0f));
     registry.emplace<VelocityComponent>(entity);
-    registry.emplace<MeshComponent>(entity, resourceManager.getResource<Geometry>("CAR_GEOMETRY"), resourceManager.getResource<Shader>("MESH_SHADER"), resourceManager.getResource<Material>("CAR_MATERIAL"));
+    registry.emplace<MeshComponent>(entity, resourceManager.getResource<Mesh>("CAR"));
     registry.emplace<CarComponent>(entity);
 }

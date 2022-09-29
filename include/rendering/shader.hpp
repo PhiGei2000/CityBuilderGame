@@ -1,4 +1,6 @@
 #pragma once
+#include "misc/typedefs.hpp"
+
 #include <string>
 #include <unordered_map>
 
@@ -31,3 +33,5 @@ class Shader {
     void setMatrix3(const std::string& name, const glm::mat3& mat);
     void setMatrix4(const std::string& name, const glm::mat4& mat);
 };
+
+using ShaderPtr = ResourcePtr<Shader>;

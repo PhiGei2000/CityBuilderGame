@@ -30,10 +30,8 @@ void BuildSystem::init() {
     buildMarkerEntity = registry.create();
     registry.emplace<BuildMarkerComponent>(buildMarkerEntity, glm::ivec2(0.0f), false);
     registry.emplace<TransformationComponent>(buildMarkerEntity, glm::vec3(0.0f), glm::quat(), glm::vec3(1.0f));
-    registry.emplace<MeshComponent>(buildMarkerEntity,
-                                    resourceManager.getResource<Geometry>("BUILDMARKER_GEOMETRY"),
-                                    resourceManager.getResource<Shader>("MESH_SHADER"),
-                                    resourceManager.getResource<Material>("BUILDMARKER_MATERIAL"));
+
+    registry.emplace<MeshComponent>(buildMarkerEntity, resourceManager.getResource<Mesh>("BUILDMARKER"));
 }
 
 void BuildSystem::update(float dt) {

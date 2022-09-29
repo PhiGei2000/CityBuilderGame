@@ -6,13 +6,11 @@ struct MeshComponent;
 struct TransformationComponent;
 
 class RenderSystem : public System {
-  protected:    
+  protected:
     unsigned int uboCamera;
     unsigned int uboLight;
 
     void init() override;
-
-    void renderMesh(const MeshComponent& mesh, const glm::mat4& model) const;        
 
     void onCameraUpdated(CameraUpdateEvent& event) const;
     void onEntityMoved(EntityMoveEvent& event) const;

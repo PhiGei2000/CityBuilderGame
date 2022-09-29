@@ -1,5 +1,7 @@
 #pragma once
 
+#include "misc/typedefs.hpp"
+
 #include <string>
 
 class Texture {
@@ -12,3 +14,5 @@ class Texture {
 
     void use(unsigned int texUnit) const;
 };
+
+using TexturePtr = ResourcePtr<Texture>;

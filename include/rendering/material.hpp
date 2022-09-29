@@ -1,5 +1,7 @@
 #pragma once
 
+#include "misc/typedefs.hpp"
+
 #include "rendering/texture.hpp"
 #include "resources/resourceManager.hpp"
 
@@ -14,9 +16,9 @@ struct Material {
     glm::vec3 specularColor = glm::vec3(1.0f);
 
     // texture maps
-    ResourcePtr<Texture> ambientTexture = ResourcePtr<Texture>(nullptr);
-    ResourcePtr<Texture> diffuseTexture = ResourcePtr<Texture>(nullptr);
-    ResourcePtr<Texture> specularTexture = ResourcePtr<Texture>(nullptr);
+    TexturePtr ambientTexture = TexturePtr(nullptr);
+    TexturePtr diffuseTexture = TexturePtr(nullptr);
+    TexturePtr specularTexture = TexturePtr(nullptr);
 
     // material properties
     float specularStrength = 0.8f; // = ((ior - 1)/(ior + 1))^2 / 0.08
@@ -32,3 +34,5 @@ struct Material {
 
     void use(Shader* shader) const;
 };
+
+using MaterialPtr = ResourcePtr<Material>;

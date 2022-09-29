@@ -21,25 +21,18 @@ RoadSystem::RoadSystem(Game* game)
 void RoadSystem::init() {
     roadEntity = registry.create();
 
+    Mesh* roadMesh = new Mesh(resourceManager.getResource<Shader>("MESH_SHADER"));
+    roadMesh->geometries["BASIC_ROADS"]= {std::make_pair(resourceManager.getResource<Material>("BASIC_STREET_MATERIAL"), GeometryPtr(new MeshGeometry()))};
+    roadMesh->geometries["BASIC_ROAD_PREVIEW"] = {std::make_pair(resourceManager.getResource<Material>("BASIC_STREET_PREVIEW_MATERIAL"), GeometryPtr(new MeshGeometry()))};
+
     registry.emplace<RoadComponent>(roadEntity);
     registry.emplace<TransformationComponent>(roadEntity, glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-    registry.emplace<MultiMeshComponent>(roadEntity, std::initializer_list<std::pair<const std::string, MeshComponent>>{
-                                                         std::make_pair("BASIC_ROADS", MeshComponent{
-                                                                                           std::shared_ptr<Geometry>(new MeshGeometry()),
-                                                                                           resourceManager.getResource<Shader>("MESH_SHADER"),
-                                                                                           resourceManager.getResource<Material>("BASIC_STREET_MATERIAL"),
-                                                                                       }),
-                                                         std::make_pair("BASIC_ROADS_PREVIEW", MeshComponent{
-                                                                                                   std::shared_ptr<Geometry>(new MeshGeometry()),
-                                                                                                   resourceManager.getResource<Shader>("MESH_SHADER"),
-                                                                                                   resourceManager.getResource<Material>("BASIC_STREET_PREVIEW_MATERIAL"),
-                                                                                               }),
-                                                     });
+    registry.emplace<MeshComponent>(roadEntity, MeshPtr(roadMesh));
 }
 
 void RoadSystem::update(float dt) {
     RoadComponent& roadComponent = registry.get<RoadComponent>(roadEntity);
-    MultiMeshComponent& multiMesh = registry.get<MultiMeshComponent>(roadEntity);
+    MeshComponent& meshComponent = registry.get<MeshComponent>(roadEntity);
 
     // sections to build
     if (sectionsToBuild.size() > 0) {
@@ -56,9 +49,9 @@ void RoadSystem::update(float dt) {
             sectionsToBuild.pop();
         }
 
-        createRoadMesh(roadComponent.graph, reinterpret_cast<MeshGeometry*>(multiMesh.meshes.at("BASIC_ROADS").geometry.get()), resourceManager.getResource<RoadPack>("BASIC_STREETS"));
+        createRoadMesh(roadComponent.graph, reinterpret_cast<MeshGeometry*>(meshComponent.mesh->geometries.at("BASIC_ROADS").front().second.get()), resourceManager.getResource<RoadPack>("BASIC_STREETS"));
 
-        multiMesh.meshes.at("BASIC_ROADS_PREVIEW").geometry->fillBuffers({}, {});
+        meshComponent.mesh->geometries.at("BASIC_ROADS_PREVIEW").front().second->fillBuffers({}, {});
     }
 
     // sections to preview
@@ -78,7 +71,7 @@ void RoadSystem::update(float dt) {
             sectionsToPreview.pop();
         }
 
-        createRoadMesh(previewGraph, reinterpret_cast<MeshGeometry*>(multiMesh.meshes.at("BASIC_ROADS_PREVIEW").geometry.get()), resourceManager.getResource<RoadPack>("BASIC_STREETS_PREVIEW"));
+        createRoadMesh(previewGraph, reinterpret_cast<MeshGeometry*>(meshComponent.mesh->geometries.at("BASIC_ROADS_PREVIEW").front().second.get()), resourceManager.getResource<RoadPack>("BASIC_STREETS_PREVIEW"));
     }
 }
 

@@ -1,21 +1,16 @@
 #pragma once
 
-#include "misc/typedefs.hpp"
-
-#include "rendering/geometry.hpp"
 #include "rendering/geometryData.hpp"
-#include "rendering/material.hpp"
+#include "resources/mesh.hpp"
 
-#include <memory>
 #include <sstream>
 #include <string>
-#include <unordered_map>
 
 #if WIN32
 #include <array>
 #endif
 
-class ModelLoader {
+class MeshLoader {
   private:
     using FaceIndices = std::array<std::tuple<int unsigned, unsigned int, unsigned int>, 3>;
 
@@ -23,8 +18,11 @@ class ModelLoader {
 
     static FaceIndices parseVertexIndices(const std::string& str);
 
-  public:    
-    static GeometryData load(const std::string& filename);
 
-    static std::unordered_map<std::string, Material*> loadMaterials(const std::string& filename, const ResourceManager* resourceManager);
+  public:
+    static TexturePtr loadTexture(const std::string& filename);
+
+    static std::unordered_map<std::string, MaterialPtr> loadMaterials(const std::string& filename);
+
+    static MeshPtr loadMesh(const std::string& filename, ShaderPtr shader);
 };

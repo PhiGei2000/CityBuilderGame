@@ -1,6 +1,7 @@
 #include "systems/debugSystem.hpp"
 
 #include "components/components.hpp"
+#include "resources/mesh.hpp"
 
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
@@ -20,11 +21,10 @@ void DebugSystem::init() {
         0.0, 0.0, 1.0};
 
     axisGeo->fillBuffers(vertices, {0, 1, 2});
-    std::pair<const std::string, MeshComponent> axisMesh = std::make_pair<const std::string, MeshComponent>("axis", MeshComponent(std::shared_ptr<Geometry>(axisGeo),
-                                                                                                                                  resourceManager.getResource<Shader>("AXIS_SHADER"),
-                                                                                                                                  std::shared_ptr<Material>(nullptr)));
+    Mesh* axisMesh = new Mesh(resourceManager.getResource<Shader>("AXIS_SHADER"));
+    axisMesh->geometries[""] = {std::make_pair(MaterialPtr(nullptr), GeometryPtr(axisGeo))};
 
-    registry.emplace<MultiMeshComponent>(debugEntity, std::initializer_list<std::pair<const std::string, MeshComponent>>{axisMesh});
+    registry.emplace<MeshComponent>(debugEntity, MeshPtr(axisMesh));
     registry.emplace<DebugComponent>(debugEntity);
     registry.emplace<TransformationComponent>(debugEntity, glm::vec3{0}, glm::quat(), glm::vec3{1}).calculateTransform();
 }
