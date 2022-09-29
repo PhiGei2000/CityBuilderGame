@@ -1,12 +1,23 @@
 #include "resources/meshLoader.hpp"
 
-#include "resources/resourceManager.hpp"
 #include "rendering/texture.hpp"
+#include "resources/resourceManager.hpp"
+
+#include "misc/utility.hpp"
 
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <vector>
+
+std::stringstream MeshLoader::readLine(std::stringstream& ss) {
+    std::string line;
+    while (line.empty()) {
+        std::getline(ss, line);
+    }
+
+    return std::stringstream(line);
+}
 
 void MeshLoader::processFaces(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& texCoords, const std::vector<glm::vec3>& normals, const std::vector<FaceIndices>& faces, GeometryData& data) {
     data.vertices.reserve(positions.size());
@@ -187,7 +198,8 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
         std::unordered_map<std::string, MaterialPtr> materials;
         std::string objectName;
 
-        std::string line; std::getline(ss, line);
+        std::string line;
+        std::getline(ss, line);
 
         do {
             std::stringstream sLine(line);
@@ -197,7 +209,7 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
             if (prefix == "mtllib") {
                 std::string mtlFile;
 
-                std::getline(sLine, mtlFile);
+                sLine >> mtlFile;
 
                 const auto& mtllib = loadMaterials("res/models/" + mtlFile);
                 for (const auto& [name, material] : mtllib) {
@@ -213,9 +225,11 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
 
                 MaterialPtr currentMaterial;
 
-                while(ss.peek() != (int)'o' && ss.good()) {
+                while (ss.peek() != (int)'o' && ss.good()) {
                     std::getline(ss, line);
                     sLine = std::stringstream(line);
+
+                    sLine >> prefix;
 
                     if (prefix == "v") {
                         sLine >> x;
@@ -239,12 +253,24 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
                     }
                     else if (prefix == "usemtl") {
                         std::string materialName;
-                        std::getline(sLine, materialName);
+                        sLine >> materialName;
 
                         currentMaterial = materials.at(materialName);
                         std::vector<FaceIndices> faceIndices;
 
                         do {
+                            std::getline(ss, line);
+
+                            if (!ss.good())
+                                break;
+
+                            if (line.empty())
+                                continue;
+
+                            sLine = std::stringstream(line);
+
+                            sLine >> prefix;
+
                             if (prefix == "f") {
                                 FaceIndices indices;
                                 for (int i = 0; i < 3; i++) {
@@ -263,7 +289,7 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
 
                                 faceIndices.push_back(indices);
                             }
-                        } while(prefix != "usemtl");
+                        } while (prefix != "usemtl");
 
                         GeometryData data;
                         processFaces(positions, texCoords, normals, faceIndices, data);
@@ -274,10 +300,8 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
                     }
                 }
             }
-        } while(std::getline(ss, line));
-
-        // GeometryData data;
-        // processFaces(positions, texCoords, normals, faceIndices, data);
+        } while (std::getline(ss, line));
+        
         file.close();
     }
     catch (std::ifstream::failure e) {

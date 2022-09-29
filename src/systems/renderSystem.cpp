@@ -75,7 +75,7 @@ void RenderSystem::onEntityMoved(EntityMoveEvent& event) const {
 }
 
 void RenderSystem::update(float dt) {
-    registry.view<TransformationComponent, MeshComponent>(entt::exclude<BuildMarkerComponent>)
+    registry.view<TransformationComponent, MeshComponent>(entt::exclude<BuildMarkerComponent, DebugComponent>)
         .each([&](const TransformationComponent& transform, const MeshComponent& mesh) {
             mesh.mesh->render(transform.transform);
         });

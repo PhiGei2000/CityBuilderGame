@@ -1,5 +1,6 @@
 # Blender v3.0.0 OBJ File: 'buildMarker.blend'
 # www.blender.org
+mtllib buildmarker.mtl
 o Plane
 v 0.000000 0.000000 0.000000
 v 0.000000 0.000000 1.250000
@@ -50,6 +51,7 @@ vt 0.599980 0.400020
 vt 0.000100 0.400020
 vt 0.000100 0.000100
 vn 0.0000 1.0000 0.0000
+usemtl buildmarker
 s off
 f 2/1/1 3/2/1 1/3/1
 f 4/4/1 6/5/1 1/3/1

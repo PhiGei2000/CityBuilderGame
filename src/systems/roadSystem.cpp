@@ -23,7 +23,7 @@ void RoadSystem::init() {
 
     Mesh* roadMesh = new Mesh(resourceManager.getResource<Shader>("MESH_SHADER"));
     roadMesh->geometries["BASIC_ROADS"]= {std::make_pair(resourceManager.getResource<Material>("BASIC_STREET_MATERIAL"), GeometryPtr(new MeshGeometry()))};
-    roadMesh->geometries["BASIC_ROAD_PREVIEW"] = {std::make_pair(resourceManager.getResource<Material>("BASIC_STREET_PREVIEW_MATERIAL"), GeometryPtr(new MeshGeometry()))};
+    roadMesh->geometries["BASIC_ROADS_PREVIEW"] = {std::make_pair(resourceManager.getResource<Material>("BASIC_STREET_PREVIEW_MATERIAL"), GeometryPtr(new MeshGeometry()))};
 
     registry.emplace<RoadComponent>(roadEntity);
     registry.emplace<TransformationComponent>(roadEntity, glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));

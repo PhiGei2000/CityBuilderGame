@@ -37,7 +37,7 @@ if (GLFW_FOUND)
     message("glfw found")
 endif()
 
-find_package(freetype REQUIRED)
+find_package(Freetype REQUIRED)
 if (FREETYPE_FOUND)
     message("freetype found")
 elseif (WIN32)

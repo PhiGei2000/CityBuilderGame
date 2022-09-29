@@ -19,7 +19,7 @@ class ResourceManager {
 
 
     template<typename T>
-    void setResource(const std::string& id, T* data);
+    void setResource(const std::string& id, ResourcePtr<T> data);
 
   public:
     struct ResourceTypeException : public std::exception {

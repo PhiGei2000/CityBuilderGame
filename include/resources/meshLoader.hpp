@@ -13,6 +13,8 @@
 class MeshLoader {
   private:
     using FaceIndices = std::array<std::tuple<int unsigned, unsigned int, unsigned int>, 3>;
+    
+    static std::stringstream readLine(std::stringstream& ss);
 
     static void processFaces(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& texCoords, const std::vector<glm::vec3>& normals, const std::vector<FaceIndices>& faces, GeometryData& data);
 

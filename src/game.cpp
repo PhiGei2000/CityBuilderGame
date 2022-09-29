@@ -28,7 +28,7 @@ void Game::init() {
     // entities
     entt::entity groundEntity = registry.create();
 
-    registry.emplace<MeshComponent>(groundEntity, resourceManager.getResource<Mesh>("GROUND"));
+    MeshComponent& mesh = registry.emplace<MeshComponent>(groundEntity, resourceManager.getResource<Mesh>("GROUND_MESH"));
 
     registry.emplace<TransformationComponent>(groundEntity, glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
 

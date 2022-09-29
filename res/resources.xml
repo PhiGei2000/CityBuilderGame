@@ -1,48 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <resources>
-    <!-- models -->
-    <!-- <resource type="model" id="BUILDMARKER_GEOMETRY" filename="models/buildMarker.obj" />
-    <resource type="model" id="CAR_GEOMETRY" filename="models/car.obj" />
-    <resource type="model" id="GROUND_GEOMETRY" filename="models/ground.obj" />
-    <resource type="model" id="CAR_GEOMETRY" filename="models/car.obj" />
-    <resource type="model" id="TREE_GEOMETRY" filename="models/tree.obj" /> -->
-
+    
     <!-- shaders -->
     <resource type="shader" id="MESH_SHADER" filename="shaders/mesh" />
     <resource type="shader" id="AXIS_SHADER" filename="shaders/axis" />
     <resource type="shader" id="RENDER_QUAD_SHADER" filename="shaders/renderQuad" />
     <resource type="shader" id="STREET_DEBUG_SHADER" filename="shaders/streetDebug" />
 
-    <!-- textures -->
-    <!-- <resource type="texture" id="BUILDMARKER_DIFFUSE" filename="textures/buildMarker_diffuse.png" />
-    <resource type="texture" id="BUILDMARKER_SPECULAR" filename="textures/buildMarker_specular.png" />
-    <resource type="texture" id="CAR_DIFFUSE" filename="textures/car_diffuse.png" />
-    <resource type="texture" id="GROUND_DIFFUSE" filename="textures/ground_diffuse.png" />
-    <resource type="texture" id="GROUND_SPECULAR" filename="textures/ground_specular.png" />
-    <resource type="texture" id="STREET_DIFFUSE" filename="textures/street_diffuse.png" />
-    <resource type="texture" id="TREE_DIFFUSE" filename="textures/tree_diffuse.png" />
-    <resource type="texture" id="TREE_SPECULAR" filename="textures/tree_specular.png" /> -->
+    <!-- meshes -->
+    <resource type="mesh" id="BUILDMARKER_MESH" filename="models/buildMarker.obj" />
+    <resource type="mesh" id="CAR_MESH" filename="models/car.obj" />
+    <resource type="mesh" id="GROUND_MESH" filename="models/ground.obj" />
+    <resource type="mesh" id="PARKING_LOT_MESH" filename="models/parking_lot.obj" />
+    <resource type="mesh" id="TREE_MESH" filename="models/tree.obj" />
 
     <!-- materials -->
-    <!-- <resource type="material" filename="models/ground.mtl">
-        <material name="ground" id="GROUND_MATERIAL" />
-    </resource>
-    <resource type="material" filename="models/tree.mtl">
-        <material name="tree" id="TREE_MATERIAL" />
-    </resource> -->
-    <!-- <resource type="material" id="CAR_MATERIAL" diffuse="CAR_DIFFUSE" ambientStrenght="0.75" shininess="8.0" specularStrenght="0.5" /> -->
-    <!-- <resource type="material" filename="models/buildmarker.mtl">
-        <material name="buildmarker" id="BUILDMARKER_MATERIAL" />
-    </resource> -->
-    <resource type="mesh" filename="models/ground.obj" shader="MESH_SHADER" />
-
     <resource type="material" filename="models/basic_street.mtl">
         <material name="basic_street" id="BASIC_STREET_MATERIAL" />
         <material name="basic_street_preview" id="BASIC_STREET_PREVIEW_MATERIAL" />
     </resource>
-    <!-- <resource type="material" filename="models/car.mtl">
-        <material name="car" id="CAR_MATERIAL" />
-    </resource> -->
+    
     <!-- streets -->
     <resource type="streetPack" id="BASIC_STREETS" roadwayWidth="3.0" roadwayHeight="0.1" sidewalkHeight="0.2" verticesPerCircle="32" shader="MESH_SHADER" material="BASIC_STREET_MATERIAL" />
     <resource type="streetPack" id="BASIC_STREETS_PREVIEW" roadwayWidth="3.0" roadwayHeight="0.1" sidewalkHeight="0.2" verticesPerCircle="32" shader="MESH_SHADER" material="BASIC_STREET_PREVIEW_MATERIAL" />

@@ -31,7 +31,7 @@ void BuildSystem::init() {
     registry.emplace<BuildMarkerComponent>(buildMarkerEntity, glm::ivec2(0.0f), false);
     registry.emplace<TransformationComponent>(buildMarkerEntity, glm::vec3(0.0f), glm::quat(), glm::vec3(1.0f));
 
-    registry.emplace<MeshComponent>(buildMarkerEntity, resourceManager.getResource<Mesh>("BUILDMARKER"));
+    registry.emplace<MeshComponent>(buildMarkerEntity, resourceManager.getResource<Mesh>("BUILDMARKER_MESH"));
 }
 
 void BuildSystem::update(float dt) {

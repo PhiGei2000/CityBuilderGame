@@ -6,6 +6,6 @@ Ks 0.500000 0.500000 0.500000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Ka TREE_DIFFUSE
-map_Kd TREE_DIFFUSE
-map_Ks TREE_SPECULAR
+map_Ka tree_diffuse.png
+map_Kd tree_diffuse.png
+map_Ks tree_specular.png

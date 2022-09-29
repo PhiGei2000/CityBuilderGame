@@ -26,7 +26,7 @@ EnvironmentSystem::EnvironmentSystem(Game* game)
 }
 
 void EnvironmentSystem::init() {
-    MeshPtr treeMesh = resourceManager.getResource<Mesh>("TREE");
+    MeshPtr treeMesh = resourceManager.getResource<Mesh>("TREE_MESH");
 
     // spawn trees
     for (int i = 0; i < 100; i++) {
