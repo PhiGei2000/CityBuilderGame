@@ -1,4 +1,6 @@
 #pragma once
+#include "component.hpp"
+
 #include <vector>
 
 #include <entt/entt.hpp>
@@ -14,7 +16,7 @@ struct ParkingSpot {
     entt::entity entity = entt::entity();
 };
 
-struct ParkingComponent {
+struct ParkingComponent : public Component {
     std::vector<ParkingSpot> parkingSpots;
 
     inline ParkingComponent(const std::vector<ParkingSpot>& parkingSpots)

@@ -1,8 +1,9 @@
 #pragma once
+#include "component.hpp"
 
 #include <glm/glm.hpp>
 
-struct BuildMarkerComponent {
+struct BuildMarkerComponent : public Component {
     glm::ivec2 position;
     bool visible;
 

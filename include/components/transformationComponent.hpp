@@ -1,10 +1,11 @@
 #pragma once
+#include "component.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-struct TransformationComponent {
+struct TransformationComponent : public Component {
     glm::vec3 position;
     glm::quat rotation;
     glm::vec3 scale;

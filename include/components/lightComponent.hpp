@@ -1,8 +1,9 @@
 #pragma once
+#include "component.hpp"
 
 #include <glm/glm.hpp>
 
-struct LightComponent {
+struct LightComponent : public Component {
     glm::vec3 direction;
 
     glm::vec3 ambient;

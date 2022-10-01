@@ -1,4 +1,5 @@
 #pragma once
+#include "component.hpp"
 
-struct EnvironmentComponent {
+struct EnvironmentComponent : public Component {
 };
