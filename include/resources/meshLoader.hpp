@@ -3,23 +3,30 @@
 #include "rendering/geometryData.hpp"
 #include "resources/mesh.hpp"
 
+#include <array>
 #include <sstream>
 #include <string>
 
-#if WIN32
-#include <array>
-#endif
-
 class MeshLoader {
   private:
-    using FaceIndices = std::array<std::tuple<int unsigned, unsigned int, unsigned int>, 3>;
+    struct VertexData {
+      std::vector<glm::vec3> positions;
+      std::vector<glm::vec2> texCoords;
+      std::vector<glm::vec3> normals;
+    };
+
+    using FaceIndices = std::array<glm::uvec3, 3>;
     
-    static std::stringstream readLine(std::stringstream& ss);
+    /// @brief A collection of the faces grouped by the used material
+    using FaceData = std::unordered_map<std::string, std::vector<FaceIndices>>;
 
-    static void processFaces(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& texCoords, const std::vector<glm::vec3>& normals, const std::vector<FaceIndices>& faces, GeometryData& data);
+    static std::stringstream readLine(std::stringstream& s);    
 
-    static FaceIndices parseVertexIndices(const std::string& str);
+    static VertexData parseVertexData(std::stringstream& s);
+    static FaceData parseFaceData(std::stringstream& s);
 
+    static glm::vec2 parseVec2(std::stringstream& s);
+    static glm::vec3 parseVec3(std::stringstream& s);    
 
   public:
     static TexturePtr loadTexture(const std::string& filename);

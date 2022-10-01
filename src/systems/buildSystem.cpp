@@ -62,6 +62,21 @@ void BuildSystem::update(float dt) {
     else {
         buildMarkerComponent.visible = false;
     }
+
+    while (objectsToBuild.size() > 0) {
+        BuildInfo objectToBuild = objectsToBuild.front();
+
+        entt::entity entity = registry.create();
+        registry.emplace<TransformationComponent>(entity, utility::toWorldCoords(objectToBuild.gridPosition), glm::vec3(0.0f, glm::radians(-90.0f) * (int)objectToBuild.direction, 0.0f), glm::vec3(1.0f)).calculateTransform();
+
+        switch (objectToBuild.type) {
+            case BuildingType::PARKING_LOT:
+                registry.emplace<MeshComponent>(entity, resourceManager.getResource<Mesh>("PARKING_LOT_MESH"));
+                break;
+        }
+
+        objectsToBuild.pop();
+    }
 }
 
 glm::ivec2 BuildSystem::getGridPos(const glm::vec2& mousePos) const {
@@ -128,6 +143,8 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
                 BuildShape shape = BuildShape::POINT;
                 glm::ivec2 start;
 
+                state.currentPosition = buildMarker.position;
+
                 switch (selectedType) {
                     case BuildingType::ROAD:
                         action = state.building ? BuildAction::END : BuildAction::BEGIN;
@@ -140,8 +157,15 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
 
                         setState(selectedType, buildMarker.position, !state.building, buildMarker.position, state.xFirst);
                         break;
+                    case BuildingType::PARKING_LOT:
+                        action = BuildAction::END;                        
                     default:
                         break;
+                }
+
+                if (selectedType != BuildingType::ROAD && action == BuildAction::END) {
+                    objectsToBuild.push(BuildInfo{
+                        selectedType, state.currentPosition, Direction::NORTH});
                 }
 
                 BuildEvent event = BuildEvent{state.currentPosition, selectedType, action, start, shape, state.xFirst};

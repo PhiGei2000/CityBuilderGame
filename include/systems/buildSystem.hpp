@@ -3,6 +3,9 @@
 
 #include "events/buildEvent.hpp"
 #include "misc/buildingType.hpp"
+#include "misc/direction.hpp"
+
+#include <queue>
 
 #include <glm/glm.hpp>
 
@@ -11,6 +14,12 @@ struct KeyEvent;
 
 class BuildSystem : public System {
   protected:
+    struct BuildInfo {
+      BuildingType type;
+      glm::ivec2 gridPosition;
+      Direction direction;
+    };
+
     virtual void init() override;
 
     entt::entity cameraEntity;
@@ -32,6 +41,8 @@ class BuildSystem : public System {
         //
         bool xFirst = true;
     };
+
+    std::queue<BuildInfo> objectsToBuild;
 
     BuildSystemState state{};
 

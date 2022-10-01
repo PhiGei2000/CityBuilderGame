@@ -13,47 +13,103 @@
 std::stringstream MeshLoader::readLine(std::stringstream& ss) {
     std::string line;
     while (line.empty()) {
-        std::getline(ss, line);
+        if (!std::getline(ss, line)) {
+            return std::stringstream("\0");
+        }
     }
 
     return std::stringstream(line);
 }
 
-void MeshLoader::processFaces(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& texCoords, const std::vector<glm::vec3>& normals, const std::vector<FaceIndices>& faces, GeometryData& data) {
-    data.vertices.reserve(positions.size());
-    data.indices.reserve(faces.size() * 3);
+MeshLoader::VertexData MeshLoader::parseVertexData(std::stringstream& s) {
+    VertexData data;
+    std::string prefix;
 
-    std::vector<std::tuple<unsigned int, unsigned int, unsigned int>> vertices;
-    std::vector<unsigned int> indices;
+    char nextChar = s.peek();
+    while (nextChar == 'v' || nextChar == '#') {
 
-    for (const FaceIndices& face : faces) {
-        for (const auto [posIndex, texIndex, normIndex] : face) {
-            bool vertexExists = false;
-            unsigned int index = vertices.size();
+        auto line = readLine(s);
+        line >> prefix;
 
-            for (int i = 0; i < vertices.size(); i++) {
-                const auto [vertPosIndex, vertTexIndex, vertNormIndex] = vertices[i];
-                vertexExists = posIndex == vertPosIndex && texIndex == vertTexIndex && normIndex == vertNormIndex;
+        if (prefix == "v") {
+            const glm::vec3& position = parseVec3(line);
+            data.positions.emplace_back(position);
+        }
+        else if (prefix == "vt") {
+            const glm::vec2& texCoord = parseVec2(line);
+            data.texCoords.emplace_back(texCoord);
+        }
+        else if (prefix == "vn") {
+            const glm::vec3& normal = parseVec3(line);
+            data.normals.emplace_back(normal);
+        }
 
-                if (vertexExists) {
-                    indices.push_back(i);
-                    break;
-                }
+        nextChar = s.peek();
+    }
+
+    return data;
+}
+
+MeshLoader::FaceData MeshLoader::parseFaceData(std::stringstream& s) {
+    FaceData data;
+    std::string prefix;
+
+    char nextChar;
+
+    unsigned int posIndex;
+    unsigned int texIndex;
+    unsigned int normIndex;
+
+    std::string materialName;
+
+    while ((nextChar = s.peek()) != 'o' && !s.eof()) {
+        auto line = readLine(s);
+        line >> prefix;
+
+        if (prefix == "usemtl") {
+            line >> materialName;
+        }
+        else if (prefix == "f") {
+            FaceIndices indices;
+            for (int i = 0; i < 3; i++) {
+                std::string posStr, texStr, normStr;
+
+                std::getline(line, posStr, '/');
+                std::getline(line, texStr, '/');
+                line >> normStr;
+
+                posIndex = std::stoi(posStr) - 1;
+                texIndex = std::stoi(texStr) - 1;
+                normIndex = std::stoi(normStr) - 1;
+
+                indices[i] = glm::uvec3(posIndex, texIndex, normIndex);
             }
 
-            if (!vertexExists) {
-                vertices.emplace_back(posIndex, texIndex, normIndex);
-                indices.push_back(index);
-            }
+            data[materialName].push_back(indices);
+        }
+        else if (prefix.empty()) {
+            return data;
         }
     }
 
-    data.indices = indices;
-    for (const auto [posIndex, texIndex, normIndex] : vertices) {
-        data.vertices.emplace_back(positions[posIndex],
-                                   texCoords[texIndex],
-                                   normals[normIndex]);
-    }
+    return data;
+}
+
+glm::vec2 MeshLoader::parseVec2(std::stringstream& s) {
+    float x, y;
+    s >> x;
+    s >> y;
+
+    return glm::vec2(x, y);
+}
+
+glm::vec3 MeshLoader::parseVec3(std::stringstream& s) {
+    float x, y, z;
+    s >> x;
+    s >> y;
+    s >> z;
+
+    return glm::vec3(x, y, z);
 }
 
 TexturePtr MeshLoader::loadTexture(const std::string& filename) {
@@ -104,7 +160,7 @@ std::unordered_map<std::string, MaterialPtr> MeshLoader::loadMaterials(const std
                 mtl->ambientColor = glm::vec3(r, g, b);
             }
             // diffuse color
-            else if (prefix == "Kd" || prefix == "Ke") {
+            else if (prefix == "Kd") {
                 sline >> r;
                 sline >> g;
                 sline >> b;
@@ -198,14 +254,13 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
         std::unordered_map<std::string, MaterialPtr> materials;
         std::string objectName;
 
-        std::string line;
-        std::getline(ss, line);
+        glm::uvec3 indexOffsets = glm::uvec3(0);
 
-        do {
+        for (std::string line; std::getline(ss, line);) {
             std::stringstream sLine(line);
             sLine >> prefix;
 
-            float x, y, z;
+            // read material lib
             if (prefix == "mtllib") {
                 std::string mtlFile;
 
@@ -216,92 +271,57 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
                     materials.emplace(name, material);
                 }
             }
+            // parse object data
             else if (prefix == "o") {
                 sLine >> objectName;
 
-                std::vector<glm::vec3> positions;
-                std::vector<glm::vec2> texCoords;
-                std::vector<glm::vec3> normals;
+                VertexData vertData = parseVertexData(ss);
+                FaceData faceData = parseFaceData(ss);
 
-                MaterialPtr currentMaterial;
+                // process faces
+                for (const auto& [materialName, faceIndices] : faceData) {
+                    MaterialPtr material = materials.at(materialName);
+                    std::vector<glm::uvec3> vertices;
 
-                while (ss.peek() != (int)'o' && ss.good()) {
-                    std::getline(ss, line);
-                    sLine = std::stringstream(line);
+                    GeometryData data;
 
-                    sLine >> prefix;
+                    for (const auto& faces : faceIndices) {
+                        for (int i = 0; i < 3; i++) {
+                            const auto& indices = faces[i];
+                            bool vertexExists = false;
+                            unsigned int verticesCount = vertices.size();
 
-                    if (prefix == "v") {
-                        sLine >> x;
-                        sLine >> y;
-                        sLine >> z;
+                            for (int j = 0; j < verticesCount; j++) {
+                                const auto& vertexIndices = vertices[j];
+                                vertexExists = (indices == vertexIndices);
 
-                        positions.emplace_back(x, y, z);
-                    }
-                    else if (prefix == "vt") {
-                        sLine >> x;
-                        sLine >> y;
-
-                        texCoords.emplace_back(x, y);
-                    }
-                    else if (prefix == "vn") {
-                        sLine >> x;
-                        sLine >> y;
-                        sLine >> z;
-
-                        normals.emplace_back(x, y, z);
-                    }
-                    else if (prefix == "usemtl") {
-                        std::string materialName;
-                        sLine >> materialName;
-
-                        currentMaterial = materials.at(materialName);
-                        std::vector<FaceIndices> faceIndices;
-
-                        do {
-                            std::getline(ss, line);
-
-                            if (!ss.good())
-                                break;
-
-                            if (line.empty())
-                                continue;
-
-                            sLine = std::stringstream(line);
-
-                            sLine >> prefix;
-
-                            if (prefix == "f") {
-                                FaceIndices indices;
-                                for (int i = 0; i < 3; i++) {
-                                    std::string posStr, texStr, normStr;
-                                    unsigned int posIndex, texIndex, normIndex;
-                                    std::getline(sLine, posStr, '/');
-                                    std::getline(sLine, texStr, '/');
-                                    sLine >> normStr;
-
-                                    posIndex = std::stoi(posStr) - 1;
-                                    texIndex = std::stoi(texStr) - 1;
-                                    normIndex = std::stoi(normStr) - 1;
-
-                                    indices[i] = std::tuple(posIndex, texIndex, normIndex);
+                                if (vertexExists) {
+                                    data.indices.push_back(j);
+                                    break;
                                 }
-
-                                faceIndices.push_back(indices);
                             }
-                        } while (prefix != "usemtl");
 
-                        GeometryData data;
-                        processFaces(positions, texCoords, normals, faceIndices, data);
-
-                        MeshGeometry* geometry = new MeshGeometry(data);
-
-                        mesh->geometries[objectName].push_back(std::make_pair(currentMaterial, GeometryPtr(geometry)));
+                            if (!vertexExists) {
+                                vertices.push_back(indices);
+                                data.indices.push_back(verticesCount);
+                            }
+                        }
                     }
+
+                    for (const auto& indices : vertices) {
+                        const glm::uvec3& vertexIndices = indices - indexOffsets;
+
+                        data.vertices.emplace_back(vertData.positions[vertexIndices.x], vertData.texCoords[vertexIndices.y], vertData.normals[vertexIndices.z]);
+                    }
+
+                    indexOffsets += glm::uvec3(vertData.positions.size(), vertData.texCoords.size(), vertData.normals.size());
+
+                    GeometryPtr geometry = GeometryPtr(new MeshGeometry(data));
+                    mesh->geometries[objectName].push_back(std::make_pair(material, geometry));
                 }
             }
-        } while (std::getline(ss, line));
-        
+        }
+
         file.close();
     }
     catch (std::ifstream::failure e) {

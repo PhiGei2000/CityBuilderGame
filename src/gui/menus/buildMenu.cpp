@@ -21,8 +21,18 @@ BuildMenu::BuildMenu(Gui* gui)
 
         e.handled = true;
     };
-
     addChild(streetButton);
+
+    parkingLotButtonTexture = new Texture("res/gui/parking_lot_icon.png");
+    parkingLotButton = new IconButton("build_menu.button_parkingLot", gui, colors::anthraziteGrey, parkingLotButtonTexture);
+    parkingLotButton->constraints.width = AbsoluteConstraint(64);
+    parkingLotButton->constraints.height = AbsoluteConstraint(64);
+    parkingLotButton->onClick += [&](MouseButtonEvent& e) {
+        this->selectBuildingType(BuildingType::PARKING_LOT);
+
+        e.handled = true;
+    };
+    addChild(parkingLotButton);
 }
 
 void BuildMenu::selectBuildingType(BuildingType type) const {
