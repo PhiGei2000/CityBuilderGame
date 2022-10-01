@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <resources>
-    
+
     <!-- shaders -->
     <resource type="shader" id="MESH_SHADER" filename="shaders/mesh" />
     <resource type="shader" id="AXIS_SHADER" filename="shaders/axis" />
@@ -11,7 +11,6 @@
     <resource type="mesh" id="BUILDMARKER_MESH" filename="models/buildMarker.obj" />
     <resource type="mesh" id="CAR_MESH" filename="models/car.obj" />
     <resource type="mesh" id="GROUND_MESH" filename="models/ground.obj" />
-    <resource type="mesh" id="PARKING_LOT_MESH" filename="models/parking_lot.obj" />
     <resource type="mesh" id="TREE_MESH" filename="models/tree.obj" />
 
     <!-- materials -->
@@ -19,7 +18,7 @@
         <material name="basic_street" id="BASIC_STREET_MATERIAL" />
         <material name="basic_street_preview" id="BASIC_STREET_PREVIEW_MATERIAL" />
     </resource>
-    
+
     <!-- streets -->
     <resource type="streetPack" id="BASIC_STREETS" roadwayWidth="3.0" roadwayHeight="0.1" sidewalkHeight="0.2" verticesPerCircle="32" shader="MESH_SHADER" material="BASIC_STREET_MATERIAL" />
     <resource type="streetPack" id="BASIC_STREETS_PREVIEW" roadwayWidth="3.0" roadwayHeight="0.1" sidewalkHeight="0.2" verticesPerCircle="32" shader="MESH_SHADER" material="BASIC_STREET_PREVIEW_MATERIAL" />

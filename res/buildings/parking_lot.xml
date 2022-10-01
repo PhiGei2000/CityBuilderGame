@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<building>
+    <name>Parking Lot</name>
+    <geometry model="models/parking_lot.obj" />
+
+    <parking>
+        <parkingSpot position="4.1667 2.0000 1.4266"/>
+        <parkingSpot position="5.8333 2.0000 1.4266"/>
+        <parkingSpot position="7.5000 2.0000 1.4266"/>
+        <parkingSpot position="9.1667 2.0000 1.4266"/>
+        <parkingSpot position="9.1667 2.0000 8.5734"/>
+        <parkingSpot position="7.5000 2.0000 8.5734"/>
+        <parkingSpot position="5.8333 2.0000 8.5734"/>
+        <parkingSpot position="4.1667 2.0000 8.5734"/>
+        <parkingSpot position="2.5000 2.0000 8.5734"/>
+        <parkingSpot position="0.8333 2.0000 8.5734"/>
+    </parking>
+</building>
