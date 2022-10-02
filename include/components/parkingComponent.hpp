@@ -14,6 +14,10 @@ struct ParkingSpot {
     bool occupied = false;
     /// @brief The entity occupying the parking spot
     entt::entity entity = entt::entity();
+
+    inline ParkingSpot(const glm::vec3& position)
+        : position(position) {
+    }
 };
 
 struct ParkingComponent : public Component {

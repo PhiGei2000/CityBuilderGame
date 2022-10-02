@@ -5,6 +5,7 @@
 #include "rendering/material.hpp"
 #include "resources/mesh.hpp"
 #include "resources/meshLoader.hpp"
+#include "resources/objectLoader.hpp"
 #include "resources/roadGeometryGenerator.hpp"
 #include "resources/roadPack.hpp"
 
@@ -18,7 +19,7 @@
 using namespace pugi;
 
 ResourceManager::ResourceManager(const std::string& resourceDir)
-    : resourceDir(resourceDir) {
+    : resourceDir(resourceDir), objectLoader(*this) {
 
     loadResources();
 }
@@ -140,6 +141,17 @@ void ResourceManager::loadResources() {
             setResource(id, ResourcePtr<RoadPack>(pack));
         }
     }
+
+    // objects
+    std::string buildingsPath = resourceDir + "objects";
+    for (const auto& entry : std::filesystem::directory_iterator(buildingsPath)) {
+        if (entry.path().extension() == ".xml") {
+            const std::string& id = "object." + entry.path().stem().string();
+            ObjectPtr object = objectLoader.loadBuilding(entry.path().string());
+
+            setResource(id, object);
+        }
+    }
 }
 
 template<typename T>
@@ -156,16 +168,16 @@ std::shared_ptr<T> ResourceManager::getResource(const std::string& resourceId) c
     return std::reinterpret_pointer_cast<T>(resource.data);
 }
 
-template ResourcePtr<Texture> ResourceManager::getResource<Texture>(const std::string&) const;
-template ResourcePtr<Shader> ResourceManager::getResource<Shader>(const std::string&) const;
-// template ResourcePtr<Geometry> ResourceManager::getResource<Geometry>(const std::string&) const;
+template TexturePtr ResourceManager::getResource<Texture>(const std::string&) const;
+template ShaderPtr ResourceManager::getResource<Shader>(const std::string&) const;
+template MaterialPtr ResourceManager::getResource<Material>(const std::string&) const;
+template MeshPtr ResourceManager::getResource<Mesh>(const std::string&) const;
+template ObjectPtr ResourceManager::getResource<Object>(const std::string&) const;
 template ResourcePtr<RoadPack> ResourceManager::getResource<RoadPack>(const std::string&) const;
-template ResourcePtr<Material> ResourceManager::getResource<Material>(const std::string&) const;
-template ResourcePtr<Mesh> ResourceManager::getResource<Mesh>(const std::string&) const;
 
 template void ResourceManager::setResource<Texture>(const std::string&, TexturePtr);
 template void ResourceManager::setResource<Shader>(const std::string&, ShaderPtr);
-// template void ResourceManager::setResource<Geometry>(const std::string&, Geometry*);
-template void ResourceManager::setResource<RoadPack>(const std::string&, ResourcePtr<RoadPack>);
 template void ResourceManager::setResource<Material>(const std::string&, MaterialPtr);
 template void ResourceManager::setResource<Mesh>(const std::string&, MeshPtr);
+template void ResourceManager::setResource<Object>(const std::string&, ObjectPtr);
+template void ResourceManager::setResource<RoadPack>(const std::string&, ResourcePtr<RoadPack>);

@@ -2,6 +2,8 @@
 
 #include "misc/typedefs.hpp"
 
+#include "objectLoader.hpp"
+
 #include <string>
 #include <typeindex>
 #include <unordered_map>
@@ -14,14 +16,16 @@ class ResourceManager {
         std::shared_ptr<void> data;
     };
 
-    const std::string resourceDir;
     std::unordered_map<std::string, ResourceHolder> resources;
 
+    ObjectLoader objectLoader;
 
     template<typename T>
     void setResource(const std::string& id, ResourcePtr<T> data);
 
   public:
+    const std::string resourceDir;
+    
     struct ResourceTypeException : public std::exception {
       private:
         const char* message;

@@ -12,5 +12,5 @@ struct LightComponent : public Component {
 
     inline LightComponent(const glm::vec3& direction, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular)
         : direction(direction), ambient(ambient), diffuse(diffuse), specular(specular) {
-    }
+    }        
 };

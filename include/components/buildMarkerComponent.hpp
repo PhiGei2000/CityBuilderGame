@@ -5,7 +5,7 @@
 
 struct BuildMarkerComponent : public Component {
     glm::ivec2 position;
-    bool visible;
+    bool visible;    
 
     inline BuildMarkerComponent(const glm::ivec2& position, bool visible = false)
         : position(position), visible(visible) {

@@ -12,10 +12,12 @@
 struct MouseButtonEvent;
 struct KeyEvent;
 
+struct Object;
+
 class BuildSystem : public System {
   protected:
     struct BuildInfo {
-      BuildingType type;
+      ObjectPtr object;
       glm::ivec2 gridPosition;
       Direction direction;
     };

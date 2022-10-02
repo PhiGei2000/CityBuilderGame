@@ -1,10 +1,11 @@
 #pragma once
+#include "component.hpp"
 
 #include <glm/glm.hpp>
 
 struct TransformationComponent;
 
-struct CameraComponent {
+struct CameraComponent : public Component {
     glm::vec3 up, front, right;
 
     float width = 800.0f;

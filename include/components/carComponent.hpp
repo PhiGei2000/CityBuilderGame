@@ -1,4 +1,5 @@
 #pragma once
 #include "component.hpp"
 
-struct CarComponent : public Component {};
+struct CarComponent : public Component {    
+};

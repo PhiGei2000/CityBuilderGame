@@ -1,6 +1,5 @@
 #pragma once
 #include "component.hpp"
 
-struct DebugComponent : public Component {
-    
+struct DebugComponent : public Component {    
 };

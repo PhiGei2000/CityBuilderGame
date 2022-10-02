@@ -24,5 +24,5 @@ struct TransformationComponent : public Component {
     void setRotation(const glm::vec3& eulerAngles);
 
     void addScale(const glm::vec3& scale);
-    void setScale(const glm::vec3& scale);
+    void setScale(const glm::vec3& scale);    
 };

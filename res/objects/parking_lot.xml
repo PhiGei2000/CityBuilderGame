@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <building>
     <name>Parking Lot</name>
-    <geometry model="models/parking_lot.obj" />
+    <mesh filename="models/parking_lot.obj" shader="MESH_SHADER" />
 
     <parking>
         <parkingSpot position="4.1667 2.0000 1.4266"/>

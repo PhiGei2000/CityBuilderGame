@@ -7,5 +7,5 @@
 #include <unordered_map>
 
 struct RoadComponent : public Component {
-    RoadGraph graph;
+    RoadGraph graph;    
 };

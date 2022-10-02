@@ -66,14 +66,10 @@ void BuildSystem::update(float dt) {
     while (objectsToBuild.size() > 0) {
         BuildInfo objectToBuild = objectsToBuild.front();
 
-        entt::entity entity = registry.create();
+        entt::entity entity = objectToBuild.object->create(registry);
         registry.emplace<TransformationComponent>(entity, utility::toWorldCoords(objectToBuild.gridPosition), glm::vec3(0.0f, glm::radians(-90.0f) * (int)objectToBuild.direction, 0.0f), glm::vec3(1.0f)).calculateTransform();
 
-        switch (objectToBuild.type) {
-            case BuildingType::PARKING_LOT:
-                registry.emplace<MeshComponent>(entity, resourceManager.getResource<Mesh>("PARKING_LOT_MESH"));
-                break;
-        }
+        
 
         objectsToBuild.pop();
     }
@@ -159,14 +155,11 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
                         break;
                     case BuildingType::PARKING_LOT:
                         action = BuildAction::END;                        
+
+                        objectsToBuild.emplace(BuildInfo{resourceManager.getResource<Object>("object.parking_lot"), buildMarker.position, Direction::NORTH});
                     default:
                         break;
-                }
-
-                if (selectedType != BuildingType::ROAD && action == BuildAction::END) {
-                    objectsToBuild.push(BuildInfo{
-                        selectedType, state.currentPosition, Direction::NORTH});
-                }
+                }                
 
                 BuildEvent event = BuildEvent{state.currentPosition, selectedType, action, start, shape, state.xFirst};
 #if DEBUG
