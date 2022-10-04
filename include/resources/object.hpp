@@ -2,22 +2,21 @@
 #include "components/component.hpp"
 #include "misc/typedefs.hpp"
 
-#include <typeindex>
 #include <string>
+#include <typeindex>
 #include <vector>
 
-using ComponentTemplate = std::pair<std::type_index, Component>;
-
 struct Object {
+  protected:
+    std::map<std::type_index, AssignableComponent> components;
+
+  public:
     std::string name;
 
-    std::vector<ComponentTemplate> components;
+    template<ComponentType TComponent>
+    void addComponent(const TComponent& component);
 
     entt::entity create(entt::registry& registry) const;
-
-protected:
-    template<ComponentType T>
-    static T& createComponent(const entt::entity& entity, entt::registry& registry, const T& component);
 };
 
 using ObjectPtr = ResourcePtr<Object>;

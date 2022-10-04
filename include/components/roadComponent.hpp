@@ -6,6 +6,14 @@
 #include <map>
 #include <unordered_map>
 
-struct RoadComponent : public Component {
-    RoadGraph graph;    
+struct RoadComponent : public AssignableComponent {
+    RoadGraph graph;
+
+    inline RoadComponent(const RoadGraph& graph)
+        : graph(graph) {
+    }
+
+    inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
+        registry.emplace<RoadComponent>(entity, graph);
+    }
 };

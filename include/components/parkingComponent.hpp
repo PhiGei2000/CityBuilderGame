@@ -20,10 +20,14 @@ struct ParkingSpot {
     }
 };
 
-struct ParkingComponent : public Component {
+struct ParkingComponent : public AssignableComponent {
     std::vector<ParkingSpot> parkingSpots;
 
     inline ParkingComponent(const std::vector<ParkingSpot>& parkingSpots)
         : parkingSpots(parkingSpots) {
+    }
+
+    inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
+        registry.emplace<ParkingComponent>(entity, parkingSpots);
     }
 };

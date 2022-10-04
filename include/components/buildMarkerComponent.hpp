@@ -3,7 +3,7 @@
 
 #include <glm/glm.hpp>
 
-struct BuildMarkerComponent : public Component {
+struct BuildMarkerComponent : public Component<false> {
     glm::ivec2 position;
     bool visible;    
 

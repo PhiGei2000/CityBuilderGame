@@ -69,10 +69,10 @@ ObjectPtr ObjectLoader::loadBuilding(const std::string& filename) {
             object->name = node.text().as_string();
         }
         else if (name == "mesh") {
-            object->components.emplace_back(typeid(MeshComponent), loadComponent<MeshComponent>(node));
+            object->addComponent<MeshComponent>(loadComponent<MeshComponent>(node));
         }
         else if (name == "parking") {
-            object->components.emplace_back(typeid(ParkingComponent), loadComponent<ParkingComponent>(node));
+            object->addComponent<ParkingComponent>(loadComponent<ParkingComponent>(node));
         }
     }
 

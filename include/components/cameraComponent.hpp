@@ -5,7 +5,7 @@
 
 struct TransformationComponent;
 
-struct CameraComponent : public Component {
+struct CameraComponent : public Component<false> {
     glm::vec3 up, front, right;
 
     float width = 800.0f;
@@ -19,5 +19,5 @@ struct CameraComponent : public Component {
 
     void calculateMatrices(const TransformationComponent& transform);
 
-    void calculateVectors();
+    void calculateVectors();    
 };

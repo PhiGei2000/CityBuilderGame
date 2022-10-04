@@ -5,7 +5,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-struct TransformationComponent : public Component {
+struct TransformationComponent : public AssignableComponent {
     glm::vec3 position;
     glm::quat rotation;
     glm::vec3 scale;
@@ -25,4 +25,6 @@ struct TransformationComponent : public Component {
 
     void addScale(const glm::vec3& scale);
     void setScale(const glm::vec3& scale);    
+
+    void assignToEntity(const entt::entity entity, entt::registry& registry) const override;
 };
