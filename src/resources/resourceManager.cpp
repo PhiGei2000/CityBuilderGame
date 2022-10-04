@@ -147,7 +147,7 @@ void ResourceManager::loadResources() {
     for (const auto& entry : std::filesystem::directory_iterator(buildingsPath)) {
         if (entry.path().extension() == ".xml") {
             const std::string& id = "object." + entry.path().stem().string();
-            ObjectPtr object = objectLoader.loadBuilding(entry.path().string());
+            ObjectPtr object = objectLoader.loadObject(entry.path().string());
 
             setResource(id, object);
         }

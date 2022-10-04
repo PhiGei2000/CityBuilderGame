@@ -1,6 +1,7 @@
 #pragma once
 #include "system.hpp"
 
+#include "events/buildEvent.hpp"
 #include "misc/direction.hpp"
 
 class CarSystem : public System {
@@ -12,5 +13,7 @@ class CarSystem : public System {
 
     void update(float dt) override;
 
-    void spawnCar(const glm::vec3& position, Direction drivingDirection) const;
+    const entt::entity spawnCar(const glm::vec3& position, Direction drivingDirection) const;
+
+    void handleBuildEvent(BuildEvent& e);
 };

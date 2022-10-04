@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<building>
+<object>
     <name>Parking Lot</name>
     <mesh filename="models/parking_lot.obj" shader="MESH_SHADER" />
 
     <parking>
-        <parkingSpot position="4.1667 2.0000 1.4266"/>
-        <parkingSpot position="5.8333 2.0000 1.4266"/>
-        <parkingSpot position="7.5000 2.0000 1.4266"/>
-        <parkingSpot position="9.1667 2.0000 1.4266"/>
-        <parkingSpot position="9.1667 2.0000 8.5734"/>
-        <parkingSpot position="7.5000 2.0000 8.5734"/>
-        <parkingSpot position="5.8333 2.0000 8.5734"/>
-        <parkingSpot position="4.1667 2.0000 8.5734"/>
-        <parkingSpot position="2.5000 2.0000 8.5734"/>
-        <parkingSpot position="0.8333 2.0000 8.5734"/>
+        <parkingSpot position="1.4266 0.2000 4.1667 "/>
+        <parkingSpot position="1.4266 0.2000 5.8333 "/>
+        <parkingSpot position="1.4266 0.2000 7.5000 "/>
+        <parkingSpot position="1.4266 0.2000 9.1667 "/>
+        <parkingSpot position="8.5734 0.2000 9.1667 "/>
+        <parkingSpot position="8.5734 0.2000 7.5000 "/>
+        <parkingSpot position="8.5734 0.2000 5.8333 "/>
+        <parkingSpot position="8.5734 0.2000 4.1667 "/>
+        <parkingSpot position="8.5734 0.2000 2.5000 "/>
+        <parkingSpot position="8.5734 0.2000 0.8333 "/>
     </parking>
-</building>
+</object>

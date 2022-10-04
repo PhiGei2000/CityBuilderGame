@@ -9,6 +9,7 @@ enum class BuildAction {
     DEFAULT,
     BEGIN,
     END,
+    ENTITY_CREATED,
     SELECT,
     PREVIEW
 };

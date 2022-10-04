@@ -25,7 +25,7 @@ CarComponent ObjectLoader::loadComponent<CarComponent>(const xml_node& node) {
 template<>
 MeshComponent ObjectLoader::loadComponent<MeshComponent>(const xml_node& node) {
     const std::string& filename = node.attribute("filename").as_string();
-    const std::string& shaderID = node.attribute("shader").as_string();
+    const std::string& shaderID = node.attribute("shader").as_string("MESH_SHADER");
 
     ShaderPtr shader = resourceManager.getResource<Shader>(shaderID);
 
@@ -51,7 +51,7 @@ ParkingComponent ObjectLoader::loadComponent<ParkingComponent>(const xml_node& n
     return ParkingComponent(spots);
 }
 
-ObjectPtr ObjectLoader::loadBuilding(const std::string& filename) {
+ObjectPtr ObjectLoader::loadObject(const std::string& filename) {
     xml_document doc;
     xml_parse_result result = doc.load_file(filename.c_str());
 
@@ -63,7 +63,7 @@ ObjectPtr ObjectLoader::loadBuilding(const std::string& filename) {
     }
 
     Object* object = new Object();
-    for (const auto& node : doc.child("building")) {
+    for (const auto& node : doc.child("object")) {
         const std::string& name = node.name();
 
         if (name == "name") {
@@ -74,6 +74,9 @@ ObjectPtr ObjectLoader::loadBuilding(const std::string& filename) {
         }
         else if (name == "parking") {
             object->addComponent<ParkingComponent>(loadComponent<ParkingComponent>(node));
+        }
+        else if (name == "car") {
+            object->addComponent<CarComponent>(loadComponent<CarComponent>(node));
         }
     }
 

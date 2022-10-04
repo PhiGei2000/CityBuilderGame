@@ -20,6 +20,12 @@ class BuildSystem : public System {
       ObjectPtr object;
       glm::ivec2 gridPosition;
       Direction direction;
+
+      BuildingType type;
+      glm::ivec2 startPosition;
+
+      BuildInfo(ObjectPtr object, const glm::ivec2& gridPosition, Direction direction, BuildingType type);
+      BuildInfo(ObjectPtr object, const glm::ivec2& gridPosition, Direction direction, BuildingType type, const glm::ivec2& startPosition);
     };
 
     virtual void init() override;

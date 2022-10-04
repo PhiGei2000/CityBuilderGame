@@ -10,6 +10,14 @@
 #include <array>
 #include <iostream>
 
+BuildSystem::BuildInfo::BuildInfo(ObjectPtr object, const glm::ivec2& gridPosition, Direction direction, BuildingType type)
+    : BuildInfo(object, gridPosition, direction, type, gridPosition) {
+}
+
+BuildSystem::BuildInfo::BuildInfo(ObjectPtr object, const glm::ivec2& gridPosition, Direction direction, BuildingType type, const glm::ivec2& startPosition)
+    : object(object), gridPosition(gridPosition), direction(direction), type(type), startPosition(startPosition) {
+}
+
 BuildSystem::BuildSystem(Game* game)
     : System(game) {
     init();
@@ -68,8 +76,10 @@ void BuildSystem::update(float dt) {
 
         entt::entity entity = objectToBuild.object->create(registry);
         registry.emplace<TransformationComponent>(entity, utility::toWorldCoords(objectToBuild.gridPosition), glm::vec3(0.0f, glm::radians(-90.0f) * (int)objectToBuild.direction, 0.0f), glm::vec3(1.0f)).calculateTransform();
+        registry.emplace<BuildingComponent>(entity, objectToBuild.gridPosition);             
 
-        
+        BuildEvent event(objectToBuild.gridPosition, objectToBuild.type, BuildAction::ENTITY_CREATED, objectToBuild.startPosition, getShape(objectToBuild.startPosition, objectToBuild.gridPosition));
+        game->raiseEvent(event);
 
         objectsToBuild.pop();
     }
@@ -156,7 +166,7 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
                     case BuildingType::PARKING_LOT:
                         action = BuildAction::END;                        
 
-                        objectsToBuild.emplace(BuildInfo{resourceManager.getResource<Object>("object.parking_lot"), buildMarker.position, Direction::NORTH});
+                        objectsToBuild.emplace(BuildInfo(resourceManager.getResource<Object>("object.parking_lot"), buildMarker.position, Direction::NORTH, BuildingType::PARKING_LOT));
                     default:
                         break;
                 }                

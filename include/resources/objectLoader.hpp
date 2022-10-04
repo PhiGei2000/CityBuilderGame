@@ -17,5 +17,5 @@ class ObjectLoader {
   public:
     ObjectLoader(ResourceManager& resourceManager);
 
-    ObjectPtr loadBuilding(const std::string& filename);
+    ObjectPtr loadObject(const std::string& filename);
 };
