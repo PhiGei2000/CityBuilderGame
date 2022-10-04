@@ -17,9 +17,10 @@ CarComponent ObjectLoader::loadComponent<CarComponent>(const xml_node& node) {
     return CarComponent();
 }
 
-template<>
-LightComponent ObjectLoader::loadComponent<LightComponent>(const xml_node& node) {
-}
+//template<>
+//LightComponent ObjectLoader::loadComponent<LightComponent>(const xml_node& node) {
+//
+//}
 
 template<>
 MeshComponent ObjectLoader::loadComponent<MeshComponent>(const xml_node& node) {

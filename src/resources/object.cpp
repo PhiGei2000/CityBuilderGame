@@ -2,16 +2,16 @@
 
 #include "components/components.hpp"
 
-template<ComponentType T>
-void Object::addComponent(const T& component) {
-    components[typeid(T)] = component;
+template<AssignableComponentType T>
+void Object::addComponent(const T& component) {    
+    components[typeid(T)] = std::make_shared<T>(component);
 }
 
 entt::entity Object::create(entt::registry& registry) const {
     const entt::entity entity = registry.create();
 
-    for (const auto& [_, component] : components) {
-        component.assignToEntity(entity, registry);
+    for (const auto& [type, component] : components) {        
+        component->assignToEntity(entity, registry);
     }
 
     return entity;
