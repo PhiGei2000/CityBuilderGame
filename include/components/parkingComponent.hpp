@@ -8,15 +8,17 @@
 
 /// @brief Describes a parking spot and the entity occupying it.
 struct ParkingSpot {
+    /// @brief An id to identify the parking spot
+    const std::string id;
     /// @brief The position of the parking spot
     glm::vec3 position;
     /// @brief True if the parking spot is occupied by an entity, otherwise false
     bool occupied = false;
     /// @brief The entity occupying the parking spot
-    entt::entity entity = entt::entity();
+    entt::entity entity = entt::null;
 
-    inline ParkingSpot(const glm::vec3& position)
-        : position(position) {
+    inline ParkingSpot(const std::string& id, const glm::vec3& position)
+        : id(id), position(position) {
     }
 };
 

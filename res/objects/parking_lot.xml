@@ -4,15 +4,137 @@
     <mesh filename="models/parking_lot.obj" shader="MESH_SHADER" />
 
     <parking>
-        <parkingSpot position="1.4266 0.2000 4.1667 "/>
-        <parkingSpot position="1.4266 0.2000 5.8333 "/>
-        <parkingSpot position="1.4266 0.2000 7.5000 "/>
-        <parkingSpot position="1.4266 0.2000 9.1667 "/>
-        <parkingSpot position="8.5734 0.2000 9.1667 "/>
-        <parkingSpot position="8.5734 0.2000 7.5000 "/>
-        <parkingSpot position="8.5734 0.2000 5.8333 "/>
-        <parkingSpot position="8.5734 0.2000 4.1667 "/>
-        <parkingSpot position="8.5734 0.2000 2.5000 "/>
-        <parkingSpot position="8.5734 0.2000 0.8333 "/>
+        <parkingSpot id="parkingSpot0" position="1.4266 0.2000 4.1667 "/>
+        <parkingSpot id="parkingSpot1" position="1.4266 0.2000 5.8333 "/>
+        <parkingSpot id="parkingSpot2" position="1.4266 0.2000 7.5000 "/>
+        <parkingSpot id="parkingSpot3" position="1.4266 0.2000 9.1667 "/>
+        <parkingSpot id="parkingSpot4" position="8.5734 0.2000 9.1667 "/>
+        <parkingSpot id="parkingSpot5" position="8.5734 0.2000 7.5000 "/>
+        <parkingSpot id="parkingSpot6" position="8.5734 0.2000 5.8333 "/>
+        <parkingSpot id="parkingSpot7" position="8.5734 0.2000 4.1667 "/>
+        <parkingSpot id="parkingSpot8" position="8.5734 0.2000 2.5000 "/>
+        <parkingSpot id="parkingSpot9" position="8.5734 0.2000 0.8333 "/>
     </parking>
+
+    <carPath>
+        <!-- short side -->
+        <path id="parkingSpot0" direction="in">
+            <node position="0.0000 0.2000 2.5000"/>
+            <node position="4.0000 0.2000 2.5000"/>
+            <node position="4.0000 0.2000 4.1667"/>
+            <node position="1.4266 0.2000 4.1667"/>
+        </path>
+        <path id="parkingSpot0" direction="out">
+            <node position="1.4266 0.2000 4.1667"/>
+            <node position="6.0000 0.2000 4.1667"/>
+            <node position="6.0000 0.2000 0.8333"/>
+            <node position="0.0000 0.2000 0.8333"/>
+        </path>
+        <path id="parkingSpot1" direction="in">
+            <node position="0.0000 0.2000 2.5000"/>
+            <node position="4.0000 0.2000 2.5000"/>  
+            <node position="4.0000 0.2000 5.8333"/>
+            <node position="1.4266 0.2000 5.8333"/>          
+        </path>
+        <path id="parkingSpot1" direction="out">
+            <node position="1.4266 0.2000 5.8333"/>
+            <node position="6.0000 0.2000 5.8333"/>
+            <node position="6.0000 0.2000 0.8333"/>
+            <node position="0.0000 0.2000 0.8333"/>
+        </path>
+        <path id="parkingSpot2" direction="in">
+            <node position="0.0000 0.2000 2.5000"/>
+            <node position="4.0000 0.2000 2.5000"/>  
+            <node position="4.0000 0.2000 7.5000"/>
+            <node position="1.4266 0.2000 7.5000"/>          
+        </path>
+        <path id="parkingSpot2" direction="out">
+            <node position="1.4266 0.2000 7.5000"/>
+            <node position="6.0000 0.2000 7.5000"/>
+            <node position="6.0000 0.2000 0.8333"/>
+            <node position="0.0000 0.2000 0.8333"/>
+        </path>
+        <path id="parkingSpot3" direction="in">
+            <node position="0.0000 0.2000 2.5000"/>
+            <node position="4.0000 0.2000 2.5000"/>  
+            <node position="4.0000 0.2000 9.1667"/>
+            <node position="1.4266 0.2000 9.1667"/>          
+        </path>
+        <path id="parkingSpot3" direction="out">
+            <node position="1.4266 0.2000 9.1667"/>
+            <node position="6.0000 0.2000 9.1667"/>
+            <node position="6.0000 0.2000 0.8333"/>
+            <node position="0.0000 0.2000 0.8333"/>
+        </path>
+
+        <!-- long side -->
+        <path id="parkingSpot4" direction="in">
+            <node position="0.0000 0.2000 2.5000"/>
+            <node position="4.0000 0.2000 2.5000"/>  
+            <node position="4.0000 0.2000 9.1667"/>
+            <node position="8.5734 0.2000 9.1667"/>          
+        </path>
+        <path id="parkingSpot4" direction="out">
+            <node position="8.5734 0.2000 9.1667"/>
+            <node position="6.0000 0.2000 9.1667"/>
+            <node position="6.0000 0.2000 0.8333"/>
+            <node position="0.0000 0.2000 0.8333"/>
+        </path>
+        <path id="parkingSpot5" direction="in">
+            <node position="0.0000 0.2000 2.5000"/>
+            <node position="4.0000 0.2000 2.5000"/>  
+            <node position="4.0000 0.2000 7.5000"/>
+            <node position="8.5734 0.2000 7.5000"/>          
+        </path>
+        <path id="parkingSpot5" direction="out">
+            <node position="8.5734 0.2000 7.5000"/>
+            <node position="6.0000 0.2000 7.5000"/>
+            <node position="6.0000 0.2000 0.8333"/>
+            <node position="0.0000 0.2000 0.8333"/>
+        </path>
+        <path id="parkingSpot6" direction="in">
+            <node position="0.0000 0.2000 2.5000"/>
+            <node position="4.0000 0.2000 2.5000"/>  
+            <node position="4.0000 0.2000 5.8333"/>
+            <node position="8.5734 0.2000 5.8333"/>          
+        </path>
+        <path id="parkingSpot6" direction="out">
+            <node position="8.5734 0.2000 5.8333"/>
+            <node position="6.0000 0.2000 5.8333"/>
+            <node position="6.0000 0.2000 0.8333"/>
+            <node position="0.0000 0.2000 0.8333"/>
+        </path>
+        <path id="parkingSpot7" direction="in">
+            <node position="0.0000 0.2000 2.5000"/>
+            <node position="4.0000 0.2000 2.5000"/>  
+            <node position="4.0000 0.2000 4.1667"/>
+            <node position="8.5734 0.2000 4.1667"/>          
+        </path>
+        <path id="parkingSpot7" direction="out">
+            <node position="8.5734 0.2000 4.1667"/>
+            <node position="6.0000 0.2000 4.1667"/>
+            <node position="6.0000 0.2000 0.8333"/>
+            <node position="0.0000 0.2000 0.8333"/>
+        </path>
+        <path id="parkingSpot8" direction="in">
+            <node position="0.0000 0.2000 2.5000"/>                        
+            <node position="8.5734 0.2000 2.5000"/>          
+        </path>
+        <path id="parkingSpot8" direction="out">
+            <node position="8.5734 0.2000 9.1667"/>
+            <node position="6.0000 0.2000 9.1667"/>
+            <node position="6.0000 0.2000 2.5000"/>
+            <node position="0.0000 0.2000 2.5000"/>
+        </path>
+        <path id="parkingSpot9" direction="in">
+            <node position="0.0000 0.2000 2.5000"/>
+            <node position="4.0000 0.2000 2.5000"/>  
+            <node position="4.0000 0.2000 0.8333"/>
+            <node position="8.5734 0.2000 0.8333"/>          
+        </path>
+        <path id="parkingSpot9" direction="out">
+            <node position="8.5734 0.2000 0.8333"/>                    
+            <node position="0.0000 0.2000 0.8333"/>
+        </path>
+    </carPath>
 </object>

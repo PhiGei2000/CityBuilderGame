@@ -4,6 +4,7 @@
 #include "buildingComponent.hpp"
 #include "cameraComponent.hpp"
 #include "carComponent.hpp"
+#include "carPathComponent.hpp"
 #include "debugComponent.hpp"
 #include "environmentComponent.hpp"
 #include "lightComponent.hpp"

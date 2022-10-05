@@ -4,9 +4,15 @@
 #include "events/buildEvent.hpp"
 #include "misc/direction.hpp"
 
+struct CarComponent;
+struct TransformationComponent;
+struct VelocityComponent;
+
 class CarSystem : public System {
   protected:
     void init() override;
+
+    static void updateCar(CarComponent& carComponent, TransformationComponent& transform, VelocityComponent& velocity);
 
   public:
     CarSystem(Game* game);

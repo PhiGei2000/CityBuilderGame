@@ -4,4 +4,6 @@
 	<mesh filename="models/car.obj" />
 
 	<car></car>
+
+	<velocity></velocity>
 </object>

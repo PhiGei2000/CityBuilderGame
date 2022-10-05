@@ -19,6 +19,7 @@ entt::entity Object::create(entt::registry& registry) const {
 
 template void Object::addComponent<BuildingComponent>(const BuildingComponent&);
 template void Object::addComponent<CarComponent>(const CarComponent&);
+template void Object::addComponent<CarPathComponent>(const CarPathComponent&);
 template void Object::addComponent<EnvironmentComponent>(const EnvironmentComponent&);
 template void Object::addComponent<LightComponent>(const LightComponent&);
 template void Object::addComponent<MeshComponent>(const MeshComponent&);
