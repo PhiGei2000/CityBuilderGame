@@ -148,25 +148,25 @@ GeometryData RoadGeometryGenerator::generateAnnulusSector(const glm::vec3& cente
         float vRadius = uvs.sizeV / 2.0f;
         const glm::vec2& uvCenter = glm::vec2(uvs.u + uRadius, uvs.v + vRadius);
 
-        vertices.emplace_back(Vertex(center, uvCenter, glm::vec3(0.0f, 1.0f, 0.0f)));
-
         // outer vertices
         for (int i = 0; i < verticesCount; i++) {
-            float x = outerRadius * glm::cos(startAngle + i * anglePerVertex);
-            float y = outerRadius * glm::sin(startAngle + i * anglePerVertex);
+            float x1 = outerRadius * glm::cos(startAngle + i * anglePerVertex);
+            float y1 = outerRadius * glm::sin(startAngle + i * anglePerVertex);
 
-            const glm::vec2& uvOffset = glm::vec2(uRadius * glm::cos(startAngle + i * anglePerVertex), vRadius * glm::sin(startAngle + i * anglePerVertex));
+            float x2 = outerRadius * glm::cos(startAngle + (i + 1) * anglePerVertex);
+            float y2 = outerRadius * glm::sin(startAngle + (i + 1) * anglePerVertex);
 
-            vertices.emplace_back(center + glm::vec3(x, 0.0f, y), uvCenter + uvOffset, glm::vec3(0.0f, 1.0f, 0.0f));
+            const glm::vec2& uv1Offset = glm::vec2(uRadius * glm::cos(startAngle + i * anglePerVertex), vRadius * glm::sin(startAngle + i * anglePerVertex));
+            const glm::vec2& uv2Offset = glm::vec2(uRadius * glm::cos(startAngle + (i + 1) * anglePerVertex), vRadius * glm::sin(startAngle + (i + 1) * anglePerVertex));
+
+            vertices.emplace_back(Vertex(center, uvCenter, glm::vec3(0.0f, 1.0f, 0.0f)));
+            vertices.emplace_back(center + glm::vec3(x1, 0.0f, y1), uvCenter + uv1Offset, glm::vec3(0.0f, 1.0f, 0.0f));
+            vertices.emplace_back(center + glm::vec3(x2, 0.0f, y2), uvCenter + uv2Offset, glm::vec3(0.0f, 1.0f, 0.0f));
         }
 
         // indices
-        for (unsigned int i = 1; i <= verticesCount; i++) {
-            indices.insert(indices.end(), {
-                                              0,
-                                              i,
-                                              (i % verticesCount) + 1,
-                                          });
+        for (unsigned int i = 0; i < vertices.size(); i++) {
+            indices.push_back(i);
         }
     }
     else {

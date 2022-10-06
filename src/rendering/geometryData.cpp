@@ -5,10 +5,7 @@ GeometryData::GeometryData() {
 
 GeometryData::GeometryData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
     : indices(indices), vertices(vertices) {
-    for (int i = 0; i < indices.size(); i += 3) {        
-        // TODO: Check if two tangent spaces are different if and only if the normal vectors are different
-        calculateTangentSpace(this->vertices[indices[i]], this->vertices[indices[i + 1]], this->vertices[indices[i+2]]);        
-    }
+    calculateTangentSpace();
 }
 
 GeometryData GeometryData::merge(const GeometryData& first, const GeometryData& second) {
@@ -89,4 +86,11 @@ void GeometryData::calculateTangentSpace(Vertex& v1, Vertex& v2, Vertex& v3) {
     v2.bitangent = bitangent;
     v3.tangent = tangent;
     v3.bitangent = bitangent;
+}
+
+void GeometryData::calculateTangentSpace() {
+    for (int i = 0; i < indices.size(); i += 3) {        
+        // TODO: Check if two tangent spaces are different if and only if the normal vectors are different
+        calculateTangentSpace(this->vertices[indices[i]], this->vertices[indices[i + 1]], this->vertices[indices[i+2]]);        
+    }
 }

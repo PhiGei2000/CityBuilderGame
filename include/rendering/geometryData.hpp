@@ -23,4 +23,6 @@ struct GeometryData {
 
     static std::pair<glm::vec3, glm::vec3> calculateTangentSpace(const std::array<Vertex, 3>& triangle);
     static void calculateTangentSpace(Vertex& v1, Vertex& v2, Vertex& v3);
+
+    void calculateTangentSpace();
 };

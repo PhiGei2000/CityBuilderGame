@@ -29,7 +29,7 @@ class MeshLoader {
     static glm::vec3 parseVec3(std::stringstream& s);    
 
   public:
-    static TexturePtr loadTexture(const std::string& filename);
+    static TexturePtr loadTexture(const std::string& filename, int format = GL_RGBA);
 
     static std::unordered_map<std::string, MaterialPtr> loadMaterials(const std::string& filename);
 

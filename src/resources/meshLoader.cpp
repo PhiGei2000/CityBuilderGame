@@ -112,8 +112,8 @@ glm::vec3 MeshLoader::parseVec3(std::stringstream& s) {
     return glm::vec3(x, y, z);
 }
 
-TexturePtr MeshLoader::loadTexture(const std::string& filename) {
-    Texture* texture = new Texture(filename);
+TexturePtr MeshLoader::loadTexture(const std::string& filename, int format) {
+    Texture* texture = new Texture(filename, format);
 
     return TexturePtr(texture);
 }
@@ -145,6 +145,12 @@ std::unordered_map<std::string, MaterialPtr> MeshLoader::loadMaterials(const std
             // new material
             if (prefix == "newmtl") {
                 if (mtl != nullptr) {
+                    if (!mtl->normalMap) {
+                        std::cout << "No normal map loaded for: " + filename << " using default normal map" << std::endl;
+
+                        mtl->normalMap = loadTexture("res/textures/default_normal.png", GL_RGB);
+                    }
+
                     materials.emplace(materialName, mtl);
                 }
 
@@ -223,6 +229,26 @@ std::unordered_map<std::string, MaterialPtr> MeshLoader::loadMaterials(const std
 
                 mtl->specularTexture = loadTexture("res/models/" + filename);
             }
+            else if (prefix == "map_Bump") {
+                std::unordered_map<std::string, std::string> args;
+
+                std::string arg, argValue;
+                sline >> arg;
+                while (arg.starts_with('-')) {
+                    sline >> argValue;
+
+                    args[arg] = argValue;
+                    sline >> arg;
+                }
+
+                mtl->normalMap = loadTexture("res/models/" + arg, GL_RGB);
+            }
+        }
+
+        if (!mtl->normalMap) {
+            std::cout << "No normal map loaded for: " + filename << " using default normal map" << std::endl;
+
+            mtl->normalMap = loadTexture("res/textures/default_normal.png", GL_RGB);
         }
 
         materials.emplace(materialName, mtl);

@@ -1,12 +1,13 @@
-# Blender 3.3.0 MTL File: 'car.blend'
+# Blender 3.3.1 MTL File: 'car.blend'
 # www.blender.org
 
 newmtl car
 Ns 250.000000
-Ka 0.400000 0.400000 0.400000
-Ks 0.600000 0.600000 0.600000
+Ka 0.250000 0.250000 0.250000
+Ks 0.504545 0.504545 0.504545
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
 map_Kd car_diffuse.png
+map_Bump -bm 1.000000 car_normal.png

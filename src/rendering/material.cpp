@@ -42,6 +42,12 @@ void Material::use(Shader* shader) const {
         shader->setInt("material.specularTexture", 2);
     }
 
+    // normal map
+    if (normalMap) {
+        normalMap->use(3);
+        shader->setInt("material.normalMap", 3);
+    }
+
     // properties
     shader->setFloat("material.shiniess", shininess);
     shader->setFloat("material.specularStrength", specularStrength);
