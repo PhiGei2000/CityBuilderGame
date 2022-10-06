@@ -1,0 +1,13 @@
+# Blender 3.3.0 MTL File: 'ground.blend'
+# www.blender.org
+
+newmtl Material
+Ns 360.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:/Users/Philipp/Source/Repos/CityBuilderGame/res/models/ground_diffuse.png
+map_Ke D:/Users/Philipp/Source/Repos/CityBuilderGame/res/models/ground_specular.png
+map_Bump -bm 1.000000 D:/Users/Philipp/Source/Repos/CityBuilderGame/res/models/ground_normal.png
