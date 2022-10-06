@@ -1,5 +1,19 @@
 #include "rendering/geometryData.hpp"
 
+GeometryData::GeometryData() {
+}
+
+GeometryData::GeometryData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+    : indices(indices) {
+    for (int i = 0; i < indices.size(); i += 3) {
+        std::array<Vertex, 3> triangle = {vertices[indices[i]], vertices[indices[i + 1]], vertices[indices[i + 2]]};
+        // TODO: Check if two tangent spaces are different if and only if the normal vectors are different
+        calculateTangentSpace(triangle);
+
+        this->vertices.insert(this->vertices.end(), triangle.begin(), triangle.end());
+    }
+}
+
 GeometryData GeometryData::merge(const GeometryData& first, const GeometryData& second) {
     GeometryData result = first;
 
@@ -28,8 +42,7 @@ void GeometryData::addData(const GeometryData& data) {
 }
 
 GeometryData GeometryData::transformVertices(const std::function<Vertex(const Vertex&)>& transform) const {
-    GeometryData transformedData;
-    transformedData.indices = indices;
+    GeometryData transformedData({}, indices);
 
     for (const Vertex& vert : vertices) {
         transformedData.vertices.emplace_back(transform(vert));
@@ -39,16 +52,40 @@ GeometryData GeometryData::transformVertices(const std::function<Vertex(const Ve
 }
 
 GeometryData GeometryData::transformVertices(const glm::mat4& transform) const {
-    GeometryData transformedData;
-    transformedData.indices = indices;
+    GeometryData transformedData({}, indices);
 
     const glm::mat3& normalMatrix = glm::mat3(glm::transpose(glm::inverse(transform)));
     for (const Vertex& vert : vertices) {
         const glm::vec3& position = glm::vec3(transform * glm::vec4(vert.position, 1.0f));
         const glm::vec3& normal = normalMatrix * vert.normal;
+        const glm::vec3& tangent = normalMatrix * vert.tangent;
+        const glm::vec3& bitangent = normalMatrix * vert.bitangent;
 
-        transformedData.vertices.emplace_back(position, vert.texCoord, normal);
+        transformedData.vertices.emplace_back(position, vert.texCoord, normal, tangent, bitangent);
     }
 
     return transformedData;
+}
+
+std::pair<glm::vec3, glm::vec3> GeometryData::calculateTangentSpaceVectors(const std::array<Vertex, 3>& triangle) {
+    const glm::vec3& edge1 = triangle[1].position - triangle[0].position;
+    const glm::vec3& edge2 = triangle[2].position - triangle[0].position;
+
+    const glm::vec2& deltaUV1 = triangle[1].texCoord - triangle[0].texCoord;
+    const glm::vec2& deltaUV2 = triangle[2].texCoord - triangle[0].texCoord;
+
+    const float f = 1 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+    const glm::vec3& tangent = f * (deltaUV2.y * edge1 - deltaUV1.y * edge2);
+    const glm::vec3& bitangent = f * (-deltaUV2.x * edge1 + deltaUV1.x * edge2);
+
+    return std::make_pair(tangent, bitangent);
+}
+
+void GeometryData::calculateTangentSpace(std::array<Vertex, 3>& triangle) {
+    const auto& [tangent, bitangent] = calculateTangentSpaceVectors(triangle);
+
+    for (Vertex& vert : triangle) {
+        vert.tangent = tangent;
+        vert.bitangent = bitangent;
+    }
 }
