@@ -1,6 +1,7 @@
 #pragma once
 #include "rendering/vertex.hpp"
 
+#include <array>
 #include <functional>
 #include <unordered_set>
 #include <vector>
@@ -20,6 +21,6 @@ struct GeometryData {
     GeometryData transformVertices(const std::function<Vertex(const Vertex&)>& transformation) const;
     GeometryData transformVertices(const glm::mat4& transform) const;
 
-    static std::pair<glm::vec3, glm::vec3> calculateTangentSpaceVectors(const std::array<Vertex, 3>& triangle);
-    static void calculateTangentSpace(std::array<Vertex, 3>& triangle);
+    static std::pair<glm::vec3, glm::vec3> calculateTangentSpace(const std::array<Vertex, 3>& triangle);
+    static void calculateTangentSpace(Vertex& v1, Vertex& v2, Vertex& v3);
 };

@@ -46,11 +46,11 @@ void Geometry::draw() const {
 }
 
 const VertexAttributes MeshGeometry::meshVertexAttributes = VertexAttributes{
-    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float),                   (void*)0},
-    {2, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(3 * sizeof(float))},
-    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(5 * sizeof(float))},
-    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(8 * sizeof(float))},
-    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(8 * sizeof(float))}
+    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float),                    (void*)0},
+    {2, GL_FLOAT, GL_FALSE, 14 * sizeof(float),  (void*)(3 * sizeof(float))},
+    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float),  (void*)(5 * sizeof(float))},
+    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float),  (void*)(8 * sizeof(float))},
+    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(11 * sizeof(float))}
 };
 
 MeshGeometry::MeshGeometry()

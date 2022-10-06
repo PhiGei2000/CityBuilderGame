@@ -1,7 +1,7 @@
 #version 450
 in vec3 FragPos;
 in vec2 TexCoord;
-in vec3 Normal;
+in mat3 TBN;
 
 layout(std140, binding = 1) uniform Camera {
     mat4 view;
@@ -27,6 +27,7 @@ struct Material {
     sampler2D ambientTexture;
     sampler2D diffuseTexture;
     sampler2D specularTexture;
+    sampler2D normalMap;
 
     float shininess;
     float specularStrength;
@@ -44,8 +45,8 @@ out vec4 FragColor;
 uniform Material material;
 
 vec3 calcAmbientLight(vec3 ambientColor);
-vec3 calcDiffuseLight(vec3 diffuseColor);
-vec3 calcSpecularLight(vec3 specularColor);
+vec3 calcDiffuseLight(vec3 normal, vec3 diffuseColor);
+vec3 calcSpecularLight(vec3 normal, vec3 specularColor);
 
 void main() {
     // init colors
@@ -64,6 +65,10 @@ void main() {
         specularColor = texture(material.specularTexture, TexCoord).rgb;
     }
 
+    vec3 normal = texture(material.normalMap, TexCoord).rgb;
+    normal = normal * 2.0 - 1.0;
+    normal = normalize(TBN * normal);
+
     vec3 ambient, diffuse, specular;
     switch (material.illuminationModel) {
     case 0:
@@ -71,13 +76,13 @@ void main() {
         break;
     case 1:
         ambient = calcAmbientLight(ambientColor);
-        diffuse = calcDiffuseLight(diffuseColor);
+        diffuse = calcDiffuseLight(normal, diffuseColor);
         FragColor = vec4(ambient + diffuse, material.dissolve);
         break;
     case 2:
         ambient = calcAmbientLight(ambientColor);
-        diffuse = calcDiffuseLight(diffuseColor);
-        specular = calcSpecularLight(specularColor);
+        diffuse = calcDiffuseLight(normal, diffuseColor);
+        specular = calcSpecularLight(normal, specularColor);
         FragColor = vec4(ambient + diffuse + specular, material.dissolve);
     }
 }
@@ -86,15 +91,15 @@ vec3 calcAmbientLight(vec3 ambientColor) {
     return lightAmbient * ambientColor;
 }
 
-vec3 calcDiffuseLight(vec3 diffuseColor) {
-    float diff = max(dot(Normal, -lightDirection), 0.0);
+vec3 calcDiffuseLight(vec3 normal, vec3 diffuseColor) {
+    float diff = max(dot(normal, -lightDirection), 0.0);
     return diff * lightDiffuse * diffuseColor;
 }
 
-vec3 calcSpecularLight(vec3 specularColor) {
+vec3 calcSpecularLight(vec3 normal, vec3 specularColor) {
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 halfwayDir = normalize(viewDir - lightDirection);
 
-    float spec = pow(max(dot(Normal, halfwayDir), 0.0), material.shininess);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
     return spec * lightSpecular * specularColor;
 }

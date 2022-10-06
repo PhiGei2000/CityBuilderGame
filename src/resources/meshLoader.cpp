@@ -314,6 +314,14 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
                         data.vertices.emplace_back(vertData.positions[vertexIndices.x], vertData.texCoords[vertexIndices.y], vertData.normals[vertexIndices.z]);
                     }
 
+                    // calculate tangent space
+                    for (int i = 0; i < data.indices.size(); i += 3) {
+                        GeometryData::calculateTangentSpace(
+                            data.vertices[data.indices[i]],
+                            data.vertices[data.indices[i + 1]],
+                            data.vertices[data.indices[i + 2]]);
+                    }
+
                     indexOffsets += glm::uvec3(vertData.positions.size(), vertData.texCoords.size(), vertData.normals.size());
 
                     GeometryPtr geometry = GeometryPtr(new MeshGeometry(data));

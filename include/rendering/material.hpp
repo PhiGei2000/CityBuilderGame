@@ -16,9 +16,10 @@ struct Material {
     glm::vec3 specularColor = glm::vec3(1.0f);
 
     // texture maps
-    TexturePtr ambientTexture = TexturePtr(nullptr);
-    TexturePtr diffuseTexture = TexturePtr(nullptr);
-    TexturePtr specularTexture = TexturePtr(nullptr);
+    TexturePtr ambientTexture = TexturePtr();
+    TexturePtr diffuseTexture = TexturePtr();
+    TexturePtr specularTexture = TexturePtr();
+    TexturePtr normalMap = TexturePtr();
 
     // material properties
     float specularStrength = 0.8f; // = ((ior - 1)/(ior + 1))^2 / 0.08
