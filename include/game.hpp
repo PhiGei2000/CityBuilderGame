@@ -9,8 +9,7 @@
 class System;
 class Application;
 
-enum class GameState
-{
+enum class GameState {
     PAUSED,
     RUNNING,
     BUILD_MODE
@@ -26,13 +25,13 @@ class Game {
 
     Application* app;
 
-
     void init();
 
     GameState state = GameState::RUNNING;
 
   public:
-    entt::entity sun;
+    entt::entity camera;
+    entt::entity sun = entt::null;
 
     Game(Application* app);
 
@@ -53,5 +52,5 @@ class Game {
     GameState getState() const;
 
     template<typename Event>
-    void raiseEvent(Event& args);    
+    void raiseEvent(Event& args);
 };

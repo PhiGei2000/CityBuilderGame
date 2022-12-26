@@ -1,12 +1,12 @@
 #pragma once
-#include "rendering/material.hpp"
 #include "rendering/geometry.hpp"
+#include "rendering/material.hpp"
 #include "rendering/shader.hpp"
 
 #include "misc/typedefs.hpp"
 
-#include <vector>
 #include <glm/glm.hpp>
+#include <vector>
 
 struct Mesh {
     ShaderPtr shader;
@@ -15,7 +15,7 @@ struct Mesh {
 
     Mesh(ShaderPtr shader);
 
-    void render(const glm::mat4& model) const;
+    void render(const glm::mat4& model, Shader* shader = nullptr) const;
 };
 
 using MeshPtr = ResourcePtr<Mesh>;

@@ -3,6 +3,8 @@
 
 #include <glm/glm.hpp>
 
+struct CameraComponent;
+
 struct LightComponent : public AssignableComponent {
     glm::vec3 direction;
 
@@ -10,11 +12,12 @@ struct LightComponent : public AssignableComponent {
     glm::vec3 diffuse;
     glm::vec3 specular;
 
-    inline LightComponent(const glm::vec3& direction, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular)
-        : direction(direction), ambient(ambient), diffuse(diffuse), specular(specular) {
-    }        
+    glm::mat4 lightView;
+    glm::mat4 lightProjection;
 
-    inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
-        registry.emplace<LightComponent>(entity, direction, ambient, diffuse, specular);
-    }
+    LightComponent(const glm::vec3& direction, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular);
+
+    void assignToEntity(const entt::entity entity, entt::registry& registry) const override;
+
+    void calculateLightMatrices(const CameraComponent& camera);
 };

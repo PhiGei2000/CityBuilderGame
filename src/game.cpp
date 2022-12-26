@@ -17,6 +17,8 @@ Game::Game(Application* app)
 void Game::init() {
     // init systems
     systems.push_back(new CameraSystem(this));
+    camera = registry.view<CameraComponent>().front();
+
     systems.push_back(new BuildSystem(this));
     systems.push_back(new RoadSystem(this));
     systems.push_back(new CarSystem(this));
@@ -39,6 +41,7 @@ void Game::init() {
                                      glm::vec3(0.9f),     // diffuse
                                      glm::vec3(0.8f)      // specular
     );
+    registry.emplace<TransformationComponent>(sun, 300.0f * glm::vec3(0.5f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 
     EntityMoveEvent moveEvent{sun};
     raiseEvent(moveEvent);

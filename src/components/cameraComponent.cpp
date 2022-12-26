@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 void CameraComponent::calculateMatrices(const TransformationComponent& transform) {
-    projectionMatrix = glm::perspective(glm::radians(fov), width / height, 0.1f, 100.0f);
+    projectionMatrix = glm::perspective(glm::radians(fov), width / height, near, far);
 
     calculateVectors();
     glm::vec3 cameraTarget = transform.position + front;

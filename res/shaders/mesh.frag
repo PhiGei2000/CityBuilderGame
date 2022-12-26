@@ -2,6 +2,7 @@
 in vec3 FragPos;
 in vec2 TexCoord;
 in mat3 TBN;
+in vec4 FragPosLightSpace;
 
 layout(std140, binding = 1) uniform Camera {
     mat4 view;
@@ -12,6 +13,9 @@ layout(std140, binding = 1) uniform Camera {
 };
 
 layout(std140, binding = 2) uniform Light {
+    mat4 lightView;
+    mat4 lightProjection;
+
     vec3 lightDirection;
 
     vec3 lightAmbient;
@@ -43,10 +47,12 @@ struct Material {
 out vec4 FragColor;
 
 uniform Material material;
+uniform sampler2D shadowMap;
 
 vec3 calcAmbientLight(vec3 ambientColor);
 vec3 calcDiffuseLight(vec3 normal, vec3 diffuseColor);
 vec3 calcSpecularLight(vec3 normal, vec3 specularColor);
+float shadowCalculation(vec4 fragPosLightSpace);
 
 void main() {
     // init colors
@@ -69,21 +75,22 @@ void main() {
     normal = normal * 2.0 - 1.0;
     normal = normalize(TBN * normal);
 
+    float shadow = shadowCalculation(FragPosLightSpace);
     vec3 ambient, diffuse, specular;
     switch (material.illuminationModel) {
-    case 0:
-        FragColor = vec4(diffuseColor, material.dissolve);
-        break;
-    case 1:
-        ambient = calcAmbientLight(ambientColor);
-        diffuse = calcDiffuseLight(normal, diffuseColor);
-        FragColor = vec4(ambient + diffuse, material.dissolve);
-        break;
-    case 2:
-        ambient = calcAmbientLight(ambientColor);
-        diffuse = calcDiffuseLight(normal, diffuseColor);
-        specular = calcSpecularLight(normal, specularColor);
-        FragColor = vec4(ambient + diffuse + specular, material.dissolve);
+        case 0:
+            FragColor = vec4((1.0 - shadow) * diffuseColor, material.dissolve);
+            break;
+        case 1:
+            ambient = calcAmbientLight(ambientColor);
+            diffuse = calcDiffuseLight(normal, diffuseColor);
+            FragColor = vec4(ambient + (1.0 - shadow) * diffuse, material.dissolve);
+            break;
+        case 2:
+            ambient = calcAmbientLight(ambientColor);
+            diffuse = calcDiffuseLight(normal, diffuseColor);
+            specular = calcSpecularLight(normal, specularColor);
+            FragColor = vec4(ambient + (1.0 - shadow) * (diffuse + specular), material.dissolve);
     }
 }
 
@@ -102,4 +109,16 @@ vec3 calcSpecularLight(vec3 normal, vec3 specularColor) {
 
     float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
     return spec * lightSpecular * specularColor;
+}
+
+float shadowCalculation(vec4 fragPosLightSpace) {
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    float bias = 0.01;
+    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+
+    return shadow;
 }

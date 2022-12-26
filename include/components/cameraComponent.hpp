@@ -11,6 +11,8 @@ struct CameraComponent : public Component<false> {
     float width = 800.0f;
     float height = 600.0f;
     float fov = 60.0f;
+    float near = 0.1f;
+    float far = 400.0f;
 
     float yaw = 0.0f, pitch = 0.0f;
 
@@ -19,5 +21,5 @@ struct CameraComponent : public Component<false> {
 
     void calculateMatrices(const TransformationComponent& transform);
 
-    void calculateVectors();    
+    void calculateVectors();
 };
