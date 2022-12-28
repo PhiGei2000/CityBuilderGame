@@ -30,23 +30,6 @@ void RenderSystem::init() {
     glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4) + 4 * sizeof(glm::vec4), NULL, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    // shadow depth buffer and texture
-    glGenFramebuffers(1, &depthFramebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, depthFramebuffer);
-
-    glGenTextures(1, &depthMap);
-    glBindTexture(GL_TEXTURE_2D, depthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Configuration::SHADOW_BUFFER_WIDTH, Configuration::SHADOW_BUFFER_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
     depthShader = resourceManager.getResource<Shader>("DEPTH_SHADER");
 }
 
@@ -124,21 +107,19 @@ void RenderSystem::renderScene(Shader* shader) const {
 
 void RenderSystem::update(float dt) {
     // shadows
-    glViewport(0, 0, Configuration::SHADOW_BUFFER_WIDTH, Configuration::SHADOW_BUFFER_HEIGHT);
-    glBindFramebuffer(GL_FRAMEBUFFER, depthFramebuffer);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    shadowBuffer.use();
+
+    // glCullFace(GL_FRONT);
     renderScene(depthShader.get());
+    // glCullFace(GL_BACK);
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     const CameraComponent& camera = registry.get<CameraComponent>(game->camera);
     glViewport(0, 0, camera.width, camera.height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    const int offset = 4;
-    glActiveTexture(GL_TEXTURE0 + offset);
-    glBindTexture(GL_TEXTURE_2D, depthMap);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboLight);
-    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4) + 4 * sizeof(glm::vec4), sizeof(int), &offset);
+    shadowBuffer.bindTextures();
 
     renderScene();
 

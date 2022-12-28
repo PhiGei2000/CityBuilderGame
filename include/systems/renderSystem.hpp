@@ -2,6 +2,8 @@
 #include "events/events.hpp"
 #include "systems/system.hpp"
 
+#include "rendering/shadowBuffer.hpp"
+
 struct MeshComponent;
 struct LightComponent;
 struct CameraComponent;
@@ -13,8 +15,7 @@ class RenderSystem : public System {
     unsigned int uboCamera;
     unsigned int uboLight;
 
-    unsigned int depthFramebuffer;
-    unsigned int depthMap;
+    ShadowBuffer shadowBuffer;
 
     unsigned int cameraWidth;
 
