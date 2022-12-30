@@ -1,8 +1,12 @@
 #version 450
+
+#define splitCount 2
+
 in vec3 FragPos;
 in vec2 TexCoord;
 in mat3 TBN;
-in vec4 FragPosLightSpace;
+in vec4 FragPosLightSpace[splitCount];
+in float ClipSpacePosZ;
 
 layout(std140, binding = 1) uniform Camera {
     mat4 view;
@@ -13,14 +17,16 @@ layout(std140, binding = 1) uniform Camera {
 };
 
 layout(std140, binding = 2) uniform Light {
-    mat4 lightView;
-    mat4 lightProjection;
+    mat4 lightView[splitCount];
+    mat4 lightProjection[splitCount];
 
     vec3 lightDirection;
 
     vec3 lightAmbient;
     vec3 lightDiffuse;
     vec3 lightSpecular;
+
+    float cascadeFarPlanes[splitCount];
 };
 
 struct Material {
@@ -47,12 +53,12 @@ struct Material {
 out vec4 FragColor;
 
 uniform Material material;
-uniform sampler2D shadowMap;
+uniform sampler2D shadowMaps[splitCount];
 
 vec3 calcAmbientLight(vec3 ambientColor);
 vec3 calcDiffuseLight(vec3 normal, vec3 diffuseColor);
 vec3 calcSpecularLight(vec3 normal, vec3 specularColor);
-float shadowCalculation(vec4 fragPosLightSpace);
+float shadowCalculation();
 
 void main() {
     // init colors
@@ -75,7 +81,7 @@ void main() {
     normal = normal * 2.0 - 1.0;
     normal = normalize(TBN * normal);
 
-    float shadow = shadowCalculation(FragPosLightSpace);
+    float shadow = shadowCalculation();
     vec3 ambient, diffuse, specular;
     switch (material.illuminationModel) {
         case 0:
@@ -111,21 +117,28 @@ vec3 calcSpecularLight(vec3 normal, vec3 specularColor) {
     return spec * lightSpecular * specularColor;
 }
 
-float shadowCalculation(vec4 fragPosLightSpace) {
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+float shadowCalculation() {
+    int mapIndex = 0;
+    for (int i = 0; i < splitCount; i++) {
+        if (abs(ClipSpacePosZ) < cascadeFarPlanes[i]) {
+            mapIndex = i;
+            break;
+        }
+    }
+
+    vec3 projCoords = FragPosLightSpace[mapIndex].xyz / FragPosLightSpace[mapIndex].w;
     projCoords = projCoords * 0.5 + 0.5;
-    float closestDepth = texture(shadowMap, projCoords.xy).r;
     float currentDepth = projCoords.z;
 
     float bias = 0.01;
     float shadow = 0;
-    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    vec2 texelSize = 1.0 / textureSize(shadowMaps[mapIndex], 0);
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
-            float closestDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            float closestDepth = texture(shadowMaps[mapIndex], projCoords.xy + vec2(x, y) * texelSize).r;
             shadow += currentDepth - bias > closestDepth ? 1.0 : 0.0;
         }
     }
 
-    return shadow / 9.0;
+    return shadow / 9.0;    
 }

@@ -27,7 +27,7 @@ class RenderSystem : public System {
     void onEntityMoved(EntityMoveEvent& event) const;
     void renderScene(Shader* shader = nullptr) const;
 
-    void updateLightBuffer(const LightComponent& sunLight) const;
+    void updateLightBuffer(const LightComponent& sunLight, const CameraComponent& component) const;
 
   public:
     RenderSystem(Game* app);
