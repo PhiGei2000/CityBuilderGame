@@ -4,7 +4,7 @@
 class ShadowBuffer {
   private:
     unsigned int fbo;
-    unsigned int depthMaps[Configuration::SHADOW_BUFFER_SPLIT_COUNT];
+    unsigned int depthMaps[Configuration::SHADOW_CASCADE_COUNT];
 
   public:
     ShadowBuffer();

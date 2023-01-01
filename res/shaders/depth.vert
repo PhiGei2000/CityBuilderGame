@@ -5,11 +5,9 @@ layout(location = 2) in vec3 aNormal;
 layout(location = 3) in vec3 aTangent;
 layout(location = 4) in vec3 aBitangent;
 
-#define splitCount 2
-
 layout(std140, binding = 2) uniform Light {
-    mat4 lightView[splitCount];
-    mat4 lightProjection[splitCount];
+    mat4 lightView[cascadeCount];
+    mat4 lightProjection[cascadeCount];
 
     vec3 lightDirection;
 
@@ -17,7 +15,7 @@ layout(std140, binding = 2) uniform Light {
     vec3 lightDiffuse;
     vec3 lightSpecular;
 
-    float cascadeFarPlanes[splitCount];
+    float cascadeFarPlanes[cascadeCount];
 };
 
 uniform mat4 model;

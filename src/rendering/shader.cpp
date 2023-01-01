@@ -1,5 +1,7 @@
 #include "rendering/shader.hpp"
 
+#include "misc/configuration.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -7,14 +9,25 @@
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 
+const std::unordered_map<std::string, std::string> Shader::defines = {
+    std::make_pair<std::string, std::string>("cascadeCount", std::to_string(Configuration::SHADOW_CASCADE_COUNT))};
+
 std::string Shader::getSource(const std::string& filename) {
     std::ifstream file;
 
     file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     try {
         file.open(filename);
+        std::string firstLine;
+        std::getline(file, firstLine);
 
         std::stringstream ss;
+        ss << firstLine << std::endl;
+
+        for (const auto [name, value] : defines) {
+            ss << "#define " << name << " " << value << std::endl;
+        }
+
         ss << file.rdbuf();
 
         file.close();

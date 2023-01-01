@@ -8,8 +8,8 @@ ShadowBuffer::ShadowBuffer() {
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    glGenTextures(Configuration::SHADOW_BUFFER_SPLIT_COUNT, &depthMaps[0]);
-    for (int i = 0; i < Configuration::SHADOW_BUFFER_SPLIT_COUNT; i++) {
+    glGenTextures(Configuration::SHADOW_CASCADE_COUNT, &depthMaps[0]);
+    for (int i = 0; i < Configuration::SHADOW_CASCADE_COUNT; i++) {
         glBindTexture(GL_TEXTURE_2D, depthMaps[i]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Configuration::SHADOW_BUFFER_WIDTH, Configuration::SHADOW_BUFFER_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -43,7 +43,7 @@ void ShadowBuffer::use(unsigned int mapIndex) const {
 
 void ShadowBuffer::bindTextures() const {
     const int offset = 4;
-    for (int i = 0; i < Configuration::SHADOW_BUFFER_SPLIT_COUNT; i++) {
+    for (int i = 0; i < Configuration::SHADOW_CASCADE_COUNT; i++) {
         glActiveTexture(GL_TEXTURE0 + offset + i);
         glBindTexture(GL_TEXTURE_2D, depthMaps[i]);
     }

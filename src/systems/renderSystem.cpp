@@ -27,7 +27,7 @@ void RenderSystem::init() {
     // sun light buffer
     glGenBuffers(1, &uboLight);
     glBindBuffer(GL_UNIFORM_BUFFER, uboLight);
-    glBufferData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_BUFFER_SPLIT_COUNT * sizeof(glm::mat4) + (4 + Configuration::SHADOW_BUFFER_SPLIT_COUNT) * sizeof(glm::vec4), NULL, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_CASCADE_COUNT * sizeof(glm::mat4) + (4 + Configuration::SHADOW_CASCADE_COUNT) * sizeof(glm::vec4), NULL, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     depthShader = resourceManager.getResource<Shader>("DEPTH_SHADER");
@@ -84,23 +84,23 @@ void RenderSystem::onEntityMoved(EntityMoveEvent& event) const {
 
 void RenderSystem::updateLightBuffer(const LightComponent& sunLight, const CameraComponent& camera) const {
     glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboLight);
-    for (int i = 0; i < Configuration::SHADOW_BUFFER_SPLIT_COUNT; i++) {
+    for (int i = 0; i < Configuration::SHADOW_CASCADE_COUNT; i++) {
         // light view
         glBufferSubData(GL_UNIFORM_BUFFER, i * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(sunLight.lightView[i]));
         // light projection
-        glBufferSubData(GL_UNIFORM_BUFFER, (Configuration::SHADOW_BUFFER_SPLIT_COUNT + i) * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(sunLight.lightProjection[i]));
+        glBufferSubData(GL_UNIFORM_BUFFER, (Configuration::SHADOW_CASCADE_COUNT + i) * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(sunLight.lightProjection[i]));
         // cascade far planes
         float value = (camera.far - camera.near) * Configuration::CASCADE_FAR_PLANES_FACTORS[i] + camera.near;
-        glBufferSubData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_BUFFER_SPLIT_COUNT * sizeof(glm::mat4) + (4 + i) * sizeof(glm::vec4), sizeof(float), &value);
+        glBufferSubData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_CASCADE_COUNT * sizeof(glm::mat4) + (4 + i) * sizeof(glm::vec4), sizeof(float), &value);
     }
     // light direction
-    glBufferSubData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_BUFFER_SPLIT_COUNT * sizeof(glm::mat4), sizeof(glm::vec3), glm::value_ptr(sunLight.direction));
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_CASCADE_COUNT * sizeof(glm::mat4), sizeof(glm::vec3), glm::value_ptr(sunLight.direction));
     // light ambient
-    glBufferSubData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_BUFFER_SPLIT_COUNT * sizeof(glm::mat4) + sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(sunLight.ambient));
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_CASCADE_COUNT * sizeof(glm::mat4) + sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(sunLight.ambient));
     // light diffuse
-    glBufferSubData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_BUFFER_SPLIT_COUNT * sizeof(glm::mat4) + 2 * sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(sunLight.diffuse));
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_CASCADE_COUNT * sizeof(glm::mat4) + 2 * sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(sunLight.diffuse));
     // light specular
-    glBufferSubData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_BUFFER_SPLIT_COUNT * sizeof(glm::mat4) + 3 * sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(sunLight.specular));
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_CASCADE_COUNT * sizeof(glm::mat4) + 3 * sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(sunLight.specular));
 }
 
 void RenderSystem::renderScene(Shader* shader) const {
@@ -112,7 +112,7 @@ void RenderSystem::renderScene(Shader* shader) const {
 
 void RenderSystem::update(float dt) {
     // shadows
-    for (int i = 0; i < Configuration::SHADOW_BUFFER_SPLIT_COUNT; i++) {
+    for (int i = 0; i < Configuration::SHADOW_CASCADE_COUNT; i++) {
         shadowBuffer.use(i);
         depthShader->use();
         depthShader->setInt("mapIndex", i);

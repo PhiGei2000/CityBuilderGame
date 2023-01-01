@@ -14,8 +14,8 @@ struct LightComponent : public AssignableComponent {
     glm::vec3 diffuse;
     glm::vec3 specular;
 
-    glm::mat4 lightView[Configuration::SHADOW_BUFFER_SPLIT_COUNT];
-    glm::mat4 lightProjection[Configuration::SHADOW_BUFFER_SPLIT_COUNT];
+    glm::mat4 lightView[Configuration::SHADOW_CASCADE_COUNT];
+    glm::mat4 lightProjection[Configuration::SHADOW_CASCADE_COUNT];
 
     LightComponent(const glm::vec3& direction, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular);
 

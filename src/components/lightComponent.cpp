@@ -14,7 +14,7 @@ void LightComponent::assignToEntity(const entt::entity entity, entt::registry& r
 
 void LightComponent::calculateLightMatrices(const CameraComponent& camera) {
     float lastSplitDistance = 0.0f;
-    for (int k = 0; k < Configuration::SHADOW_BUFFER_SPLIT_COUNT; k++) {
+    for (int k = 0; k < Configuration::SHADOW_CASCADE_COUNT; k++) {
         // frustum in clip space
         glm::vec3 frustum[] = {
             // near plane

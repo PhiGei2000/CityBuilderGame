@@ -1,11 +1,8 @@
 #version 450
-
-#define splitCount 2
-
 in vec3 FragPos;
 in vec2 TexCoord;
 in mat3 TBN;
-in vec4 FragPosLightSpace[splitCount];
+in vec4 FragPosLightSpace[cascadeCount];
 in float ClipSpacePosZ;
 
 layout(std140, binding = 1) uniform Camera {
@@ -17,8 +14,8 @@ layout(std140, binding = 1) uniform Camera {
 };
 
 layout(std140, binding = 2) uniform Light {
-    mat4 lightView[splitCount];
-    mat4 lightProjection[splitCount];
+    mat4 lightView[cascadeCount];
+    mat4 lightProjection[cascadeCount];
 
     vec3 lightDirection;
 
@@ -26,7 +23,7 @@ layout(std140, binding = 2) uniform Light {
     vec3 lightDiffuse;
     vec3 lightSpecular;
 
-    float cascadeFarPlanes[splitCount];
+    float cascadeFarPlanes[cascadeCount];
 };
 
 struct Material {
@@ -53,7 +50,7 @@ struct Material {
 out vec4 FragColor;
 
 uniform Material material;
-uniform sampler2D shadowMaps[splitCount];
+uniform sampler2D shadowMaps[cascadeCount];
 
 vec3 calcAmbientLight(vec3 ambientColor);
 vec3 calcDiffuseLight(vec3 normal, vec3 diffuseColor);
@@ -119,7 +116,7 @@ vec3 calcSpecularLight(vec3 normal, vec3 specularColor) {
 
 float shadowCalculation() {
     int mapIndex = 0;
-    for (int i = 0; i < splitCount; i++) {
+    for (int i = 0; i < cascadeCount; i++) {
         if (abs(ClipSpacePosZ) < cascadeFarPlanes[i]) {
             mapIndex = i;
             break;
@@ -140,5 +137,5 @@ float shadowCalculation() {
         }
     }
 
-    return shadow / 9.0;    
+    return shadow / 9.0;
 }

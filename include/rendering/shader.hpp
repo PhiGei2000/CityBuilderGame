@@ -10,6 +10,7 @@ class Shader {
   private:
     unsigned int program = 0;
     std::unordered_map<std::string, unsigned int> uniforms;
+    static const std::unordered_map<std::string, std::string> defines;
 
     static std::string getSource(const std::string& filename);
     static unsigned int compileShader(int shaderType, const std::string& filename);
