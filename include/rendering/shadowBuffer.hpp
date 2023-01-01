@@ -4,12 +4,14 @@
 class ShadowBuffer {
   private:
     unsigned int fbo;
-    unsigned int depthMaps[Configuration::SHADOW_CASCADE_COUNT];
+    unsigned int depthMap;
 
   public:
+    static constexpr unsigned int depthMapOffset = 4;
+
     ShadowBuffer();
     ~ShadowBuffer();
 
-    void use(unsigned int mapIndex) const;
+    void use() const;
     void bindTextures() const;
 };

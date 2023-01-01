@@ -19,7 +19,7 @@ class RenderSystem : public System {
 
     unsigned int cameraWidth;
 
-    std::shared_ptr<Shader> depthShader;
+    std::shared_ptr<Shader> shadowShader;
 
     void init() override;
 

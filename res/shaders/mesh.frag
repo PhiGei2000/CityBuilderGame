@@ -50,7 +50,7 @@ struct Material {
 out vec4 FragColor;
 
 uniform Material material;
-uniform sampler2D shadowMaps[cascadeCount];
+uniform sampler2DArray shadowMaps;
 
 vec3 calcAmbientLight(vec3 ambientColor);
 vec3 calcDiffuseLight(vec3 normal, vec3 diffuseColor);
@@ -129,10 +129,10 @@ float shadowCalculation() {
 
     float bias = 0.01;
     float shadow = 0;
-    vec2 texelSize = 1.0 / textureSize(shadowMaps[mapIndex], 0);
+    vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps, 0));
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
-            float closestDepth = texture(shadowMaps[mapIndex], projCoords.xy + vec2(x, y) * texelSize).r;
+            float closestDepth = texture(shadowMaps, vec3(projCoords.xy + vec2(x, y) * texelSize, mapIndex)).r;
             shadow += currentDepth - bias > closestDepth ? 1.0 : 0.0;
         }
     }

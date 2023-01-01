@@ -30,7 +30,7 @@ void RenderSystem::init() {
     glBufferData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_CASCADE_COUNT * sizeof(glm::mat4) + (4 + Configuration::SHADOW_CASCADE_COUNT) * sizeof(glm::vec4), NULL, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    depthShader = resourceManager.getResource<Shader>("DEPTH_SHADER");
+    shadowShader = resourceManager.getResource<Shader>("SHADOW_SHADER");
 }
 
 RenderSystem::RenderSystem(Game* game)
@@ -112,15 +112,12 @@ void RenderSystem::renderScene(Shader* shader) const {
 
 void RenderSystem::update(float dt) {
     // shadows
-    for (int i = 0; i < Configuration::SHADOW_CASCADE_COUNT; i++) {
-        shadowBuffer.use(i);
-        depthShader->use();
-        depthShader->setInt("mapIndex", i);
+    shadowBuffer.use();
+    shadowShader->use();
 
-        // glCullFace(GL_FRONT);
-        renderScene(depthShader.get());
-        // glCullFace(GL_BACK);
-    }
+    // glCullFace(GL_FRONT);
+    renderScene(shadowShader.get());
+    // glCullFace(GL_BACK);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
