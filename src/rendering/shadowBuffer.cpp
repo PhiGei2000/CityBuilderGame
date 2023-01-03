@@ -43,6 +43,7 @@ ShadowBuffer::~ShadowBuffer() {
 void ShadowBuffer::use() const {
     glViewport(0, 0, Configuration::SHADOW_BUFFER_WIDTH, Configuration::SHADOW_BUFFER_HEIGHT);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMap, 0);
 
     glClear(GL_DEPTH_BUFFER_BIT);
 }

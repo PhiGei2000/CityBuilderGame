@@ -13,65 +13,71 @@ void LightComponent::assignToEntity(const entt::entity entity, entt::registry& r
 }
 
 void LightComponent::calculateLightMatrices(const CameraComponent& camera) {
-    float lastSplitDistance = 0.0f;
-    for (int k = 0; k < Configuration::SHADOW_CASCADE_COUNT; k++) {
-        // frustum in clip space
-        glm::vec3 frustum[] = {
-            // near plane
-            glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f),
-            glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f),
-            glm::vec4(1.0f, -1.0f, -1.0f, 1.0f),
-            glm::vec4(1.0f, 1.0f, -1.0f, 1.0f),
-            // far plane
-            glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f),
-            glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f),
-            glm::vec4(1.0f, -1.0f, 1.0f, 1.0f),
-            glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-        };
+    for (int i = 0; i < Configuration::SHADOW_CASCADE_COUNT; i++) {
+        float near = i == 0 ? camera.near : ((camera.far - camera.near) * Configuration::CASCADE_FAR_PLANE_FACTORS[i - 1] + camera.near);
+        float far = (camera.far - camera.near) * Configuration::CASCADE_FAR_PLANE_FACTORS[i] + camera.near;
 
-        glm::vec3 frustumCenter = glm::vec3(0.0f);
-
-        // transform frustum to world space
-        const glm::mat4 inverseTransform = glm::inverse(camera.projectionMatrix * camera.viewMatrix);
-        for (int i = 0; i < 8; i++) {
-            glm::vec4 transformed = inverseTransform * glm::vec4(frustum[i], 1.0f);
-            frustum[i] = 1 / transformed.w * glm::vec3(transformed);
-
-            frustumCenter += frustum[i] / 8.0f;
-        }
-
-        float splitDistance = Configuration::CASCADE_FAR_PLANES_FACTORS[k];
-        for (int i = 0; i < 4; i++) {
-            glm::vec3 distance = frustum[i + 4] - frustum[i];
-            frustum[i + 4] = frustum[i] + distance * splitDistance;
-            frustum[i] = frustum[i] + distance * lastSplitDistance;
-        }
-        lastSplitDistance = splitDistance;
-
-        glm::vec3 lightPos = frustumCenter - (camera.far - camera.near) * direction;
-
-        // transform direction vector to spherical coordinates and calculate up vector
-        // (same calculation as in camera component just with differential geometry)
-        float theta = glm::acos(direction.y);
-        float phi = glm::sign(direction.z) * glm::acos(direction.x / glm::sin(theta));
-        const glm::vec3 lightUp = glm::vec3(-glm::sin(phi), 0, glm::cos(phi));
-
-        lightView[k] = glm::lookAt(lightPos, lightPos + direction, lightUp);
-
-        // transform frustum to light space and calculate projection matrix
-        float left = FLT_MAX, right = -FLT_MAX, top = -FLT_MAX, bottom = FLT_MAX, near = FLT_MAX, far = -FLT_MAX;
-        for (int i = 0; i < 8; i++) {
-            glm::vec4 transformed = lightView[k] * glm::vec4(frustum[i], 1.0f);
-            frustum[i] = 1 / transformed.w * glm::vec3(transformed);
-
-            left = std::min(left, frustum[i].x);
-            right = std::max(right, frustum[i].x);
-            bottom = std::min(bottom, frustum[i].y);
-            top = std::max(top, frustum[i].y);
-            near = std::min(near, frustum[i].z);
-            far = std::max(far, frustum[i].z);
-        }
-
-        lightProjection[k] = glm::ortho(left, right, bottom, top, 0.0f, far - near);
+        const auto& [projection, view] = calculateLightMatrices(camera, near, far);
+        lightProjection[i] = projection;
+        lightView[i] = view;
     }
+}
+
+std::vector<glm::vec4> LightComponent::getFrustumInWorldSpace(const glm::mat4& projection, const glm::mat4& view) {
+    std::vector<glm::vec4> frustumCorners;
+    glm::mat4 inverse = glm::inverse(projection * view);
+
+    frustumCorners.reserve(8);
+    for (int x = 0; x < 2; x++) {
+        for (int y = 0; y < 2; y++) {
+            for (int z = 0; z < 2; z++) {
+                const glm::vec4& pt = inverse * glm::vec4(2.0f * x - 1.0f, 2.0f * y - 1.0f, 2.0f * z - 1.0f, 1.0f);
+                frustumCorners.push_back(pt / pt.w);
+            }
+        }
+    }
+
+    return frustumCorners;
+}
+
+std::pair<glm::mat4, glm::mat4> LightComponent::calculateLightMatrices(const CameraComponent& camera, float nearPlane, float farPlane) const {
+    const glm::mat4 projection = glm::perspective(camera.fov, camera.width / camera.height, nearPlane, farPlane);
+
+    const std::vector<glm::vec4> frustum = getFrustumInWorldSpace(projection, camera.viewMatrix);
+
+    // calculate frustum center
+    glm::vec3 center = glm::vec3(0.0f);
+    for (const auto& corner : frustum) {
+        center += glm::vec3(corner) / 8.0f;
+    }
+
+    // calculate light view matrix
+    // direction = (cos(phi)*sin(theta),cos(theta),sin(phi)*sin(theta))
+    const float theta = glm::acos(direction.y);
+    const float phi = glm::sign(direction.z) * glm::acos(direction.x / glm::sin(theta));
+
+    const glm::vec3 lightUp = glm::vec3(glm::cos(phi) * glm::cos(theta), -glm::sin(theta), glm::sin(phi) * glm::cos(theta));
+
+    const glm::mat4 lightView = glm::lookAt(center, center + direction, lightUp);
+
+    // calculate light projection matrix
+    float minX = FLT_MAX;
+    float maxX = -FLT_MAX;
+    float minY = FLT_MAX;
+    float maxY = -FLT_MAX;
+    float minZ = FLT_MAX;
+    float maxZ = -FLT_MAX;
+    for (const auto& corner : frustum) {
+        const glm::vec4 pl = lightView * corner;
+        minX = std::min(minX, pl.x / pl.w);
+        maxX = std::max(maxX, pl.x / pl.w);
+        minY = std::min(minY, pl.y / pl.w);
+        maxY = std::max(maxY, pl.y / pl.w);
+        minZ = std::min(minZ, pl.z / pl.w);
+        maxZ = std::max(maxZ, pl.z / pl.w);
+    }
+
+    const glm::mat4 lightProjection = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
+
+    return std::make_pair(lightProjection, lightView);
 }

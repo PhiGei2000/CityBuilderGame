@@ -3,6 +3,8 @@
 
 #include "misc/configuration.hpp"
 
+#include <vector>
+
 #include <glm/glm.hpp>
 
 struct CameraComponent;
@@ -22,4 +24,9 @@ struct LightComponent : public AssignableComponent {
     void assignToEntity(const entt::entity entity, entt::registry& registry) const override;
 
     void calculateLightMatrices(const CameraComponent& camera);
+
+  private:
+    static std::vector<glm::vec4> getFrustumInWorldSpace(const glm::mat4& projection, const glm::mat4& view);
+
+    std::pair<glm::mat4, glm::mat4> calculateLightMatrices(const CameraComponent& camera, float nearPlane, float farPlane) const;
 };

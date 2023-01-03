@@ -14,5 +14,5 @@ class Configuration {
     static constexpr unsigned int SHADOW_BUFFER_HEIGHT = 1024;
 
     static constexpr unsigned int SHADOW_CASCADE_COUNT = 2;
-    static constexpr float CASCADE_FAR_PLANES_FACTORS[SHADOW_CASCADE_COUNT] = {0.75f, 1.0f};
+    static constexpr float CASCADE_FAR_PLANE_FACTORS[SHADOW_CASCADE_COUNT] = {0.9f, 1.0f};
 };

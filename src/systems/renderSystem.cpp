@@ -90,7 +90,7 @@ void RenderSystem::updateLightBuffer(const LightComponent& sunLight, const Camer
         // light projection
         glBufferSubData(GL_UNIFORM_BUFFER, (Configuration::SHADOW_CASCADE_COUNT + i) * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(sunLight.lightProjection[i]));
         // cascade far planes
-        float value = (camera.far - camera.near) * Configuration::CASCADE_FAR_PLANES_FACTORS[i] + camera.near;
+        float value = (camera.far - camera.near) * Configuration::CASCADE_FAR_PLANE_FACTORS[i] + camera.near;
         glBufferSubData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_CASCADE_COUNT * sizeof(glm::mat4) + (4 + i) * sizeof(glm::vec4), sizeof(float), &value);
     }
     // light direction
