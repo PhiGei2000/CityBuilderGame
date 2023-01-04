@@ -35,13 +35,13 @@ void Game::init() {
     registry.emplace<TransformationComponent>(groundEntity, glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
 
     sun = registry.create();
-    registry.emplace<LightComponent>(sun,
-                                     glm::vec3{0, -1, 0}, // direction
-                                     glm::vec3(0.5f),     // ambient
-                                     glm::vec3(0.9f),     // diffuse
-                                     glm::vec3(0.8f)      // specular
-    );
-    registry.emplace<TransformationComponent>(sun, 300.0f * glm::vec3(0.5f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+    registry.emplace<SunLightComponent>(sun,
+                                        glm::radians(90.0f), // direction
+                                        glm::vec3(0.5f),     // ambient
+                                        glm::vec3(0.9f),     // diffuse
+                                        glm::vec3(0.8f)     // specular
+                                        );
+    registry.emplace<TransformationComponent>(sun, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 
     EntityMoveEvent moveEvent{sun};
     raiseEvent(moveEvent);

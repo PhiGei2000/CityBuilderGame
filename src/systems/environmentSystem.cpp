@@ -8,6 +8,7 @@
 #include "components/components.hpp"
 #include "events/events.hpp"
 #include "misc/configuration.hpp"
+#include "misc/utility.hpp"
 
 #include <glm/glm.hpp>
 
@@ -56,6 +57,30 @@ void EnvironmentSystem::update(float dt) {
 
         entitiesToDestroy.pop();
     }
+
+    const float sunSpeed = 0.05f;
+    TransformationComponent& sunPos = registry.get<TransformationComponent>(game->sun);
+    SunLightComponent& sunLight = registry.get<SunLightComponent>(game->sun);
+
+    // move sun
+    static constexpr float two_pi = 2 * glm::pi<float>();
+    sunLight.angle += sunSpeed * dt;
+    if (sunLight.angle > two_pi) {
+        sunLight.angle -= two_pi;
+    }
+    else if (sunLight.angle < -two_pi) {
+        sunLight.angle += two_pi;
+    }
+
+    sunLight.direction = glm::vec3(glm::cos(sunLight.angle), glm::sin(sunLight.angle), 0.0f);
+    sunPos.position = -300.0f * sunLight.direction;
+
+#if DEBUG
+    std::cout << "sun pos: " << sunPos.position << "(phi: " << sunLight.angle << ")" << std::endl;
+#endif
+
+    EntityMoveEvent e{game->sun};
+    game->raiseEvent(e);
 }
 
 void EnvironmentSystem::handleBuildEvent(const BuildEvent& e) {

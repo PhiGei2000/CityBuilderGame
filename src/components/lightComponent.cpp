@@ -1,6 +1,7 @@
 #include "components/lightComponent.hpp"
 
 #include "components/cameraComponent.hpp"
+#include "misc/utility.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -52,9 +53,7 @@ std::pair<glm::mat4, glm::mat4> LightComponent::calculateLightMatrices(const Cam
     }
 
     // calculate light view matrix
-    // direction = (cos(phi)*sin(theta),cos(theta),sin(phi)*sin(theta))
-    const float theta = glm::acos(direction.y);
-    const float phi = glm::sign(direction.z) * glm::acos(direction.x / glm::sin(theta));
+    const float phi = utility::kartesianToSpherical(direction).z;
 
     const glm::vec3 lightUp = glm::vec3(-glm::sin(phi), 0.0f, glm::cos(phi));
 

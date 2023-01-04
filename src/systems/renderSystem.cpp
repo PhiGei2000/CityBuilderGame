@@ -65,7 +65,7 @@ void RenderSystem::onCameraUpdated(CameraUpdateEvent& event) const {
     glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4) + sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(cameraTarget));
 
     if (game->sun != entt::null) {
-        LightComponent& sunLight = registry.get<LightComponent>(game->sun);
+        SunLightComponent& sunLight = registry.get<SunLightComponent>(game->sun);
         sunLight.calculateLightMatrices(camera);
         updateLightBuffer(sunLight, camera);
     }
@@ -75,7 +75,7 @@ void RenderSystem::onEntityMoved(EntityMoveEvent& event) const {
     // update sun uniform buffer
     if (event.entity == game->sun) {
         const CameraComponent& camera = registry.get<CameraComponent>(game->camera);
-        LightComponent& sunLight = registry.get<LightComponent>(game->sun);
+        SunLightComponent& sunLight = registry.get<SunLightComponent>(game->sun);
 
         sunLight.calculateLightMatrices(camera);
         updateLightBuffer(sunLight, camera);

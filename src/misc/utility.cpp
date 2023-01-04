@@ -21,3 +21,4 @@ std::ostream& operator<<(std::ostream& os, const glm::vec<4, T, Q>& vec) {
 }
 
 template std::ostream& operator<< <int, glm::packed_highp>(std::ostream&, const glm::vec<2, int, glm::packed_highp>&);
+template std::ostream& operator<< <float, glm::packed_highp>(std::ostream&, const glm::vec<3, float, glm::packed_highp>&);
