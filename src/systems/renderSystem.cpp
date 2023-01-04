@@ -125,6 +125,16 @@ void RenderSystem::update(float dt) {
     glViewport(0, 0, camera.width, camera.height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+#if DEBUG
+    const entt::entity& debugEntity = registry.view<DebugComponent>().front();
+    const DebugComponent& debugComponent = registry.get<DebugComponent>(debugEntity);
+    if (debugComponent.mode == DebugMode::SHADOW_MAPS) {
+        shadowMapRenderer.render(shadowBuffer);
+
+        return;
+    }
+#endif
+
     shadowBuffer.bindTextures();
 
     renderScene();

@@ -44,7 +44,14 @@ void DebugSystem::update(float dt) {
 }
 
 void DebugSystem::handleKeyEvent(const KeyEvent& e) {
+    DebugComponent& debugComponent = registry.get<DebugComponent>(debugEntity);
+
     if (e.key == GLFW_KEY_F3 && e.action == GLFW_PRESS) {
-        game->debugMode = !game->debugMode;
+        debugComponent.mode = debugComponent.mode == DebugMode::AXIS ? DebugMode::OFF : DebugMode::AXIS;
     }
+    else if (e.key == GLFW_KEY_F4 && e.action == GLFW_PRESS) {
+        debugComponent.mode = debugComponent.mode == DebugMode::SHADOW_MAPS ? DebugMode::OFF : DebugMode::SHADOW_MAPS;
+    }
+
+    game->debugMode = debugComponent.mode == DebugMode::OFF ? false : true;
 }

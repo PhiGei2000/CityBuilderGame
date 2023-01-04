@@ -8,8 +8,6 @@ layout(location = 4) in vec3 aBitangent;
 out vec3 FragPos;
 out vec2 TexCoord;
 out mat3 TBN;
-out vec4 FragPosLightSpace[cascadeCount];
-out float ClipSpacePosZ;
 
 layout(std140, binding = 1) uniform Camera {
     mat4 view;
@@ -17,19 +15,6 @@ layout(std140, binding = 1) uniform Camera {
 
     vec3 viewPos;
     vec3 cameraTarget;
-};
-
-layout(std140, binding = 2) uniform Light {
-    mat4 lightView[cascadeCount];
-    mat4 lightProjection[cascadeCount];
-
-    vec3 lightDirection;
-
-    vec3 lightAmbient;
-    vec3 lightDiffuse;
-    vec3 lightSpecular;
-
-    float cascadeFarPlanes[cascadeCount];
 };
 
 uniform mat4 model;
@@ -45,9 +30,6 @@ void main() {
 
     gl_Position = projection * view * model * position;
     FragPos = vec3(model * position);
-    for (int i = 0; i < cascadeCount; i++) {
-        FragPosLightSpace[i] = lightProjection[i] * lightView[i] * vec4(FragPos, 1.0);
-    }
 
     TexCoord = aTexCoord;
 }

@@ -2,8 +2,6 @@
 in vec3 FragPos;
 in vec2 TexCoord;
 in mat3 TBN;
-in vec4 FragPosLightSpace[cascadeCount];
-in float ClipSpacePosZ;
 
 layout(std140, binding = 1) uniform Camera {
     mat4 view;
@@ -115,15 +113,18 @@ vec3 calcSpecularLight(vec3 normal, vec3 specularColor) {
 }
 
 float shadowCalculation() {
-    int mapIndex = 0;
+    vec4 fragPosViewSpace = view * vec4(FragPos, 1.0);
+
+    int mapIndex = cascadeCount - 1;
     for (int i = 0; i < cascadeCount; i++) {
-        if (abs(ClipSpacePosZ) < cascadeFarPlanes[i]) {
+        if (abs(fragPosViewSpace.z) < cascadeFarPlanes[i]) {
             mapIndex = i;
             break;
         }
     }
 
-    vec3 projCoords = FragPosLightSpace[mapIndex].xyz / FragPosLightSpace[mapIndex].w;
+    vec4 fragPosLightSpace = lightProjection[mapIndex] * lightView[mapIndex] * vec4(FragPos, 1.0);
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
     float currentDepth = projCoords.z;
 

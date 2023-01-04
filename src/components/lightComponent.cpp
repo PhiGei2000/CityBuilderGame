@@ -31,7 +31,7 @@ std::vector<glm::vec4> LightComponent::getFrustumInWorldSpace(const glm::mat4& p
     for (int x = 0; x < 2; x++) {
         for (int y = 0; y < 2; y++) {
             for (int z = 0; z < 2; z++) {
-                const glm::vec4& pt = inverse * glm::vec4(2.0f * x - 1.0f, 2.0f * y - 1.0f, 2.0f * z - 1.0f, 1.0f);
+                const glm::vec4 pt = inverse * glm::vec4(2.0f * x - 1.0f, 2.0f * y - 1.0f, 2.0f * z - 1.0f, 1.0f);
                 frustumCorners.push_back(pt / pt.w);
             }
         }
@@ -41,7 +41,7 @@ std::vector<glm::vec4> LightComponent::getFrustumInWorldSpace(const glm::mat4& p
 }
 
 std::pair<glm::mat4, glm::mat4> LightComponent::calculateLightMatrices(const CameraComponent& camera, float nearPlane, float farPlane) const {
-    const glm::mat4 projection = glm::perspective(camera.fov, camera.width / camera.height, nearPlane, farPlane);
+    const glm::mat4 projection = glm::perspective(glm::radians(camera.fov), camera.width / camera.height, nearPlane, farPlane);
 
     const std::vector<glm::vec4> frustum = getFrustumInWorldSpace(projection, camera.viewMatrix);
 
@@ -56,7 +56,7 @@ std::pair<glm::mat4, glm::mat4> LightComponent::calculateLightMatrices(const Cam
     const float theta = glm::acos(direction.y);
     const float phi = glm::sign(direction.z) * glm::acos(direction.x / glm::sin(theta));
 
-    const glm::vec3 lightUp = glm::vec3(glm::cos(phi) * glm::cos(theta), -glm::sin(theta), glm::sin(phi) * glm::cos(theta));
+    const glm::vec3 lightUp = glm::vec3(-glm::sin(phi), 0.0f, glm::cos(phi));
 
     const glm::mat4 lightView = glm::lookAt(center, center + direction, lightUp);
 

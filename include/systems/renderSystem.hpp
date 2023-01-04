@@ -4,6 +4,10 @@
 
 #include "rendering/shadowBuffer.hpp"
 
+#if DEBUG
+#include "rendering/debug/shadowMapRenderer.hpp"
+#endif
+
 struct MeshComponent;
 struct LightComponent;
 struct CameraComponent;
@@ -16,6 +20,9 @@ class RenderSystem : public System {
     unsigned int uboLight;
 
     ShadowBuffer shadowBuffer;
+    #if DEBUG
+    ShadowMapRenderer shadowMapRenderer;
+#endif
 
     unsigned int cameraWidth;
 

@@ -12,7 +12,7 @@ struct CameraComponent : public Component<false> {
     float height = 600.0f;
     float fov = 60.0f;
     float near = 0.1f;
-    float far = 200.0f;
+    float far = 400.0f;
 
     float yaw = 0.0f, pitch = 0.0f;
 
