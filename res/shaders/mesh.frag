@@ -53,7 +53,7 @@ uniform sampler2DArray shadowMaps;
 vec3 calcAmbientLight(vec3 ambientColor);
 vec3 calcDiffuseLight(vec3 normal, vec3 diffuseColor);
 vec3 calcSpecularLight(vec3 normal, vec3 specularColor);
-float shadowCalculation();
+float shadowCalculation(vec3 normal);
 
 void main() {
     // init colors
@@ -76,7 +76,7 @@ void main() {
     normal = normal * 2.0 - 1.0;
     normal = normalize(TBN * normal);
 
-    float shadow = shadowCalculation();
+    float shadow = shadowCalculation(normal);
     vec3 ambient, diffuse, specular;
     switch (material.illuminationModel) {
         case 0:
@@ -112,7 +112,7 @@ vec3 calcSpecularLight(vec3 normal, vec3 specularColor) {
     return spec * lightSpecular * specularColor;
 }
 
-float shadowCalculation() {
+float shadowCalculation(vec3 normal) {
     vec4 fragPosViewSpace = view * vec4(FragPos, 1.0);
 
     int mapIndex = cascadeCount - 1;
@@ -128,7 +128,7 @@ float shadowCalculation() {
     projCoords = projCoords * 0.5 + 0.5;
     float currentDepth = projCoords.z;
 
-    float bias = 0.01;
+    float bias = max(0.05 * (1.0 - dot(normal, lightDirection)), 0.005);
     float shadow = 0;
     vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps, 0));
     for (int x = -1; x <= 1; x++) {
