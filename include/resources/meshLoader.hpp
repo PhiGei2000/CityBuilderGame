@@ -10,23 +10,72 @@
 class MeshLoader {
   private:
     struct VertexData {
-      std::vector<glm::vec3> positions;
-      std::vector<glm::vec2> texCoords;
-      std::vector<glm::vec3> normals;
+        std::vector<glm::vec3> positions;
+        std::vector<glm::vec2> texCoords;
+        std::vector<glm::vec3> normals;
     };
 
-    using FaceIndices = std::array<glm::uvec3, 3>;
-    
+    /// @brief Holds index information about a vertex.
+    struct VertexIndices {
+        unsigned int positionIndex;
+        unsigned int texCoordIndex;
+        unsigned int normalIndex;
+
+        inline VertexIndices()
+            : positionIndex(INT_MAX), texCoordIndex(INT_MAX), normalIndex(INT_MAX) {
+        }
+
+        inline VertexIndices(unsigned int positionIndex, unsigned int texCoordIndex, unsigned int normalIndex)
+            : positionIndex(positionIndex), texCoordIndex(texCoordIndex), normalIndex(normalIndex) {
+        }
+
+        inline bool operator==(const VertexIndices& other) const {
+            return positionIndex == other.positionIndex && texCoordIndex == other.texCoordIndex && normalIndex == other.normalIndex;
+        }
+
+        inline bool operator!=(const VertexIndices& other) const {
+            return !operator==(other);
+        }
+
+        inline VertexIndices operator+(const VertexIndices& rhs) const {
+            return VertexIndices(positionIndex + rhs.positionIndex, texCoordIndex + rhs.texCoordIndex, normalIndex + rhs.normalIndex);
+        }
+
+        inline VertexIndices operator-(const VertexIndices& rhs) const {
+            return VertexIndices(positionIndex - rhs.positionIndex, texCoordIndex - rhs.texCoordIndex, normalIndex - rhs.normalIndex);
+        }
+
+        inline VertexIndices& operator+=(const VertexIndices& rhs) {
+            positionIndex += rhs.positionIndex;
+            texCoordIndex += rhs.texCoordIndex;
+            normalIndex += rhs.normalIndex;
+
+            return *this;
+        }
+
+        inline VertexIndices& operator-=(const VertexIndices& rhs) {
+            positionIndex -= rhs.positionIndex;
+            texCoordIndex -= rhs.texCoordIndex;
+            normalIndex -= rhs.normalIndex;
+
+            return *this;
+        }
+    };
+
+    using FaceIndices = std::array<VertexIndices, 3>;
+
     /// @brief A collection of the faces grouped by the used material
     using FaceData = std::unordered_map<std::string, std::vector<FaceIndices>>;
 
-    static std::stringstream readLine(std::stringstream& s);    
+    static std::stringstream readLine(std::stringstream& s);
 
     static VertexData parseVertexData(std::stringstream& s);
     static FaceData parseFaceData(std::stringstream& s);
 
     static glm::vec2 parseVec2(std::stringstream& s);
-    static glm::vec3 parseVec3(std::stringstream& s);    
+    static glm::vec3 parseVec3(std::stringstream& s);
+
+    static void correctWindingOrder(const VertexData& data, FaceData& faceData);
 
   public:
     static TexturePtr loadTexture(const std::string& filename, int format = GL_RGBA);

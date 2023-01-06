@@ -82,7 +82,7 @@ MeshLoader::FaceData MeshLoader::parseFaceData(std::stringstream& s) {
                 texIndex = std::stoi(texStr) - 1;
                 normIndex = std::stoi(normStr) - 1;
 
-                indices[i] = glm::uvec3(posIndex, texIndex, normIndex);
+                indices[i] = VertexIndices(posIndex, texIndex, normIndex);
             }
 
             data[materialName].push_back(indices);
@@ -110,6 +110,26 @@ glm::vec3 MeshLoader::parseVec3(std::stringstream& s) {
     s >> z;
 
     return glm::vec3(x, y, z);
+}
+
+void MeshLoader::correctWindingOrder(const VertexData& vertices, FaceData& faces) {
+    for (auto& face : faces) {
+        for (auto& indices : face.second) {
+            const glm::vec3& p0 = vertices.positions[indices[0].positionIndex];
+            const glm::vec3& p1 = vertices.positions[indices[1].positionIndex];
+            const glm::vec3& p2 = vertices.positions[indices[2].positionIndex];
+
+            const glm::vec3& normal = vertices.normals[indices[0].normalIndex];
+            const glm::vec3 calculatedNormal = glm::cross(p1 - p0, p2 - p0);
+
+            if (glm::dot(calculatedNormal, normal) < 0) {
+                // if face is not counterclockwise winding order, swap two indices
+                VertexIndices tmp = indices[0];
+                indices[0] = indices[1];
+                indices[1] = tmp;
+            }
+        }
+    }
 }
 
 TexturePtr MeshLoader::loadTexture(const std::string& filename, int format) {
@@ -280,7 +300,7 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
         std::unordered_map<std::string, MaterialPtr> materials;
         std::string objectName;
 
-        glm::uvec3 indexOffsets = glm::uvec3(0);
+        VertexIndices indexOffsets = VertexIndices(0, 0, 0);
 
         for (std::string line; std::getline(ss, line);) {
             std::stringstream sLine(line);
@@ -304,10 +324,12 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
                 VertexData vertData = parseVertexData(ss);
                 FaceData faceData = parseFaceData(ss);
 
+                correctWindingOrder(vertData, faceData);
+
                 // process faces
                 for (const auto& [materialName, faceIndices] : faceData) {
                     MaterialPtr material = materials.at(materialName);
-                    std::vector<glm::uvec3> vertices;
+                    std::vector<VertexIndices> vertices;
 
                     GeometryData data;
 
@@ -335,9 +357,12 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
                     }
 
                     for (const auto& indices : vertices) {
-                        const glm::uvec3& vertexIndices = indices - indexOffsets;
+                        const VertexIndices& vertexIndices = indices - indexOffsets;
 
-                        data.vertices.emplace_back(vertData.positions[vertexIndices.x], vertData.texCoords[vertexIndices.y], vertData.normals[vertexIndices.z]);
+                        data.vertices.emplace_back(
+                            vertData.positions[vertexIndices.positionIndex],
+                            vertData.texCoords[vertexIndices.texCoordIndex],
+                            vertData.normals[vertexIndices.normalIndex]);
                     }
 
                     // calculate tangent space
@@ -348,7 +373,7 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
                             data.vertices[data.indices[i + 2]]);
                     }
 
-                    indexOffsets += glm::uvec3(vertData.positions.size(), vertData.texCoords.size(), vertData.normals.size());
+                    indexOffsets += VertexIndices(vertData.positions.size(), vertData.texCoords.size(), vertData.normals.size());
 
                     GeometryPtr geometry = GeometryPtr(new MeshGeometry(data));
                     mesh->geometries[objectName].push_back(std::make_pair(material, geometry));
