@@ -100,3 +100,7 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
+if (WIN32)
+    # copy resource directory to build dir
+    file(COPY ./res DESTINATION ${CMAKE_BINARY_DIR})
+endif()
