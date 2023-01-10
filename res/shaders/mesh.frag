@@ -1,7 +1,12 @@
 #version 450
-in vec3 FragPos;
-in vec2 TexCoord;
-in mat3 TBN;
+in VS_OUT {
+    vec3 FragPos;
+    vec2 TexCoord;
+    mat3 TBN;
+    vec3 tangentLightDirection;
+    vec3 tangentViewPos;
+    vec3 tangentFragPos;
+} fs_in;
 
 layout(std140, binding = 1) uniform Camera {
     mat4 view;
@@ -59,22 +64,21 @@ void main() {
     // init colors
     vec3 ambientColor = material.ambientColor;
     if (material.useAmbientTexture) {
-        ambientColor = ambientColor * texture(material.ambientTexture, TexCoord).rgb;
+        ambientColor = ambientColor * texture(material.ambientTexture, fs_in.TexCoord).rgb;
     }
 
     vec3 diffuseColor = material.diffuseColor;
     if (material.useDiffuseTexture) {
-        diffuseColor = texture(material.diffuseTexture, TexCoord).rgb;
+        diffuseColor = texture(material.diffuseTexture, fs_in.TexCoord).rgb;
     }
 
     vec3 specularColor = material.specularColor;
     if (material.useSpecularTexture) {
-        specularColor = texture(material.specularTexture, TexCoord).rgb;
+        specularColor = texture(material.specularTexture, fs_in.TexCoord).rgb;
     }
 
-    vec3 normal = texture(material.normalMap, TexCoord).rgb;
+    vec3 normal = texture(material.normalMap, fs_in.TexCoord).rgb;
     normal = normal * 2.0 - 1.0;
-    normal = normalize(TBN * normal);
 
     float shadow = shadowCalculation(normal);
     vec3 ambient, diffuse, specular;
@@ -100,20 +104,20 @@ vec3 calcAmbientLight(vec3 ambientColor) {
 }
 
 vec3 calcDiffuseLight(vec3 normal, vec3 diffuseColor) {
-    float diff = max(dot(normal, -lightDirection), 0.0);
+    float diff = max(dot(normal, -fs_in.tangentLightDirection), 0.0);
     return diff * lightDiffuse * diffuseColor;
 }
 
 vec3 calcSpecularLight(vec3 normal, vec3 specularColor) {
-    vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 halfwayDir = normalize(viewDir - lightDirection);
+    vec3 viewDir = normalize(fs_in.tangentViewPos - fs_in.tangentFragPos);
+    vec3 halfwayDir = normalize(viewDir - fs_in.tangentLightDirection);
 
     float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
     return spec * lightSpecular * specularColor;
 }
 
 float shadowCalculation(vec3 normal) {
-    vec4 fragPosViewSpace = view * vec4(FragPos, 1.0);
+    vec4 fragPosViewSpace = view * vec4(fs_in.FragPos, 1.0);
 
     int mapIndex = cascadeCount - 1;
     for (int i = 0; i < cascadeCount; i++) {
@@ -123,12 +127,12 @@ float shadowCalculation(vec3 normal) {
         }
     }
 
-    vec4 fragPosLightSpace = lightProjection[mapIndex] * lightView[mapIndex] * vec4(FragPos, 1.0);
+    vec4 fragPosLightSpace = lightProjection[mapIndex] * lightView[mapIndex] * vec4(fs_in.FragPos, 1.0);
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
     float currentDepth = projCoords.z;
 
-    float bias = max(0.05 * (1.0 - dot(normal, lightDirection)), 0.005);
+    float bias = max(0.05 * (1.0 - dot(normal, fs_in.tangentLightDirection)), 0.005);    
     float shadow = 0;
     vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps, 0));
     for (int x = -1; x <= 1; x++) {

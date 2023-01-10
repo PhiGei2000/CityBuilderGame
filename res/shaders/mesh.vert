@@ -5,9 +5,14 @@ layout(location = 2) in vec3 aNormal;
 layout(location = 3) in vec3 aTangent;
 layout(location = 4) in vec3 aBitangent;
 
-out vec3 FragPos;
-out vec2 TexCoord;
-out mat3 TBN;
+out VS_OUT {
+    vec3 FragPos;
+    vec2 TexCoord;
+    mat3 TBN;
+    vec3 tangentLightDirection;
+    vec3 tangentViewPos;
+    vec3 tangentFragPos;
+} vs_out;
 
 layout(std140, binding = 1) uniform Camera {
     mat4 view;
@@ -15,6 +20,19 @@ layout(std140, binding = 1) uniform Camera {
 
     vec3 viewPos;
     vec3 cameraTarget;
+};
+
+layout(std140, binding = 2) uniform Light {
+    mat4 lightView[cascadeCount];
+    mat4 lightProjection[cascadeCount];
+
+    vec3 lightDirection;
+
+    vec3 lightAmbient;
+    vec3 lightDiffuse;
+    vec3 lightSpecular;
+
+    float cascadeFarPlanes[cascadeCount];
 };
 
 uniform mat4 model;
@@ -26,10 +44,13 @@ void main() {
     vec3 B = normalize(vec3(model * vec4(aBitangent, 0.0)));
     vec3 N = normalize(vec3(model * vec4(aNormal, 0.0)));
 
-    TBN = mat3(T, B, N);
+    vs_out.TBN = mat3(T, B, N);
 
     gl_Position = projection * view * model * position;
-    FragPos = vec3(model * position);
+    vs_out.FragPos = vec3(model * position);
 
-    TexCoord = aTexCoord;
+    vs_out.TexCoord = aTexCoord;
+    vs_out.tangentLightDirection = normalize(vs_out.TBN * lightDirection);
+    vs_out.tangentViewPos = vs_out.TBN * viewPos;
+    vs_out.tangentFragPos = vs_out.TBN * vs_out.FragPos;
 }
