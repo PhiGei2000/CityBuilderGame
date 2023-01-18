@@ -42,7 +42,7 @@ namespace utility {
         return (end - start) * value + start;
     }
 
-    constexpr glm::vec3 kartesianToSpherical(const glm::vec3& coords) {
+    inline glm::vec3 kartesianToSpherical(const glm::vec3& coords) {
         float r = glm::length(coords);
 
         float theta = glm::acos(coords.y / r);
@@ -50,7 +50,7 @@ namespace utility {
         return glm::vec3(r, theta, phi);
     }
 
-    constexpr glm::vec3 sphericalToKartesian(const glm::vec3& coords) {
+    inline glm::vec3 sphericalToKartesian(const glm::vec3& coords) {
         return coords.x * glm::vec3(
                               glm::sin(coords.y) * glm::cos(coords.z),
                               glm::cos(coords.y),
