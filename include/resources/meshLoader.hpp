@@ -63,9 +63,13 @@ class MeshLoader {
     };
 
     using FaceIndices = std::array<VertexIndices, 3>;
+    struct FaceDataCollection {
+        std::vector<FaceIndices> indicesCulling;
+        std::vector<FaceIndices> indicesNonCulling;
+    };
 
     /// @brief A collection of the faces grouped by the used material
-    using FaceData = std::unordered_map<std::string, std::vector<FaceIndices>>;
+    using FaceData = std::unordered_map<std::string, FaceDataCollection>;    
 
     static std::stringstream readLine(std::stringstream& s);
 
@@ -76,6 +80,8 @@ class MeshLoader {
     static glm::vec3 parseVec3(std::stringstream& s);
 
     static void correctWindingOrder(const VertexData& data, FaceData& faceData);
+
+    static GeometryData processFaces(const std::vector<FaceIndices>& indices, const VertexData& vertData, VertexIndices& indexOffsets);
 
   public:
     static TexturePtr loadTexture(const std::string& filename, int format = GL_RGBA);

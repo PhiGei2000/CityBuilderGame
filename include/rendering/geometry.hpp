@@ -29,18 +29,21 @@ class Geometry {
 
     void bind() const;
 
-    void draw() const;
+    virtual void draw() const;
 };
 
 class MeshGeometry : public Geometry {
   private:
     const static VertexAttributes meshVertexAttributes;
 
+    bool culling;
+
   public:
     MeshGeometry();
     MeshGeometry(const GeometryData& data);
 
     void fillBuffers(const GeometryData& data);
+    void draw() const override;
 };
 
 using GeometryPtr = ResourcePtr<Geometry>;

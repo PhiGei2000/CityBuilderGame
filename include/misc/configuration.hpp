@@ -10,9 +10,9 @@ class Configuration {
     static constexpr int maxCars = 1;
     static constexpr float carVelocity = 1.0f;
 
-    static constexpr unsigned int SHADOW_BUFFER_WIDTH = 1024;
-    static constexpr unsigned int SHADOW_BUFFER_HEIGHT = 1024;
+    static constexpr unsigned int SHADOW_BUFFER_WIDTH = 4096;
+    static constexpr unsigned int SHADOW_BUFFER_HEIGHT = 4096;
 
     static constexpr unsigned int SHADOW_CASCADE_COUNT = 3;
-    static constexpr float CASCADE_FAR_PLANE_FACTORS[SHADOW_CASCADE_COUNT] = {0.05f, 0.1f, 1.0f};
+    static constexpr float CASCADE_FAR_PLANE_FACTORS[SHADOW_CASCADE_COUNT] = {0.25f, 0.5f, 1.0f};
 };

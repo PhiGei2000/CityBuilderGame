@@ -132,7 +132,11 @@ float shadowCalculation(vec3 normal) {
     projCoords = projCoords * 0.5 + 0.5;
     float currentDepth = projCoords.z;
 
-    float bias = max(0.05 * (1.0 - dot(normal, fs_in.tangentLightDirection)), 0.005);    
+    if (currentDepth > 1.0) {
+        return 0.0;
+    }
+
+    float bias = max(0.005 * (1.0 - dot(normal, fs_in.tangentLightDirection)), 0.005);    
     float shadow = 0;
     vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps, 0));
     for (int x = -1; x <= 1; x++) {

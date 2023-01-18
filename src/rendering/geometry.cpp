@@ -72,4 +72,16 @@ void MeshGeometry::fillBuffers(const GeometryData& data) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.indices.size() * sizeof(unsigned int), data.indices.data(), GL_STATIC_DRAW);
 
     drawCount = data.indices.size();
+    culling = data.culling;
+}
+
+void MeshGeometry::draw() const {
+    if (culling) {
+        glEnable(GL_CULL_FACE);
+    }
+    else {
+        glDisable(GL_CULL_FACE);
+    }
+
+    Geometry::draw();
 }

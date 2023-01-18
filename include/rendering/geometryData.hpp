@@ -9,10 +9,11 @@
 struct GeometryData {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
+    bool culling;
 
     GeometryData();
 
-    GeometryData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+    GeometryData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, bool culling = true);
 
     static GeometryData merge(const GeometryData& first, const GeometryData& second);
 

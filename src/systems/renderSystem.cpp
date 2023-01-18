@@ -115,9 +115,9 @@ void RenderSystem::update(float dt) {
     shadowBuffer.use();
     shadowShader->use();
 
-    // glCullFace(GL_FRONT);
+    glCullFace(GL_FRONT);
     renderScene(shadowShader.get());
-    // glCullFace(GL_BACK);
+    glCullFace(GL_BACK);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -129,7 +129,9 @@ void RenderSystem::update(float dt) {
     const entt::entity& debugEntity = registry.view<DebugComponent>().front();
     const DebugComponent& debugComponent = registry.get<DebugComponent>(debugEntity);
     if (debugComponent.mode == DebugMode::SHADOW_MAPS) {
+        glDisable(GL_CULL_FACE);
         shadowMapRenderer.render(shadowBuffer);
+        glEnable(GL_CULL_FACE);
 
         return;
     }

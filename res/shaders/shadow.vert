@@ -8,5 +8,5 @@ layout(location = 4) in vec3 aBitangent;
 uniform mat4 model;
 
 void main() {
-    gl_Position = model * vec4(aPos, 1.0);
+    gl_Position = model * vec4(aPos - 0.001 * aNormal, 1.0);
 }

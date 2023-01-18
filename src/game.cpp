@@ -36,7 +36,7 @@ void Game::init() {
 
     sun = registry.create();
     registry.emplace<SunLightComponent>(sun,
-                                        glm::radians(90.0f), // direction
+                                        glm::radians(25.0f), // direction
                                         glm::vec3(0.5f),     // ambient
                                         glm::vec3(0.9f),     // diffuse
                                         glm::vec3(0.8f)     // specular

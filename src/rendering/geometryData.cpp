@@ -3,12 +3,14 @@
 GeometryData::GeometryData() {
 }
 
-GeometryData::GeometryData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
-    : indices(indices), vertices(vertices) {
+GeometryData::GeometryData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, bool culling)
+    : indices(indices), vertices(vertices), culling(culling) {
     calculateTangentSpace();
 }
 
 GeometryData GeometryData::merge(const GeometryData& first, const GeometryData& second) {
+    assert(first.culling == second.culling);
+
     GeometryData result = first;
 
     unsigned int indexOffset = result.vertices.size();

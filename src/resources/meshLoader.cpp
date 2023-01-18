@@ -61,6 +61,7 @@ MeshLoader::FaceData MeshLoader::parseFaceData(std::stringstream& s) {
     unsigned int normIndex;
 
     std::string materialName;
+    bool culling = true;
 
     while ((nextChar = s.peek()) != 'o' && !s.eof()) {
         auto line = readLine(s);
@@ -85,7 +86,23 @@ MeshLoader::FaceData MeshLoader::parseFaceData(std::stringstream& s) {
                 indices[i] = VertexIndices(posIndex, texIndex, normIndex);
             }
 
-            data[materialName].push_back(indices);
+            if (culling) {
+                data[materialName].indicesCulling.push_back(indices);
+            }
+            else {
+                data[materialName].indicesNonCulling.push_back(indices);
+            }
+        }
+        else if (prefix == "c") {
+            std::string value;
+            line >> value;
+
+            if (value == "on") {
+                culling = true;
+            }
+            else if (value == "off") {
+                culling = false;
+            }
         }
         else if (prefix.empty()) {
             return data;
@@ -114,7 +131,7 @@ glm::vec3 MeshLoader::parseVec3(std::stringstream& s) {
 
 void MeshLoader::correctWindingOrder(const VertexData& vertices, FaceData& faces) {
     for (auto& face : faces) {
-        for (auto& indices : face.second) {
+        for (auto& indices : face.second.indicesCulling) {
             const glm::vec3& p0 = vertices.positions[indices[0].positionIndex];
             const glm::vec3& p1 = vertices.positions[indices[1].positionIndex];
             const glm::vec3& p2 = vertices.positions[indices[2].positionIndex];
@@ -130,6 +147,55 @@ void MeshLoader::correctWindingOrder(const VertexData& vertices, FaceData& faces
             }
         }
     }
+}
+
+GeometryData MeshLoader::processFaces(const std::vector<FaceIndices>& indices, const VertexData& vertData, VertexIndices& indexOffsets) {
+    bool vertexExists = false;
+    std::vector<VertexIndices> vertices;
+
+    GeometryData data;
+
+    for (const auto& faces : indices) {
+        for (int i = 0; i < 3; i++) {
+            const auto& indices = faces[i];
+            bool vertexExists = false;
+            unsigned int verticesCount = vertices.size();
+
+            for (int j = 0; j < verticesCount; j++) {
+                const auto& vertexIndices = vertices[j];
+                vertexExists = (indices == vertexIndices);
+
+                if (vertexExists) {
+                    data.indices.push_back(j);
+                    break;
+                }
+            }
+
+            if (!vertexExists) {
+                vertices.push_back(indices);
+                data.indices.push_back(verticesCount);
+            }
+        }
+    }
+
+    for (const auto& indices : vertices) {
+        const VertexIndices& vertexIndices = indices - indexOffsets;
+
+        data.vertices.emplace_back(
+            vertData.positions[vertexIndices.positionIndex],
+            vertData.texCoords[vertexIndices.texCoordIndex],
+            vertData.normals[vertexIndices.normalIndex]);
+    }
+
+    // calculate tangent space
+    for (int i = 0; i < data.indices.size(); i += 3) {
+        GeometryData::calculateTangentSpace(
+            data.vertices[data.indices[i]],
+            data.vertices[data.indices[i + 1]],
+            data.vertices[data.indices[i + 2]]);
+    }
+
+    return data;
 }
 
 TexturePtr MeshLoader::loadTexture(const std::string& filename, int format) {
@@ -329,55 +395,23 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
                 // process faces
                 for (const auto& [materialName, faceIndices] : faceData) {
                     MaterialPtr material = materials.at(materialName);
-                    std::vector<VertexIndices> vertices;
 
-                    GeometryData data;
+                    // culled faces
+                    GeometryData dataCulling = processFaces(faceIndices.indicesCulling, vertData, indexOffsets);
+                    dataCulling.culling = true;
 
-                    for (const auto& faces : faceIndices) {
-                        for (int i = 0; i < 3; i++) {
-                            const auto& indices = faces[i];
-                            bool vertexExists = false;
-                            unsigned int verticesCount = vertices.size();
+                    GeometryPtr cullingGeometry = GeometryPtr(new MeshGeometry(dataCulling));
+                    mesh->geometries[objectName].push_back(std::make_pair(material, cullingGeometry));
 
-                            for (int j = 0; j < verticesCount; j++) {
-                                const auto& vertexIndices = vertices[j];
-                                vertexExists = (indices == vertexIndices);
+                    // non culled faces
+                    GeometryData dataNonCulling = processFaces(faceIndices.indicesNonCulling, vertData, indexOffsets);
+                    dataNonCulling.culling = false;
 
-                                if (vertexExists) {
-                                    data.indices.push_back(j);
-                                    break;
-                                }
-                            }
-
-                            if (!vertexExists) {
-                                vertices.push_back(indices);
-                                data.indices.push_back(verticesCount);
-                            }
-                        }
-                    }
-
-                    for (const auto& indices : vertices) {
-                        const VertexIndices& vertexIndices = indices - indexOffsets;
-
-                        data.vertices.emplace_back(
-                            vertData.positions[vertexIndices.positionIndex],
-                            vertData.texCoords[vertexIndices.texCoordIndex],
-                            vertData.normals[vertexIndices.normalIndex]);
-                    }
-
-                    // calculate tangent space
-                    for (int i = 0; i < data.indices.size(); i += 3) {
-                        GeometryData::calculateTangentSpace(
-                            data.vertices[data.indices[i]],
-                            data.vertices[data.indices[i + 1]],
-                            data.vertices[data.indices[i + 2]]);
-                    }
-
-                    indexOffsets += VertexIndices(vertData.positions.size(), vertData.texCoords.size(), vertData.normals.size());
-
-                    GeometryPtr geometry = GeometryPtr(new MeshGeometry(data));
-                    mesh->geometries[objectName].push_back(std::make_pair(material, geometry));
+                    GeometryPtr nonCullingGeometry = GeometryPtr(new MeshGeometry(dataNonCulling));
+                    mesh->geometries[objectName].push_back(std::make_pair(material, nonCullingGeometry));
                 }
+
+                indexOffsets += VertexIndices(vertData.positions.size(), vertData.texCoords.size(), vertData.normals.size());
             }
         }
 
