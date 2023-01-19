@@ -74,14 +74,14 @@ class MeshLoader {
     static std::stringstream readLine(std::stringstream& s);
 
     static VertexData parseVertexData(std::stringstream& s);
-    static FaceData parseFaceData(std::stringstream& s);
+    static FaceData parseFaceData(std::stringstream& s, const VertexIndices& indexOffsets);
 
     static glm::vec2 parseVec2(std::stringstream& s);
     static glm::vec3 parseVec3(std::stringstream& s);
 
     static void correctWindingOrder(const VertexData& data, FaceData& faceData);
 
-    static GeometryData processFaces(const std::vector<FaceIndices>& indices, const VertexData& vertData, VertexIndices& indexOffsets);
+    static GeometryData processFaces(const std::vector<FaceIndices>& indices, const VertexData& vertData);
 
   public:
     static TexturePtr loadTexture(const std::string& filename, int format = GL_RGBA);

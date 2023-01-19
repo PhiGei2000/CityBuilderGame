@@ -50,7 +50,7 @@ MeshLoader::VertexData MeshLoader::parseVertexData(std::stringstream& s) {
     return data;
 }
 
-MeshLoader::FaceData MeshLoader::parseFaceData(std::stringstream& s) {
+MeshLoader::FaceData MeshLoader::parseFaceData(std::stringstream& s, const VertexIndices& indexOffsets) {
     FaceData data;
     std::string prefix;
 
@@ -83,7 +83,7 @@ MeshLoader::FaceData MeshLoader::parseFaceData(std::stringstream& s) {
                 texIndex = std::stoi(texStr) - 1;
                 normIndex = std::stoi(normStr) - 1;
 
-                indices[i] = VertexIndices(posIndex, texIndex, normIndex);
+                indices[i] = VertexIndices(posIndex, texIndex, normIndex) - indexOffsets;
             }
 
             if (culling) {
@@ -149,7 +149,7 @@ void MeshLoader::correctWindingOrder(const VertexData& vertices, FaceData& faces
     }
 }
 
-GeometryData MeshLoader::processFaces(const std::vector<FaceIndices>& indices, const VertexData& vertData, VertexIndices& indexOffsets) {
+GeometryData MeshLoader::processFaces(const std::vector<FaceIndices>& indices, const VertexData& vertData) {
     bool vertexExists = false;
     std::vector<VertexIndices> vertices;
 
@@ -178,13 +178,11 @@ GeometryData MeshLoader::processFaces(const std::vector<FaceIndices>& indices, c
         }
     }
 
-    for (const auto& indices : vertices) {
-        const VertexIndices& vertexIndices = indices - indexOffsets;
-
+    for (const auto& indices : vertices) {        
         data.vertices.emplace_back(
-            vertData.positions[vertexIndices.positionIndex],
-            vertData.texCoords[vertexIndices.texCoordIndex],
-            vertData.normals[vertexIndices.normalIndex]);
+            vertData.positions[indices.positionIndex],
+            vertData.texCoords[indices.texCoordIndex],
+            vertData.normals[indices.normalIndex]);
     }
 
     // calculate tangent space
@@ -388,7 +386,7 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
                 sLine >> objectName;
 
                 VertexData vertData = parseVertexData(ss);
-                FaceData faceData = parseFaceData(ss);
+                FaceData faceData = parseFaceData(ss, indexOffsets);
 
                 correctWindingOrder(vertData, faceData);
 
@@ -397,14 +395,14 @@ MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
                     MaterialPtr material = materials.at(materialName);
 
                     // culled faces
-                    GeometryData dataCulling = processFaces(faceIndices.indicesCulling, vertData, indexOffsets);
+                    GeometryData dataCulling = processFaces(faceIndices.indicesCulling, vertData);
                     dataCulling.culling = true;
 
                     GeometryPtr cullingGeometry = GeometryPtr(new MeshGeometry(dataCulling));
                     mesh->geometries[objectName].push_back(std::make_pair(material, cullingGeometry));
 
                     // non culled faces
-                    GeometryData dataNonCulling = processFaces(faceIndices.indicesNonCulling, vertData, indexOffsets);
+                    GeometryData dataNonCulling = processFaces(faceIndices.indicesNonCulling, vertData);
                     dataNonCulling.culling = false;
 
                     GeometryPtr nonCullingGeometry = GeometryPtr(new MeshGeometry(dataNonCulling));
