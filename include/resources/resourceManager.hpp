@@ -11,7 +11,7 @@
 class ResourceManager {
   private:
     struct ResourceHolder {
-        std::type_index type = std::type_index(typeid(void));        
+        std::type_index type = std::type_index(typeid(void));
 
         std::shared_ptr<void> data;
     };
@@ -21,11 +21,20 @@ class ResourceManager {
     ObjectLoader objectLoader;
 
     template<typename T>
-    void setResource(const std::string& id, ResourcePtr<T> data);
+    inline void setResource(const std::string& id, ResourcePtr<T> data) {
+      ResourcePtr<void> dataPtr = ResourcePtr<T>(data);
+
+      if (resources.contains(id)) {
+        resources[id].data.swap(dataPtr);
+      }
+      else {
+        resources[id] = ResourceHolder{std::type_index(typeid(T)), dataPtr};
+      }
+    }
 
   public:
     const std::string resourceDir;
-    
+
     struct ResourceTypeException : public std::exception {
       private:
         const char* message;
@@ -36,7 +45,7 @@ class ResourceManager {
         const char* what() const noexcept override;
     };
 
-    ResourceManager(const std::string& resourceDir);    
+    ResourceManager(const std::string& resourceDir);
 
     void loadResources();
 
@@ -44,5 +53,16 @@ class ResourceManager {
     void loadResource(const std::string& resourceId, const std::string& filename, TArgs... args);
 
     template<typename T>
-    ResourcePtr<T> getResource(const std::string& resourceId) const;
+    inline ResourcePtr<T> getResource(const std::string& resourceId) const {
+      const std::type_index type = std::type_index(typeid(T));
+      const ResourceHolder& resource = resources.at(resourceId);
+
+      if (type != resource.type) {
+        std::string message = "Resource could not converted to ";
+
+        throw ResourceTypeException(message.append(type.name()).c_str());
+      }
+
+      return std::reinterpret_pointer_cast<T>(resource.data);
+    }
 };

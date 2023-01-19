@@ -32,17 +32,17 @@ const char* ResourceManager::ResourceTypeException::what() const noexcept {
     return message;
 }
 
-template<typename T>
-void ResourceManager::setResource(const std::string& id, ResourcePtr<T> data) {
-    ResourcePtr<void> dataPtr = ResourcePtr<T>(data);
+// template<typename T>
+// void ResourceManager::setResource(const std::string& id, ResourcePtr<T> data) {
+//     ResourcePtr<void> dataPtr = ResourcePtr<T>(data);
 
-    if (resources.contains(id)) {
-        resources[id].data.swap(dataPtr);
-    }
-    else {
-        resources[id] = ResourceHolder{std::type_index(typeid(T)), dataPtr};
-    }
-}
+//     if (resources.contains(id)) {
+//         resources[id].data.swap(dataPtr);
+//     }
+//     else {
+//         resources[id] = ResourceHolder{std::type_index(typeid(T)), dataPtr};
+//     }
+// }
 
 template<>
 void ResourceManager::loadResource<Shader>(const std::string& id, const std::string& filename) {
@@ -154,30 +154,30 @@ void ResourceManager::loadResources() {
     }
 }
 
-template<typename T>
-std::shared_ptr<T> ResourceManager::getResource(const std::string& resourceId) const {
-    const std::type_index type = std::type_index(typeid(T));
-    const ResourceHolder& resource = resources.at(resourceId);
+// template<typename T>
+// std::shared_ptr<T> ResourceManager::getResource(const std::string& resourceId) const {
+//     const std::type_index type = std::type_index(typeid(T));
+//     const ResourceHolder& resource = resources.at(resourceId);
 
-    if (type != resource.type) {
-        std::string message = "Resource could not converted to ";
+//     if (type != resource.type) {
+//         std::string message = "Resource could not converted to ";
 
-        throw ResourceTypeException(message.append(type.name()).c_str());
-    }
+//         throw ResourceTypeException(message.append(type.name()).c_str());
+//     }
 
-    return std::reinterpret_pointer_cast<T>(resource.data);
-}
+//     return std::reinterpret_pointer_cast<T>(resource.data);
+// }
 
-template TexturePtr ResourceManager::getResource<Texture>(const std::string&) const;
-template ShaderPtr ResourceManager::getResource<Shader>(const std::string&) const;
-template MaterialPtr ResourceManager::getResource<Material>(const std::string&) const;
-template MeshPtr ResourceManager::getResource<Mesh>(const std::string&) const;
-template ObjectPtr ResourceManager::getResource<Object>(const std::string&) const;
-template ResourcePtr<RoadPack> ResourceManager::getResource<RoadPack>(const std::string&) const;
+// template TexturePtr ResourceManager::getResource<Texture>(const std::string&) const;
+// template ShaderPtr ResourceManager::getResource<Shader>(const std::string&) const;
+// template MaterialPtr ResourceManager::getResource<Material>(const std::string&) const;
+// template MeshPtr ResourceManager::getResource<Mesh>(const std::string&) const;
+// template ObjectPtr ResourceManager::getResource<Object>(const std::string&) const;
+// template ResourcePtr<RoadPack> ResourceManager::getResource<RoadPack>(const std::string&) const;
 
-template void ResourceManager::setResource<Texture>(const std::string&, TexturePtr);
-template void ResourceManager::setResource<Shader>(const std::string&, ShaderPtr);
-template void ResourceManager::setResource<Material>(const std::string&, MaterialPtr);
-template void ResourceManager::setResource<Mesh>(const std::string&, MeshPtr);
-template void ResourceManager::setResource<Object>(const std::string&, ObjectPtr);
-template void ResourceManager::setResource<RoadPack>(const std::string&, ResourcePtr<RoadPack>);
+// template void ResourceManager::setResource<Texture>(const std::string&, TexturePtr);
+// template void ResourceManager::setResource<Shader>(const std::string&, ShaderPtr);
+// template void ResourceManager::setResource<Material>(const std::string&, MaterialPtr);
+// template void ResourceManager::setResource<Mesh>(const std::string&, MeshPtr);
+// template void ResourceManager::setResource<Object>(const std::string&, ObjectPtr);
+// template void ResourceManager::setResource<RoadPack>(const std::string&, ResourcePtr<RoadPack>);

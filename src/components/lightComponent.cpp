@@ -27,8 +27,7 @@ void LightComponent::calculateLightMatrices(const CameraComponent& camera) {
 std::vector<glm::vec4> LightComponent::getFrustumInWorldSpace(const glm::mat4& projection, const glm::mat4& view) {
     std::vector<glm::vec4> frustumCorners;
     glm::mat4 inverse = glm::inverse(projection * view);
-
-    frustumCorners.reserve(8);
+    
     for (int x = 0; x < 2; x++) {
         for (int y = 0; y < 2; y++) {
             for (int z = 0; z < 2; z++) {
@@ -49,15 +48,16 @@ std::pair<glm::mat4, glm::mat4> LightComponent::calculateLightMatrices(const Cam
     // calculate frustum center
     glm::vec3 center = glm::vec3(0.0f);
     for (const auto& corner : frustum) {
-        center += glm::vec3(corner) / 8.0f;
+        center += glm::vec3(corner);
     }
+    center /= frustum.size();
 
     // calculate light view matrix
-    const float phi = utility::kartesianToSpherical(direction).z;
+    const float theta = utility::cartesianToSpherical(direction).y;
 
-    const glm::vec3 lightUp = glm::vec3(-glm::sin(phi), 0.0f, glm::cos(phi));
+    const glm::vec3 lightUp = glm::vec3(glm::cos(theta), -glm::sin(theta), 0.0f);
 
-    const glm::mat4 lightView = glm::lookAt(center, center + direction, lightUp);
+    const glm::mat4 lightView = glm::lookAt(center + direction, center, lightUp);
 
     // calculate light projection matrix
     float minX = FLT_MAX;

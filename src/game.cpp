@@ -3,6 +3,7 @@
 #include "application.hpp"
 #include "components/components.hpp"
 #include "events/events.hpp"
+#include "misc/utility.hpp"
 #include "rendering/geometry.hpp"
 #include "rendering/shader.hpp"
 #include "rendering/texture.hpp"
@@ -35,13 +36,14 @@ void Game::init() {
     registry.emplace<TransformationComponent>(groundEntity, glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
 
     sun = registry.create();
+    constexpr float sunAngle = glm::radians(45.0f);
     registry.emplace<SunLightComponent>(sun,
-                                        glm::radians(25.0f), // direction
-                                        glm::vec3(0.5f),     // ambient
-                                        glm::vec3(0.9f),     // diffuse
-                                        glm::vec3(0.8f)     // specular
-                                        );
-    registry.emplace<TransformationComponent>(sun, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+                                        sunAngle,        // direction
+                                        glm::vec3(0.5f), // ambient
+                                        glm::vec3(0.9f), // diffuse
+                                        glm::vec3(0.8f)  // specular
+    );
+    registry.emplace<TransformationComponent>(sun, utility::sphericalToCartesian(300.0f, sunAngle, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 
     EntityMoveEvent moveEvent{sun};
     raiseEvent(moveEvent);

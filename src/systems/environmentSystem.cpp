@@ -57,7 +57,9 @@ void EnvironmentSystem::update(float dt) {
 
         entitiesToDestroy.pop();
     }
+    return;
 
+    // sun movement
     const float sunSpeed = 0.05f;
     TransformationComponent& sunPos = registry.get<TransformationComponent>(game->sun);
     SunLightComponent& sunLight = registry.get<SunLightComponent>(game->sun);
@@ -72,7 +74,7 @@ void EnvironmentSystem::update(float dt) {
         sunLight.angle += two_pi;
     }
 
-    sunLight.direction = glm::vec3(glm::cos(sunLight.angle), glm::sin(sunLight.angle), 0.0f);
+    sunLight.direction = -glm::vec3(glm::cos(sunLight.angle), glm::sin(sunLight.angle), 0.0f);
     sunPos.position = -300.0f * sunLight.direction;
 
 #if DEBUG

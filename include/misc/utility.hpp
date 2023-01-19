@@ -42,7 +42,7 @@ namespace utility {
         return (end - start) * value + start;
     }
 
-    inline glm::vec3 kartesianToSpherical(const glm::vec3& coords) {
+    inline glm::vec3 cartesianToSpherical(const glm::vec3& coords) {
         float r = glm::length(coords);
 
         float theta = glm::acos(coords.y / r);
@@ -50,11 +50,19 @@ namespace utility {
         return glm::vec3(r, theta, phi);
     }
 
-    inline glm::vec3 sphericalToKartesian(const glm::vec3& coords) {
-        return coords.x * glm::vec3(
-                              glm::sin(coords.y) * glm::cos(coords.z),
-                              glm::cos(coords.y),
-                              glm::sin(coords.y) * glm::sin(coords.z));
+    inline glm::vec3 cartesianToSpherical(float x, float y, float z) {
+        return cartesianToSpherical(glm::vec3(x, y, z));
+    }
+
+    inline glm::vec3 sphericalToCartesian(float r, float theta, float phi) {
+        return r * glm::vec3(
+                              glm::sin(theta) * glm::cos(phi),
+                              glm::cos(theta),
+                              glm::sin(theta) * glm::sin(phi));
+    }
+
+    inline glm::vec3 sphericalToCartesian(const glm::vec3& coords) {
+        return sphericalToCartesian(coords.x, coords.y, coords.z);
     }
 } // namespace utility
 
@@ -75,4 +83,4 @@ namespace glm {
     GLM_FUNC_QUALIFIER GLM_CONSTEXPR int dot(const vec<2, int, packed_highp>& x, const vec<2, int, packed_highp>& y) {
         return x.x * y.x + x.y * y.x;
     }
-} // namespace glm
+} // namespace glm 
