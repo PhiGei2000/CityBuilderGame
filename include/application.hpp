@@ -33,6 +33,8 @@ class Application {
     void init();
 
   public:
+    float updateTime = 0.0f;
+
     Application();
 
     void run();

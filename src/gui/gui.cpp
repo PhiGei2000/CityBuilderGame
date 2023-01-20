@@ -116,6 +116,12 @@ Rectangle Gui::getBox() const {
     return Rectangle{0, 0, width, height};
 }
 
+void Gui::update() {
+    for (Widget* widget : widgets) {
+        widget->update();
+    }
+}
+
 void Gui::render() const {
     // bind the shader
     guiShader->use();

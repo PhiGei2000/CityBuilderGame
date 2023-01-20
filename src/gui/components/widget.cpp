@@ -25,7 +25,7 @@ void Widget::handleMouseMoveEvent(MouseMoveEvent& event) {
             onMouseEnter.invoke(event);
         }
     }
-    
+
     // mouse leave
     if (!area.pointInside(event.x, event.y)) {
         if (area.pointInside(event.lastX, event.lastY)) {
@@ -44,6 +44,9 @@ void Widget::hide() {
 
 bool Widget::isVisible() const {
     return visible;
+}
+
+void Widget::update() {
 }
 
 void Widget::render() const {
@@ -80,21 +83,21 @@ Rectangle Widget::getBox() const {
     // set width and height values
     float width, height;
     switch (constraints.height.type) {
-    case ConstraintType::ABSOLUTE:
-        height = constraints.height.value;
-        break;
-    case ConstraintType::RELATIVE:
-        height = constraints.height.value * parentBox.height;
-        break;
+        case ConstraintType::ABSOLUTE:
+            height = constraints.height.value;
+            break;
+        case ConstraintType::RELATIVE:
+            height = constraints.height.value * parentBox.height;
+            break;
     }
 
     switch (constraints.width.type) {
-    case ConstraintType::ABSOLUTE:
-        width = constraints.width.value;
-        break;
-    case ConstraintType::RELATIVE:
-        width = constraints.width.value * parentBox.width;
-        break;
+        case ConstraintType::ABSOLUTE:
+            width = constraints.width.value;
+            break;
+        case ConstraintType::RELATIVE:
+            width = constraints.width.value * parentBox.width;
+            break;
     }
 
     if (constraints.height.type == ConstraintType::ASPECT) {
@@ -108,27 +111,27 @@ Rectangle Widget::getBox() const {
     float x = parentBox.x;
     float y = parentBox.y;
     switch (constraints.x.type) {
-    case ConstraintType::ABSOLUTE:
-        x += constraints.x.value;
-        break;
-    case ConstraintType::RELATIVE:
-        x += constraints.x.value * parentBox.width;
-        break;
-    case ConstraintType::CENTER:
-        x += (parentBox.width - width) * 0.5f;
-        break;
+        case ConstraintType::ABSOLUTE:
+            x += constraints.x.value;
+            break;
+        case ConstraintType::RELATIVE:
+            x += constraints.x.value * parentBox.width;
+            break;
+        case ConstraintType::CENTER:
+            x += (parentBox.width - width) * 0.5f;
+            break;
     }
 
     switch (constraints.y.type) {
-    case ConstraintType::ABSOLUTE:
-        y += constraints.y.value;
-        break;
-    case ConstraintType::RELATIVE:
-        y += constraints.y.value * parentBox.height;
-        break;
-    case ConstraintType::CENTER:
-        y += (parentBox.height - height) * 0.5f;
-        break;
+        case ConstraintType::ABSOLUTE:
+            y += constraints.y.value;
+            break;
+        case ConstraintType::RELATIVE:
+            y += constraints.y.value * parentBox.height;
+            break;
+        case ConstraintType::CENTER:
+            y += (parentBox.height - height) * 0.5f;
+            break;
     }
 
     return Rectangle{x, y, width, height};

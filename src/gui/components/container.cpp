@@ -26,11 +26,21 @@ void Container::handleMouseMoveEvent(MouseMoveEvent& e) {
     }
 }
 
-void Container::addChild(Widget* child) {    
+void Container::addChild(Widget* child) {
     children.push_back(child);
     child->parent = this;
 
     setChildConstraints();
+}
+
+Widget* Container::getChild(const std::string& id) const {
+    for (Widget* child : children) {
+        if (child->id == id) {
+            return child;
+        }
+    }
+
+    return nullptr;
 }
 
 void Container::show() {
@@ -46,6 +56,12 @@ void Container::hide() {
 
     for (Widget* child : children) {
         child->hide();
+    }
+}
+
+void Container::update() {
+    for (Widget* child : children) {
+        child->update();
     }
 }
 

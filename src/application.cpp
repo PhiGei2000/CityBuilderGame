@@ -118,14 +118,15 @@ void Application::run() {
 
     while (!stopRequested) {
         float currentTime = (float)glfwGetTime();
-        float dt = currentTime - lastTime;
+        updateTime = currentTime - lastTime;
         lastTime = currentTime;
 
         glClearColor(0.7f, 0.877f, 0.917f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        game->update(dt);
+        game->update(updateTime);
 
+        gui->update();
         gui->render();
 
         glfwSwapBuffers(window);

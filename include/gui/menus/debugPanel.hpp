@@ -4,4 +4,6 @@
 class DebugPanel : public StackPanel {
   public:
     DebugPanel(Gui* gui);
+
+    void update() override;
 };

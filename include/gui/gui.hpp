@@ -61,6 +61,8 @@ class Gui {
     void setScreenSize(float width, float height);
     Rectangle getBox() const;
 
+    void update();
+
     void render() const;
 
     void handleMouseButtonEvent(MouseButtonEvent& e);

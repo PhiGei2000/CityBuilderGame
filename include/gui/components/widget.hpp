@@ -36,6 +36,8 @@ class Widget {
     virtual void hide();
     bool isVisible() const;
 
+    virtual void update();
+
     virtual void render() const;
 
     virtual Rectangle getBox() const;
