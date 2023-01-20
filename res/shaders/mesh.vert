@@ -12,7 +12,8 @@ out VS_OUT {
     vec3 tangentLightDirection;
     vec3 tangentViewPos;
     vec3 tangentFragPos;
-} vs_out;
+}
+vs_out;
 
 layout(std140, binding = 1) uniform Camera {
     mat4 view;
@@ -40,17 +41,21 @@ uniform mat4 model;
 void main() {
     vec4 position = vec4(aPos, 1.0);
 
-    vec3 T = normalize(vec3(model * vec4(aTangent, 0.0)));
-    vec3 B = normalize(vec3(model * vec4(aBitangent, 0.0)));
-    vec3 N = normalize(vec3(model * vec4(aNormal, 0.0)));
+    // calculate TBN matrix to transform world vectors into tangent space
+    mat3 normalMatrix = transpose(inverse(mat3(model)));
+    vec3 T = normalize(normalMatrix * aTangent);
+    vec3 B = normalize(normalMatrix * aBitangent);
+    vec3 N = normalize(normalMatrix * aNormal);
 
-    vs_out.TBN = mat3(T, B, N);
+    vs_out.TBN = transpose(mat3(T, B, N));
 
     gl_Position = projection * view * model * position;
     vs_out.FragPos = vec3(model * position);
-
     vs_out.TexCoord = aTexCoord;
+
+    // transform light direction vector to tangent space
     vs_out.tangentLightDirection = normalize(vs_out.TBN * lightDirection);
+    // transform view and fragment position to tangent space
     vs_out.tangentViewPos = vs_out.TBN * viewPos;
     vs_out.tangentFragPos = vs_out.TBN * vs_out.FragPos;
 }

@@ -11,9 +11,12 @@ class Container : public Widget {
   public:
     Container(const std::string& id, Gui* gui, const glm::vec4& backgroundColor);
     virtual void addChild(Widget* child);
+    Widget* getChild(const std::string& id) const;
 
     virtual void show() override;
     virtual void hide() override;
+
+    void update() override;
 
     void render() const override;
 

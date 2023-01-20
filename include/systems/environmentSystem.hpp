@@ -4,12 +4,16 @@
 #include <queue>
 
 struct BuildEvent;
+struct TransformationComponent;
+struct SunLightComponent;
 
 class EnvironmentSystem : public System {
   protected:
     virtual void init() override;
 
     std::queue<entt::entity> entitiesToDestroy;
+
+    void updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const;
 
   public:
     EnvironmentSystem(Game* game);

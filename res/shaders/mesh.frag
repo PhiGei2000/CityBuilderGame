@@ -77,10 +77,13 @@ void main() {
         specularColor = texture(material.specularTexture, fs_in.TexCoord).rgb;
     }
 
+    // extract the normal vector from the normal map. The normal vector is then in tangent space
     vec3 normal = texture(material.normalMap, fs_in.TexCoord).rgb;
     normal = normal * 2.0 - 1.0;
-
+    // normal = normalize(transpose(fs_in.TBN) * normal);
+    
     float shadow = shadowCalculation(normal);
+
     vec3 ambient, diffuse, specular;
     switch (material.illuminationModel) {
         case 0:
@@ -104,21 +107,23 @@ vec3 calcAmbientLight(vec3 ambientColor) {
 }
 
 vec3 calcDiffuseLight(vec3 normal, vec3 diffuseColor) {
-    float diff = max(dot(normal, -fs_in.tangentLightDirection), 0.0);
+    float diff = max(dot(normal, fs_in.tangentLightDirection), 0.0);
     return diff * lightDiffuse * diffuseColor;
 }
 
 vec3 calcSpecularLight(vec3 normal, vec3 specularColor) {
     vec3 viewDir = normalize(fs_in.tangentViewPos - fs_in.tangentFragPos);
-    vec3 halfwayDir = normalize(viewDir - fs_in.tangentLightDirection);
+    vec3 halfwayDir = normalize(viewDir + fs_in.tangentLightDirection);
 
     float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
     return spec * lightSpecular * specularColor;
 }
 
 float shadowCalculation(vec3 normal) {
+    // transform fragment position from world space into view space
     vec4 fragPosViewSpace = view * vec4(fs_in.FragPos, 1.0);
 
+    // find the corresponding shadow map
     int mapIndex = cascadeCount - 1;
     for (int i = 0; i < cascadeCount; i++) {
         if (abs(fragPosViewSpace.z) < cascadeFarPlanes[i]) {
@@ -127,16 +132,19 @@ float shadowCalculation(vec3 normal) {
         }
     }
 
+    // transform the fragment position from world space into light space and extract depth from the shadow map
     vec4 fragPosLightSpace = lightProjection[mapIndex] * lightView[mapIndex] * vec4(fs_in.FragPos, 1.0);
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
     float currentDepth = projCoords.z;
 
+    // if depth greater than zero render no shadow
     if (currentDepth > 1.0) {
         return 0.0;
     }
 
-    float bias = max(0.005 * (1.0 - dot(normal, fs_in.tangentLightDirection)), 0.005);    
+    // calculate bias and apply pcf
+    float bias = max(0.005 * (1.0 - dot(normal, fs_in.tangentLightDirection)), 0.005);        
     float shadow = 0;
     vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps, 0));
     for (int x = -1; x <= 1; x++) {

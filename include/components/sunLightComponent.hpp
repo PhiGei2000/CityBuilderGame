@@ -7,6 +7,6 @@ struct SunLightComponent : public LightComponent {
     float angle;
 
     SunLightComponent(float angle, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular)
-        : LightComponent(-glm::vec3(glm::cos(angle), glm::sin(angle), 0.0f), ambient, diffuse, specular), angle(angle) {
+        : LightComponent(glm::vec3(glm::cos(angle), glm::sin(angle), 0.0f), ambient, diffuse, specular), angle(angle) {
     }
 };

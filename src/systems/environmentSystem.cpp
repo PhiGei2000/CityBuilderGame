@@ -47,22 +47,9 @@ void EnvironmentSystem::init() {
     }
 }
 
-void EnvironmentSystem::update(float dt) {
-    while (entitiesToDestroy.size() > 0) {
-        auto entity = entitiesToDestroy.front();
-
-        if (registry.valid(entity)) {
-            registry.destroy(entity);
-        }
-
-        entitiesToDestroy.pop();
-    }
-    return;
-
+void EnvironmentSystem::updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const {
     // sun movement
-    const float sunSpeed = 0.05f;
-    TransformationComponent& sunPos = registry.get<TransformationComponent>(game->sun);
-    SunLightComponent& sunLight = registry.get<SunLightComponent>(game->sun);
+    const float sunSpeed = 0.05f;    
 
     // move sun
     static constexpr float two_pi = 2 * glm::pi<float>();
@@ -75,14 +62,32 @@ void EnvironmentSystem::update(float dt) {
     }
 
     sunLight.direction = -glm::vec3(glm::cos(sunLight.angle), glm::sin(sunLight.angle), 0.0f);
-    sunPos.position = -300.0f * sunLight.direction;
+    sunTransform.position = -300.0f * sunLight.direction;
 
 #if DEBUG
-    std::cout << "sun pos: " << sunPos.position << "(phi: " << sunLight.angle << ")" << std::endl;
+    std::cout << "sun pos: " << sunTransform.position << "(phi: " << sunLight.angle << ")" << std::endl;
 #endif
 
     EntityMoveEvent e{game->sun};
     game->raiseEvent(e);
+}
+
+void EnvironmentSystem::update(float dt) {
+    while (entitiesToDestroy.size() > 0) {
+        auto entity = entitiesToDestroy.front();
+
+        if (registry.valid(entity)) {
+            registry.destroy(entity);
+        }
+
+        entitiesToDestroy.pop();
+    }
+    return;
+
+    auto& sunLight = registry.get<SunLightComponent>(game->sun);
+    auto& sunTransform = registry.get<TransformationComponent>(game->sun);
+
+    updateDayNightCycle(dt, sunTransform, sunLight);
 }
 
 void EnvironmentSystem::handleBuildEvent(const BuildEvent& e) {

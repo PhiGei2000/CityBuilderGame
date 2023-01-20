@@ -15,6 +15,13 @@ std::ostream& operator<<(std::ostream& os, const glm::vec<4, T, Q>& vec);
 
 std::ostream& operator<<(std::ostream& os, BuildingType type);
 
+namespace std {
+    template<typename T, glm::qualifier Q>
+    std::string to_string(const glm::vec<3, T, Q>& vec) {
+        return "x: " + std::to_string(vec.x) + " y: " + std::to_string(vec.y) + " z: " + std::to_string(vec.z);
+    }
+} // namespace std
+
 namespace utility {
 
     template<typename T>
@@ -56,9 +63,9 @@ namespace utility {
 
     inline glm::vec3 sphericalToCartesian(float r, float theta, float phi) {
         return r * glm::vec3(
-                              glm::sin(theta) * glm::cos(phi),
-                              glm::cos(theta),
-                              glm::sin(theta) * glm::sin(phi));
+                       glm::sin(theta) * glm::cos(phi),
+                       glm::cos(theta),
+                       glm::sin(theta) * glm::sin(phi));
     }
 
     inline glm::vec3 sphericalToCartesian(const glm::vec3& coords) {
@@ -83,4 +90,4 @@ namespace glm {
     GLM_FUNC_QUALIFIER GLM_CONSTEXPR int dot(const vec<2, int, packed_highp>& x, const vec<2, int, packed_highp>& y) {
         return x.x * y.x + x.y * y.x;
     }
-} // namespace glm 
+} // namespace glm
