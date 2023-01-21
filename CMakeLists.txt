@@ -48,6 +48,9 @@ if(WIN32)
     # include glm
     set(GLM_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/lib/glm)    
 
+    # include stb
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/lib/stb)
+
     set(FREETYPE_INCLUDE_DIRS ./lib/freetype/include)  
     find_file(FREETYPE_LIBRARY freetype.lib HINTS "${CMAKE_CURRENT_LIST_DIR}/lib/freetype/release static/vs2015-2022/win64")
 else()
