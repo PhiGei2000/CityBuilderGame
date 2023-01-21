@@ -1,0 +1,21 @@
+[submodule "lib/glm"]
+	path = lib/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "lib/glfw"]
+	path = lib/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "lib/freetype"]
+	path = lib/freetype
+	url = https://github.com/ubawurinna/freetype-windows-binaries
+[submodule "lib/stb"]
+	path = lib/stb
+	url = https://github.com/nothings/stb.git
+[submodule "lib/entt"]
+	path = lib/entt
+	url = https://github.com/skypjack/entt
+[submodule "lib/pugixml"]
+	path = lib/pugixml
+	url = https://github.com/zeux/pugixml
+[submodule "lib/glew-cmake"]
+	path = lib/glew-cmake
+	url = https://github.com/Perlmint/glew-cmake

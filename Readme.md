@@ -13,11 +13,11 @@ A simple city-building game using C++ and OpenGL.
 ## Getting started
 ### Check the requirements
 Requirements:
-- CMake 3.20
+- CMake 3.22.1 and above
 - C++ 20
 - OpenGL 4.5
 
-Packages:
+Packages (only on Linux):
 - [glm](https://github.com/g-truc/glm)
 - [glfw](https://github.com/glfw/glfw)
 - [glew](https://github.com/nigels-com/glew)
@@ -27,7 +27,8 @@ Packages:
 - [pugixml](https://github.com/zeux/pugixml)
 
 ### Clone the repository
-    git clone https://github.com/PhiGei2000/CityBuildingGame.git
+    git clone --recursive https://github.com/PhiGei2000/CityBuildingGame.git
+the `--recursive` option is only needed on windows to download the libraries from github.
 
 Change your current directory to the downloaded project
 
