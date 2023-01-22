@@ -25,6 +25,7 @@ Packages (only on Linux):
 - [stb image](https://github.com/nothings/stb/blob/master/stb_image.h)
 - [entt](https://github.com/skypjack/entt)
 - [pugixml](https://github.com/zeux/pugixml)
+- [libnoise](https://github.com/PhiGei2000/libnoise)
 
 ### Clone the repository
     git clone --recursive https://github.com/PhiGei2000/CityBuildingGame.git

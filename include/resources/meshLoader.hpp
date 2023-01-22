@@ -8,7 +8,7 @@
 #include <string>
 
 class MeshLoader {
-  private:
+  public:
     struct VertexData {
         std::vector<glm::vec3> positions;
         std::vector<glm::vec2> texCoords;
@@ -69,8 +69,9 @@ class MeshLoader {
     };
 
     /// @brief A collection of the faces grouped by the used material
-    using FaceData = std::unordered_map<std::string, FaceDataCollection>;    
+    using FaceData = std::unordered_map<std::string, FaceDataCollection>;
 
+  private:
     static std::stringstream readLine(std::stringstream& s);
 
     static VertexData parseVertexData(std::stringstream& s);

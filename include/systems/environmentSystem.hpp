@@ -6,6 +6,7 @@
 struct BuildEvent;
 struct TransformationComponent;
 struct SunLightComponent;
+struct TerrainComponent;
 
 class EnvironmentSystem : public System {
   protected:
@@ -13,7 +14,7 @@ class EnvironmentSystem : public System {
 
     std::queue<entt::entity> entitiesToDestroy;
 
-    void updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const;
+    void updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const;    
 
   public:
     EnvironmentSystem(Game* game);

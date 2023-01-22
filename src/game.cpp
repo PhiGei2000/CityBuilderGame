@@ -16,11 +16,14 @@ Game::Game(Application* app)
 }
 
 void Game::init() {
+    terrain = registry.create();
+
     // init systems
     systems.push_back(new CameraSystem(this));
     camera = registry.view<CameraComponent>().front();
 
     systems.push_back(new BuildSystem(this));
+    systems.push_back(new TerrainSystem(this));
     systems.push_back(new RoadSystem(this));
     systems.push_back(new CarSystem(this));
     systems.push_back(new EnvironmentSystem(this));
@@ -29,11 +32,6 @@ void Game::init() {
     systems.push_back(new RenderSystem(this));
 
     // entities
-    entt::entity groundEntity = registry.create();
-
-    MeshComponent& mesh = registry.emplace<MeshComponent>(groundEntity, resourceManager.getResource<Mesh>("GROUND_MESH"));
-
-    registry.emplace<TransformationComponent>(groundEntity, glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
 
     sun = registry.create();
     constexpr float sunAngle = glm::radians(45.0f);

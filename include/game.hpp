@@ -32,6 +32,7 @@ class Game {
   public:
     entt::entity camera;
     entt::entity sun = entt::null;
+    entt::entity terrain;
 
     Game(Application* app);
 

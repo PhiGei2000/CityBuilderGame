@@ -32,7 +32,7 @@ if(WIN32)
     set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
     add_subdirectory(lib/glfw)    
     
-    # build glew    
+    # build glew            
     set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_LIST_DIR}/lib/glew-cmake/build)
     add_subdirectory(lib/glew-cmake)
     set(GLEW_INCLUDE_DIRS lib/glew-cmake/include)    
@@ -49,7 +49,11 @@ if(WIN32)
     set(GLM_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/lib/glm)    
 
     # include stb
-    include_directories(${CMAKE_CURRENT_LIST_DIR}/lib/stb)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/lib/stb)   
+    
+    # include libnoise            
+    add_subdirectory(lib/libnoise)    
+    set(LIBNOISE_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/lib/libnoise/src)
 
     set(FREETYPE_INCLUDE_DIRS ./lib/freetype/include)  
     find_file(FREETYPE_LIBRARY freetype.lib HINTS "${CMAKE_CURRENT_LIST_DIR}/lib/freetype/release static/vs2015-2022/win64")
@@ -78,7 +82,10 @@ else()
     if (GLEW_FOUND)
         message("glew found")
     endif()
+
+    find_package(noise REQUIRED)
 endif() 
+
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 
@@ -88,7 +95,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${GLEW_INCLUDE_DIRS}
     ${ENTT_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
-    ${GLM_INCLUDE_DIRS})
+    ${GLM_INCLUDE_DIRS}
+    ${LIBNOISE_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME}
     ${OPENGL_LIBRARIES}
@@ -96,13 +104,15 @@ target_link_libraries(${PROJECT_NAME}
     ${GLEW_LIBRARIES}
     ${FREETYPE_LIBRARY}
     pugixml
+    noise
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
+set(RESOURCE_PATH ${CMAKE_CURRENT_LIST_DIR}/res)
 if (WIN32)
     # copy resource directory to build dir
-    file(COPY ./res DESTINATION ${CMAKE_BINARY_DIR})
+    file(CREATE_LINK ${CMAKE_CURRENT_LIST_DIR}/res ${CMAKE_CURRENT_BINARY_DIR}/res SYMBOLIC)    
 endif()

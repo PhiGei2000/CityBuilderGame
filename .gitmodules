@@ -19,3 +19,6 @@
 [submodule "lib/glew-cmake"]
 	path = lib/glew-cmake
 	url = https://github.com/Perlmint/glew-cmake
+[submodule "lib/libnoise"]
+	path = lib/libnoise
+	url = https://github.com/PhiGei2000/libnoise

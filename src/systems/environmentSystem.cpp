@@ -28,12 +28,14 @@ EnvironmentSystem::EnvironmentSystem(Game* game)
 
 void EnvironmentSystem::init() {
     MeshPtr treeMesh = resourceManager.getResource<Mesh>("TREE_MESH");
+    const TerrainComponent& terrain = registry.get<TerrainComponent>(game->terrain);
 
     // spawn trees
     for (int i = 0; i < 100; i++) {
         entt::entity entity = registry.create();
 
-        glm::vec3 position = glm::vec3((float)rand() / static_cast<float>(RAND_MAX) * Configuration::worldSize, 0.0f, (float)rand() / static_cast<float>(RAND_MAX) * Configuration::worldSize);
+        glm::vec2 gridPos = Configuration::worldSize / static_cast<float>(RAND_MAX) * glm::vec2(rand(), rand());
+        glm::vec3 position = glm::vec3(gridPos.x, terrain.getHeightValue(gridPos), gridPos.y);
         float angle = (float)rand() / static_cast<float>(RAND_MAX) * 0.5f * M_PI;
         glm::vec3 scale = glm::vec3((float)rand() / static_cast<float>(RAND_MAX) * 0.5 + 1.5f);
 
@@ -49,7 +51,7 @@ void EnvironmentSystem::init() {
 
 void EnvironmentSystem::updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const {
     // sun movement
-    const float sunSpeed = 0.05f;    
+    const float sunSpeed = 0.05f;
 
     // move sun
     static constexpr float two_pi = 2 * glm::pi<float>();
