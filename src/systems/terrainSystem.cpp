@@ -19,13 +19,16 @@ void TerrainSystem::generateTerrain(TerrainComponent& terrain) const {
     int cellsPerDirection = Configuration::worldSize / Configuration::gridSize;
 
     noise::module::Perlin perlin;
+    perlin.SetFrequency(0.0001f);
+    perlin.SetOctaveCount(4);
+    perlin.SetLacunarity(1.9);    
 
     terrain.heightValues = new float*[cellsPerDirection];
     for (int x = 0; x < cellsPerDirection; x++) {
         terrain.heightValues[x] = new float[cellsPerDirection];
 
         for (int y = 0; y < cellsPerDirection; y++) {
-            terrain.heightValues[x][y] = perlin.GetValue(x, y, 0);
+            terrain.heightValues[x][y] = glm::floor(perlin.GetValue(x * 100, y * 100, 0) * 4 + 2) * 2;
         }
     }
 }
