@@ -2,16 +2,16 @@
 #include "events/events.hpp"
 #include "systems/system.hpp"
 
+#include "components/meshComponent.hpp"
+#include "components/transformationComponent.hpp"
 #include "rendering/shadowBuffer.hpp"
 
 #if DEBUG
 #include "rendering/debug/shadowMapRenderer.hpp"
 #endif
 
-struct MeshComponent;
 struct LightComponent;
 struct CameraComponent;
-struct TransformationComponent;
 struct Shader;
 
 class RenderSystem : public System {
@@ -20,7 +20,7 @@ class RenderSystem : public System {
     unsigned int uboLight;
 
     ShadowBuffer shadowBuffer;
-    #if DEBUG
+#if DEBUG
     ShadowMapRenderer shadowMapRenderer;
 #endif
 
@@ -32,7 +32,14 @@ class RenderSystem : public System {
 
     void onCameraUpdated(CameraUpdateEvent& event) const;
     void onEntityMoved(EntityMoveEvent& event) const;
-    void renderScene(Shader* shader = nullptr) const;
+
+    template<typename... T>
+    inline void renderScene(entt::exclude_t<T...> exclude = {}, Shader* shader = nullptr) const {
+        registry.view<MeshComponent, TransformationComponent>(exclude)
+            .each([&](const MeshComponent& mesh, const TransformationComponent& transform) {
+                mesh.mesh->render(transform.transform, shader);
+            });
+    }
 
     void updateLightBuffer(const LightComponent& sunLight, const CameraComponent& component) const;
 

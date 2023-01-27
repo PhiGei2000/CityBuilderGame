@@ -36,7 +36,7 @@ class MeshGeometry : public Geometry {
   private:
     const static VertexAttributes meshVertexAttributes;
 
-    bool culling;
+    bool culling = true;
 
   public:
     MeshGeometry();

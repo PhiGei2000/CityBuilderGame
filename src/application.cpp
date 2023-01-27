@@ -1,8 +1,6 @@
 
 #include "application.hpp"
 
-#include "systems/cameraSystem.hpp"
-#include "systems/renderSystem.hpp"
 #include "systems/system.hpp"
 
 #include "rendering/geometry.hpp"

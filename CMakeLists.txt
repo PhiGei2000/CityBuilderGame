@@ -25,37 +25,40 @@ endif()
 
 if(WIN32)
     set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_LIST_DIR}/lib)
-    
+
     # install glfw
     set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
     set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-    add_subdirectory(lib/glfw)    
-    
-    # build glew            
+    add_subdirectory(lib/glfw)
+
+    # build glew
     set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_LIST_DIR}/lib/glew-cmake/build)
     add_subdirectory(lib/glew-cmake)
-    set(GLEW_INCLUDE_DIRS lib/glew-cmake/include)    
-        
-    set(GLEW_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/lib/glew-cmake/lib/glew-sharedd.lib)  
-    file(COPY_FILE ${CMAKE_CURRENT_BINARY_DIR}/lib/glew-cmake/bin/glew-sharedd.dll ${CMAKE_CURRENT_BINARY_DIR}/glew-sharedd.dll ONLY_IF_DIFFERENT)
-    
+    set(GLEW_INCLUDE_DIRS lib/glew-cmake/include)
+
+    set(GLEW_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/lib/glew-cmake/lib/glew-sharedd.lib)
+
+    if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/lib/glew-cmake/bin/glew-sharedd.dll)
+        file(COPY_FILE ${CMAKE_CURRENT_BINARY_DIR}/lib/glew-cmake/bin/glew-sharedd.dll ${CMAKE_CURRENT_BINARY_DIR}/glew-sharedd.dll ONLY_IF_DIFFERENT)
+    endif()
+
     add_subdirectory(lib/pugixml)
 
     # include entt
-    set(ENTT_INCLUDE_DIRS ./lib/entt/src HINTS ${CMAKE_CURRENT_LIST_DIR})      
+    set(ENTT_INCLUDE_DIRS ./lib/entt/src HINTS ${CMAKE_CURRENT_LIST_DIR})
 
     # include glm
-    set(GLM_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/lib/glm)    
+    set(GLM_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/lib/glm)
 
     # include stb
-    include_directories(${CMAKE_CURRENT_LIST_DIR}/lib/stb)   
-    
-    # include libnoise            
-    add_subdirectory(lib/libnoise)    
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/lib/stb)
+
+    # include libnoise
+    add_subdirectory(lib/libnoise)
     set(LIBNOISE_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/lib/libnoise/src)
 
-    set(FREETYPE_INCLUDE_DIRS ./lib/freetype/include)  
+    set(FREETYPE_INCLUDE_DIRS ./lib/freetype/include)
     find_file(FREETYPE_LIBRARY freetype.lib HINTS "${CMAKE_CURRENT_LIST_DIR}/lib/freetype/release static/vs2015-2022/win64")
 else()
     find_package(glm REQUIRED)
@@ -84,7 +87,7 @@ else()
     endif()
 
     find_package(noise REQUIRED)
-endif() 
+endif()
 
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
@@ -114,5 +117,5 @@ include(CPack)
 set(RESOURCE_PATH ${CMAKE_CURRENT_LIST_DIR}/res)
 if (WIN32)
     # copy resource directory to build dir
-    file(CREATE_LINK ${CMAKE_CURRENT_LIST_DIR}/res ${CMAKE_CURRENT_BINARY_DIR}/res SYMBOLIC)    
+    file(CREATE_LINK ${CMAKE_CURRENT_LIST_DIR}/res ${CMAKE_CURRENT_BINARY_DIR}/res SYMBOLIC)
 endif()

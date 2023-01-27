@@ -103,20 +103,13 @@ void RenderSystem::updateLightBuffer(const LightComponent& sunLight, const Camer
     glBufferSubData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_CASCADE_COUNT * sizeof(glm::mat4) + 3 * sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(sunLight.specular));
 }
 
-void RenderSystem::renderScene(Shader* shader) const {
-    registry.view<TransformationComponent, MeshComponent>(entt::exclude<BuildMarkerComponent, DebugComponent>)
-        .each([&](const TransformationComponent& transform, const MeshComponent& mesh) {
-            mesh.mesh->render(transform.transform, shader);
-        });
-}
-
 void RenderSystem::update(float dt) {
     // shadows
     shadowBuffer.use();
     shadowShader->use();
 
     glCullFace(GL_FRONT);
-    renderScene(shadowShader.get());
+    renderScene({}, shadowShader.get());
     glCullFace(GL_BACK);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
