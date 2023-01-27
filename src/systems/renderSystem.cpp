@@ -109,7 +109,7 @@ void RenderSystem::update(float dt) {
     shadowShader->use();
 
     glCullFace(GL_FRONT);
-    renderScene({}, shadowShader.get());
+    renderScene(entt::exclude<DebugComponent>, shadowShader.get());
     glCullFace(GL_BACK);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -132,7 +132,7 @@ void RenderSystem::update(float dt) {
 
     shadowBuffer.bindTextures();
 
-    renderScene();
+    renderScene(entt::exclude<DebugComponent>);
 
     if (game->getState() == GameState::BUILD_MODE) {
         registry.view<TransformationComponent, MeshComponent, BuildMarkerComponent>()
