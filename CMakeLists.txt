@@ -46,7 +46,7 @@ if(WIN32)
     add_subdirectory(lib/pugixml)
 
     # include entt
-    set(ENTT_INCLUDE_DIRS ./lib/entt/src HINTS ${CMAKE_CURRENT_LIST_DIR})
+    set(ENTT_INCLUDE_DIRS lib/entt/src HINTS ${CMAKE_CURRENT_LIST_DIR})
 
     # include glm
     set(GLM_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/lib/glm)
@@ -57,6 +57,7 @@ if(WIN32)
     # include libnoise
     add_subdirectory(lib/libnoise)
     set(LIBNOISE_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/lib/libnoise/src)
+    set(LIBNOISE_LIBRARIES noise)
 
     set(FREETYPE_INCLUDE_DIRS ./lib/freetype/include)
     find_file(FREETYPE_LIBRARY freetype.lib HINTS "${CMAKE_CURRENT_LIST_DIR}/lib/freetype/release static/vs2015-2022/win64")
@@ -86,10 +87,12 @@ else()
         message("glew found")
     endif()
 
-    find_package(noise REQUIRED)
-    if (NOISE_FOUND) 
-        message("noise found")
-    endif()
+    set(LIBNOISE_LIBRARIES libnoise.so)
+
+    include_directories(/usr/include/freetype2)
+    include_directories(/usr/include/stb)
+
+    set(FREETYPE_LIBRARY libfreetype.so)
 endif()
 
 
@@ -110,7 +113,7 @@ target_link_libraries(${PROJECT_NAME}
     ${GLEW_LIBRARIES}
     ${FREETYPE_LIBRARY}
     pugixml
-    noise
+    ${LIBNOISE_LIBRARIES}
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
