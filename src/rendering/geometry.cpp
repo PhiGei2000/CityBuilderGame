@@ -1,13 +1,14 @@
 #include "rendering/geometry.hpp"
 
 Geometry::Geometry(const VertexAttributes& attributes, int drawMode)
-    : drawMode(drawMode) {
+    : drawMode(drawMode), drawCount(0) {
     glGenVertexArrays(1, &vao);
 
     glBindVertexArray(vao);
 
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
+
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
@@ -21,10 +22,34 @@ Geometry::Geometry(const VertexAttributes& attributes, int drawMode)
 
         offset += attribute.stride;
     }
+
+    // unbind buffers
+    // make sure to unbind the vertex array object before the element buffer
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Geometry::setVertexAttribute(unsigned int index, const VertexAttribute& attribute, unsigned int vbo, unsigned int divisor) const {
+    glBindVertexArray(vao);
+    glEnableVertexAttribArray(index);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo == 0 ? this->vbo : vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+    glVertexAttribPointer(index, attribute.size, attribute.type, attribute.normalized, attribute.stride, attribute.pointer);
+
+    if (divisor != 0) {
+        glVertexAttribDivisor(index, divisor);
+    }
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Geometry::fillBuffers(const std::vector<float>& vertices, const std::vector<unsigned int>& indices) {
-    bind();
+    glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -33,16 +58,17 @@ void Geometry::fillBuffers(const std::vector<float>& vertices, const std::vector
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
     drawCount = indices.size();
-}
 
-void Geometry::bind() const {
-    glBindVertexArray(vao);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Geometry::draw() const {
-    bind();
+    glBindVertexArray(vao);
 
     glDrawElements(drawMode, drawCount, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }
 
 const VertexAttributes MeshGeometry::meshVertexAttributes = VertexAttributes{
@@ -63,7 +89,7 @@ MeshGeometry::MeshGeometry(const GeometryData& data)
 }
 
 void MeshGeometry::fillBuffers(const GeometryData& data) {
-    bind();
+    glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -73,6 +99,10 @@ void MeshGeometry::fillBuffers(const GeometryData& data) {
 
     drawCount = data.indices.size();
     culling = data.culling;
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void MeshGeometry::draw() const {
@@ -84,4 +114,19 @@ void MeshGeometry::draw() const {
     }
 
     Geometry::draw();
+}
+
+void MeshGeometry::drawInstanced(unsigned int instancesCount) const {
+    if (culling) {
+        glEnable(GL_CULL_FACE);
+    }
+    else {
+        glDisable(GL_CULL_FACE);
+    }
+
+    glBindVertexArray(vao);
+
+    glDrawElementsInstanced(drawMode, drawCount, GL_UNSIGNED_INT, 0, instancesCount);
+
+    glBindVertexArray(0);
 }
