@@ -8,6 +8,8 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+class InstanceBuffer;
+
 struct Mesh {
     ShaderPtr shader;
 
@@ -16,6 +18,9 @@ struct Mesh {
     Mesh(ShaderPtr shader);
 
     void render(const glm::mat4& model, Shader* shader = nullptr) const;
+    void renderInstanced(unsigned int instancesCount, const glm::mat4& model, Shader* shader = nullptr) const;
+
+    void linkInstanceBuffer(const InstanceBuffer& buffer) const;
 };
 
 using MeshPtr = ResourcePtr<Mesh>;

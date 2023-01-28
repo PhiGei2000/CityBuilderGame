@@ -29,24 +29,22 @@ EnvironmentSystem::EnvironmentSystem(Game* game)
 void EnvironmentSystem::init() {
     MeshPtr treeMesh = resourceManager.getResource<Mesh>("TREE_MESH");
     const TerrainComponent& terrain = registry.get<TerrainComponent>(game->terrain);
+    std::vector<glm::vec3> offsets;
+    offsets.reserve(100);
 
     // spawn trees
     for (int i = 0; i < 100; i++) {
-        entt::entity entity = registry.create();
-
         glm::vec2 gridPos = Configuration::worldSize / static_cast<float>(RAND_MAX) * glm::vec2(rand(), rand());
         glm::vec3 position = glm::vec3(gridPos.x, terrain.getHeightValue(gridPos), gridPos.y);
-        float angle = (float)rand() / static_cast<float>(RAND_MAX) * 0.5f * M_PI;
-        glm::vec3 scale = glm::vec3((float)rand() / static_cast<float>(RAND_MAX) * 0.5 + 1.5f);
-
-        registry.emplace<MeshComponent>(entity, treeMesh);
-        registry.emplace<TransformationComponent>(entity,
-                                                  position,
-                                                  glm::quat(cos(angle * 0.5f), 0, sin(angle * 0.5f), 0),
-                                                  scale)
-            .calculateTransform();
-        registry.emplace<EnvironmentComponent>(entity);
+        /*float angle = (float)rand() / static_cast<float>(RAND_MAX) * 0.5f * M_PI;
+        glm::vec3 scale = glm::vec3((float)rand() / static_cast<float>(RAND_MAX) * 0.5 + 1.5f);*/
+        offsets.push_back(position);
     }
+
+    entt::entity entity = registry.create();
+    InstancedMeshComponent& instancedMesh = registry.emplace<InstancedMeshComponent>(entity, treeMesh, offsets);
+    registry.emplace<TransformationComponent>(entity, glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f)).calculateTransform();
+    registry.emplace<EnvironmentComponent>(entity);
 }
 
 void EnvironmentSystem::updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const {

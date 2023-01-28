@@ -2,6 +2,7 @@
 #include "events/events.hpp"
 #include "systems/system.hpp"
 
+#include "components/instancedMeshComponent.hpp"
 #include "components/meshComponent.hpp"
 #include "components/transformationComponent.hpp"
 #include "rendering/shadowBuffer.hpp"
@@ -38,6 +39,12 @@ class RenderSystem : public System {
         registry.view<MeshComponent, TransformationComponent>(exclude)
             .each([&](const MeshComponent& mesh, const TransformationComponent& transform) {
                 mesh.mesh->render(transform.transform, shader);
+            });
+
+        ShaderPtr instancedShader = resourceManager.getResource<Shader>("MESH_INSTANCED_SHADER");
+        registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
+            .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {
+                mesh.mesh->renderInstanced(mesh.offsets.size(), transform.transform, instancedShader.get());
             });
     }
 

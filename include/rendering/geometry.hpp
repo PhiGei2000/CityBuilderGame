@@ -25,25 +25,26 @@ class Geometry {
   public:
     Geometry(const VertexAttributes& attributes, int drawMode = GL_TRIANGLES);
 
+    void setVertexAttribute(unsigned int index, const VertexAttribute& attributes, unsigned int vbo = 0, unsigned int divisor = 0) const;
     void fillBuffers(const std::vector<float>& vertices, const std::vector<unsigned int>& indices);
-
-    void bind() const;
 
     virtual void draw() const;
 };
 
 class MeshGeometry : public Geometry {
   private:
-    const static VertexAttributes meshVertexAttributes;
-
     bool culling = true;
 
   public:
+    const static VertexAttributes meshVertexAttributes;
+
     MeshGeometry();
     MeshGeometry(const GeometryData& data);
 
     void fillBuffers(const GeometryData& data);
     void draw() const override;
+
+    void drawInstanced(unsigned int instancesCount) const;
 };
 
 using GeometryPtr = ResourcePtr<Geometry>;

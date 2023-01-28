@@ -32,18 +32,6 @@ const char* ResourceManager::ResourceTypeException::what() const noexcept {
     return message;
 }
 
-// template<typename T>
-// void ResourceManager::setResource(const std::string& id, ResourcePtr<T> data) {
-//     ResourcePtr<void> dataPtr = ResourcePtr<T>(data);
-
-//     if (resources.contains(id)) {
-//         resources[id].data.swap(dataPtr);
-//     }
-//     else {
-//         resources[id] = ResourceHolder{std::type_index(typeid(T)), dataPtr};
-//     }
-// }
-
 template<>
 void ResourceManager::loadResource<Shader>(const std::string& id, const std::string& filename) {
     const std::string& vertexPath = resourceDir + filename + ".vert";
@@ -58,6 +46,12 @@ void ResourceManager::loadResource<Shader>(const std::string& id, const std::str
         shader = new Shader(vertexPath, fragmentPath);
     }
 
+    setResource(id, ShaderPtr(shader));
+}
+
+template<>
+void ResourceManager::loadResource<Shader>(const std::string& id, const std::string& vertexPath, const std::string& fragmentPath) {
+    Shader* shader = new Shader(resourceDir + vertexPath, resourceDir + fragmentPath);
     setResource(id, ShaderPtr(shader));
 }
 
@@ -84,12 +78,16 @@ void ResourceManager::loadResources() {
         const std::string& id = resourceNode.attribute("id").as_string();
         const std::string& filename = resourceNode.attribute("filename").as_string();
 
-        // if (type == "model") {
-        //     loadResource<Geometry>(id, filename);
-        // }
-        // else
         if (type == "shader") {
-            loadResource<Shader>(id, filename);
+            if (filename.empty()) {
+                const std::string& vertexPath = resourceNode.attribute("vertex").as_string();
+                const std::string& fragmentPath = resourceNode.attribute("fragment").as_string();
+
+                loadResource<Shader, const std::string&>(id, vertexPath, fragmentPath);
+            }
+            else {
+                loadResource<Shader>(id, filename);
+            }
         }
         else if (type == "texture") {
             bool rgba = resourceNode.attribute("rgba").as_bool();
@@ -154,30 +152,3 @@ void ResourceManager::loadResources() {
     }
 }
 
-// template<typename T>
-// std::shared_ptr<T> ResourceManager::getResource(const std::string& resourceId) const {
-//     const std::type_index type = std::type_index(typeid(T));
-//     const ResourceHolder& resource = resources.at(resourceId);
-
-//     if (type != resource.type) {
-//         std::string message = "Resource could not converted to ";
-
-//         throw ResourceTypeException(message.append(type.name()).c_str());
-//     }
-
-//     return std::reinterpret_pointer_cast<T>(resource.data);
-// }
-
-// template TexturePtr ResourceManager::getResource<Texture>(const std::string&) const;
-// template ShaderPtr ResourceManager::getResource<Shader>(const std::string&) const;
-// template MaterialPtr ResourceManager::getResource<Material>(const std::string&) const;
-// template MeshPtr ResourceManager::getResource<Mesh>(const std::string&) const;
-// template ObjectPtr ResourceManager::getResource<Object>(const std::string&) const;
-// template ResourcePtr<RoadPack> ResourceManager::getResource<RoadPack>(const std::string&) const;
-
-// template void ResourceManager::setResource<Texture>(const std::string&, TexturePtr);
-// template void ResourceManager::setResource<Shader>(const std::string&, ShaderPtr);
-// template void ResourceManager::setResource<Material>(const std::string&, MaterialPtr);
-// template void ResourceManager::setResource<Mesh>(const std::string&, MeshPtr);
-// template void ResourceManager::setResource<Object>(const std::string&, ObjectPtr);
-// template void ResourceManager::setResource<RoadPack>(const std::string&, ResourcePtr<RoadPack>);

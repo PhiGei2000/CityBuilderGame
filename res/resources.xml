@@ -7,6 +7,7 @@
 	<resource type="shader" id="AXIS_SHADER" filename="shaders/axis" />
 	<resource type="shader" id="RENDER_QUAD_SHADER" filename="shaders/renderQuad" />
 	<resource type="shader" id="STREET_DEBUG_SHADER" filename="shaders/streetDebug" />
+	<resource type="shader" id="MESH_INSTANCED_SHADER" vertex="shaders/meshInstanced.vert" fragment="shaders/mesh.frag " />
 
 	<!-- meshes -->
 	<resource type="mesh" id="BUILDMARKER_MESH" filename="models/buildMarker.obj" />

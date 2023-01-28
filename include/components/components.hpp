@@ -7,6 +7,7 @@
 #include "carPathComponent.hpp"
 #include "debugComponent.hpp"
 #include "environmentComponent.hpp"
+#include "instancedMeshComponent.hpp"
 #include "lightComponent.hpp"
 #include "meshComponent.hpp"
 #include "parkingComponent.hpp"
