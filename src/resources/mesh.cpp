@@ -10,11 +10,22 @@ Mesh::Mesh() {
 void Mesh::render(ShaderPtr shader) const {
     for (const auto& [name, data] : geometries) {
         for (const auto& [material, geometry] : data) {
+            bool blend = false;
             if (material) {
                 material->use(shader.get());
+
+                blend = material->dissolve < 1.0f;
+            }
+
+            if (blend) {
+                glEnable(GL_BLEND);
             }
 
             geometry->draw();
+
+            if (blend) {
+                glDisable(GL_BLEND);
+            }
         }
     }
 }
