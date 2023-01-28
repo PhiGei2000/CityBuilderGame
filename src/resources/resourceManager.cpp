@@ -56,6 +56,12 @@ void ResourceManager::loadResource<Shader>(const std::string& id, const std::str
 }
 
 template<>
+void ResourceManager::loadResource<Shader>(const std::string& id, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath) {
+    Shader* shader = new Shader(resourceDir + vertexPath, resourceDir + fragmentPath, resourceDir + geometryPath);
+    setResource(id, ShaderPtr(shader));
+}
+
+template<>
 void ResourceManager::loadResource<Texture>(const std::string& id, const std::string& filename, bool alpha) {
     Texture* texture = alpha ? new Texture(resourceDir + filename, GL_RGBA) : new Texture(resourceDir + filename);
 
@@ -82,8 +88,14 @@ void ResourceManager::loadResources() {
             if (filename.empty()) {
                 const std::string& vertexPath = resourceNode.attribute("vertex").as_string();
                 const std::string& fragmentPath = resourceNode.attribute("fragment").as_string();
+                const std::string& geometryPath = resourceNode.attribute("geometry").as_string();
 
-                loadResource<Shader, const std::string&>(id, vertexPath, fragmentPath);
+                if (geometryPath.empty()) {
+                    loadResource<Shader, const std::string&>(id, vertexPath, fragmentPath);
+                }
+                else {
+                    loadResource<Shader, const std::string&, const std::string&>(id, vertexPath, fragmentPath, geometryPath);
+                }
             }
             else {
                 loadResource<Shader>(id, filename);
@@ -113,11 +125,7 @@ void ResourceManager::loadResources() {
             }
         }
         else if (type == "mesh") {
-            const std::string& shaderId = resourceNode.attribute("shader").as_string("MESH_SHADER");
-
-            ShaderPtr shader = getResource<Shader>(shaderId);
-
-            MeshPtr mesh = MeshLoader::loadMesh(resourceDir + filename, shader);
+            MeshPtr mesh = MeshLoader::loadMesh(resourceDir + filename);
 
             setResource(id, mesh);
         }
@@ -151,4 +159,3 @@ void ResourceManager::loadResources() {
         }
     }
 }
-

@@ -10,15 +10,13 @@
 
 class InstanceBuffer;
 
-struct Mesh {
-    ShaderPtr shader;
-
+struct Mesh {    
     std::unordered_map<std::string, std::vector<std::pair<MaterialPtr, GeometryPtr>>> geometries;
 
-    Mesh(ShaderPtr shader);
+    Mesh();
 
-    void render(const glm::mat4& model, Shader* shader = nullptr) const;
-    void renderInstanced(unsigned int instancesCount, const glm::mat4& model, Shader* shader = nullptr) const;
+    void render(ShaderPtr shader) const;
+    void renderInstanced(ShaderPtr shader, unsigned int instancesCount) const;
 
     void linkInstanceBuffer(const InstanceBuffer& buffer) const;
 };

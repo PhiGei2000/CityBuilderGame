@@ -25,11 +25,8 @@ CarComponent ObjectLoader::loadComponent<CarComponent>(const xml_node& node) {
 template<>
 MeshComponent ObjectLoader::loadComponent<MeshComponent>(const xml_node& node) {
     const std::string& filename = node.attribute("filename").as_string();
-    const std::string& shaderID = node.attribute("shader").as_string("MESH_SHADER");
 
-    ShaderPtr shader = resourceManager.getResource<Shader>(shaderID);
-
-    MeshPtr mesh = MeshLoader::loadMesh(resourceManager.resourceDir + filename, shader);
+    MeshPtr mesh = MeshLoader::loadMesh(resourceManager.resourceDir + filename);
     return MeshComponent(mesh);
 }
 
