@@ -21,23 +21,28 @@ void TerrainSystem::generateTerrain(TerrainComponent& terrain) const {
     noise::module::Perlin perlin;
     perlin.SetFrequency(0.0001f);
     perlin.SetOctaveCount(4);
-    perlin.SetLacunarity(1.9);    
+    perlin.SetLacunarity(1.9);
 
     terrain.heightValues = new float*[cellsPerDirection];
     for (int x = 0; x < cellsPerDirection; x++) {
         terrain.heightValues[x] = new float[cellsPerDirection];
 
         for (int y = 0; y < cellsPerDirection; y++) {
-            terrain.heightValues[x][y] = glm::floor(perlin.GetValue(x * 100, y * 100, 0) * 4 + 2) * 2;
+            float heightValue = glm::floor(perlin.GetValue(x * 100, y * 100, 0) * 4 + 2) * 2;
+            terrain.heightValues[x][y] = heightValue;
         }
     }
 }
 
 void TerrainSystem::generateTerrainMesh(const TerrainComponent& terrain, MeshComponent& mesh) const {
     int cellsPerDirection = Configuration::worldSize / Configuration::gridSize;
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-    unsigned int currentIndex = 0;
+    std::vector<Vertex> terrainVertices;
+    std::vector<unsigned int> terrainIndices;
+    unsigned int currentTerrainIndex = 0;
+
+    std::vector<Vertex> waterVertices;
+    std::vector<unsigned int> waterIndices;
+    unsigned int currentWaterIndex = 0;
 
     // texture coords
     constexpr glm::vec2 t0 = glm::vec2(0.0f, 0.0f);
@@ -59,27 +64,56 @@ void TerrainSystem::generateTerrainMesh(const TerrainComponent& terrain, MeshCom
             glm::vec3 n2 = glm::normalize(glm::cross(p3 - p2, p0 - p2));
             glm::vec3 n3 = glm::normalize(glm::cross(p1 - p3, p2 - p3));
 
-            // build triangles (not finished)
-            vertices.emplace_back(p0, t0, n1);
-            vertices.emplace_back(p1, t1, n1);
-            vertices.emplace_back(p3, t3, n1);
+            // build triangles (maybe not finished)
+            terrainVertices.emplace_back(p0, t0, n1);
+            terrainVertices.emplace_back(p1, t1, n1);
+            terrainVertices.emplace_back(p3, t3, n1);
 
-            vertices.emplace_back(p0, t0, n2);
-            vertices.emplace_back(p3, t3, n2);
-            vertices.emplace_back(p2, t2, n2);
+            terrainVertices.emplace_back(p0, t0, n2);
+            terrainVertices.emplace_back(p3, t3, n2);
+            terrainVertices.emplace_back(p2, t2, n2);
 
             for (int i = 0; i < 6; i++) {
-                indices.push_back(currentIndex + i);
+                terrainIndices.push_back(currentTerrainIndex++);
             }
 
-            currentIndex += 6;
+            // water plane
+            if (terrain.isWater(static_cast<float>(Configuration::gridSize) * glm::vec2(x + 0.5f, y + 0.5f))) {
+                p0 = static_cast<float>(Configuration::gridSize) * glm::vec3(x, -0.2f, y);
+                p1 = static_cast<float>(Configuration::gridSize) * glm::vec3(x + 1, -0.2f, y);
+                p2 = static_cast<float>(Configuration::gridSize) * glm::vec3(x, -0.2f, y + 1);
+                p3 = static_cast<float>(Configuration::gridSize) * glm::vec3(x + 1, -0.2f, y + 1);
+
+                glm::vec3 waterNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+
+                // TODO: optimize this
+                // build triangles
+                waterVertices.emplace_back(p0, t0, waterNormal);
+                waterVertices.emplace_back(p1, t1, waterNormal);
+                waterVertices.emplace_back(p3, t3, waterNormal);
+
+                waterVertices.emplace_back(p0, t0, waterNormal);
+                waterVertices.emplace_back(p3, t3, waterNormal);
+                waterVertices.emplace_back(p2, t2, waterNormal);
+
+                for (int i = 0; i < 6; i++) {
+                    waterIndices.push_back(currentWaterIndex++);
+                }
+            }
         }
     }
 
     MaterialPtr groundMaterial = resourceManager.getResource<Material>("GROUND_MATERIAL");
-    GeometryData data(vertices, indices, false);
-    GeometryPtr geometry(new MeshGeometry(data));
-    mesh.mesh->geometries["ground"].push_back(std::make_pair(groundMaterial, geometry));
+    GeometryData terrainData(terrainVertices, terrainIndices, false);
+    GeometryPtr terrainGeometry(new MeshGeometry(terrainData));
+    mesh.mesh->geometries["ground"].push_back(std::make_pair(groundMaterial, terrainGeometry));
+
+    if (waterVertices.size() > 0) {
+        MaterialPtr waterMaterial = resourceManager.getResource<Material>("WATER_MATERIAL");
+        GeometryData waterData(waterVertices, waterIndices, false);
+        GeometryPtr waterGeometry(new MeshGeometry(waterData));
+        mesh.mesh->geometries["water"].push_back(std::make_pair(waterMaterial, waterGeometry));
+    }
 }
 
 TerrainSystem::TerrainSystem(Game* game)
