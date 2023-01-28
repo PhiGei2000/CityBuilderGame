@@ -10,7 +10,7 @@ class TerrainSystem : public System {
 
     void generateTerrain(TerrainComponent& terrain) const;
 
-    void generateTerrainMesh(const TerrainComponent& terrain, MeshComponent& mesh) const;
+    void generateTerrainMesh(const TerrainComponent& terrain, MeshComponent& mesh) const;    
 
   public:
     TerrainSystem(Game* game);

@@ -1,0 +1,10 @@
+newmtl water
+Ns 360.000000
+Ka 0.700000 0.700000 0.700000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.450000
+d 0.400000
+illum 2
+map_Ka water_diffuse.png
+map_Kd water_diffuse.png

@@ -23,6 +23,9 @@
 	<resource type="material" filename="models/ground.mtl">
 		<material name="ground" id="GROUND_MATERIAL"/>
 	</resource>
+	<resource type="material" filename="models/water.mtl" >
+		<material name="water" id="WATER_MATERIAL" />
+	</resource>
 
 	<!-- streets -->
 	<resource type="streetPack" id="BASIC_STREETS" roadwayWidth="3.0" roadwayHeight="0.1" sidewalkHeight="0.2" verticesPerCircle="32" shader="MESH_SHADER" material="BASIC_STREET_MATERIAL" />

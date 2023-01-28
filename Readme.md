@@ -5,6 +5,7 @@ A simple city-building game using C++ and OpenGL.
 ### Features
 - [x] GUI
 - [x] Street placement
+- [ ] procedural terrain generation
 - [ ] Traffic
 - [ ] Buildings
 - [ ] Savegames
