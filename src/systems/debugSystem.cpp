@@ -21,7 +21,7 @@ void DebugSystem::init() {
         0.0, 0.0, 1.0};
 
     axisGeo->fillBuffers(vertices, {0, 1, 2});
-    Mesh* axisMesh = new Mesh(resourceManager.getResource<Shader>("AXIS_SHADER"));
+    Mesh* axisMesh = new Mesh();
     axisMesh->geometries[""] = {std::make_pair(MaterialPtr(nullptr), GeometryPtr(axisGeo))};
 
     registry.emplace<MeshComponent>(debugEntity, MeshPtr(axisMesh));

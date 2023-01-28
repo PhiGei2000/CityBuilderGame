@@ -31,6 +31,7 @@ void RenderSystem::init() {
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     shadowShader = resourceManager.getResource<Shader>("SHADOW_SHADER");
+    instancedShadowShader = resourceManager.getResource<Shader>("SHADOW_INSTANCED_SHADER");
 }
 
 RenderSystem::RenderSystem(Game* game)
@@ -109,7 +110,8 @@ void RenderSystem::update(float dt) {
     shadowShader->use();
 
     glCullFace(GL_FRONT);
-    renderScene(entt::exclude<DebugComponent>, shadowShader.get());
+    renderScene(shadowShader, entt::exclude<DebugComponent>);
+    renderSceneInstanced(instancedShadowShader, entt::exclude<DebugComponent>);
     glCullFace(GL_BACK);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -131,13 +133,18 @@ void RenderSystem::update(float dt) {
 #endif
 
     shadowBuffer.bindTextures();
+    ShaderPtr meshShader = resourceManager.getResource<Shader>("MESH_SHADER");
+    ShaderPtr instancedMeshShader = resourceManager.getResource<Shader>("MESH_INSTANCED_SHADER");
 
-    renderScene(entt::exclude<DebugComponent>);
+    renderScene(meshShader, entt::exclude<DebugComponent>);
+    renderSceneInstanced(instancedMeshShader, entt::exclude<DebugComponent>);
 
+    meshShader->use();
     if (game->getState() == GameState::BUILD_MODE) {
         registry.view<TransformationComponent, MeshComponent, BuildMarkerComponent>()
             .each([&](const TransformationComponent& transform, const MeshComponent& mesh, const BuildMarkerComponent& buildMarker) {
-                mesh.mesh->render(transform.transform);
+                meshShader->setMatrix4("model", transform.transform);
+                mesh.mesh->render(meshShader);
             });
     }
 
@@ -147,7 +154,10 @@ void RenderSystem::update(float dt) {
         // const DebugComponent& debug = registry.get<DebugComponent>(debugEntity);
         const MeshComponent& mesh = registry.get<MeshComponent>(debugEntity);
         const TransformationComponent& transform = registry.get<TransformationComponent>(debugEntity);
+        ShaderPtr axisShader = resourceManager.getResource<Shader>("AXIS_SHADER");
 
-        mesh.mesh->render(transform.transform);
+        axisShader->use();
+        axisShader->setMatrix4("model", transform.transform);
+        mesh.mesh->render(meshShader);
     }
 }

@@ -89,5 +89,5 @@ class MeshLoader {
 
     static std::unordered_map<std::string, MaterialPtr> loadMaterials(const std::string& filename);
 
-    static MeshPtr loadMesh(const std::string& filename, ShaderPtr shader);
+    static MeshPtr loadMesh(const std::string& filename);
 };

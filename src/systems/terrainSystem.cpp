@@ -9,7 +9,7 @@ void TerrainSystem::init() {
     TerrainComponent& terrain = registry.emplace<TerrainComponent>(game->terrain);
     generateTerrain(terrain);
 
-    MeshComponent& terrainMesh = registry.emplace<MeshComponent>(game->terrain, MeshPtr(new Mesh(resourceManager.getResource<Shader>("MESH_SHADER"))));
+    MeshComponent& terrainMesh = registry.emplace<MeshComponent>(game->terrain, MeshPtr(new Mesh()));
     generateTerrainMesh(terrain, terrainMesh);
 
     registry.emplace<TransformationComponent>(game->terrain, glm::vec3(0.0f), glm::quat(), glm::vec3(1.0f));

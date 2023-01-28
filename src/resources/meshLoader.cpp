@@ -346,8 +346,8 @@ std::unordered_map<std::string, MaterialPtr> MeshLoader::loadMaterials(const std
     }
 }
 
-MeshPtr MeshLoader::loadMesh(const std::string& filename, ShaderPtr shader) {
-    Mesh* mesh = new Mesh(shader);
+MeshPtr MeshLoader::loadMesh(const std::string& filename) {
+    Mesh* mesh = new Mesh();
 
     std::ifstream file;
     file.exceptions(std::ifstream::failbit | std::ifstream::badbit);

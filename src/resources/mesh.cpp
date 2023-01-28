@@ -4,64 +4,30 @@
 #include "rendering/instanceBuffer.hpp"
 #include "rendering/shadowBuffer.hpp"
 
-Mesh::Mesh(ShaderPtr shader)
-    : shader(shader) {
+Mesh::Mesh() {
 }
 
-void Mesh::render(const glm::mat4& model, Shader* alternateShader) const {
-    if (alternateShader == nullptr) {
-        // use default shader
-        shader->use();
-        shader->setMatrix4("model", model);
-        shader->setInt("shadowMaps", ShadowBuffer::depthMapOffset);
-
-        for (const auto& [name, data] : geometries) {
-            for (const auto& [material, geometry] : data) {
-                if (material) {
-                    material->use(shader.get());
-                }
-
-                geometry->draw();
+void Mesh::render(ShaderPtr shader) const {
+    for (const auto& [name, data] : geometries) {
+        for (const auto& [material, geometry] : data) {
+            if (material) {
+                material->use(shader.get());
             }
-        }
-    }
-    else {
-        alternateShader->use();
-        alternateShader->setMatrix4("model", model);
 
-        for (const auto& [_, data] : geometries) {
-            for (const auto& [_, geometry] : data) {
-                geometry->draw();
-            }
+            geometry->draw();
         }
     }
 }
 
-void Mesh::renderInstanced(unsigned int instancesCount, const glm::mat4& model, Shader* alternateShader) const {
-    if (alternateShader == nullptr) {
-        // use default shader
-        shader->use();
-        shader->setMatrix4("model", model);
-        shader->setInt("shadowMaps", ShadowBuffer::depthMapOffset);
+void Mesh::renderInstanced(ShaderPtr shader, unsigned int instancesCount) const {
 
-        for (const auto& [name, data] : geometries) {
-            for (const auto& [material, geometry] : data) {
-                if (material) {
-                    material->use(shader.get());
-                }
-
-                std::static_pointer_cast<MeshGeometry>(geometry)->drawInstanced(instancesCount);
+    for (const auto& [name, data] : geometries) {
+        for (const auto& [material, geometry] : data) {
+            if (material) {
+                material->use(shader.get());
             }
-        }
-    }
-    else {
-        alternateShader->use();
-        alternateShader->setMatrix4("model", model);
 
-        for (const auto& [_, data] : geometries) {
-            for (const auto& [_, geometry] : data) {
-                std::static_pointer_cast<MeshGeometry>(geometry)->drawInstanced(instancesCount);
-            }
+            std::static_pointer_cast<MeshGeometry>(geometry)->drawInstanced(instancesCount);
         }
     }
 }

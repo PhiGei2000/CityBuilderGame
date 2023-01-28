@@ -28,6 +28,7 @@ class RenderSystem : public System {
     unsigned int cameraWidth;
 
     std::shared_ptr<Shader> shadowShader;
+    std::shared_ptr<Shader> instancedShadowShader;
 
     void init() override;
 
@@ -35,16 +36,26 @@ class RenderSystem : public System {
     void onEntityMoved(EntityMoveEvent& event) const;
 
     template<typename... T>
-    inline void renderScene(entt::exclude_t<T...> exclude = {}, Shader* shader = nullptr) const {
+    inline void renderScene(ShaderPtr shader, entt::exclude_t<T...> exclude = {}) const {
+        shader->use();
+        shader->setInt("shadowMaps", ShadowBuffer::depthMapOffset);
+
         registry.view<MeshComponent, TransformationComponent>(exclude)
             .each([&](const MeshComponent& mesh, const TransformationComponent& transform) {
-                mesh.mesh->render(transform.transform, shader);
+                shader->setMatrix4("model", transform.transform);
+                mesh.mesh->render(shader);
             });
+    }
 
-        ShaderPtr instancedShader = resourceManager.getResource<Shader>("MESH_INSTANCED_SHADER");
+    template<typename... T>
+    inline void renderSceneInstanced(ShaderPtr shader, entt::exclude_t<T...> exclude = {}) const {
+        shader->use();
+        shader->setInt("shadowMaps", ShadowBuffer::depthMapOffset);
+
         registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
             .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {
-                mesh.mesh->renderInstanced(mesh.offsets.size(), transform.transform, instancedShader.get());
+                shader->setMatrix4("model", transform.transform);
+                mesh.mesh->renderInstanced(shader, mesh.offsets.size());
             });
     }
 
