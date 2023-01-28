@@ -46,7 +46,9 @@ void Mesh::renderInstanced(ShaderPtr shader, unsigned int instancesCount) const 
 void Mesh::linkInstanceBuffer(const InstanceBuffer& buffer) const {
     for (const auto& [_, subMesh] : geometries) {
         for (const auto& [_, geometry] : subMesh) {
-            geometry->setVertexAttribute(MeshGeometry::meshVertexAttributes.size(), VertexAttribute{3, GL_FLOAT, GL_FALSE, 3 * sizeof(glm::vec3), (void*)0}, buffer.vbo, 1);
+            for (int i = 0; i < 4; i++) {
+                geometry->setVertexAttribute(MeshGeometry::meshVertexAttributes.size() + i, VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(i * sizeof(glm::vec4))}, buffer.vbo, 1);
+            }
         }
     }
 }

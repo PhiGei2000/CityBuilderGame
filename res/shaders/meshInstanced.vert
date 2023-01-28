@@ -4,7 +4,7 @@ layout(location = 1) in vec2 aTexCoord;
 layout(location = 2) in vec3 aNormal;
 layout(location = 3) in vec3 aTangent;
 layout(location = 4) in vec3 aBitangent;
-layout(location = 5) in vec3 aOffset;
+layout(location = 5) in mat4 aModel;
 
 out VS_OUT {
     vec3 FragPos;
@@ -40,7 +40,7 @@ layout(std140, binding = 2) uniform Light {
 uniform mat4 model;
 
 void main() {
-    vec4 position = vec4(aPos + aOffset, 1.0);
+    vec4 position = aModel * vec4(aPos, 1.0);
 
     // calculate TBN matrix to transform world vectors into tangent space
     mat3 normalMatrix = transpose(inverse(mat3(model)));

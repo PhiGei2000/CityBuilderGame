@@ -4,7 +4,7 @@ layout(location = 1) in vec2 aTexCoord;
 layout(location = 2) in vec3 aNormal;
 layout(location = 3) in vec3 aTangent;
 layout(location = 4) in vec3 aBitangent;
-layout(location = 5) in vec3 aOffset;
+layout(location = 5) in mat4 aModel;
 
 layout(std140, binding = 2) uniform Light {
     mat4 lightView[cascadeCount];
@@ -22,5 +22,5 @@ layout(std140, binding = 2) uniform Light {
 uniform mat4 model;
 
 void main() {
-    gl_Position = model * vec4(aPos + aOffset + 0.1 * lightDirection, 1.0);
+    gl_Position = model * aModel * vec4(aPos + 0.1 * lightDirection, 1.0);
 }

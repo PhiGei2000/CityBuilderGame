@@ -3,6 +3,8 @@
 
 #include <vector>
 
+struct TransformationComponent;
+
 class InstanceBuffer {
   private:
     unsigned int vbo;
@@ -12,5 +14,5 @@ class InstanceBuffer {
   public:
     InstanceBuffer();
 
-    void fillBuffer(const std::vector<glm::vec3>& offsets) const;
+    void fillBuffer(const std::vector<TransformationComponent>& offsets) const;
 };

@@ -55,7 +55,7 @@ class RenderSystem : public System {
         registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
             .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {
                 shader->setMatrix4("model", transform.transform);
-                mesh.mesh->renderInstanced(shader, mesh.offsets.size());
+                mesh.mesh->renderInstanced(shader, mesh.transformations.size());
             });
     }
 
