@@ -36,9 +36,7 @@ void TransformationComponent::setRotation(const glm::vec3& eulerAngles) {
 }
 
 void TransformationComponent::addScale(const glm::vec3& scale) {
-    this->scale.x *= scale.x;
-    this->scale.y *= scale.y;
-    this->scale.z *= scale.z;
+    this->scale *= scale;
 }
 
 void TransformationComponent::setScale(const glm::vec3& scale) {

@@ -15,5 +15,5 @@ class TerrainSystem : public System {
   public:
     TerrainSystem(Game* game);
 
-    void update(float dt);
+    void update(float dt) override;
 };

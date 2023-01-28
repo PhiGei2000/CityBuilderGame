@@ -1,5 +1,6 @@
 #pragma once
 #include "meshComponent.hpp"
+#include "transformationComponent.hpp"
 
 #include "rendering/instanceBuffer.hpp"
 
@@ -8,17 +9,17 @@
 #include <vector>
 
 struct InstancedMeshComponent : public MeshComponent {
-    std::vector<glm::vec3> offsets;
+    std::vector<TransformationComponent> transformations;
     InstanceBuffer instanceBuffer;
 
-    inline InstancedMeshComponent(const MeshPtr& mesh, const std::vector<glm::vec3>& offsets)
-        : MeshComponent(mesh), offsets(offsets) {
-        instanceBuffer.fillBuffer(offsets);
+    inline InstancedMeshComponent(const MeshPtr& mesh, const std::vector<TransformationComponent>& transformations)
+        : MeshComponent(mesh), transformations(transformations) {
+        instanceBuffer.fillBuffer(transformations);
 
         mesh->linkInstanceBuffer(instanceBuffer);        
     }
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
-        registry.emplace<InstancedMeshComponent>(entity, mesh, offsets);
+        registry.emplace<InstancedMeshComponent>(entity, mesh, transformations);
     }
 };
