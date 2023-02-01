@@ -81,8 +81,8 @@ void EnvironmentSystem::update(float dt) {
         const glm::ivec2& position = cellsToClear.front();
         registry.view<EnvironmentComponent, InstancedMeshComponent, TransformationComponent>()
             .each([&](const EnvironmentComponent& environment, InstancedMeshComponent& instancedMesh, const TransformationComponent& transformation) {
-                auto it = instancedMesh.transformations.begin();          
-                bool needsUpdate = false;      
+                auto it = instancedMesh.transformations.begin();
+                bool needsUpdate = false;
 
                 while (it != instancedMesh.transformations.end()) {
                     const glm::vec3& objectPosition = (*it).position;
@@ -99,7 +99,7 @@ void EnvironmentSystem::update(float dt) {
 
                 instancedMesh.instanceBuffer.fillBuffer(instancedMesh.transformations);
             });
-        
+
         cellsToClear.pop();
     }
 
