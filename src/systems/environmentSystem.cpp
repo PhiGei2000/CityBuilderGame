@@ -94,14 +94,16 @@ void EnvironmentSystem::update(float dt) {
 }
 
 void EnvironmentSystem::handleBuildEvent(const BuildEvent& e) {
-    auto view = registry.view<EnvironmentComponent, TransformationComponent>();
-    for (auto entity : view) {
-        const TransformationComponent& transform = view.get<TransformationComponent>(entity);
+    if (e.action == BuildAction::END) {
+        auto view = registry.view<EnvironmentComponent, TransformationComponent>();
+        for (auto entity : view) {
+            const TransformationComponent& transform = view.get<TransformationComponent>(entity);
 
-        glm::ivec2 gridPos = glm::ivec2(floor(transform.position.x / Configuration::gridSize), floor(transform.position.z / Configuration::gridSize));
+            glm::ivec2 gridPos = glm::ivec2(floor(transform.position.x / Configuration::gridSize), floor(transform.position.z / Configuration::gridSize));
 
-        if (e.gridPosition == gridPos) {
-            entitiesToDestroy.push(entity);
+            if (e.gridPosition == gridPos) {
+                entitiesToDestroy.push(entity);
+            }
         }
     }
 }
