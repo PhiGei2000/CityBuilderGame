@@ -18,7 +18,7 @@ class BuildSystem : public System {
   protected:
     struct BuildInfo {
         ObjectPtr object;
-        std::vector<glm::ivec2> positions;        
+        std::vector<glm::ivec2> positions;
         Direction direction;
 
         BuildingType type;
