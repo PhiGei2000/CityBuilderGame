@@ -26,7 +26,7 @@ void CarSystem::update(float dt) {
 
             for (ParkingSpot& spot : parking.parkingSpots) {
                 if (spot.occupied) {
-                    if (rand() / rand_max > threshold) {                        
+                    if (rand() / rand_max > threshold) {
                         // get path
                         const CarPath& path = carPathComponent.paths.at(spot.id);
 
@@ -105,11 +105,11 @@ void CarSystem::handleBuildEvent(BuildEvent& e) {
     static constexpr float threshold = 0.5f;
 
     if (e.type == BuildingType::PARKING_LOT && e.action == BuildAction::ENTITY_CREATED) {
-        const glm::vec3& position = utility::toWorldCoords(e.gridPosition);
+        const glm::vec3& position = utility::toWorldCoords(e.positions[0]);
 
         registry.view<BuildingComponent, ParkingComponent>().each(
             [&](const BuildingComponent& building, ParkingComponent& parking) {
-                if (e.gridPosition == building.gridPosition) {
+                if (e.positions[0] == building.gridPosition) {
                     for (ParkingSpot& parkingSpot : parking.parkingSpots) {
                         if (rand() / rand_max > threshold) {
                             entt::entity car = spawnCar(position + parkingSpot.position, Direction::NORTH);

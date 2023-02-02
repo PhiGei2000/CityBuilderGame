@@ -13,6 +13,7 @@ class EnvironmentSystem : public System {
     virtual void init() override;
 
     std::queue<entt::entity> entitiesToDestroy;
+    std::queue<glm::ivec2> cellsToClear;
 
     void updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const;    
 

@@ -60,8 +60,19 @@ void BuildSystem::update(float dt) {
             transform.calculateTransform();
 
             if (this->state.building) {
+
                 // render building preview
-                BuildEvent event = BuildEvent{gridPos, state.selectedBuildingType, BuildAction::PREVIEW, state.startPosition, getShape(state.startPosition, gridPos), state.xFirst};
+                BuildEvent event = BuildEvent{
+                    {gridPos, state.startPosition},
+                    state.selectedBuildingType,
+                    BuildAction::PREVIEW,
+                    getShape(state.startPosition, gridPos)
+                };
+
+                if (state.selectedBuildingType == BuildingType::ROAD) {
+                    event.positions = getRoadNodes(state.startPosition, gridPos);
+                    event.shape = BuildShape::LINE;
+                }
 
                 game->raiseEvent(event);
             }
@@ -76,9 +87,9 @@ void BuildSystem::update(float dt) {
 
         entt::entity entity = objectToBuild.object->create(registry);
         registry.emplace<TransformationComponent>(entity, utility::toWorldCoords(objectToBuild.gridPosition), glm::vec3(0.0f, glm::radians(-90.0f) * (int)objectToBuild.direction, 0.0f), glm::vec3(1.0f)).calculateTransform();
-        registry.emplace<BuildingComponent>(entity, objectToBuild.gridPosition);             
+        registry.emplace<BuildingComponent>(entity, objectToBuild.gridPosition);
 
-        BuildEvent event(objectToBuild.gridPosition, objectToBuild.type, BuildAction::ENTITY_CREATED, objectToBuild.startPosition, getShape(objectToBuild.startPosition, objectToBuild.gridPosition));
+        BuildEvent event({objectToBuild.gridPosition, objectToBuild.startPosition}, objectToBuild.type, BuildAction::ENTITY_CREATED, getShape(objectToBuild.startPosition, objectToBuild.gridPosition));
         game->raiseEvent(event);
 
         objectsToBuild.pop();
@@ -107,6 +118,7 @@ glm::ivec2 BuildSystem::getGridPos(const glm::vec2& mousePos) const {
 }
 
 void BuildSystem::setState(BuildingType selectedType, const glm::ivec2& currentPosition, bool building, const glm::ivec2& startPosition, bool xFirst) {
+    // update state variables
     state.building = building;
     state.currentPosition = currentPosition;
     state.startPosition = building ? startPosition : glm::ivec2(-1);
@@ -114,7 +126,18 @@ void BuildSystem::setState(BuildingType selectedType, const glm::ivec2& currentP
     state.xFirst = xFirst;
 
     if (state.building) {
-        BuildEvent event = BuildEvent{currentPosition, state.selectedBuildingType, BuildAction::PREVIEW, state.startPosition, getShape(state.startPosition, state.currentPosition), state.xFirst};
+        std::vector<glm::ivec2> positions;
+        BuildShape shape;
+        if (state.selectedBuildingType == BuildingType::ROAD) {
+            positions = getRoadNodes(startPosition, currentPosition);
+            shape = BuildShape::LINE;
+        }
+        else {
+            positions = {startPosition, currentPosition};
+            shape = getShape(startPosition, currentPosition);
+        }
+
+        BuildEvent event = BuildEvent(positions, state.selectedBuildingType, BuildAction::PREVIEW, shape);
 
         game->raiseEvent(event);
     }
@@ -135,49 +158,64 @@ constexpr BuildShape BuildSystem::getShape(const glm::ivec2& start, const glm::i
     }
 }
 
+std::vector<glm::ivec2> BuildSystem::getRoadNodes(const glm::ivec2& start, const glm::ivec2& end) const {
+    BuildShape shape = getShape(start, end);
+    if (shape == BuildShape::LINE) {
+        return {start, end};
+    }
+    else {
+        glm::ivec2 node = state.xFirst ? glm::ivec2(start.x, end.y) : glm::ivec2(end.x, start.y);
+        return {start, node, end};
+    }
+}
+
 void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
     if (e.action == GLFW_RELEASE) {
         if (game->getState() == GameState::BUILD_MODE) {
-            const BuildMarkerComponent& buildMarker = registry.get<BuildMarkerComponent>(buildMarkerEntity);
+            if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+                // get the position of the build marker
+                const BuildMarkerComponent& buildMarker = registry.get<BuildMarkerComponent>(buildMarkerEntity);
 
-            int x = buildMarker.position.x, y = buildMarker.position.y;
-            int grid = Configuration::worldSize / Configuration::gridSize;
+                int x = buildMarker.position.x, y = buildMarker.position.y;
+                int grid = Configuration::worldSize / Configuration::gridSize;
 
-            if (utility::inRange(x, 0, grid) && utility::inRange(y, 0, grid)) {
-                BuildingType selectedType = state.selectedBuildingType;
-                BuildAction action = BuildAction::DEFAULT;
-                BuildShape shape = BuildShape::POINT;
-                glm::ivec2 start;
+                if (utility::inRange(x, 0, grid) && utility::inRange(y, 0, grid)) {
+                    BuildingType selectedType = state.selectedBuildingType;
+                    BuildAction action = BuildAction::DEFAULT;
+                    BuildShape shape = BuildShape::POINT;
+                    glm::ivec2 start;
+                    std::vector<glm::ivec2> positions;
 
-                state.currentPosition = buildMarker.position;
+                    state.currentPosition = buildMarker.position;
 
-                switch (selectedType) {
-                    case BuildingType::ROAD:
-                        action = state.building ? BuildAction::END : BuildAction::BEGIN;
+                    switch (selectedType) {
+                        case BuildingType::ROAD:
+                            action = state.building ? BuildAction::END : BuildAction::BEGIN;
 
-                        if (action == BuildAction::END) {
-                            start = state.startPosition;
+                            if (action == BuildAction::END) {
+                                start = state.startPosition;
 
-                            shape = getShape(start, buildMarker.position);
-                        }
+                                positions = getRoadNodes(start, buildMarker.position);
+                            }
 
-                        setState(selectedType, buildMarker.position, !state.building, buildMarker.position, state.xFirst);
-                        break;
-                    case BuildingType::PARKING_LOT:
-                        action = BuildAction::END;                        
+                            setState(selectedType, buildMarker.position, !state.building, buildMarker.position, state.xFirst);
+                            break;
+                        case BuildingType::PARKING_LOT:
+                            action = BuildAction::END;
 
-                        objectsToBuild.emplace(BuildInfo(resourceManager.getResource<Object>("object.parking_lot"), buildMarker.position, Direction::NORTH, BuildingType::PARKING_LOT));
-                    default:
-                        break;
-                }                
+                            objectsToBuild.emplace(BuildInfo(resourceManager.getResource<Object>("object.parking_lot"), buildMarker.position, Direction::NORTH, BuildingType::PARKING_LOT));
+                        default:
+                            break;
+                    }
 
-                BuildEvent event = BuildEvent{state.currentPosition, selectedType, action, start, shape, state.xFirst};
+                    BuildEvent event = BuildEvent(positions, selectedType, action, shape);
 #if DEBUG
-                static std::string actionNames[] = {"DEFAULT", "BEGIN", "END"};
+                    static std::string actionNames[] = {"DEFAULT", "BEGIN", "END"};
 
-                std::cout << "Raising Build Event: {pos: (" << buildMarker.position << "), type: " << selectedType << ", action: " << actionNames[(unsigned int)action] << ", start: (" << start << ")}" << std::endl;
+                    std::cout << "Raising Build Event: {pos: (" << buildMarker.position << "), type: " << selectedType << ", action: " << actionNames[(unsigned int)action] << ", start: (" << start << ")}" << std::endl;
 #endif
-                game->raiseEvent(event);
+                    game->raiseEvent(event);
+                }
             }
         }
     }

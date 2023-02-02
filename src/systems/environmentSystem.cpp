@@ -73,6 +73,33 @@ void EnvironmentSystem::updateDayNightCycle(float dt, TransformationComponent& s
 }
 
 void EnvironmentSystem::update(float dt) {
+    // TODO: Optimize this
+    while (cellsToClear.size() > 0) {
+        const glm::ivec2& position = cellsToClear.front();
+        registry.view<EnvironmentComponent, InstancedMeshComponent, TransformationComponent>()
+            .each([&](const EnvironmentComponent& environment, InstancedMeshComponent& instancedMesh, const TransformationComponent& transformation) {
+                auto it = instancedMesh.transformations.begin();          
+                bool needsUpdate = false;      
+
+                while (it != instancedMesh.transformations.end()) {
+                    const glm::vec3& objectPosition = (*it).position;
+                    const glm::ivec2 gridPosition = glm::floor(1 / static_cast<float>(Configuration::gridSize) * glm::vec2(objectPosition.x, objectPosition.z));
+
+                    if (gridPosition == position) {
+                        it = instancedMesh.transformations.erase(it);
+                        needsUpdate = true;
+                    }
+                    else {
+                        it++;
+                    }
+                }
+
+                instancedMesh.instanceBuffer.fillBuffer(instancedMesh.transformations);
+            });
+        
+        cellsToClear.pop();
+    }
+
     while (entitiesToDestroy.size() > 0) {
         auto entity = entitiesToDestroy.front();
 
@@ -91,14 +118,25 @@ void EnvironmentSystem::update(float dt) {
 }
 
 void EnvironmentSystem::handleBuildEvent(const BuildEvent& e) {
-    auto view = registry.view<EnvironmentComponent, TransformationComponent>();
-    for (auto entity : view) {
-        const TransformationComponent& transform = view.get<TransformationComponent>(entity);
+    if (e.action == BuildAction::END) {
+        switch (e.shape) {
+            case BuildShape::POINT:
+                cellsToClear.emplace(e.positions[0]);
+                break;
+            case BuildShape::LINE: {
+                int segmentsCount = e.positions.size() - 1;
+                for (int i = 0; i < segmentsCount; i++) {
+                    const glm::ivec2 direction = glm::normalize(e.positions[i + 1] - e.positions[i]);
+                    glm::ivec2 current = e.positions[i];
 
-        glm::ivec2 gridPos = glm::ivec2(floor(transform.position.x / Configuration::gridSize), floor(transform.position.z / Configuration::gridSize));
-
-        if (e.gridPosition == gridPos) {
-            entitiesToDestroy.push(entity);
+                    while (current != e.positions[i + 1]) {
+                        cellsToClear.push(current);
+                        current += direction;
+                    }
+                }
+            } break;
+            case BuildShape::AREA: {
+            } break;
         }
     }
 }

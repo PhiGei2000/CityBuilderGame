@@ -22,7 +22,7 @@ void RoadSystem::init() {
     roadEntity = registry.create();
 
     Mesh* roadMesh = new Mesh();
-    roadMesh->geometries["BASIC_ROADS"]= {std::make_pair(resourceManager.getResource<Material>("BASIC_STREET_MATERIAL"), GeometryPtr(new MeshGeometry()))};
+    roadMesh->geometries["BASIC_ROADS"] = {std::make_pair(resourceManager.getResource<Material>("BASIC_STREET_MATERIAL"), GeometryPtr(new MeshGeometry()))};
     roadMesh->geometries["BASIC_ROADS_PREVIEW"] = {std::make_pair(resourceManager.getResource<Material>("BASIC_STREET_PREVIEW_MATERIAL"), GeometryPtr(new MeshGeometry()))};
 
     registry.emplace<RoadComponent>(roadEntity, RoadGraph());
@@ -150,33 +150,17 @@ void RoadSystem::handleBuildEvent(const BuildEvent& event) {
     if (event.type != BuildingType::ROAD)
         return;
 
-    std::vector<std::pair<glm::ivec2, glm::ivec2>> sections;
-    if (event.shape == BuildShape::LINE) {
-        sections.emplace_back(event.startPosition, event.gridPosition);
-    }
-    else {
-        glm::ivec2 p;
-        if (event.xFirst) {
-            p = glm::ivec2(event.gridPosition.x, event.startPosition.y);
-        }
-        else {
-            p = glm::ivec2(event.startPosition.x, event.gridPosition.y);
-        }
+    int segmentsCount = event.positions.size() - 1;
 
-        sections.emplace_back(event.startPosition, p);
-        sections.emplace_back(p, event.gridPosition);
-    }
-
+    previewGraph.clear();
     if (event.action == BuildAction::END) {
-        for (const auto& section : sections) {
-            sectionsToBuild.push(section);
+        for (int i = 0; i < segmentsCount; i++) {
+            sectionsToBuild.emplace(event.positions[i], event.positions[i + 1]);
         }
     }
     else if (event.action == BuildAction::PREVIEW) {
-        previewGraph.clear();
-
-        for (const auto& section : sections) {
-            sectionsToPreview.push(section);
-        }
+        for (int i = 0; i < segmentsCount; i++) {
+            sectionsToPreview.emplace(event.positions[i], event.positions[i + 1]);
+        }        
     }
 }
