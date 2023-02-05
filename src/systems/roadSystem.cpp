@@ -161,6 +161,6 @@ void RoadSystem::handleBuildEvent(const BuildEvent& event) {
     else if (event.action == BuildAction::PREVIEW) {
         for (int i = 0; i < segmentsCount; i++) {
             sectionsToPreview.emplace(event.positions[i], event.positions[i + 1]);
-        }        
+        }
     }
 }
