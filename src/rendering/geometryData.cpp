@@ -91,8 +91,62 @@ void GeometryData::calculateTangentSpace(Vertex& v1, Vertex& v2, Vertex& v3) {
 }
 
 void GeometryData::calculateTangentSpace() {
-    for (int i = 0; i < indices.size(); i += 3) {        
+    for (int i = 0; i < indices.size(); i += 3) {
         // TODO: Check if two tangent spaces are different if and only if the normal vectors are different
-        calculateTangentSpace(this->vertices[indices[i]], this->vertices[indices[i + 1]], this->vertices[indices[i+2]]);        
+        calculateTangentSpace(this->vertices[indices[i]], this->vertices[indices[i + 1]], this->vertices[indices[i + 2]]);
     }
 }
+
+#if DEBUG
+#include <fstream>
+#include <set>
+#include <sstream>
+#include <iostream>
+
+void GeometryData::save(const std::string& filename) const {
+    std::cout << "save mesh to: " << filename << std::endl;
+
+    std::stringstream outString;
+
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec2> texCoords;
+    std::vector<glm::vec3> normals;
+
+    std::vector<std::array<std::tuple<unsigned int, unsigned int, unsigned int>, 3>> faces;
+
+    for (const auto& vertex : vertices) {
+        positions.push_back(vertex.position);
+        texCoords.push_back(vertex.texCoord);
+        normals.push_back(vertex.normal);
+    }
+
+    for (const auto& position : positions) {
+        outString << "v " << position.x << " " << position.y << " " << position.z << std::endl;
+    }
+
+    for (const auto& texCoord : texCoords) {
+        outString << "vt " << texCoord.x << " " << texCoord.y << std::endl;
+    }
+
+    for (const auto& normal : normals) {
+        outString << "vn " << normal.x << " " << normal.y << " " << normal.z << std::endl;
+    }
+
+    for (int i = 0; i < indices.size(); i += 3) {
+        // faces
+        outString << "f ";
+        for (int j = 0; j < 3; j++) {
+            outString << indices[i + j] + 1 << "/"
+                      << indices[i + j] + 1 << "/"
+                      << indices[i + j] + 1 << " ";
+        }
+        outString << std::endl;
+    }
+
+    std::ofstream file;
+    file.open(filename);
+
+    file << outString.str();
+    file.close();
+}
+#endif

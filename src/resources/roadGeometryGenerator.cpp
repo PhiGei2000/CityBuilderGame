@@ -149,15 +149,15 @@ GeometryData RoadGeometryGenerator::generateAnnulusSector(const glm::vec3& cente
         const glm::vec2& uvCenter = glm::vec2(uvs.u + uRadius, uvs.v + vRadius);
 
         // outer vertices
-        for (int i = 0; i < verticesCount; i++) {
-            float x1 = outerRadius * glm::cos(startAngle + i * anglePerVertex);
-            float y1 = outerRadius * glm::sin(startAngle + i * anglePerVertex);
+        for (int i = 0; i < verticesCount - 1; i++) {
+            float x1 = outerRadius * glm::cos(startAngle + (i + 1) * anglePerVertex);
+            float y1 = outerRadius * glm::sin(startAngle + (i + 1) * anglePerVertex);
 
-            float x2 = outerRadius * glm::cos(startAngle + (i + 1) * anglePerVertex);
-            float y2 = outerRadius * glm::sin(startAngle + (i + 1) * anglePerVertex);
+            float x2 = outerRadius * glm::cos(startAngle + i * anglePerVertex);
+            float y2 = outerRadius * glm::sin(startAngle + i * anglePerVertex);
 
-            const glm::vec2& uv1Offset = glm::vec2(uRadius * glm::cos(startAngle + i * anglePerVertex), vRadius * glm::sin(startAngle + i * anglePerVertex));
-            const glm::vec2& uv2Offset = glm::vec2(uRadius * glm::cos(startAngle + (i + 1) * anglePerVertex), vRadius * glm::sin(startAngle + (i + 1) * anglePerVertex));
+            const glm::vec2& uv1Offset = glm::vec2(uRadius * glm::cos(startAngle + (i + 1) * anglePerVertex), vRadius * glm::sin(startAngle + (i + 1) * anglePerVertex));
+            const glm::vec2& uv2Offset = glm::vec2(uRadius * glm::cos(startAngle + i * anglePerVertex), vRadius * glm::sin(startAngle + i * anglePerVertex));
 
             vertices.emplace_back(Vertex(center, uvCenter, glm::vec3(0.0f, 1.0f, 0.0f)));
             vertices.emplace_back(center + glm::vec3(x1, 0.0f, y1), uvCenter + uv1Offset, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -240,7 +240,7 @@ GeometryData RoadGeometryGenerator::generateNotConnected(const RoadSpecs& specs)
     float sidewalkWidth = (Configuration::gridSize - specs.roadwayWidth) / 2.0f;
 
     // roadway
-    data.addData(generateAnnulus(glm::vec3(0.0f, specs.roadwayHeight, 0.0f), specs.roadwayWidth / 2.0f, 0, specs.verticesPerCircle, crossingRoadwayUVAreas[4]));
+    data.addData(generateAnnulus(glm::vec3(0.0f, specs.roadwayHeight, 0.0f), specs.roadwayWidth / 2.0f, 0, specs.verticesPerCircle, roadwayClearUVArea));
     // sidewalk
     data.addData(generateQuadCircle(glm::vec3(0.0f), specs.sidewalkHeight, halfGrid, specs.verticesPerCircle, sidewalkStraightUVAreas[0]));
     data.addData(generateAnnulus(glm::vec3(0.0f, specs.sidewalkHeight, 0.0f), halfGrid, specs.roadwayWidth / 2.0f, specs.verticesPerCircle, sidewalkStraightUVAreas[1]));
@@ -307,8 +307,7 @@ GeometryData RoadGeometryGenerator::generateTCrossing(const RoadSpecs& specs) {
     data.addData(generateQuad(glm::vec3(-halfGrid, specs.sidewalkHeight, -halfGrid + sidewalkWidth), glm::vec3(0.0f, -(specs.sidewalkHeight - specs.roadwayHeight), 0.0f), glm::vec3(Configuration::gridSize, 0.0f, 0.0f), sidewalkStraightUVAreas[2]));
 
     // roadway
-    data.addData(generateQuad(glm::vec3(-halfGrid, specs.roadwayHeight, -halfGrid + sidewalkWidth), glm::vec3(0.0f, 0.0f, specs.roadwayWidth), glm::vec3(Configuration::gridSize, 0.0f, 0.0f), roadwayUVArea));
-    data.addData(generateQuad(glm::vec3(-halfGrid, specs.roadwayHeight, halfGrid - sidewalkWidth), glm::vec3(0.0f, 0.0f, sidewalkWidth), glm::vec3(Configuration::gridSize, 0.0f, 0.0f), crossingRoadwayUVAreas[1]));
+    data.addData(generateQuad(glm::vec3(-halfGrid, specs.roadwayHeight, -halfGrid + sidewalkWidth), glm::vec3(0.0f, 0.0f, specs.roadwayWidth + sidewalkWidth), glm::vec3(Configuration::gridSize, 0.0f, 0.0f), tCrossingRoadwayUVArea));    
 
     // short sidewalks
     data.addData(generateQuadCircleSector(glm::vec3(halfGrid, specs.roadwayHeight, halfGrid), specs.sidewalkHeight - specs.roadwayHeight, sidewalkWidth, specs.verticesPerCircle / 4, 180, 270, sidewalkRoundUVAreas[0]));
@@ -324,12 +323,8 @@ GeometryData RoadGeometryGenerator::generateCrossing(const RoadSpecs& specs) {
     GeometryData data;
     float sidewalkWidth = (Configuration::gridSize - specs.roadwayWidth) / 2.0f;
 
-    // roadway
-    data.addData(generateQuad(glm::vec3(halfGrid, specs.roadwayHeight, -halfGrid), glm::vec3(-sidewalkWidth, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, Configuration::gridSize), crossingRoadwayUVAreas[0]));
-    data.addData(generateQuad(glm::vec3(halfGrid, specs.roadwayHeight, halfGrid), glm::vec3(0.0f, 0.0f, -sidewalkWidth), glm::vec3(-Configuration::gridSize, 0.0f, 0.0f), crossingRoadwayUVAreas[1]));
-    data.addData(generateQuad(glm::vec3(-halfGrid, specs.roadwayHeight, halfGrid), glm::vec3(sidewalkWidth, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -Configuration::gridSize), crossingRoadwayUVAreas[2]));
-    data.addData(generateQuad(glm::vec3(-halfGrid, specs.roadwayHeight, -halfGrid), glm::vec3(0.0f, 0.0f, sidewalkWidth), glm::vec3(Configuration::gridSize, 0.0f, 0.0f), crossingRoadwayUVAreas[3]));
-    data.addData(generateQuad(glm::vec3(-halfGrid + sidewalkWidth, specs.roadwayHeight, -halfGrid + sidewalkWidth), glm::vec3(0.0f, 0.0f, specs.roadwayWidth), glm::vec3(specs.roadwayWidth, 0.0f, 0.0f), crossingRoadwayUVAreas[4]));
+    // roadway    
+    data.addData(generateQuad(glm::vec3(-halfGrid, specs.roadwayHeight, -halfGrid), glm::vec3(0.0f, 0.0f, Configuration::gridSize), glm::vec3(Configuration::gridSize, 0.0f, 0.0f), crossingRoadwayUVArea));
 
     // sidewalks
     data.addData(generateQuadCircleSector(glm::vec3(-halfGrid, specs.roadwayHeight, -halfGrid), specs.sidewalkHeight - specs.roadwayHeight, sidewalkWidth, specs.verticesPerCircle / 4, 0, 90, sidewalkRoundUVAreas[0]));
@@ -343,6 +338,10 @@ GeometryData RoadGeometryGenerator::generateCrossing(const RoadSpecs& specs) {
 
     data.addData(generateQuadCircleSector(glm::vec3(-halfGrid, specs.roadwayHeight, halfGrid), specs.sidewalkHeight - specs.roadwayHeight, sidewalkWidth, specs.verticesPerCircle / 4, 270, 360, sidewalkRoundUVAreas[0]));
     data.addData(generateAnnulusSector(glm::vec3(-halfGrid, specs.sidewalkHeight, halfGrid), sidewalkWidth, 0, specs.verticesPerCircle / 4, 270, 360, sidewalkRoundUVAreas[1]));
+
+    #if DEBUG
+    data.save("streetCrossing.obj");
+#endif
 
     return data;
 }
@@ -365,10 +364,10 @@ GeometryData RoadGeometryGenerator::generateEnd(const RoadSpecs& specs) {
     data.addData(generateQuad(glm::vec3(halfGrid, specs.roadwayHeight, halfGrid - sidewalkWidth), glm::vec3(-halfGrid, 0.0f, 0.0f), glm::vec3(0.0f, specs.sidewalkHeight - specs.roadwayHeight, 0.0f), halfSidewalkStraightUVAreas[2]));
 
     // end
-    data.addData(generateAnnulusSector(glm::vec3(0.0f, specs.roadwayHeight, 0.0f), halfGrid - sidewalkWidth, 0, specs.verticesPerCircle / 2, 90, 270, crossingRoadwayUVAreas[4]));
+    data.addData(generateAnnulusSector(glm::vec3(0.0f, specs.roadwayHeight, 0.0f), halfGrid - sidewalkWidth, 0, specs.verticesPerCircle / 2, 90, 270, halfRoadwayClearUVArea));
     data.addData(generateQuadCircleSector(glm::vec3(0.0f, 0.0f, 0.0f), specs.sidewalkHeight, halfGrid, specs.verticesPerCircle / 2, 90, 270, sidewalkStraightUVAreas[0]));
     data.addData(generateAnnulusSector(glm::vec3(0.0f, specs.sidewalkHeight, 0.0f), halfGrid, halfGrid - sidewalkWidth, specs.verticesPerCircle / 2, 90, 270, sidewalkStraightUVAreas[1]));
-    data.addData(generateQuadCircleSector(glm::vec3(0.0f, specs.roadwayHeight, 0.0f), specs.sidewalkHeight - specs.roadwayHeight, halfGrid - sidewalkWidth, specs.verticesPerCircle / 2, 90, 270, sidewalkStraightUVAreas[2], true));
+    data.addData(generateQuadCircleSector(glm::vec3(0.0f, specs.roadwayHeight, 0.0f), specs.sidewalkHeight - specs.roadwayHeight, halfGrid - sidewalkWidth, specs.verticesPerCircle / 2, 90, 270, sidewalkStraightUVAreas[2], true));    
 
     return data;
 }

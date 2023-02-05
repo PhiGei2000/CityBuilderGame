@@ -6,6 +6,10 @@
 #include <unordered_set>
 #include <vector>
 
+#if DEBUG
+#include <string>
+#endif
+
 struct GeometryData {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -26,4 +30,8 @@ struct GeometryData {
     static void calculateTangentSpace(Vertex& v1, Vertex& v2, Vertex& v3);
 
     void calculateTangentSpace();
+
+#if DEBUG
+    void save(const std::string& filename) const;
+#endif
 };

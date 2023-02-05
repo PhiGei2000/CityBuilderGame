@@ -19,8 +19,11 @@ class RoadGeometryGenerator {
 
     static constexpr float halfGrid = Configuration::gridSize / 2.0f;
 
-    static constexpr UVArea roadwayUVArea = {0.0f, 0.0f, 0.5f, 0.5f};
-    static constexpr UVArea halfRoadwayUVArea = {0.0f, 0.0f, 0.5f, 0.25f};
+    static constexpr UVArea roadwayUVArea = {0.125f, 0.0f, 0.25f, 0.5f};
+    static constexpr UVArea halfRoadwayUVArea = {0.125f, 0.0f, 0.25f, 0.25f};
+    static constexpr UVArea roadwayClearUVArea = {0.5f, 0.5f, 0.5f, 0.5f};
+    static constexpr UVArea halfRoadwayClearUVArea = {0.5f, 0.5f, 0.25f, 0.25f};
+
     static constexpr UVArea sidewalkStraightUVAreas[] = {
         {  0.5f, 0.0f, 0.125f, 0.5f},
         {0.625f, 0.0f,  0.25f, 0.5f},
@@ -32,16 +35,11 @@ class RoadGeometryGenerator {
         {0.875f, 0.0f, 0.125f, 0.25f}
     };
     static constexpr UVArea sidewalkRoundUVAreas[] = {
-        {  0.5f, 0.5f, 0.125f,   0.5f},
-        {0.625f, 0.5f, 0.375f, 0.375f}
+        {  0.5f, 0.0f, 0.125f,   0.5f},
+        {0.625f, 0.0f, 0.375f, 0.375f}
     };
-    static constexpr UVArea crossingRoadwayUVAreas[] = {
-        {  0.0f,   1.0f,    0.5f, -0.125f}, // top
-        {  0.5f,   1.0f, -0.125f,   -0.5f}, // right
-        {  0.5f,   0.5f,   -0.5f,  0.125f}, // bottom
-        {  0.0f,   0.5f,  0.125f,    0.5f}, // left
-        {0.125f, 0.625f,   0.25f,   0.25f}  // center
-    };
+    static constexpr UVArea crossingRoadwayUVArea = {0.0f, 0.5f, 0.5f, 0.5f};
+    static constexpr UVArea tCrossingRoadwayUVArea = {0.125f, 0.5f, 0.375f, 0.5f};
 
     static GeometryData generateQuad(const glm::vec3& pos, const glm::vec3& first, const glm::vec3& second, const UVArea& uvs);
 
