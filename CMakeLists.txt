@@ -87,12 +87,19 @@ else()
         message("glew found")
     endif()
 
+<<<<<<< HEAD
     set(LIBNOISE_LIBRARIES libnoise.so)
 
     include_directories(/usr/include/freetype2)
     include_directories(/usr/include/stb)
 
     set(FREETYPE_LIBRARY libfreetype.so)
+=======
+    find_package(noise REQUIRED)
+    if (NOISE_FOUND) 
+        message("noise found")
+    endif()
+>>>>>>> Change BuildInfo to hold more positions
 endif()
 
 

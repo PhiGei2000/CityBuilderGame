@@ -52,7 +52,6 @@ void BuildSystem::update(float dt) {
             transform.calculateTransform();
 
             if (this->state.building) {
-
                 // render building preview
                 BuildEvent event = BuildEvent{
                     {gridPos, state.startPosition},
@@ -66,7 +65,7 @@ void BuildSystem::update(float dt) {
                     event.shape = BuildShape::LINE;
                 }
 
-                game->raiseEvent(event);
+                game->raiseEvent(event);                
             }
         }
     }
@@ -78,10 +77,10 @@ void BuildSystem::update(float dt) {
         BuildInfo objectToBuild = objectsToBuild.front();
 
         entt::entity entity = objectToBuild.object->create(registry);
-        registry.emplace<TransformationComponent>(entity, utility::toWorldCoords(objectToBuild.gridPosition), glm::vec3(0.0f, glm::radians(-90.0f) * (int)objectToBuild.direction, 0.0f), glm::vec3(1.0f)).calculateTransform();
-        registry.emplace<BuildingComponent>(entity, objectToBuild.gridPosition);
+        registry.emplace<TransformationComponent>(entity, utility::toWorldCoords(objectToBuild.positions[0]), glm::vec3(0.0f, glm::radians(-90.0f) * (int)objectToBuild.direction, 0.0f), glm::vec3(1.0f)).calculateTransform();
+        registry.emplace<BuildingComponent>(entity, objectToBuild.positions[0]);
 
-        BuildEvent event({objectToBuild.gridPosition, objectToBuild.startPosition}, objectToBuild.type, BuildAction::ENTITY_CREATED, getShape(objectToBuild.startPosition, objectToBuild.gridPosition));
+        BuildEvent event(objectToBuild.positions, objectToBuild.type, BuildAction::ENTITY_CREATED, getShape(objectToBuild.positions[0], objectToBuild.positions[1]));
         game->raiseEvent(event);
 
         objectsToBuild.pop();
@@ -195,7 +194,7 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
                         case BuildingType::PARKING_LOT:
                             action = BuildAction::END;
 
-                            objectsToBuild.emplace(BuildInfo(resourceManager.getResource<Object>("object.parking_lot"), buildMarker.position, Direction::NORTH, BuildingType::PARKING_LOT));
+                            objectsToBuild.emplace(BuildInfo(resourceManager.getResource<Object>("object.parking_lot"), {buildMarker.position}, BuildingType::PARKING_LOT));
                         default:
                             break;
                     }
