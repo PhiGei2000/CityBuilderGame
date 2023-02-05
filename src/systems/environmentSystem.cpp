@@ -121,20 +121,6 @@ void EnvironmentSystem::update(float dt) {
 
 void EnvironmentSystem::handleBuildEvent(const BuildEvent& e) {
     if (e.action == BuildAction::END) {
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-        auto view = registry.view<EnvironmentComponent, TransformationComponent>();
-        for (auto entity : view) {
-            const TransformationComponent& transform = view.get<TransformationComponent>(entity);
-
-            glm::ivec2 gridPos = glm::ivec2(floor(transform.position.x / Configuration::gridSize), floor(transform.position.z / Configuration::gridSize));
-
-            if (e.gridPosition == gridPos) {
-                entitiesToDestroy.push(entity);
-            }
-=======
->>>>>>> Rework road building process
         switch (e.shape) {
             case BuildShape::POINT:
                 cellsToClear.emplace(e.positions[0]);
@@ -153,10 +139,6 @@ void EnvironmentSystem::handleBuildEvent(const BuildEvent& e) {
             } break;
             case BuildShape::AREA: {
             } break;
-<<<<<<< HEAD
-=======
->>>>>>> Rework road building process
->>>>>>> Rework road building process
         }
     }
 }

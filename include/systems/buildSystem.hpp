@@ -11,6 +11,7 @@
 
 struct MouseButtonEvent;
 struct KeyEvent;
+struct TerrainComponent;
 
 struct Object;
 
