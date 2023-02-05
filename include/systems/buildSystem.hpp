@@ -17,15 +17,15 @@ struct Object;
 class BuildSystem : public System {
   protected:
     struct BuildInfo {
-      ObjectPtr object;
-      glm::ivec2 gridPosition;
-      Direction direction;
+        ObjectPtr object;
+        std::vector<glm::ivec2> positions;        
+        Direction direction;
 
-      BuildingType type;
-      glm::ivec2 startPosition;
+        BuildingType type;
 
-      BuildInfo(ObjectPtr object, const glm::ivec2& gridPosition, Direction direction, BuildingType type);
-      BuildInfo(ObjectPtr object, const glm::ivec2& gridPosition, Direction direction, BuildingType type, const glm::ivec2& startPosition);
+        inline BuildInfo(ObjectPtr object, const std::vector<glm::ivec2>& positions, BuildingType type, Direction direction = Direction::UNDEFINED)
+            : object(object), positions(positions), type(type), direction(direction) {
+        }
     };
 
     virtual void init() override;
@@ -57,7 +57,7 @@ class BuildSystem : public System {
     /// @brief Returns the current position of the mouse cursor projected to the grid
     glm::ivec2 getGridPos(const glm::vec2& mousePos) const;
 
-    /// @brief sets the current state of the current building process
+    /// @brief Sets the current state of the current building process
     /// @param currentBuildingType The currently selected building type
     /// @param currentPosition The position of the build marker
     /// @param building True if the building process has been started
@@ -71,7 +71,18 @@ class BuildSystem : public System {
     /// @return The type of the shape of the building area
     static constexpr BuildShape getShape(const glm::ivec2& start, const glm::ivec2& end);
 
+    /// @brief Calculates the positions of road nodes based on start and end point of the road
+    /// @param start The start position of the road
+    /// @param end The end position of the road
+    /// @returns The positions of the road nodes
     std::vector<glm::ivec2> getRoadNodes(const glm::ivec2& start, const glm::ivec2& end) const;
+
+    /// @brief Determines if the given building could be build
+    /// @param buildInfo The information about the building
+    /// @param terrain The terrain information
+    /// @return True if the building could be build otherwise false
+    bool canBuild(const BuildInfo& buildInfo, const TerrainComponent& terrain) const;
+
   public:
     BuildSystem(Game* game);
 

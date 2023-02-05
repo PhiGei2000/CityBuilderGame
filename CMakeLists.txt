@@ -87,6 +87,9 @@ else()
     endif()
 
     find_package(noise REQUIRED)
+    if (NOISE_FOUND) 
+        message("noise found")
+    endif()
 endif()
 
 
