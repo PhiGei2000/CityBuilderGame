@@ -23,11 +23,12 @@ void TerrainSystem::generateTerrain(TerrainComponent& terrain) const {
     perlin.SetOctaveCount(4);
     perlin.SetLacunarity(1.9);
 
-    terrain.heightValues = new float*[cellsPerDirection];
-    for (int x = 0; x < cellsPerDirection; x++) {
-        terrain.heightValues[x] = new float[cellsPerDirection];
+    terrain.heightValues = new float*[cellsPerDirection + 1];
+    for (int x = 0; x < cellsPerDirection + 1; x++) {
+        terrain.heightValues[x] = new float[cellsPerDirection + 1];
 
-        for (int y = 0; y < cellsPerDirection; y++) {
+        for (int y = 0; y < cellsPerDirection + 1; y++) {
+            
             float heightValue = glm::floor(perlin.GetValue(x * 100, y * 100, 0) * 4 + 2) * 2;
             terrain.heightValues[x][y] = heightValue;
         }

@@ -30,8 +30,34 @@ void RenderSystem::init() {
     glBufferData(GL_UNIFORM_BUFFER, 2 * Configuration::SHADOW_CASCADE_COUNT * sizeof(glm::mat4) + (4 + Configuration::SHADOW_CASCADE_COUNT) * sizeof(glm::vec4), NULL, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+    // shadow rendering
     shadowShader = resourceManager.getResource<Shader>("SHADOW_SHADER");
     instancedShadowShader = resourceManager.getResource<Shader>("SHADOW_INSTANCED_SHADER");
+
+    // terrain gradient debug
+    terrainNormals = new Geometry({
+                                      VertexAttribute{3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),                   (void*)0},
+                                      VertexAttribute{3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))}
+    },
+                                  GL_POINTS);
+
+    std::vector<float> gradients;
+    std::vector<unsigned int> indices;
+    const TerrainComponent& terrain = registry.get<TerrainComponent>(registry.view<TerrainComponent>().front());
+
+    constexpr unsigned int cellsPerDirection = Configuration::worldSize / Configuration::gridSize;
+    for (int x = 0; x < cellsPerDirection; x++) {
+        for (int y = 0; y < cellsPerDirection; y++) {
+            glm::vec2 gridPos = static_cast<float>(Configuration::gridSize) * glm::vec2(x + 0.5f, y + 0.5f);
+            float height = terrain.getHeightValue(gridPos);
+            glm::vec3 normal = terrain.getSurfaceNormal(gridPos);
+            gradients.insert(gradients.end(), {gridPos.x, height, gridPos.y, normal.x, normal.y, normal.z});
+
+            indices.push_back(x * cellsPerDirection + y);
+        }
+    }
+
+    terrainNormals->fillBuffers(gradients, indices);
 }
 
 RenderSystem::RenderSystem(Game* game)
@@ -78,6 +104,7 @@ void RenderSystem::onEntityMoved(EntityMoveEvent& event) const {
         const CameraComponent& camera = registry.get<CameraComponent>(game->camera);
         SunLightComponent& sunLight = registry.get<SunLightComponent>(game->sun);
 
+        // recalculate matrices and update light buffer
         sunLight.calculateLightMatrices(camera);
         updateLightBuffer(sunLight, camera);
     }
@@ -149,6 +176,10 @@ void RenderSystem::update(float dt) {
     }
 
     if (game->debugMode) {
+        ShaderPtr terrainNormalShader = resourceManager.getResource<Shader>("TERRAIN_NORMAL_SHADER");
+        terrainNormalShader->use();
+        terrainNormals->draw();
+
         entt::entity debugEntity = registry.view<DebugComponent>().front();
 
         // const DebugComponent& debug = registry.get<DebugComponent>(debugEntity);

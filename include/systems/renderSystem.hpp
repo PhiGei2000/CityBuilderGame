@@ -20,6 +20,8 @@ class RenderSystem : public System {
     unsigned int uboCamera;
     unsigned int uboLight;
 
+    Geometry* terrainNormals;
+
     ShadowBuffer shadowBuffer;
 #if DEBUG
     ShadowMapRenderer shadowMapRenderer;
