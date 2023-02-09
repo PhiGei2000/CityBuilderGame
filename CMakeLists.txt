@@ -24,6 +24,10 @@ if(OPENGL_FOUND)
 endif()
 
 if(WIN32)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        add_compile_options(/MP)
+    endif()
+
     set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_LIST_DIR}/lib)
 
     # install glfw

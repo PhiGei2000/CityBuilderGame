@@ -3,6 +3,30 @@
 
 #include "misc/utility.hpp"
 
+#include <ostream>
+
+enum class TerrainSurfaceTypes {
+    FLAT,
+    DIAGONAL,
+    EDGE
+};
+
+inline std::ostream& operator<<(std::ostream& os, TerrainSurfaceTypes type) {
+    switch (type) {
+        case TerrainSurfaceTypes::FLAT:
+            os << "flat";
+            break;
+        case TerrainSurfaceTypes::EDGE:
+            os << "edge";
+            break;
+        case TerrainSurfaceTypes::DIAGONAL:
+            os << "diagonal";
+            break;
+    }
+
+    return os;
+}
+
 struct TerrainComponent : public AssignableComponent {
   private:
     inline static glm::uvec2 getGridPos(const glm::vec2& position) {
@@ -32,17 +56,15 @@ struct TerrainComponent : public AssignableComponent {
         return height;
     }
 
-    inline glm::vec3 getSurfaceNormal(const glm::vec2& position) const {
+    inline glm::vec3 getSurfaceVector(const glm::vec2& position) const {
         glm::uvec2 gridPos = getGridPos(position);
 
         float h0 = heightValues[gridPos.x][gridPos.y];
         float h1 = heightValues[gridPos.x + 1][gridPos.y];
         float h2 = heightValues[gridPos.x][gridPos.y + 1];
+        float h3 = heightValues[gridPos.x + 1][gridPos.y + 1];
 
-        const glm::vec3 e1 = glm::vec3(Configuration::gridSize, h1 - h0, 0.0f);
-        const glm::vec3 e2 = glm::vec3(0.0f, h2 - h0, Configuration::gridSize);
-
-        return glm::normalize(glm::cross(e2, e1));
+        return glm::vec3(h1 - h0, h2 - h0, h3 - h0);
     }
 
     inline bool isWater(const glm::vec2& position) const {
@@ -60,6 +82,29 @@ struct TerrainComponent : public AssignableComponent {
         }
 
         return false;
+    }
+
+    inline TerrainSurfaceTypes getSurfaceType(const glm::vec2& position) const {
+        const glm::uvec2 gridPos = getGridPos(position);
+
+        float heights[] = {heightValues[gridPos.x][gridPos.y],
+                           heightValues[gridPos.x + 1][gridPos.y],
+                           heightValues[gridPos.x][gridPos.y + 1],
+                           heightValues[gridPos.x + 1][gridPos.y + 1]};
+
+        unsigned int equalHeightsCount = 1;
+        for (int i = 1; i < 4; i++) {
+            equalHeightsCount += heights[i] == heights[0] ? 1 : 0;
+        }
+
+        switch (equalHeightsCount) {            
+            case 2:
+                return TerrainSurfaceTypes::DIAGONAL;
+            case 4:
+                return TerrainSurfaceTypes::FLAT;
+            default:
+                return TerrainSurfaceTypes::EDGE;
+        }
     }
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
