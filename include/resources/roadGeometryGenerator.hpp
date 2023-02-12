@@ -55,6 +55,7 @@ class RoadGeometryGenerator {
     static GeometryData generateTCrossing(const RoadSpecs& specs);
     static GeometryData generateCrossing(const RoadSpecs& specs);
     static GeometryData generateEnd(const RoadSpecs& specs);
+    static GeometryData generateRamp(const RoadSpecs& specs);
 
   public:
     static RoadPackGeometry generateRoadPackGeometries(const RoadSpecs& specs);

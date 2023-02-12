@@ -67,6 +67,16 @@ struct TerrainComponent : public AssignableComponent {
         return glm::vec3(h1 - h0, h2 - h0, h3 - h0);
     }
 
+    inline glm::vec2 getSurfaceGradient(const glm::vec2& position) const {
+        glm::uvec2 gridPos = getGridPos(position);
+
+        float h0 = heightValues[gridPos.x][gridPos.y];
+        float h1 = heightValues[gridPos.x + 1][gridPos.y];
+        float h2 = heightValues[gridPos.x][gridPos.y + 1];
+
+        return glm::vec2(h1 - h0, h2 - h0);
+    }
+
     inline bool isWater(const glm::vec2& position) const {
         constexpr unsigned int cellsPerDirection = Configuration::worldSize / Configuration::gridSize;
         glm::uvec2 gridPos = getGridPos(position);
@@ -97,7 +107,7 @@ struct TerrainComponent : public AssignableComponent {
             equalHeightsCount += heights[i] == heights[0] ? 1 : 0;
         }
 
-        switch (equalHeightsCount) {            
+        switch (equalHeightsCount) {
             case 2:
                 return TerrainSurfaceTypes::DIAGONAL;
             case 4:

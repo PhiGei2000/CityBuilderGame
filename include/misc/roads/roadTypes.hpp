@@ -9,5 +9,6 @@ enum class RoadType
     CROSSING,
     STRAIGHT,
     CURVE_FULL,
+    RAMP,
     UNDEFINED = -1
 };

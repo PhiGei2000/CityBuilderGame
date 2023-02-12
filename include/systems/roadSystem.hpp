@@ -17,8 +17,8 @@ class RoadSystem : public System {
   private:
     void init();
 
-    std::queue<std::tuple<glm::ivec2, glm::ivec2>> sectionsToBuild;
-    std::queue<std::tuple<glm::ivec2, glm::ivec2>> sectionsToPreview;
+    std::queue<std::pair<glm::ivec2, glm::ivec2>> sectionsToBuild;
+    std::queue<std::pair<glm::ivec2, glm::ivec2>> sectionsToPreview;
 
     RoadGraph previewGraph;
 
@@ -28,7 +28,7 @@ class RoadSystem : public System {
     RoadSystem(Game* game);
 
     void update(float dt);
-    
+
     void createRoadMesh(const RoadGraph& graph, MeshGeometry* geometry, ResourcePtr<RoadPack> roadPack) const;
 
     void clearRoadGraph(RoadGraph& graph) const;

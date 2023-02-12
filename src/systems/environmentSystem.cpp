@@ -37,7 +37,7 @@ void EnvironmentSystem::init() {
         glm::vec2 gridPos = Configuration::worldSize / static_cast<float>(RAND_MAX) * glm::vec2(rand(), rand());
         glm::vec3 position = glm::vec3(gridPos.x, terrain.getHeightValue(gridPos), gridPos.y);
         if (!terrain.isWater(gridPos)) {
-            float angle = (float)rand() / static_cast<float>(RAND_MAX) * 0.5f * M_PI;
+            float angle = (float)rand() / static_cast<float>(RAND_MAX) * 0.5f * glm::pi<float>();
             glm::vec3 scale = glm::vec3((float)rand() / static_cast<float>(RAND_MAX) * 0.5 + 1.5f);
 
             transformations.emplace_back(position, glm::quat(glm::vec3(0, angle, 0)), scale);

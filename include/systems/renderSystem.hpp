@@ -18,9 +18,7 @@ struct Shader;
 class RenderSystem : public System {
   protected:
     unsigned int uboCamera;
-    unsigned int uboLight;
-
-    Geometry* terrainNormals;
+    unsigned int uboLight;    
 
     ShadowBuffer shadowBuffer;
 #if DEBUG
