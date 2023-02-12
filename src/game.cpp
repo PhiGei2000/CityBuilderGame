@@ -103,9 +103,22 @@ void Game::raiseEvent(Event& e) {
     }
 }
 
+template<>
+void Game::raiseEvent(BuildEvent& e) {
+    if (state != GameState::PAUSED) {
+        eventDispatcher.trigger<BuildEvent&>(e);
+
+        if (!e.valid) {
+            app->getGui()->showWarning("Invalid build position!");
+        }
+        else {
+            app->getGui()->hideWarning();
+        }
+    }
+}
+
 template void Game::raiseEvent<FramebufferSizeEvent>(FramebufferSizeEvent&);
 template void Game::raiseEvent<KeyEvent>(KeyEvent&);
 template void Game::raiseEvent<MouseButtonEvent>(MouseButtonEvent&);
 template void Game::raiseEvent<MouseMoveEvent>(MouseMoveEvent&);
-template void Game::raiseEvent<BuildEvent>(BuildEvent&);
 template void Game::raiseEvent<CameraUpdateEvent>(CameraUpdateEvent&);

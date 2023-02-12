@@ -49,6 +49,10 @@ class Application {
         game->setState(state);
     }
 
+    inline const Gui* getGui() const {
+        return gui;
+    }
+
     inline GameState getGameState() const {
         return game->getState();
     }

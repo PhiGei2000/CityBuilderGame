@@ -79,10 +79,11 @@ class BuildSystem : public System {
     std::vector<glm::ivec2> getRoadNodes(const glm::ivec2& start, const glm::ivec2& end) const;
 
     /// @brief Determines if the given building could be build
-    /// @param buildInfo The information about the building
+    /// @param positions The position data of the building
+    /// @param type The building type
     /// @param terrain The terrain information
     /// @return True if the building could be build otherwise false
-    bool canBuild(const BuildInfo& buildInfo, const TerrainComponent& terrain) const;
+    bool canBuild(const std::vector<glm::ivec2>& positions, const BuildingType type, const TerrainComponent& terrain) const;
 
   public:
     BuildSystem(Game* game);

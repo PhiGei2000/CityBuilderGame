@@ -32,6 +32,8 @@ void Gui::init() {
     optionsMenu = new OptionsMenu(this);
     buildMenu = new BuildMenu(this);
     debugPanel = new DebugPanel(this);
+    warningWidget = new Label("warning_label", this, colors::transparent, "", colors::warning);
+    warningWidget->hide();
 
     widgets = {pauseMenu, optionsMenu, buildMenu, debugPanel};
 
@@ -82,6 +84,15 @@ void Gui::popMenu() {
         // if the navigation stack is empty set the game state to running
         app->setGameState(GameState::RUNNING);
     }
+}
+
+void Gui::showWarning(const std::string& text) const {
+    warningWidget->text = text;
+    warningWidget->show();
+}
+
+void Gui::hideWarning() const {
+    warningWidget->hide();
 }
 
 Application* Gui::getApp() const {
@@ -151,6 +162,8 @@ void Gui::render() const {
     }
 
     debugPanel->render();
+
+    warningWidget->render();
 
     // enable depth test and disable blend
     glEnable(GL_DEPTH_TEST);

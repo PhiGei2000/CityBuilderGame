@@ -39,7 +39,10 @@ struct BuildEvent : public Event {
     /// @brief The shape of the building.
     BuildShape shape = BuildShape::LINE;
 
-    inline BuildEvent(const std::vector<glm::ivec2>& positions, BuildingType type, BuildAction action, BuildShape shape = BuildShape::LINE)
+    /// @brief True if the build can be builded on the specified position
+    bool valid = true;
+
+    inline BuildEvent(const std::vector<glm::ivec2>& positions, BuildingType type, BuildAction action, BuildShape shape = BuildShape::LINE, bool valid = true)
         : positions(positions), type(type), action(action), shape(shape) {
     }
 

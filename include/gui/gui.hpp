@@ -13,6 +13,7 @@ class PauseMenu;
 class OptionsMenu;
 class BuildMenu;
 class DebugPanel;
+class Label;
 
 struct KeyEvent;
 struct MouseButtonEvent;
@@ -33,14 +34,14 @@ class Gui {
     float width, height;
 
     PauseMenu* pauseMenu;
-    OptionsMenu* optionsMenu;    
-    
+    OptionsMenu* optionsMenu;
+
     BuildMenu* buildMenu;
-
     DebugPanel* debugPanel;
+  Label* warningWidget;
 
-    std::stack<Widget*> navigation;  
-    std::vector<Widget*> widgets;  
+    std::stack<Widget*> navigation;
+    std::vector<Widget*> widgets;
 
     Shader* guiShader = new Shader("res/shaders/renderQuad.vert", "res/shaders/renderQuad.frag");
 
@@ -53,6 +54,9 @@ class Gui {
 
     void showMenu(GameMenus gameMenu);
     void popMenu();
+
+    void showWarning(const std::string& text) const;
+    void hideWarning() const;
 
     Application* getApp() const;
     Shader* getShader() const;
