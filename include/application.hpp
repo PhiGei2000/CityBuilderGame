@@ -13,10 +13,12 @@ struct KeyEvent;
 struct FramebufferSizeEvent;
 struct MouseButtonEvent;
 struct MouseMoveEvent;
+struct MouseScrollEvent;
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 static void cursorPos_callback(GLFWwindow* window, double x, double y);
+static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 class Application {
   private:
@@ -63,4 +65,5 @@ class Application {
     void onFramebufferSizeEvent(FramebufferSizeEvent& e);
     void onMouseMoveEvent(MouseMoveEvent& e);
     void onMouseButtonEvent(MouseButtonEvent& e);
+    void onMouseScrollEvent(MouseScrollEvent& e);
 };

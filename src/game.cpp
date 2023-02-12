@@ -121,4 +121,5 @@ template void Game::raiseEvent<FramebufferSizeEvent>(FramebufferSizeEvent&);
 template void Game::raiseEvent<KeyEvent>(KeyEvent&);
 template void Game::raiseEvent<MouseButtonEvent>(MouseButtonEvent&);
 template void Game::raiseEvent<MouseMoveEvent>(MouseMoveEvent&);
+template void Game::raiseEvent<MouseScrollEvent>(MouseScrollEvent&);
 template void Game::raiseEvent<CameraUpdateEvent>(CameraUpdateEvent&);

@@ -20,3 +20,11 @@ struct MouseButtonEvent : public Event {
         : x(x), y(y), button(button), action(action), mods(mods) {
     }
 };
+
+struct MouseScrollEvent : public Event {
+    float xoffset, yoffset;
+
+    inline MouseScrollEvent(float xoffset, float yoffset)
+        : xoffset(xoffset), yoffset(yoffset) {
+    }
+};

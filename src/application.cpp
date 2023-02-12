@@ -45,6 +45,13 @@ void mouseButton_callback(GLFWwindow* window, int button, int action, int mods) 
     app->onMouseButtonEvent(event);
 }
 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    Application* app = (Application*)glfwGetWindowUserPointer(window);
+
+    MouseScrollEvent event = MouseScrollEvent((float)xoffset, (float)yoffset);
+    app->onMouseScrollEvent(event);
+}
+
 void Application::init() {
     if (!glfwInit()) {
         std::cerr << "failed to intialize GLFW!" << std::endl;
@@ -85,6 +92,7 @@ void Application::init() {
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, cursorPos_callback);
     glfwSetMouseButtonCallback(window, mouseButton_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     glfwSetWindowUserPointer(window, this);
 
@@ -96,7 +104,7 @@ void Application::init() {
     glEnable(GL_FRAMEBUFFER_SRGB);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
-    glEnable(GL_CULL_FACE);    
+    glEnable(GL_CULL_FACE);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -172,4 +180,8 @@ void Application::onMouseButtonEvent(MouseButtonEvent& e) {
     if (!e.handled) {
         game->raiseEvent(e);
     }
+}
+
+void Application::onMouseScrollEvent(MouseScrollEvent& e) {
+    game->raiseEvent(e);
 }
