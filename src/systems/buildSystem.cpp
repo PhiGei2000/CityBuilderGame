@@ -240,6 +240,8 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
             case BuildingType::PARKING_LOT:
                 action = BuildAction::END;
 
+                positions = {buildMarker.position};
+
                 objectsToBuild.emplace(BuildInfo(resourceManager.getResource<Object>("object.parking_lot"), {buildMarker.position}, BuildingType::PARKING_LOT));
             default:
                 break;
