@@ -81,7 +81,7 @@ void main() {
     vec3 normal = texture(material.normalMap, fs_in.TexCoord).rgb;
     normal = normal * 2.0 - 1.0;
     // normal = normalize(transpose(fs_in.TBN) * normal);
-    
+
     float shadow = shadowCalculation(normal);
 
     vec3 ambient, diffuse, specular;
@@ -138,21 +138,23 @@ float shadowCalculation(vec3 normal) {
     projCoords = projCoords * 0.5 + 0.5;
     float currentDepth = projCoords.z;
 
-    // if depth greater than zero render no shadow
-    if (currentDepth > 1.0) {
+    // if depth greater than one render no shadow
+    if (currentDepth > 1.0 || projCoords.z > 1.0) {
         return 0.0;
     }
 
     // calculate bias and apply pcf
-    float bias = max(0.005 * (1.0 - dot(normal, fs_in.tangentLightDirection)), 0.005);        
+    float bias = max(0.00075 * (1.0 - dot(normal, fs_in.tangentLightDirection)), 0.00001);
     float shadow = 0;
     vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps, 0));
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
             float closestDepth = texture(shadowMaps, vec3(projCoords.xy + vec2(x, y) * texelSize, mapIndex)).r;
-            shadow += currentDepth - bias > closestDepth ? 1.0 : 0.0;
+            shadow += (currentDepth - bias) > closestDepth ? 1.0 : 0.0;
         }
     }
 
-    return shadow / 9.0;
+    shadow /= 9.0;
+
+    return shadow;
 }
