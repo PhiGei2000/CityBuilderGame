@@ -20,8 +20,11 @@ class StackPanel : public Container {
     StackOrientation orientation;
     ItemAligment itemAligment;
     float spacing = 30.0f;
+    bool outerSpacing = true;
 
     StackPanel(const std::string& id, Gui* gui, StackOrientation orientation, const glm::vec4 backgroundColor, ItemAligment itemAligment = ItemAligment::CENTER);
 
     void setChildConstraints() override;
+
+    Rectangle getBox() const override;
 };

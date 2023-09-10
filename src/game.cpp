@@ -96,6 +96,17 @@ GameState Game::getState() const {
     return state;
 }
 
+// handle framebuffer size and camera events even if the game is paused
+template<>
+void Game::raiseEvent<FramebufferSizeEvent>(FramebufferSizeEvent& e) {
+    eventDispatcher.trigger<FramebufferSizeEvent&>(e);
+}
+
+template<>
+void Game::raiseEvent<CameraUpdateEvent>(CameraUpdateEvent& e) {
+    eventDispatcher.trigger<CameraUpdateEvent&>(e);
+}
+
 template<typename Event>
 void Game::raiseEvent(Event& e) {
     if (state != GameState::PAUSED) {
@@ -103,9 +114,7 @@ void Game::raiseEvent(Event& e) {
     }
 }
 
-template void Game::raiseEvent<FramebufferSizeEvent>(FramebufferSizeEvent&);
 template void Game::raiseEvent<KeyEvent>(KeyEvent&);
 template void Game::raiseEvent<MouseButtonEvent>(MouseButtonEvent&);
 template void Game::raiseEvent<MouseMoveEvent>(MouseMoveEvent&);
 template void Game::raiseEvent<BuildEvent>(BuildEvent&);
-template void Game::raiseEvent<CameraUpdateEvent>(CameraUpdateEvent&);

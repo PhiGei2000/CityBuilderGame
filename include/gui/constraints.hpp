@@ -1,7 +1,6 @@
 #pragma once
 
-enum class ConstraintType
-{
+enum class ConstraintType {
     ABSOLUTE,
     RELATIVE,
     ASPECT,
