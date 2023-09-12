@@ -5,6 +5,7 @@
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtx/hash.hpp>
 
 class System;
 class Application;
@@ -32,7 +33,7 @@ class Game {
   public:
     entt::entity camera;
     entt::entity sun = entt::null;
-    entt::entity terrain;
+    std::unordered_map<glm::ivec2, entt::entity> terrain;
 
     Game(Application* app);
 

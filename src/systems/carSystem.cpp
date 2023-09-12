@@ -2,6 +2,7 @@
 
 #include "components/components.hpp"
 #include "misc/utility.hpp"
+#include "misc/coordinateTransform.hpp"
 
 static constexpr float rand_max = static_cast<float>(RAND_MAX);
 
@@ -22,7 +23,7 @@ void CarSystem::update(float dt) {
     float threshold = 0.9999f;
     registry.view<ParkingComponent, BuildingComponent, CarPathComponent>().each(
         [&](ParkingComponent& parking, const BuildingComponent& building, const CarPathComponent& carPathComponent) {
-            const glm::vec3& offset = utility::toWorldCoords(building.gridPosition);
+            const glm::vec3& offset = utility::gridToWorldCoords(building.gridPosition);
 
             for (ParkingSpot& spot : parking.parkingSpots) {
                 if (spot.occupied) {
@@ -105,7 +106,7 @@ void CarSystem::handleBuildEvent(BuildEvent& e) {
     static constexpr float threshold = 0.5f;
 
     if (e.type == BuildingType::PARKING_LOT && e.action == BuildAction::ENTITY_CREATED) {
-        const glm::vec3& position = utility::toWorldCoords(e.positions[0]);
+        const glm::vec3& position = utility::gridToWorldCoords(e.positions[0]);
 
         registry.view<BuildingComponent, ParkingComponent>().each(
             [&](const BuildingComponent& building, ParkingComponent& parking) {

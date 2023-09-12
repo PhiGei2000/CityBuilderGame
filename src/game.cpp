@@ -4,6 +4,7 @@
 #include "components/components.hpp"
 #include "events/events.hpp"
 #include "misc/utility.hpp"
+#include "misc/coordinateTransform.hpp"
 #include "rendering/geometry.hpp"
 #include "rendering/shader.hpp"
 #include "rendering/texture.hpp"
@@ -15,9 +16,7 @@ Game::Game(Application* app)
     init();
 }
 
-void Game::init() {
-    terrain = registry.create();
-
+void Game::init() {    
     // init systems
     systems.push_back(new CameraSystem(this));
     camera = registry.view<CameraComponent>().front();
@@ -123,3 +122,5 @@ template void Game::raiseEvent<MouseButtonEvent>(MouseButtonEvent&);
 template void Game::raiseEvent<MouseMoveEvent>(MouseMoveEvent&);
 template void Game::raiseEvent<MouseScrollEvent>(MouseScrollEvent&);
 template void Game::raiseEvent<CameraUpdateEvent>(CameraUpdateEvent&);
+template void Game::raiseEvent<ChunkCreatedEvent>(ChunkCreatedEvent&);
+template void Game::raiseEvent<ChunkDestroyedEvent>(ChunkDestroyedEvent&);

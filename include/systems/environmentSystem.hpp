@@ -4,6 +4,7 @@
 #include <queue>
 
 struct BuildEvent;
+struct ChunkCreatedEvent;
 struct TransformationComponent;
 struct SunLightComponent;
 struct TerrainComponent;
@@ -15,7 +16,7 @@ class EnvironmentSystem : public System {
     std::queue<entt::entity> entitiesToDestroy;
     std::queue<glm::ivec2> cellsToClear;
 
-    void updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const;    
+    void updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const;
 
   public:
     EnvironmentSystem(Game* game);
@@ -23,4 +24,6 @@ class EnvironmentSystem : public System {
     virtual void update(float dt) override;
 
     void handleBuildEvent(const BuildEvent& e);
+
+    void handleChunkCreatedEvent(const ChunkCreatedEvent& e) const;
 };

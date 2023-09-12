@@ -30,10 +30,10 @@ inline std::ostream& operator<<(std::ostream& os, TerrainSurfaceTypes type) {
 struct TerrainComponent : public AssignableComponent {
   private:
     inline static glm::uvec2 getGridPos(const glm::vec2& position) {
-        assert(utility::inRange<float>(position.x, 0, Configuration::worldSize));
-        assert(utility::inRange<float>(position.y, 0, Configuration::worldSize));
+        assert(utility::inRange<float>(position.x, 0, Configuration::chunkSize));
+        assert(utility::inRange<float>(position.y, 0, Configuration::chunkSize));
 
-        return glm::floor(1.0f / Configuration::gridSize * position);
+        return glm::floor(1.0f / Configuration::cellSize * position);
     }
 
   public:
@@ -48,11 +48,11 @@ struct TerrainComponent : public AssignableComponent {
         float h2 = heightValues[gridPos.x][gridPos.y + 1];
         float h3 = heightValues[gridPos.x + 1][gridPos.y + 1];
 
-        glm::vec2 cellPos = position - static_cast<float>(Configuration::gridSize) * glm::vec2(gridPos);
-        float x0 = h0 + cellPos.x * (h1 - h0) / static_cast<float>(Configuration::gridSize);
-        float x1 = h2 + cellPos.x * (h3 - h2) / static_cast<float>(Configuration::gridSize);
+        glm::vec2 cellPos = position - static_cast<float>(Configuration::cellSize) * glm::vec2(gridPos);
+        float x0 = h0 + cellPos.x * (h1 - h0) / static_cast<float>(Configuration::cellSize);
+        float x1 = h2 + cellPos.x * (h3 - h2) / static_cast<float>(Configuration::cellSize);
 
-        float height = x0 + cellPos.y * (x1 - x0) / static_cast<float>(Configuration::gridSize);
+        float height = x0 + cellPos.y * (x1 - x0) / static_cast<float>(Configuration::cellSize);
         return height;
     }
 
@@ -78,7 +78,7 @@ struct TerrainComponent : public AssignableComponent {
     }
 
     inline bool isWater(const glm::vec2& position) const {
-        constexpr unsigned int cellsPerDirection = Configuration::worldSize / Configuration::gridSize;
+        constexpr unsigned int cellsPerDirection = Configuration::chunkSize / Configuration::cellSize;
         glm::uvec2 gridPos = getGridPos(position);
 
         for (unsigned int x = 0; x <= 1; x++) {
@@ -118,7 +118,7 @@ struct TerrainComponent : public AssignableComponent {
     }
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
-        int cellsPerDirection = Configuration::worldSize / Configuration::gridSize;
+        int cellsPerDirection = Configuration::chunkSize / Configuration::cellSize;
 
         TerrainComponent& newTerrain = registry.emplace<TerrainComponent>(entity);
         newTerrain.heightValues = new float*[cellsPerDirection + 1];

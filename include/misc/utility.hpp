@@ -29,48 +29,11 @@ namespace utility {
         return minValue <= value && maxValue >= value;
     }
 
-    constexpr glm::vec3 toWorldCoords(const glm::vec2& gridCoords) {
-        return static_cast<float>(Configuration::gridSize) * glm::vec3{gridCoords.x, 0, gridCoords.y};
-    }
-
-    static glm::vec2 toPlaneCoords(const glm::vec2& gridCoords) {
-        return static_cast<float>(Configuration::gridSize) * glm::floor(gridCoords);
-    }
-
-    static glm::ivec2 toGridCoords(const glm::vec2& position) {
-        return glm::floor(1 / static_cast<float>(Configuration::gridSize) * position);
-    }
-
-    static glm::ivec2 toGridCoords(const glm::vec3& position) {
-        return toGridCoords(glm::vec2{position.x, position.z});
-    }
-
     constexpr glm::ivec2 interpolate(const glm::ivec2& start, const glm::ivec2& end, int value) {
         return (end - start) * value + start;
     }
 
-    inline glm::vec3 cartesianToSpherical(const glm::vec3& coords) {
-        float r = glm::length(coords);
-
-        float theta = glm::acos(coords.y / r);
-        float phi = (coords.x == 0 && coords.z == 0) ? 0 : glm::sign(coords.x) * glm::acos(coords.x / glm::sqrt(coords.x * coords.x + coords.z * coords.z));
-        return glm::vec3(r, theta, phi);
-    }
-
-    inline glm::vec3 cartesianToSpherical(float x, float y, float z) {
-        return cartesianToSpherical(glm::vec3(x, y, z));
-    }
-
-    inline glm::vec3 sphericalToCartesian(float r, float theta, float phi) {
-        return r * glm::vec3(
-                       glm::sin(theta) * glm::cos(phi),
-                       glm::cos(theta),
-                       glm::sin(theta) * glm::sin(phi));
-    }
-
-    inline glm::vec3 sphericalToCartesian(const glm::vec3& coords) {
-        return sphericalToCartesian(coords.x, coords.y, coords.z);
-    }
+    
 } // namespace utility
 
 namespace glm {

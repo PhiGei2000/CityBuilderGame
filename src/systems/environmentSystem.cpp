@@ -8,6 +8,7 @@
 #include "components/components.hpp"
 #include "events/events.hpp"
 #include "misc/configuration.hpp"
+#include "misc/coordinateTransform.hpp"
 #include "misc/utility.hpp"
 
 #include <glm/glm.hpp>
@@ -27,27 +28,6 @@ EnvironmentSystem::EnvironmentSystem(Game* game)
 }
 
 void EnvironmentSystem::init() {
-    MeshPtr treeMesh = resourceManager.getResource<Mesh>("TREE_MESH");
-    const TerrainComponent& terrain = registry.get<TerrainComponent>(game->terrain);
-    std::vector<TransformationComponent> transformations;
-    transformations.reserve(100);
-
-    // spawn trees
-    for (int i = 0; i < 100; i++) {
-        glm::vec2 gridPos = Configuration::worldSize / static_cast<float>(RAND_MAX) * glm::vec2(rand(), rand());
-        glm::vec3 position = glm::vec3(gridPos.x, terrain.getHeightValue(gridPos), gridPos.y);
-        if (!terrain.isWater(gridPos)) {
-            float angle = (float)rand() / static_cast<float>(RAND_MAX) * 0.5f * glm::pi<float>();
-            glm::vec3 scale = glm::vec3((float)rand() / static_cast<float>(RAND_MAX) * 0.5 + 1.5f);
-
-            transformations.emplace_back(position, glm::quat(glm::vec3(0, angle, 0)), scale);
-        }
-    }
-
-    entt::entity entity = registry.create();
-    InstancedMeshComponent& instancedMesh = registry.emplace<InstancedMeshComponent>(entity, treeMesh, transformations);
-    registry.emplace<TransformationComponent>(entity, glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-    registry.emplace<EnvironmentComponent>(entity);
 }
 
 void EnvironmentSystem::updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const {
@@ -86,7 +66,7 @@ void EnvironmentSystem::update(float dt) {
 
                 while (it != instancedMesh.transformations.end()) {
                     const glm::vec3& objectPosition = (*it).position;
-                    const glm::ivec2 gridPosition = glm::floor(1 / static_cast<float>(Configuration::gridSize) * glm::vec2(objectPosition.x, objectPosition.z));
+                    const glm::ivec2 gridPosition = glm::floor(utility::worldToGridCoords(objectPosition));
 
                     if (gridPosition == position) {
                         it = instancedMesh.transformations.erase(it);
@@ -141,4 +121,28 @@ void EnvironmentSystem::handleBuildEvent(const BuildEvent& e) {
             } break;
         }
     }
+}
+
+void EnvironmentSystem::handleChunkCreatedEvent(const ChunkCreatedEvent& e) const {
+    MeshPtr treeMesh = resourceManager.getResource<Mesh>("TREE_MESH");
+    const TerrainComponent& terrain = registry.get<TerrainComponent>(e.entity);
+    std::vector<TransformationComponent> transformations;
+    transformations.reserve(100);
+
+    // spawn trees
+    for (int i = 0; i < 100; i++) {
+        glm::vec2 gridPos = Configuration::chunkSize / static_cast<float>(RAND_MAX) * glm::vec2(rand(), rand());
+        glm::vec3 position = glm::vec3(gridPos.x, terrain.getHeightValue(gridPos), gridPos.y);
+        if (!terrain.isWater(gridPos)) {
+            float angle = (float)rand() / static_cast<float>(RAND_MAX) * 0.5f * glm::pi<float>();
+            glm::vec3 scale = glm::vec3((float)rand() / static_cast<float>(RAND_MAX) * 0.5 + 1.5f);
+
+            transformations.emplace_back(position, glm::quat(glm::vec3(0, angle, 0)), scale);
+        }
+    }
+
+    entt::entity entity = registry.create();
+    InstancedMeshComponent& instancedMesh = registry.emplace<InstancedMeshComponent>(entity, treeMesh, transformations);
+    registry.emplace<TransformationComponent>(entity, utility::chunkToWorldCoords(e.chunkPosition), glm::vec3(0.0f), glm::vec3(1.0f));
+    registry.emplace<EnvironmentComponent>(entity);
 }

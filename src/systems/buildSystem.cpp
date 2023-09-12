@@ -4,6 +4,7 @@
 #include "events/events.hpp"
 
 #include "misc/utility.hpp"
+#include "misc/coordinateTransform.hpp"
 
 #include "GLFW/glfw3.h"
 
@@ -48,7 +49,7 @@ void BuildSystem::update(float dt) {
 
         if (gridPos != buildMarkerComponent.position) {
             buildMarkerComponent.position = gridPos;
-            transform.position = glm::vec3(gridPos.x * Configuration::gridSize, 0.1f, gridPos.y * Configuration::gridSize);
+            transform.position = glm::vec3(gridPos.x * Configuration::cellSize, 0.1f, gridPos.y * Configuration::cellSize);
             transform.calculateTransform();
 
             if (this->state.building) {
@@ -80,7 +81,7 @@ void BuildSystem::update(float dt) {
         BuildInfo objectToBuild = objectsToBuild.front();
 
         entt::entity entity = objectToBuild.object->create(registry);
-        registry.emplace<TransformationComponent>(entity, utility::toWorldCoords(objectToBuild.positions[0]), glm::vec3(0.0f, glm::radians(-90.0f) * (int)objectToBuild.direction, 0.0f), glm::vec3(1.0f)).calculateTransform();
+        registry.emplace<TransformationComponent>(entity, utility::gridToWorldCoords(objectToBuild.positions[0]), glm::vec3(0.0f, glm::radians(-90.0f) * (int)objectToBuild.direction, 0.0f), glm::vec3(1.0f)).calculateTransform();
         registry.emplace<BuildingComponent>(entity, objectToBuild.positions[0]);
 
         BuildEvent event(objectToBuild.positions, objectToBuild.type, BuildAction::ENTITY_CREATED, getShape(objectToBuild.positions[0], objectToBuild.positions[1]));
@@ -105,8 +106,8 @@ glm::ivec2 BuildSystem::getGridPos(const glm::vec2& mousePos) const {
 
     glm::vec3 intersectionPoint = cameraPos.position + lambda * direction;
 
-    float gridX = intersectionPoint.x / Configuration::gridSize;
-    float gridZ = intersectionPoint.z / Configuration::gridSize;
+    float gridX = intersectionPoint.x / Configuration::cellSize;
+    float gridZ = intersectionPoint.z / Configuration::cellSize;
 
     return glm::ivec2(glm::floor(gridX), glm::floor(gridZ));
 }
@@ -172,7 +173,7 @@ bool BuildSystem::canBuild(const std::vector<glm::ivec2>& positions, const Build
             direction = glm::normalize(direction);
 
             for (int i = 0; i <= edgeLength; i++) {
-                const glm::ivec2 position = Configuration::gridSize * (positions[segment] + i * glm::ivec2(direction));
+                const glm::vec2 position = Configuration::cellSize * glm::vec2(positions[segment] + i * glm::ivec2(direction));
                 const TerrainSurfaceTypes surfaceType = terrain.getSurfaceType(position);
 
                 if (i == 0 || i == edgeLength) {
@@ -210,7 +211,7 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
         const BuildMarkerComponent& buildMarker = registry.get<BuildMarkerComponent>(buildMarkerEntity);
 
         int x = buildMarker.position.x, y = buildMarker.position.y;
-        int grid = Configuration::worldSize / Configuration::gridSize;
+        int grid = Configuration::chunkSize / Configuration::cellSize;
 
         if (!(utility::inRange(x, 0, grid) && utility::inRange(y, 0, grid))) {
             return;

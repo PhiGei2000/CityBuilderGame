@@ -259,10 +259,10 @@ void RoadGraph::updateNodeConnection(const glm::ivec2& start, Direction dir, boo
     }
 
     const glm::ivec2& direction = DirectionVectors[dir];
-    glm::ivec2 pos = start + direction;
+    glm::vec2 pos = start + direction;
 
     while (!nodes.contains(pos)) {
-        if (!(utility::inRange(pos.x, 0, Configuration::worldSize) && utility::inRange(pos.y, 0, Configuration::worldSize))) {
+        if (!(utility::inRange<float>(pos.x, 0, Configuration::chunkSize) && utility::inRange<float>(pos.y, 0, Configuration::chunkSize))) {
             return;
         }
 

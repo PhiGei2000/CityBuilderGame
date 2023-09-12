@@ -47,7 +47,7 @@ struct BuildEvent : public Event {
     }
 
     inline bool insideArea(const glm::vec2& pos) const {
-        const glm::ivec2 gridPosition = glm::floor(1 / static_cast<float>(Configuration::gridSize) * pos);
+        const glm::ivec2 gridPosition = glm::floor(1 / static_cast<float>(Configuration::cellSize) * pos);
 
         switch (shape) {
             case BuildShape::POINT:

@@ -3,6 +3,7 @@
 #include "components/components.hpp"
 #include "events/buildEvent.hpp"
 #include "misc/configuration.hpp"
+#include "misc/coordinateTransform.hpp"
 #include "misc/direction.hpp"
 #include "misc/utility.hpp"
 #include "resources/roadPack.hpp"
@@ -82,7 +83,7 @@ void RoadSystem::createRoadMesh(const RoadGraph& graph, MeshGeometry* geometry, 
         RoadType type = node.getType();
         const GeometryData& nodeData = pack->roadGeometries[type];
 
-        glm::vec3 sectionPos = utility::toWorldCoords(node.position) + static_cast<float>(Configuration::gridSize) * glm::vec3(0.5f, 0.0f, 0.5f);
+        glm::vec3 sectionPos = utility::gridToWorldCoords(node.position) + Configuration::cellSize * glm::vec3(0.5f, 0.0f, 0.5f);
         sectionPos += glm::vec3(0.0f, terrain.getHeightValue(glm::vec2(sectionPos.x, sectionPos.z)), 0.0f);
 
         int rotation = node.getRotation();
@@ -105,7 +106,7 @@ void RoadSystem::createRoadMesh(const RoadGraph& graph, MeshGeometry* geometry, 
 
                 for (int i = 1; i < edge.length; i++) {
                     const glm::ivec2 nodePos = edge.start + i * glm::ivec2(DirectionVectors[dir]);
-                    glm::vec3 edgePos = utility::toWorldCoords(nodePos) + static_cast<float>(Configuration::gridSize) * glm::vec3(0.5f, 0.0f, 0.5f);
+                    glm::vec3 edgePos = utility::gridToWorldCoords(nodePos) + Configuration::cellSize * glm::vec3(0.5f, 0.0f, 0.5f);
 
                     // calculate transformation matrix
                     glm::mat4 edgeTransform(1.0f);

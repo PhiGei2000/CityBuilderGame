@@ -4,8 +4,10 @@
 
 class Configuration {
   public:
-    static constexpr int gridSize = 5;
-    static constexpr int worldSize = 200;
+    /// @brief The size of one building cell in meters
+    static constexpr float cellSize = 5.0f;
+    /// @brief The size of one chunk in meters
+    static constexpr float chunkSize = 200.0f;    
 
     static constexpr int maxCars = 1;
     static constexpr float carVelocity = 1.0f;
