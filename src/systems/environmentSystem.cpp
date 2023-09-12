@@ -13,12 +13,6 @@
 
 #include <glm/glm.hpp>
 
-#if WIN32
-#define _USE_MATH_DEFINES
-
-#include <math.h>
-#endif
-
 EnvironmentSystem::EnvironmentSystem(Game* game)
     : System(game) {
     init();

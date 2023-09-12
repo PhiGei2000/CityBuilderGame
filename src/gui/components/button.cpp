@@ -27,7 +27,7 @@ void Button::handleMouseButtonEvent(MouseButtonEvent& event) {
     }
 
     if (event.action == GLFW_RELEASE && event.button == GLFW_MOUSE_BUTTON_LEFT) {
-        onClick.invoke(event);        
+        onClick.invoke(event);
     }
 }
 

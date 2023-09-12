@@ -21,5 +21,5 @@ layout(std140, binding = 2) uniform Light {
 uniform mat4 model;
 
 void main() {
-    gl_Position = model * vec4(aPos + 0.1 * lightDirection, 1.0);
+    gl_Position = model * vec4(aPos, 1.0);
 }

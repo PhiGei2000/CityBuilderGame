@@ -110,6 +110,7 @@ void RenderSystem::update(float dt) {
     // shadows
     shadowBuffer.use();
     shadowShader->use();
+    glClear(GL_DEPTH_BUFFER_BIT);
 
     glCullFace(GL_FRONT);
     renderScene(shadowShader, entt::exclude<DebugComponent>);

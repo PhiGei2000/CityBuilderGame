@@ -76,7 +76,7 @@ std::pair<glm::mat4, glm::mat4> LightComponent::calculateLightMatrices(const Cam
         maxZ = std::max(maxZ, pl.z / pl.w);
     }
 
-    constexpr float zMult = 1.0f;
+    constexpr float zMult = 5.1f;
 
     if (minZ < 0) {
         minZ *= zMult;
