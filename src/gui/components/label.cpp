@@ -19,7 +19,7 @@ void Label::render() const {
     guiShader->setBool("text", true);
     guiShader->setVector4("color", textColor);
 
-    gui->textRenderer.renderText(text, box, 0.5f, textAlign);
+    gui->textRenderer.renderText(text, box, 0.2f, textAlign);
 
     guiShader->setBool("flipV", false);
     guiShader->setBool("text", false);

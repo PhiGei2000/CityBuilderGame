@@ -18,7 +18,7 @@ void TextRenderer::init() {
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
     }
 
-    FT_Set_Pixel_Sizes(face, 0, 48);
+    FT_Set_Pixel_Sizes(face, 0, 128);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     for (unsigned char c = 0; c < 128; c++) {
         if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
