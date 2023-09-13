@@ -13,12 +13,17 @@
 
 #include <glm/glm.hpp>
 
+#include <format>
+
 EnvironmentSystem::EnvironmentSystem(Game* game)
     : System(game) {
     init();
 
     eventDispatcher.sink<BuildEvent>()
         .connect<&EnvironmentSystem::handleBuildEvent>(*this);
+
+    eventDispatcher.sink<ChunkCreatedEvent>()
+        .connect<&EnvironmentSystem::handleChunkCreatedEvent>(*this);
 }
 
 void EnvironmentSystem::init() {
@@ -137,6 +142,6 @@ void EnvironmentSystem::handleChunkCreatedEvent(const ChunkCreatedEvent& e) cons
 
     entt::entity entity = registry.create();
     InstancedMeshComponent& instancedMesh = registry.emplace<InstancedMeshComponent>(entity, treeMesh, transformations);
-    registry.emplace<TransformationComponent>(entity, utility::chunkToWorldCoords(e.chunkPosition), glm::vec3(0.0f), glm::vec3(1.0f));
+    registry.emplace<TransformationComponent>(entity, Configuration::chunkSize * glm::vec3(e.chunkPosition.x, 0.0f, e.chunkPosition.y), glm::quat(), glm::vec3(1.0f));
     registry.emplace<EnvironmentComponent>(entity);
 }

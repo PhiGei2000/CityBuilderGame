@@ -6,19 +6,16 @@
 
 #include "misc/coordinateTransform.hpp"
 
-#include "noise/noise.h"
+#include <format>
 
 void TerrainSystem::init() {
+    terrainNoise.SetFrequency(0.0001f);
+    terrainNoise.SetOctaveCount(4);
+    terrainNoise.SetLacunarity(1.9);
 }
 
 void TerrainSystem::generateTerrain(TerrainComponent& terrain, const glm::ivec2& chunkPosition) const {
     int cellsPerDirection = Configuration::chunkSize / Configuration::cellSize;
-    constexpr float noiseScaleFactor = 10.0f;
-
-    noise::module::Perlin perlin;
-    perlin.SetFrequency(0.0001f);
-    perlin.SetOctaveCount(4);
-    perlin.SetLacunarity(1.9);
 
     terrain.heightValues = new float*[cellsPerDirection + 1];
     for (int x = 0; x < cellsPerDirection + 1; x++) {
@@ -26,7 +23,7 @@ void TerrainSystem::generateTerrain(TerrainComponent& terrain, const glm::ivec2&
 
         for (int y = 0; y < cellsPerDirection + 1; y++) {
             glm::vec2 pos = noiseScaleFactor * (Configuration::cellSize * glm::vec2(x, y) + Configuration::chunkSize * glm::vec2(chunkPosition));
-            float heightValue = glm::floor(perlin.GetValue(pos.x, pos.y, 0) * 4 + 2) * 2;
+            float heightValue = glm::floor(terrainNoise.GetValue(pos.x, pos.y, 0) * 4 + 2) * 2;
             terrain.heightValues[x][y] = heightValue;
         }
     }
@@ -130,6 +127,8 @@ void TerrainSystem::update(float dt) {
 
         generateTerrainMesh(terrain, mesh);
         chunksToCreateMesh.pop();
+
+        game->log(std::format("TERRAIN_SYSTEM: Created chunk at {}, {}", position.x, position.y));
 
         ChunkCreatedEvent e(chunkEntity, position);
         game->raiseEvent(e);

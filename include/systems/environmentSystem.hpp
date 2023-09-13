@@ -16,6 +16,8 @@ class EnvironmentSystem : public System {
     std::queue<entt::entity> entitiesToDestroy;
     std::queue<glm::ivec2> cellsToClear;
 
+    entt::entity treeEntity;
+
     void updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const;
 
   public:

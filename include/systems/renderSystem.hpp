@@ -18,7 +18,7 @@ struct Shader;
 class RenderSystem : public System {
   protected:
     unsigned int uboCamera;
-    unsigned int uboLight;    
+    unsigned int uboLight;
 
     ShadowBuffer shadowBuffer;
 #if DEBUG
@@ -55,7 +55,7 @@ class RenderSystem : public System {
         registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
             .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {
                 shader->setMatrix4("model", transform.transform);
-                mesh.mesh->renderInstanced(shader, mesh.transformations.size());
+                mesh.mesh->renderInstanced(shader, mesh.instanceBuffer);
             });
     }
 

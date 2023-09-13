@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
 
+#include <fstream>
+
 class System;
 class Application;
 
@@ -29,6 +31,10 @@ class Game {
     void init();
 
     GameState state = GameState::RUNNING;
+
+#if DEBUG
+    std::ofstream logStream;
+#endif
 
   public:
     entt::entity camera;
@@ -55,4 +61,8 @@ class Game {
 
     template<typename Event>
     void raiseEvent(Event& args);
+
+#if DEBUG
+    void log(const std::string& message);
+#endif
 };

@@ -3,6 +3,7 @@
 
 #include <queue>
 
+#include "noise/noise.h"
 #include <glm/glm.hpp>
 
 struct TerrainComponent;
@@ -10,6 +11,9 @@ struct MeshComponent;
 
 class TerrainSystem : public System {
   protected:
+    noise::module::Perlin terrainNoise;
+    static constexpr float noiseScaleFactor = 10.0f;
+
     glm::ivec2 lastChunk = glm::ivec2(-INT_MAX);
 
     std::queue<glm::ivec2> chunksToGenerate;
@@ -19,7 +23,7 @@ class TerrainSystem : public System {
 
     void generateTerrain(TerrainComponent& terrain, const glm::ivec2& chunkPosition) const;
 
-    void generateTerrainMesh(const TerrainComponent& terrain, MeshComponent& mesh) const;    
+    void generateTerrainMesh(const TerrainComponent& terrain, MeshComponent& mesh) const;
 
   public:
     TerrainSystem(Game* game);

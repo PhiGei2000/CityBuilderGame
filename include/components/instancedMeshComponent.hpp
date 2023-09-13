@@ -15,8 +15,6 @@ struct InstancedMeshComponent : public MeshComponent {
     inline InstancedMeshComponent(const MeshPtr& mesh, const std::vector<TransformationComponent>& transformations)
         : MeshComponent(mesh), transformations(transformations) {
         instanceBuffer.fillBuffer(transformations);
-
-        mesh->linkInstanceBuffer(instanceBuffer);        
     }
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {

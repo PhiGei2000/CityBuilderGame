@@ -32,7 +32,7 @@ void RenderSystem::init() {
 
     // shadow rendering
     shadowShader = resourceManager.getResource<Shader>("SHADOW_SHADER");
-    instancedShadowShader = resourceManager.getResource<Shader>("SHADOW_INSTANCED_SHADER");    
+    instancedShadowShader = resourceManager.getResource<Shader>("SHADOW_INSTANCED_SHADER");
 }
 
 RenderSystem::RenderSystem(Game* game)
@@ -151,7 +151,7 @@ void RenderSystem::update(float dt) {
             });
     }
 
-    if (game->debugMode) {       
+    if (game->debugMode) {
         entt::entity debugEntity = registry.view<DebugComponent>().front();
 
         // const DebugComponent& debug = registry.get<DebugComponent>(debugEntity);

@@ -10,13 +10,13 @@
 
 class InstanceBuffer;
 
-struct Mesh {    
+struct Mesh {
     std::unordered_map<std::string, std::vector<std::pair<MaterialPtr, GeometryPtr>>> geometries;
 
     Mesh();
 
     void render(ShaderPtr shader) const;
-    void renderInstanced(ShaderPtr shader, unsigned int instancesCount) const;
+    void renderInstanced(ShaderPtr shader, const InstanceBuffer& instanceBuffer) const;
 
     void linkInstanceBuffer(const InstanceBuffer& buffer) const;
 };

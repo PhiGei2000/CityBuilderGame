@@ -43,7 +43,7 @@ void main() {
     vec4 position = aModel * vec4(aPos, 1.0);
 
     // calculate TBN matrix to transform world vectors into tangent space
-    mat3 normalMatrix = transpose(inverse(mat3(model)));
+    mat3 normalMatrix = transpose(inverse(mat3(model * aModel)));
     vec3 T = normalize(normalMatrix * aTangent);
     vec3 B = normalize(normalMatrix * aBitangent);
     vec3 N = normalize(normalMatrix * aNormal);

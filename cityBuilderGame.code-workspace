@@ -119,7 +119,8 @@
 			"xtr1common": "cpp",
 			"xtree": "cpp",
 			"xutility": "cpp",
-			"*.inc": "cpp"
+			"*.inc": "cpp",
+			"regex": "cpp"
 		}
 	}
 }

@@ -30,7 +30,8 @@ void Mesh::render(ShaderPtr shader) const {
     }
 }
 
-void Mesh::renderInstanced(ShaderPtr shader, unsigned int instancesCount) const {
+void Mesh::renderInstanced(ShaderPtr shader, const InstanceBuffer& instanceBuffer) const {
+    linkInstanceBuffer(instanceBuffer);
 
     for (const auto& [name, data] : geometries) {
         for (const auto& [material, geometry] : data) {
@@ -38,7 +39,7 @@ void Mesh::renderInstanced(ShaderPtr shader, unsigned int instancesCount) const 
                 material->use(shader.get());
             }
 
-            std::static_pointer_cast<MeshGeometry>(geometry)->drawInstanced(instancesCount);
+            std::static_pointer_cast<MeshGeometry>(geometry)->drawInstanced(instanceBuffer.instancesCount);
         }
     }
 }

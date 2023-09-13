@@ -12,11 +12,13 @@
 
 Game::Game(Application* app)
     : app(app), resourceManager("res/") {
+    logStream = std::ofstream("log.txt");
 
     init();
+
 }
 
-void Game::init() {    
+void Game::init() {
     // init systems
     systems.push_back(new CameraSystem(this));
     camera = registry.view<CameraComponent>().front();
@@ -135,3 +137,9 @@ template void Game::raiseEvent<MouseScrollEvent>(MouseScrollEvent&);
 template void Game::raiseEvent<CameraUpdateEvent>(CameraUpdateEvent&);
 template void Game::raiseEvent<ChunkCreatedEvent>(ChunkCreatedEvent&);
 template void Game::raiseEvent<ChunkDestroyedEvent>(ChunkDestroyedEvent&);
+
+#if DEBUG
+void Game::log(const std::string& message) {
+    logStream << message << std::endl;
+}
+#endif
