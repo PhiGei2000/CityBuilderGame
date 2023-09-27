@@ -178,7 +178,7 @@ GeometryData MeshLoader::processFaces(const std::vector<FaceIndices>& indices, c
         }
     }
 
-    for (const auto& indices : vertices) {        
+    for (const auto& indices : vertices) {
         data.vertices.emplace_back(
             vertData.positions[indices.positionIndex],
             vertData.texCoords[indices.texCoordIndex],
@@ -307,6 +307,7 @@ std::unordered_map<std::string, MaterialPtr> MeshLoader::loadMaterials(const std
 
                 mtl->diffuseTexture = loadTexture("res/models/" + filename);
             }
+            // specular map
             else if (prefix == "map_Ks") {
                 std::string filename;
                 sline >> filename;
