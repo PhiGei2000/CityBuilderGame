@@ -64,17 +64,17 @@ void main() {
     // init colors
     vec3 ambientColor = material.ambientColor;
     if (material.useAmbientTexture) {
-        ambientColor = ambientColor * texture(material.ambientTexture, fs_in.TexCoord).rgb;
+        ambientColor *= texture(material.ambientTexture, fs_in.TexCoord).rgb;
     }
 
     vec3 diffuseColor = material.diffuseColor;
     if (material.useDiffuseTexture) {
-        diffuseColor = texture(material.diffuseTexture, fs_in.TexCoord).rgb;
+        diffuseColor *= texture(material.diffuseTexture, fs_in.TexCoord).rgb;
     }
 
     vec3 specularColor = material.specularColor;
     if (material.useSpecularTexture) {
-        specularColor = texture(material.specularTexture, fs_in.TexCoord).rgb;
+        specularColor *= texture(material.specularTexture, fs_in.TexCoord).rgb;
     }
 
     // extract the normal vector from the normal map. The normal vector is then in tangent space
