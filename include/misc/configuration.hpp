@@ -7,7 +7,9 @@ class Configuration {
     /// @brief The size of one building cell in meters
     static constexpr float cellSize = 5.0f;
     /// @brief The size of one chunk in meters
-    static constexpr float chunkSize = 200.0f;    
+    static constexpr float chunkSize = 200.0f;
+
+    static constexpr float cameraHeight = 15.0f;
 
     static constexpr int maxCars = 1;
     static constexpr float carVelocity = 1.0f;

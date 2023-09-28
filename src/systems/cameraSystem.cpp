@@ -3,6 +3,8 @@
 #include "components/components.hpp"
 #include "events/cameraUpdateEvent.hpp"
 
+#include "misc/coordinateTransform.hpp"
+
 #include <GLFW/glfw3.h>
 #include <iostream>
 
@@ -63,6 +65,11 @@ void CameraSystem::update(float dt) {
     bool cameraPositionUpdated = false;
     if (cameraMoveDirection.x != 0 || cameraMoveDirection.z != 0) {
         transform.position += dt * cameraSpeed * glm::normalize(cameraMoveDirection);
+
+        const glm::ivec2& chunkPosition = utility::worldToChunkCoords(transform.position);
+        const TerrainComponent& terrain = registry.get<TerrainComponent>(game->terrain[chunkPosition]);
+        transform.position.y = glm::max(0.0f, terrain.getHeightValue(utility::worldToChunkGridCoords(transform.position))) + Configuration::cameraHeight;
+
         cameraPositionUpdated = true;
     }
 
