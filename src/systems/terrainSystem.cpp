@@ -5,6 +5,7 @@
 #include "resources/meshLoader.hpp"
 
 #include "misc/coordinateTransform.hpp"
+#include "rendering/textureAtlas.hpp"
 
 #include <format>
 
@@ -40,13 +41,13 @@ void TerrainSystem::generateTerrainMesh(const TerrainComponent& terrain, MeshCom
     unsigned int currentWaterIndex = 0;
 
     // texture coords
-    constexpr glm::vec2 t0 = glm::vec2(0.0f, 0.0f);
-    constexpr glm::vec2 t1 = glm::vec2(1.0f, 0.0f);
-    constexpr glm::vec2 t2 = glm::vec2(0.0f, 1.0f);
-    constexpr glm::vec2 t3 = glm::vec2(1.0f, 1.0f);
+    const TextureAtlas atlas(64.0f, 128.0f, 2, 1);
 
     for (int x = 0; x < cellsPerDirection; x++) {
         for (int y = 0; y < cellsPerDirection; y++) {
+            bool isWater = terrain.isWater(Configuration::cellSize * glm::vec2(x + 0.5f, y + 0.5f));
+            const std::array<glm::vec2, 4>& texCoords = atlas.getQuatTextureCoords(isWater ? 0 : 1, 0);
+
             // generate corners of the quad
             glm::vec3 p0 = glm::vec3(x * Configuration::cellSize, terrain.heightValues[x][y], y * Configuration::cellSize);
             glm::vec3 p1 = glm::vec3((x + 1) * Configuration::cellSize, terrain.heightValues[x + 1][y], y * Configuration::cellSize);
@@ -54,32 +55,36 @@ void TerrainSystem::generateTerrainMesh(const TerrainComponent& terrain, MeshCom
             glm::vec3 p3 = glm::vec3((x + 1) * Configuration::cellSize, terrain.heightValues[x + 1][y + 1], (y + 1) * Configuration::cellSize);
 
             // calculate normals
-            glm::vec3 n0 = glm::normalize(glm::cross(p2 - p0, p1 - p0));
+            // glm::vec3 n0 = glm::normalize(glm::cross(p2 - p0, p1 - p0));
             glm::vec3 n1 = glm::normalize(glm::cross(p0 - p1, p3 - p1));
             glm::vec3 n2 = glm::normalize(glm::cross(p3 - p2, p0 - p2));
-            glm::vec3 n3 = glm::normalize(glm::cross(p1 - p3, p2 - p3));
+            // glm::vec3 n3 = glm::normalize(glm::cross(p1 - p3, p2 - p3));
 
             // build triangles (maybe not finished)
-            terrainVertices.emplace_back(p0, t0, n1);
-            terrainVertices.emplace_back(p1, t1, n1);
-            terrainVertices.emplace_back(p3, t3, n1);
+            terrainVertices.emplace_back(p0, texCoords[0], n1);
+            terrainVertices.emplace_back(p1, texCoords[1], n1);
+            terrainVertices.emplace_back(p3, texCoords[3], n1);
 
-            terrainVertices.emplace_back(p0, t0, n2);
-            terrainVertices.emplace_back(p3, t3, n2);
-            terrainVertices.emplace_back(p2, t2, n2);
+            terrainVertices.emplace_back(p0, texCoords[0], n2);
+            terrainVertices.emplace_back(p3, texCoords[3], n2);
+            terrainVertices.emplace_back(p2, texCoords[2], n2);
 
             for (int i = 0; i < 6; i++) {
                 terrainIndices.push_back(currentTerrainIndex++);
             }
 
             // water plane
-            if (terrain.isWater(Configuration::cellSize * glm::vec2(x + 0.5f, y + 0.5f))) {
+            if (isWater) {
                 p0 = Configuration::cellSize * glm::vec3(x, -0.2f, y);
                 p1 = Configuration::cellSize * glm::vec3(x + 1, -0.2f, y);
                 p2 = Configuration::cellSize * glm::vec3(x, -0.2f, y + 1);
                 p3 = Configuration::cellSize * glm::vec3(x + 1, -0.2f, y + 1);
 
-                glm::vec3 waterNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+                constexpr glm::vec3 waterNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+                constexpr glm::vec2 t0 = glm::vec2(0.0f, 0.0f);
+                constexpr glm::vec2 t1 = glm::vec2(1.0f, 0.0f);
+                constexpr glm::vec2 t2 = glm::vec2(0.0f, 1.0f);
+                constexpr glm::vec2 t3 = glm::vec2(1.0f, 1.0f);
 
                 // TODO: optimize this
                 // build triangles

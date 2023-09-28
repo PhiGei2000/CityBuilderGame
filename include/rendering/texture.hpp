@@ -5,7 +5,7 @@
 #include <string>
 
 class Texture {
-  private:
+  protected:
     unsigned int texture;
 
   public:
