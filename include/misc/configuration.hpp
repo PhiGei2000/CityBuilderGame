@@ -5,9 +5,9 @@
 class Configuration {
   public:
     /// @brief The size of one building cell in meters
-    static constexpr float cellSize = 5.0f;
+    static constexpr int cellSize = 5;
     /// @brief The size of one chunk in meters
-    static constexpr float chunkSize = 200.0f;
+    static constexpr int chunkSize = 200;
 
     static constexpr float cameraHeight = 15.0f;
 

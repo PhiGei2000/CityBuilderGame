@@ -75,16 +75,14 @@ void RoadSystem::update(float dt) {
 }
 
 void RoadSystem::createRoadMesh(const RoadGraph& graph, MeshGeometry* geometry, ResourcePtr<RoadPack> pack) const {
-    const TerrainComponent& terrain = registry.get<TerrainComponent>(registry.view<TerrainComponent>().front());
-
     GeometryData data;
     for (const auto& [_, node] : graph.nodes) {
         // road node
         RoadType type = node.getType();
         const GeometryData& nodeData = pack->roadGeometries[type];
 
-        glm::vec3 sectionPos = utility::gridToWorldCoords(node.position) + Configuration::cellSize * glm::vec3(0.5f, 0.0f, 0.5f);
-        sectionPos += glm::vec3(0.0f, terrain.getHeightValue(glm::vec2(sectionPos.x, sectionPos.z)), 0.0f);
+        glm::vec3 sectionPos = utility::gridToWorldCoords(node.position) + static_cast<float>(Configuration::cellSize) * glm::vec3(0.5f, 0.0f, 0.5f);
+        sectionPos += glm::vec3(0.0f, game->terrain.getTerrainHeight(glm::vec2(node.position) + static_cast<float>(Configuration::cellSize) * glm::vec2(0.5f)), 0.0f);
 
         int rotation = node.getRotation();
         glm::mat4 transform(1.0f);
@@ -99,55 +97,55 @@ void RoadSystem::createRoadMesh(const RoadGraph& graph, MeshGeometry* geometry, 
 
         // edges
         for (const auto& edge : node.edges) {
-            if (edge.start == node.position) {
-                Direction dir = utility::getDirection(edge.end - edge.start);
+            //             if (edge.start == node.position) {
+            //                 Direction dir = utility::getDirection(edge.end - edge.start);
 
-                bool rotate = dir == Direction::WEST || dir == Direction::EAST;
+            //                 bool rotate = dir == Direction::WEST || dir == Direction::EAST;
 
-                for (int i = 1; i < edge.length; i++) {
-                    const glm::ivec2 nodePos = edge.start + i * glm::ivec2(DirectionVectors[dir]);
-                    glm::vec3 edgePos = utility::gridToWorldCoords(nodePos) + Configuration::cellSize * glm::vec3(0.5f, 0.0f, 0.5f);
+            //                 for (int i = 1; i < edge.length; i++) {
+            //                     const glm::ivec2 nodePos = edge.start + i * glm::ivec2(DirectionVectors[dir]);
+            //                     glm::vec3 edgePos = utility::gridToWorldCoords(nodePos) + Configuration::cellSize * glm::vec3(0.5f, 0.0f, 0.5f);
 
-                    // calculate transformation matrix
-                    glm::mat4 edgeTransform(1.0f);
+            //                     // calculate transformation matrix
+            //                     glm::mat4 edgeTransform(1.0f);
 
-                    const TerrainSurfaceTypes surfaceType = terrain.getSurfaceType(glm::vec2(edgePos.x, edgePos.z));
-#if DEBUG
-                    std::cout << "terrain surface at: " << nodePos << " "
-                              << surfaceType << std::endl;
-#endif
+            //                     const TerrainSurfaceTypes surfaceType = game->terrain.getSurfaceType(glm::vec2(edgePos.x, edgePos.z));
+            // #if DEBUG
+            //                     std::cout << "terrain surface at: " << nodePos << " "
+            //                               << surfaceType << std::endl;
+            // #endif
 
-                    switch (surfaceType) {
-                        case TerrainSurfaceTypes::FLAT:
-                            edgePos += glm::vec3(0.0f, terrain.getHeightValue(glm::vec2(edgePos.x, edgePos.z)), 0.0f);
-                            edgeTransform = glm::translate(edgeTransform, edgePos);
-                            if (rotate) {
-                                edgeTransform = glm::rotate(edgeTransform, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-                            }
+            //                     switch (surfaceType) {
+            //                         case TerrainSurfaceTypes::FLAT:
+            //                             edgePos += glm::vec3(0.0f, terrain.getHeightValue(glm::vec2(edgePos.x, edgePos.z)), 0.0f);
+            //                             edgeTransform = glm::translate(edgeTransform, edgePos);
+            //                             if (rotate) {
+            //                                 edgeTransform = glm::rotate(edgeTransform, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            //                             }
 
-                            data.addData(edgeData.transformVertices(edgeTransform));
-                            break;
-                        case TerrainSurfaceTypes::DIAGONAL:
-                            const glm::vec3 surfaceVector = terrain.getSurfaceVector(glm::vec2(edgePos.x, edgePos.z));
-                            const glm::vec2 gradientDir = glm::normalize(glm::vec2(surfaceVector));
+            //                             data.addData(edgeData.transformVertices(edgeTransform));
+            //                             break;
+            //                         case TerrainSurfaceTypes::DIAGONAL:
+            //                             const glm::vec3 surfaceVector = terrain.getSurfaceVector(glm::vec2(edgePos.x, edgePos.z));
+            //                             const glm::vec2 gradientDir = glm::normalize(glm::vec2(surfaceVector));
 
-                            float rotation = glm::acos(gradientDir.x);
-                            if (gradientDir.y > 0) {
-                                rotation *= -1;
-                            }
+            //                             float rotation = glm::acos(gradientDir.x);
+            //                             if (gradientDir.y > 0) {
+            //                                 rotation *= -1;
+            //                             }
 
-                            edgePos += 2.0f * glm::floor(1 / 2.0f * glm::vec3(0.0f, terrain.getHeightValue(glm::vec2(edgePos.x, edgePos.z)), 0.0f));
-#if DEBUG
-                            std::cout
-                                << "rotating by angle: " << rotation << " rad" << std::endl;
-#endif
-                            edgeTransform = glm::translate(edgeTransform, edgePos);
-                            edgeTransform = glm::rotate(edgeTransform, rotation, glm::vec3(0.0f, 1.0f, 0.0f));
-                            data.addData(rampData.transformVertices(edgeTransform));
-                            break;
-                    }
-                }
-            }
+            //                             edgePos += 2.0f * glm::floor(1 / 2.0f * glm::vec3(0.0f, terrain.getHeightValue(glm::vec2(edgePos.x, edgePos.z)), 0.0f));
+            // #if DEBUG
+            //                             std::cout
+            //                                 << "rotating by angle: " << rotation << " rad" << std::endl;
+            // #endif
+            //                             edgeTransform = glm::translate(edgeTransform, edgePos);
+            //                             edgeTransform = glm::rotate(edgeTransform, rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+            //                             data.addData(rampData.transformVertices(edgeTransform));
+            //                             break;
+            //                     }
+            //                 }
+            //             }
         }
     }
 

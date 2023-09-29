@@ -3,8 +3,8 @@
 #include "components/components.hpp"
 #include "events/events.hpp"
 
-#include "misc/utility.hpp"
 #include "misc/coordinateTransform.hpp"
+#include "misc/utility.hpp"
 
 #include "GLFW/glfw3.h"
 
@@ -165,34 +165,34 @@ std::vector<glm::ivec2> BuildSystem::getRoadNodes(const glm::ivec2& start, const
 }
 
 bool BuildSystem::canBuild(const std::vector<glm::ivec2>& positions, const BuildingType type, const TerrainComponent& terrain) const {
-    if (type == BuildingType::ROAD) {
-        const unsigned int segementsCount = positions.size() - 1;
-        for (int segment = 0; segment < segementsCount; segment++) {
-            glm::vec2 direction = positions[segment + 1] - positions[segment];
-            const unsigned int edgeLength = glm::length(direction);
-            direction = glm::normalize(direction);
+    // if (type == BuildingType::ROAD) {
+    //     const unsigned int segementsCount = positions.size() - 1;
+    //     for (int segment = 0; segment < segementsCount; segment++) {
+    //         glm::vec2 direction = positions[segment + 1] - positions[segment];
+    //         const unsigned int edgeLength = glm::length(direction);
+    //         direction = glm::normalize(direction);
 
-            for (int i = 0; i <= edgeLength; i++) {
-                const glm::vec2 position = Configuration::cellSize * glm::vec2(positions[segment] + i * glm::ivec2(direction));
-                const TerrainSurfaceTypes surfaceType = terrain.getSurfaceType(position);
+    //         for (int i = 0; i <= edgeLength; i++) {
+    //             const glm::vec2 position = Configuration::cellSize * glm::vec2(positions[segment] + i * glm::ivec2(direction));
+    //             const TerrainSurfaceTypes surfaceType = terrain.getSurfaceType(position);
 
-                if (i == 0 || i == edgeLength) {
-                    if (surfaceType != TerrainSurfaceTypes::FLAT)
-                        return false;
-                }
-                else {
-                    if (surfaceType == TerrainSurfaceTypes::EDGE)
-                        return false;
-                    else if (surfaceType == TerrainSurfaceTypes::DIAGONAL) {
-                        const glm::vec2 gradient = terrain.getSurfaceGradient(position);
-                        if (glm::dot(gradient, direction) == 0) {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //             if (i == 0 || i == edgeLength) {
+    //                 if (surfaceType != TerrainSurfaceTypes::FLAT)
+    //                     return false;
+    //             }
+    //             else {
+    //                 if (surfaceType == TerrainSurfaceTypes::EDGE)
+    //                     return false;
+    //                 else if (surfaceType == TerrainSurfaceTypes::DIAGONAL) {
+    //                     const glm::vec2 gradient = terrain.getSurfaceGradient(position);
+    //                     if (glm::dot(gradient, direction) == 0) {
+    //                         return false;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     return true;
 }

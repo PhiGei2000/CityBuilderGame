@@ -13,7 +13,7 @@
 // 4. chunk grid coords
 //      grid coords relative to the chunk position
 
-namespace utility {     
+namespace utility {
     inline glm::vec2 worldToGridCoords(const glm::vec3& worldCoords) {
         return glm::vec2(worldCoords.x, worldCoords.z);
     }
@@ -22,24 +22,33 @@ namespace utility {
         return glm::vec3(gridCoords.x, y, gridCoords.y);
     }
 
+    inline glm::ivec2 gridToChunkCoords(const glm::vec2& gridCoords) {
+        constexpr float factor = 1.0f / Configuration::chunkSize;
+        return glm::floor(factor * gridCoords);
+    }
+
     inline glm::ivec2 worldToChunkCoords(const glm::vec3& worldCoords) {
-        constexpr float factor = 1 / Configuration::chunkSize;
-        return glm::floor(factor * worldToGridCoords(worldCoords));
+        return gridToChunkCoords(worldToGridCoords(worldCoords));
     }
 
     inline glm::vec3 chunkToWorldCoords(const glm::ivec2& chunkCoords, float y = 0.0f) {
-        return gridToWorldCoords(Configuration::chunkSize * glm::vec2(chunkCoords), y);
+        return gridToWorldCoords(Configuration::chunkSize * chunkCoords, y);
+    }
+
+    inline glm::vec2 gridToChunkGridCoords(const glm::vec2& gridCoords) {
+        return gridCoords - glm::vec2(Configuration::chunkSize * gridToChunkCoords(gridCoords));
+
     }
 
     inline glm::vec2 worldToChunkGridCoords(const glm::vec3& worldCoords) {
-        return worldToGridCoords(worldCoords) - Configuration::chunkSize * glm::vec2(worldToChunkCoords(worldCoords));
+        return gridToChunkGridCoords(worldToGridCoords(worldCoords));
     }
 
     inline glm::vec2 chunkGridToGridCoords(const glm::vec2& chunkGridCoords, const glm::ivec2& chunkCoords) {
-        return Configuration::chunkSize * glm::vec2(chunkCoords) + chunkGridCoords;
+        return glm::vec2(Configuration::chunkSize * chunkCoords) + chunkGridCoords;
     }
 
-    inline glm::vec3 chunkGridToWorldCoords(const glm::vec2& chunkGridCoords, const glm::ivec2& chunkCoords, float y) {        
+    inline glm::vec3 chunkGridToWorldCoords(const glm::vec2& chunkGridCoords, const glm::ivec2& chunkCoords, float y) {
         return gridToWorldCoords(chunkGridToGridCoords(chunkGridCoords, chunkCoords), y);
     }
 
@@ -65,4 +74,4 @@ namespace utility {
     inline glm::vec3 sphericalToCartesian(const glm::vec3& coords) {
         return sphericalToCartesian(coords.x, coords.y, coords.z);
     }
-}; // namespace utilty
+}; // namespace utility

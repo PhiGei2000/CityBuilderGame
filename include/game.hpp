@@ -1,11 +1,13 @@
 #pragma once
 #include "resources/resourceManager.hpp"
 
+#include "misc/terrain.hpp"
 #include "misc/typedefs.hpp"
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
+#include <noise/noise.h>
 
 #include <fstream>
 
@@ -39,7 +41,7 @@ class Game {
   public:
     entt::entity camera;
     entt::entity sun = entt::null;
-    std::unordered_map<glm::ivec2, entt::entity> terrain;
+    Terrain terrain;
 
     Game(Application* app);
 

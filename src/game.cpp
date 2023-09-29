@@ -3,19 +3,18 @@
 #include "application.hpp"
 #include "components/components.hpp"
 #include "events/events.hpp"
-#include "misc/utility.hpp"
 #include "misc/coordinateTransform.hpp"
+#include "misc/utility.hpp"
 #include "rendering/geometry.hpp"
 #include "rendering/shader.hpp"
 #include "rendering/texture.hpp"
 #include "systems/systems.hpp"
 
 Game::Game(Application* app)
-    : app(app), resourceManager("res/") {
+    : app(app), resourceManager("res/"), terrain(this) {
     logStream = std::ofstream("log.txt");
 
     init();
-
 }
 
 void Game::init() {
@@ -43,6 +42,8 @@ void Game::init() {
                                         glm::vec3(0.8f)  // specular
     );
     registry.emplace<TransformationComponent>(sun, utility::sphericalToCartesian(300.0f, sunAngle, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+
+    // init terrain noise
 
     EntityMoveEvent moveEvent{sun};
     raiseEvent(moveEvent);

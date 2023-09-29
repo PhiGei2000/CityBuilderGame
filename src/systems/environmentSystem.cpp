@@ -130,9 +130,12 @@ void EnvironmentSystem::handleChunkCreatedEvent(const ChunkCreatedEvent& e) cons
 
     // spawn trees
     for (int i = 0; i < 100; i++) {
-        glm::vec2 gridPos = Configuration::chunkSize / static_cast<float>(RAND_MAX) * glm::vec2(rand(), rand());
-        glm::vec3 position = glm::vec3(gridPos.x, terrain.getHeightValue(gridPos), gridPos.y);
-        if (!terrain.isWater(gridPos)) {
+        glm::vec2 chunkGridPos = Configuration::chunkSize / static_cast<float>(RAND_MAX) * glm::vec2(rand(), rand());
+        const glm::vec2 gridPos = utility::chunkGridToGridCoords(chunkGridPos, e.chunkPosition);
+
+        TerrainSurfaceTypes surfaceType = game->terrain.getSurfaceType(gridPos);
+        if (surfaceType == TerrainSurfaceTypes::GRASS) {
+            glm::vec3 position = glm::vec3(chunkGridPos.x, game->terrain.getTerrainHeight(gridPos), chunkGridPos.y);
             float angle = (float)rand() / static_cast<float>(RAND_MAX) * 0.5f * glm::pi<float>();
             glm::vec3 scale = glm::vec3((float)rand() / static_cast<float>(RAND_MAX) * 0.5 + 1.5f);
 
@@ -142,6 +145,6 @@ void EnvironmentSystem::handleChunkCreatedEvent(const ChunkCreatedEvent& e) cons
 
     entt::entity entity = registry.create();
     InstancedMeshComponent& instancedMesh = registry.emplace<InstancedMeshComponent>(entity, treeMesh, transformations);
-    registry.emplace<TransformationComponent>(entity, Configuration::chunkSize * glm::vec3(e.chunkPosition.x, 0.0f, e.chunkPosition.y), glm::quat(), glm::vec3(1.0f));
+    registry.emplace<TransformationComponent>(entity, static_cast<float>(Configuration::chunkSize) * glm::vec3(e.chunkPosition.x, 0.0f, e.chunkPosition.y), glm::quat(), glm::vec3(1.0f));
     registry.emplace<EnvironmentComponent>(entity);
 }
