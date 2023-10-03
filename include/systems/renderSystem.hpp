@@ -57,6 +57,15 @@ class RenderSystem : public System {
                 shader->setMatrix4("model", transform.transform);
                 mesh.mesh->renderInstanced(shader, mesh.instanceBuffer);
             });
+
+        registry.view<MultiInstancedMeshComponent, TransformationComponent>(exclude)
+            .each([&](const MultiInstancedMeshComponent& mesh, const TransformationComponent& transform) {
+                shader->setMatrix4("model", transform.transform);
+
+                for (const auto& [name, instances] : mesh.transforms) {
+                    mesh.mesh->renderObjectInstanced(shader, name, instances.instanceBuffer);
+                }
+            });
     }
 
     void updateLightBuffer(const LightComponent& sunLight, const CameraComponent& component) const;
