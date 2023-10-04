@@ -49,7 +49,7 @@ void BuildSystem::update(float dt) {
 
         if (gridPos != buildMarkerComponent.position) {
             buildMarkerComponent.position = gridPos;
-            transform.position = glm::vec3(gridPos.x * Configuration::cellSize, 0.1f, gridPos.y * Configuration::cellSize);
+            transform.position = glm::vec3(gridPos.x * Configuration::cellSize, game->terrain.getTerrainHeight(Configuration::cellSize * gridPos) + 0.1f, gridPos.y * Configuration::cellSize);
             transform.calculateTransform();
 
             if (this->state.building) {
@@ -106,10 +106,12 @@ glm::ivec2 BuildSystem::getGridPos(const glm::vec2& mousePos) const {
 
     glm::vec3 intersectionPoint = cameraPos.position + lambda * direction;
 
-    float gridX = intersectionPoint.x / Configuration::cellSize;
-    float gridZ = intersectionPoint.z / Configuration::cellSize;
+    // float gridX = intersectionPoint.x / Configuration::cellSize;
+    // float gridZ = intersectionPoint.z / Configuration::cellSize;
 
-    return glm::ivec2(glm::floor(gridX), glm::floor(gridZ));
+    // return glm::ivec2(glm::floor(gridX), glm::floor(gridZ));
+
+    return glm::floor(1.0f / Configuration::cellSize * glm::vec2(intersectionPoint.x, intersectionPoint.z));
 }
 
 void BuildSystem::setState(BuildingType selectedType, const glm::ivec2& currentPosition, bool building, const glm::ivec2& startPosition, bool xFirst) {
@@ -210,18 +212,11 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
         // get the position of the build marker
         const BuildMarkerComponent& buildMarker = registry.get<BuildMarkerComponent>(buildMarkerEntity);
 
-        int x = buildMarker.position.x, y = buildMarker.position.y;
-        int grid = Configuration::chunkSize / Configuration::cellSize;
-
-        if (!(utility::inRange(x, 0, grid) && utility::inRange(y, 0, grid))) {
-            return;
-        }
-
         BuildingType selectedType = state.selectedBuildingType;
         BuildAction action = BuildAction::DEFAULT;
         BuildShape shape = BuildShape::POINT;
         glm::ivec2 start;
-        std::vector<glm::ivec2> positions;
+        std::vector<glm::ivec2> positions = {buildMarker.position};
 
         state.currentPosition = buildMarker.position;
 
@@ -241,9 +236,8 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
             case BuildingType::PARKING_LOT:
                 action = BuildAction::END;
 
-                positions = {buildMarker.position};
-
                 objectsToBuild.emplace(BuildInfo(resourceManager.getResource<Object>("object.parking_lot"), {buildMarker.position}, BuildingType::PARKING_LOT));
+                break;
             default:
                 break;
         }

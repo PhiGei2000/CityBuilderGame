@@ -12,6 +12,10 @@
 //      grid coords of the chunk origin divided by the chunk size
 // 4. chunk grid coords
 //      grid coords relative to the chunk position
+// 5. normalized grid coords
+//      grid coords divided by cell size
+// 6. normalized chunk grid coords
+//      chunk grid coords divided by cell size
 
 namespace utility {
     inline glm::vec2 worldToGridCoords(const glm::vec3& worldCoords) {
@@ -38,6 +42,18 @@ namespace utility {
     inline glm::vec2 gridToChunkGridCoords(const glm::vec2& gridCoords) {
         return gridCoords - glm::vec2(Configuration::chunkSize * gridToChunkCoords(gridCoords));
 
+    }
+
+    inline std::tuple<glm::ivec2, glm::vec2> gridToCombinedChunkCoords(const glm::vec2& gridCoords) {
+        const glm::ivec2& chunk = gridToChunkCoords(gridCoords);
+
+        return std::tuple<glm::ivec2, glm::vec2>(chunk, gridCoords - glm::vec2(Configuration::chunkSize * chunk));
+    }
+
+    inline std::tuple<glm::ivec2, glm::ivec2> gridToCombinedChunkCoords(const glm::ivec2& gridCoords) {
+        const glm::ivec2& chunk = gridToChunkCoords(gridCoords);
+
+        return std::tuple<glm::ivec2, glm::vec2>(chunk, gridCoords - Configuration::chunkSize * chunk);
     }
 
     inline glm::vec2 worldToChunkGridCoords(const glm::vec3& worldCoords) {

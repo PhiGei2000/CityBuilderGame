@@ -50,7 +50,7 @@ void RoadSystem::update(float dt) {
 
         createRoadMesh(roadComponent.graph, reinterpret_cast<MeshGeometry*>(meshComponent.mesh->geometries.at("BASIC_ROADS").front().second.get()), resourceManager.getResource<RoadPack>("BASIC_STREETS"));
 
-        meshComponent.mesh->geometries.at("BASIC_ROADS_PREVIEW").front().second->fillBuffers({}, {});
+        meshComponent.mesh->geometries.at("BASIC_ROADS_PREVIEW").front().second->bufferData({}, {});
     }
 
     // sections to preview
@@ -149,7 +149,7 @@ void RoadSystem::createRoadMesh(const RoadGraph& graph, MeshGeometry* geometry, 
         }
     }
 
-    geometry->fillBuffers(data);
+    geometry->bufferData(data);
 }
 
 void RoadSystem::clearRoadGraph(RoadGraph& graph) const {

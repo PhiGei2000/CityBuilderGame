@@ -130,14 +130,13 @@ void Game::raiseEvent(BuildEvent& e) {
     }
 }
 
-template void Game::raiseEvent<FramebufferSizeEvent>(FramebufferSizeEvent&);
 template void Game::raiseEvent<KeyEvent>(KeyEvent&);
 template void Game::raiseEvent<MouseButtonEvent>(MouseButtonEvent&);
 template void Game::raiseEvent<MouseMoveEvent>(MouseMoveEvent&);
 template void Game::raiseEvent<MouseScrollEvent>(MouseScrollEvent&);
-template void Game::raiseEvent<CameraUpdateEvent>(CameraUpdateEvent&);
 template void Game::raiseEvent<ChunkCreatedEvent>(ChunkCreatedEvent&);
 template void Game::raiseEvent<ChunkDestroyedEvent>(ChunkDestroyedEvent&);
+template void Game::raiseEvent<ChunkUpdatedEvent>(ChunkUpdatedEvent&);
 
 #if DEBUG
 void Game::log(const std::string& message) {

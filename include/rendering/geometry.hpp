@@ -26,9 +26,11 @@ class Geometry {
     Geometry(const VertexAttributes& attributes, int drawMode = GL_TRIANGLES);
 
     void setVertexAttribute(unsigned int index, const VertexAttribute& attributes, unsigned int vbo = 0, unsigned int divisor = 0) const;
-    void fillBuffers(const std::vector<float>& vertices, const std::vector<unsigned int>& indices);
+    void bufferData(const std::vector<float>& vertices, const std::vector<unsigned int>& indices);
 
     virtual void draw() const;
+
+    void bindBuffer() const;
 };
 
 class MeshGeometry : public Geometry {
@@ -41,7 +43,8 @@ class MeshGeometry : public Geometry {
     MeshGeometry();
     MeshGeometry(const GeometryData& data);
 
-    void fillBuffers(const GeometryData& data);
+    void bufferData(const GeometryData& data);
+    void bufferSubData(const std::vector<Vertex>& vertices, unsigned int offset);
     void draw() const override;
 
     void drawInstanced(unsigned int instancesCount) const;

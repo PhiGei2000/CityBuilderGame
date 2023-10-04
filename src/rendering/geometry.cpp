@@ -48,7 +48,7 @@ void Geometry::setVertexAttribute(unsigned int index, const VertexAttribute& att
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Geometry::fillBuffers(const std::vector<float>& vertices, const std::vector<unsigned int>& indices) {
+void Geometry::bufferData(const std::vector<float>& vertices, const std::vector<unsigned int>& indices) {
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -71,6 +71,13 @@ void Geometry::draw() const {
     glBindVertexArray(0);
 }
 
+void Geometry::bindBuffer() const {
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+}
+
 const VertexAttributes MeshGeometry::meshVertexAttributes = VertexAttributes{
     {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float),                    (void*)0},
     {2, GL_FLOAT, GL_FALSE, 14 * sizeof(float),  (void*)(3 * sizeof(float))},
@@ -85,10 +92,10 @@ MeshGeometry::MeshGeometry()
 
 MeshGeometry::MeshGeometry(const GeometryData& data)
     : Geometry(meshVertexAttributes) {
-    fillBuffers(data);
+    bufferData(data);
 }
 
-void MeshGeometry::fillBuffers(const GeometryData& data) {
+void MeshGeometry::bufferData(const GeometryData& data) {
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -99,6 +106,19 @@ void MeshGeometry::fillBuffers(const GeometryData& data) {
 
     drawCount = data.indices.size();
     culling = data.culling;
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void MeshGeometry::bufferSubData(const std::vector<Vertex>& vertices, unsigned int offset) {
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+    glBufferSubData(GL_ARRAY_BUFFER, offset, vertices.size() * sizeof(Vertex), vertices.data());
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

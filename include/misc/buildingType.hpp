@@ -1,9 +1,11 @@
 #pragma once
 
 enum class BuildingType : unsigned int {
-    CLEAR = 1,
-    ROAD = 2,
-    PARKING_LOT = 3
+    LIFT_TERRAIN,
+    LOWER_TERRAIN,
+    CLEAR,
+    ROAD,
+    PARKING_LOT,
 };
 
 
@@ -11,7 +13,7 @@ enum class BuildingType : unsigned int {
 #include <iostream>
 
 inline std::ostream& operator<<(std::ostream& os, BuildingType type) {
-    static std::string typeNames[] = {"DEFAULT", "ROAD", "PARKING_LOT"};
+    static std::string typeNames[] = {"LIFT_TERRAIN", "LOWER_TERRAIN", "DEFAULT", "ROAD", "PARKING_LOT"};
 
-    return os << typeNames[(unsigned int)type - 1];
+    return os << typeNames[(unsigned int)type];
 }

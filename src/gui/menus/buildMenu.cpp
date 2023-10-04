@@ -14,6 +14,28 @@ BuildMenu::BuildMenu(Gui* gui)
     cornerRadius = 0;
     itemAligment = ItemAligment::BEGIN;
 
+    liftTerrainButtonTexture = new Texture("res/gui/liftTerrain_icon.png");
+    liftTerrainButton = new IconButton("build_menu.button_liftTerrain", gui, colors::anthraziteGrey, liftTerrainButtonTexture);
+    liftTerrainButton->constraints.width = AbsoluteConstraint(64);
+    liftTerrainButton->constraints.height = AbsoluteConstraint(64);
+    liftTerrainButton->onClick += [&](MouseButtonEvent& e) {
+        this->selectBuildingType(BuildingType::LIFT_TERRAIN);
+
+        e.handled = true;
+    };
+    addChild(liftTerrainButton);
+
+    lowerTerrainButtonTexture = new Texture("res/gui/lowerTerrain_icon.png");
+    lowerTerrainButton = new IconButton("build_menu.button_lowerTerrain", gui, colors::anthraziteGrey, lowerTerrainButtonTexture);
+    lowerTerrainButton->constraints.width = AbsoluteConstraint(64);
+    lowerTerrainButton->constraints.height = AbsoluteConstraint(64);
+    lowerTerrainButton->onClick += [&](MouseButtonEvent& e) {
+        this->selectBuildingType(BuildingType::LOWER_TERRAIN);
+
+        e.handled = true;
+    };
+    addChild(lowerTerrainButton);
+
     streetButtonTexture = new Texture("res/gui/streetBuilder_icon.png");
     streetButton = new IconButton("build_menu.button_street", gui, colors::anthraziteGrey, streetButtonTexture);
     streetButton->constraints.width = AbsoluteConstraint(64);
