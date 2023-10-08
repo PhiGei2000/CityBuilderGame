@@ -6,86 +6,10 @@
 #include <ostream>
 
 struct TerrainComponent : public AssignableComponent {
+    /// @brief A 2-d array of height values for each cell
     float** heightValues;
+    /// @brief True if the mesh is generated
     bool meshGenerated = false;
-
-    // inline float getHeightValue(const glm::vec2& position) const {
-    //     const glm::uvec2 gridPos = getGridPos(position);
-
-    //     // linear interpolation of the height values
-    //     float h0 = heightValues[gridPos.x][gridPos.y];
-    //     float h1 = heightValues[gridPos.x + 1][gridPos.y];
-    //     float h2 = heightValues[gridPos.x][gridPos.y + 1];
-    //     float h3 = heightValues[gridPos.x + 1][gridPos.y + 1];
-
-    //     glm::vec2 cellPos = position - static_cast<float>(Configuration::cellSize) * glm::vec2(gridPos);
-    //     float x0 = h0 + cellPos.x * (h1 - h0) / static_cast<float>(Configuration::cellSize);
-    //     float x1 = h2 + cellPos.x * (h3 - h2) / static_cast<float>(Configuration::cellSize);
-
-    //     float height = x0 + cellPos.y * (x1 - x0) / static_cast<float>(Configuration::cellSize);
-    //     return height;
-    // }
-
-    // inline glm::vec3 getSurfaceVector(const glm::vec2& position) const {
-    //     glm::uvec2 gridPos = getGridPos(position);
-
-    //     float h0 = heightValues[gridPos.x][gridPos.y];
-    //     float h1 = heightValues[gridPos.x + 1][gridPos.y];
-    //     float h2 = heightValues[gridPos.x][gridPos.y + 1];
-    //     float h3 = heightValues[gridPos.x + 1][gridPos.y + 1];
-
-    //     return glm::vec3(h1 - h0, h2 - h0, h3 - h0);
-    // }
-
-    // inline glm::vec2 getSurfaceGradient(const glm::vec2& position) const {
-    //     glm::uvec2 gridPos = getGridPos(position);
-
-    //     float h0 = heightValues[gridPos.x][gridPos.y];
-    //     float h1 = heightValues[gridPos.x + 1][gridPos.y];
-    //     float h2 = heightValues[gridPos.x][gridPos.y + 1];
-
-    //     return glm::vec2(h1 - h0, h2 - h0);
-    // }
-
-    // inline bool isWater(const glm::vec2& position) const {
-    //     constexpr unsigned int cellsPerDirection = Configuration::chunkSize / Configuration::cellSize;
-    //     glm::uvec2 gridPos = getGridPos(position);
-
-    //     for (unsigned int x = 0; x <= 1; x++) {
-    //         for (unsigned int y = 0; y <= 1; y++) {
-    //             if (gridPos.x + x < cellsPerDirection && gridPos.y + y < cellsPerDirection) {
-    //                 if (heightValues[gridPos.x + x][gridPos.y + y] < 0) {
-    //                     return true;
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     return false;
-    // }
-
-    // inline TerrainSurfaceTypes getSurfaceType(const glm::vec2& position) const {
-    //     const glm::uvec2 gridPos = getGridPos(position);
-
-    //     float heights[] = {heightValues[gridPos.x][gridPos.y],
-    //                        heightValues[gridPos.x + 1][gridPos.y],
-    //                        heightValues[gridPos.x][gridPos.y + 1],
-    //                        heightValues[gridPos.x + 1][gridPos.y + 1]};
-
-    //     unsigned int equalHeightsCount = 1;
-    //     for (int i = 1; i < 4; i++) {
-    //         equalHeightsCount += heights[i] == heights[0] ? 1 : 0;
-    //     }
-
-    //     switch (equalHeightsCount) {
-    //         case 2:
-    //             return TerrainSurfaceTypes::DIAGONAL;
-    //         case 4:
-    //             return TerrainSurfaceTypes::FLAT;
-    //         default:
-    //             return TerrainSurfaceTypes::EDGE;
-    //     }
-    // }
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
         int cellsPerDirection = Configuration::chunkSize / Configuration::cellSize;

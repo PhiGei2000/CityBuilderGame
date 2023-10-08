@@ -6,66 +6,46 @@
 // types of coordinates
 // 1. world coords
 //      world coords are the default coordinates
-// 2. grid coords
-//      world coords but without the y component
-// 3. chunk coords
-//      grid coords of the chunk origin divided by the chunk size
-// 4. chunk grid coords
-//      grid coords relative to the chunk position
-// 5. normalized grid coords
+// 2. normalized world grid coords
 //      grid coords divided by cell size
-// 6. normalized chunk grid coords
+// 3. normalized chunk grid coords
 //      chunk grid coords divided by cell size
 
 namespace utility {
-    inline glm::vec2 worldToGridCoords(const glm::vec3& worldCoords) {
-        return glm::vec2(worldCoords.x, worldCoords.z);
+    inline glm::vec2 worldToNormalizedWorldGridCoords(const glm::vec3& position) {
+        return 1.0f / Configuration::cellSize * glm::vec2(position.x, position.z);
     }
 
-    inline glm::vec3 gridToWorldCoords(const glm::vec2& gridCoords, float y = 0.0f) {
-        return glm::vec3(gridCoords.x, y, gridCoords.y);
+    inline std::tuple<glm::ivec2, glm::vec2> normalizedWorldGridToNormalizedChunkGridCoords(const glm::vec2& position) {
+        const glm::ivec2& chunk = glm::floor(1.0f / Configuration::cellsPerChunk * position);
+
+        return {chunk, position - glm::vec2(Configuration::cellsPerChunk * chunk)};
     }
 
-    inline glm::ivec2 gridToChunkCoords(const glm::vec2& gridCoords) {
-        constexpr float factor = 1.0f / Configuration::chunkSize;
-        return glm::floor(factor * gridCoords);
+    inline std::tuple<glm::ivec2, glm::ivec2> normalizedWorldGridToNormalizedChunkGridCoords(const glm::ivec2& position) {
+        const glm::ivec2& chunk = glm::floor(1.0f / Configuration::cellsPerChunk * glm::vec2(position));
+
+        return {chunk, position - Configuration::cellsPerChunk * chunk};
     }
 
-    inline glm::ivec2 worldToChunkCoords(const glm::vec3& worldCoords) {
-        return gridToChunkCoords(worldToGridCoords(worldCoords));
+    inline std::tuple<glm::ivec2, glm::vec2> worldToNormalizedChunkGridCoords(const glm::vec3& position) {
+        return normalizedWorldGridToNormalizedChunkGridCoords(worldToNormalizedWorldGridCoords(position));
     }
 
-    inline glm::vec3 chunkToWorldCoords(const glm::ivec2& chunkCoords, float y = 0.0f) {
-        return gridToWorldCoords(Configuration::chunkSize * chunkCoords, y);
+    inline glm::vec3 normalizedWorldGridToWorldCoords(const glm::vec2& position, float y = 0) {
+        return static_cast<float>(Configuration::cellSize) * glm::vec3(position.x, y, position.y);
     }
 
-    inline glm::vec2 gridToChunkGridCoords(const glm::vec2& gridCoords) {
-        return gridCoords - glm::vec2(Configuration::chunkSize * gridToChunkCoords(gridCoords));
-
+    inline glm::vec2 normalizedChunkGridToNormalizedWorldGridCoords(const glm::ivec2& chunk, const glm::vec2& position) {
+        return glm::vec2(Configuration::cellsPerChunk * chunk) + position;
     }
 
-    inline std::tuple<glm::ivec2, glm::vec2> gridToCombinedChunkCoords(const glm::vec2& gridCoords) {
-        const glm::ivec2& chunk = gridToChunkCoords(gridCoords);
-
-        return std::tuple<glm::ivec2, glm::vec2>(chunk, gridCoords - glm::vec2(Configuration::chunkSize * chunk));
+    inline glm::ivec2 normalizedChunkGridToNormalizedWorldGridCoords(const glm::ivec2& chunk, const glm::ivec2& position) {
+        return Configuration::cellsPerChunk * chunk + position;
     }
 
-    inline std::tuple<glm::ivec2, glm::ivec2> gridToCombinedChunkCoords(const glm::ivec2& gridCoords) {
-        const glm::ivec2& chunk = gridToChunkCoords(gridCoords);
-
-        return std::tuple<glm::ivec2, glm::vec2>(chunk, gridCoords - Configuration::chunkSize * chunk);
-    }
-
-    inline glm::vec2 worldToChunkGridCoords(const glm::vec3& worldCoords) {
-        return gridToChunkGridCoords(worldToGridCoords(worldCoords));
-    }
-
-    inline glm::vec2 chunkGridToGridCoords(const glm::vec2& chunkGridCoords, const glm::ivec2& chunkCoords) {
-        return glm::vec2(Configuration::chunkSize * chunkCoords) + chunkGridCoords;
-    }
-
-    inline glm::vec3 chunkGridToWorldCoords(const glm::vec2& chunkGridCoords, const glm::ivec2& chunkCoords, float y) {
-        return gridToWorldCoords(chunkGridToGridCoords(chunkGridCoords, chunkCoords), y);
+    inline glm::vec3 normalizedChunkGridToWorldCoords(const glm::ivec2& chunk, const glm::vec2& position, float y = 0) {
+        return normalizedWorldGridToWorldCoords(normalizedChunkGridToNormalizedWorldGridCoords(chunk, position), y);
     }
 
     inline glm::vec3 cartesianToSpherical(const glm::vec3& coords) {

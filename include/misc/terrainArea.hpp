@@ -7,7 +7,7 @@
 #include <glm/gtx/hash.hpp>
 
 struct TerrainArea {
-    /// @brief Position of the south east corner in grid coords
+    /// @brief Position of the south east corner in normalized world grid coords
     glm::ivec2 position;
     /// @brief Size of the area
     glm::uvec2 size;
@@ -29,12 +29,11 @@ struct TerrainArea {
     /// @param chunk The position of the chunk
     /// @return The part of the terrain area intersecting with the given chunk
     inline TerrainArea getAreaInChunk(const glm::ivec2& chunk) const {
-        glm::ivec2 posChunk = utility::gridToChunkCoords(position);
+        const auto& [posChunk, posInsideChunk] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
         if (posChunk != chunk) {
             return TerrainArea(glm::ivec2(0), glm::ivec2(0));
         }
 
-        glm::ivec2 posInsideChunk = position - Configuration::chunkSize * chunk;
         glm::uvec2 chunkAreaSize;
 
         // trim size if the area reaches to the neighbour chunk
@@ -60,7 +59,7 @@ struct TerrainArea {
     inline std::unordered_map<glm::ivec2, TerrainArea> getChunkAreas() const {
         std::unordered_map<glm::ivec2, TerrainArea> chunkAreas;
 
-        glm::ivec2 chunk = utility::gridToChunkCoords(position);
+        const auto& [chunk, _] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
 
         const TerrainArea& chunkArea = getAreaInChunk(chunk);
         chunkAreas[chunk] = chunkArea;

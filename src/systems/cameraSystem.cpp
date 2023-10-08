@@ -66,8 +66,8 @@ void CameraSystem::update(float dt) {
     if (cameraMoveDirection.x != 0 || cameraMoveDirection.z != 0) {
         transform.position += dt * cameraSpeed * glm::normalize(cameraMoveDirection);
 
-        const glm::ivec2& chunkPosition = utility::worldToChunkCoords(transform.position);
-        transform.position.y = glm::max(0.0f, game->terrain.getTerrainHeight(utility::worldToGridCoords(transform.position))) + Configuration::cameraHeight;
+        const glm::vec2& cameraGridPos = utility::worldToNormalizedWorldGridCoords(transform.position);
+        transform.position.y = glm::max(0.0f, game->terrain.getTerrainHeight(cameraGridPos)) + Configuration::cameraHeight;
 
         cameraPositionUpdated = true;
     }

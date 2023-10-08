@@ -32,7 +32,8 @@ class TerrainSystem : public System {
 
     void generateTerrainMesh(const glm::ivec2& chunkPosition, MeshComponent& mesh) const;
 
-    void generateTerrainQuadMesh(const glm::ivec2& position, const glm::ivec2& chunkPosition, std::vector<Vertex>& terrainVertices) const;
+    unsigned int generateTerrainQuadMesh(const glm::ivec2& position, const glm::ivec2& chunkPosition, std::vector<Vertex>& terrainVertices) const;
+    unsigned int generateWaterQuadMesh(const glm::ivec2& position, const glm::ivec2& chunkPosition, std::vector<Vertex>& waterVertices) const;
 
     void updateTerrainMesh(const TerrainArea& area) const;
     void updateTerrainMesh(const TerrainArea& area, MeshComponent& mesh) const;

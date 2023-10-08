@@ -10,13 +10,12 @@ Terrain::Terrain(Game* game)
 }
 
 int Terrain::getTerrainHeight(const glm::ivec2& position) const {
-    const glm::ivec2& chunkPosition = utility::gridToChunkCoords(position);
-    const glm::ivec2& chunkGridCoords = 1.0f / Configuration::cellSize * glm::vec2(position - Configuration::chunkSize * chunkPosition);
+    const auto& [chunk, pos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
 
-    const entt::entity entity = chunkEntities.at(chunkPosition);
+    const entt::entity entity = chunkEntities.at(chunk);
     const TerrainComponent& terrainComponent = game->getRegistry().get<TerrainComponent>(entity);
 
-    return terrainComponent.heightValues[chunkGridCoords.x][chunkGridCoords.y];
+    return terrainComponent.heightValues[pos.x][pos.y];
 }
 
 float Terrain::getTerrainHeight(const glm::vec2& position) const {
@@ -28,25 +27,25 @@ float Terrain::getTerrainHeight(const glm::vec2& position) const {
     float h2 = getTerrainHeight(cellCoords + glm::ivec2(0, 1));
     float h3 = getTerrainHeight(cellCoords + glm::ivec2(1, 1));
 
-    const glm::vec2& cellPos = position - static_cast<float>(Configuration::cellSize) * glm::floor(1.0f / Configuration::cellSize * glm::vec2(cellCoords));
-    float x0 = h0 + cellPos.x * (h1 - h0) / static_cast<float>(Configuration::cellSize);
-    float x1 = h2 + cellPos.x * (h3 - h2) / static_cast<float>(Configuration::cellSize);
+    const glm::vec2& cellPos = position - glm::vec2(cellCoords);
+    float x0 = h0 + cellPos.x * (h1 - h0);
+    float x1 = h2 + cellPos.x * (h3 - h2);
 
-    float height = x0 + cellPos.y * (x1 - x0) / static_cast<float>(Configuration::cellSize);
+    float height = x0 + cellPos.y * (x1 - x0);
     return height;
 }
 
 TerrainSurfaceTypes Terrain::getSurfaceType(const glm::vec2& position) const {
     constexpr glm::vec2 offsets[9] = {
-        static_cast<float>(Configuration::cellSize) * glm::vec2(0, 0),
-        static_cast<float>(Configuration::cellSize) * glm::vec2(1, 0),
-        static_cast<float>(Configuration::cellSize) * glm::vec2(0, 1),
-        static_cast<float>(Configuration::cellSize) * glm::vec2(1, 1),
-        static_cast<float>(Configuration::cellSize) * glm::vec2(-1, 0),
-        static_cast<float>(Configuration::cellSize) * glm::vec2(0, -1),
-        static_cast<float>(Configuration::cellSize) * glm::vec2(-1, -1),
-        static_cast<float>(Configuration::cellSize) * glm::vec2(-1, 1),
-        static_cast<float>(Configuration::cellSize) * glm::vec2(1, -1),
+        glm::vec2(0, 0),
+        glm::vec2(1, 0),
+        glm::vec2(0, 1),
+        glm::vec2(1, 1),
+        glm::vec2(-1, 0),
+        glm::vec2(0, -1),
+        glm::vec2(-1, -1),
+        glm::vec2(-1, 1),
+        glm::vec2(1, -1),
     };
 
     for (int i = 0; i < 4; i++) {

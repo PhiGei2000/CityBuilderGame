@@ -81,7 +81,7 @@ void BuildSystem::update(float dt) {
         BuildInfo objectToBuild = objectsToBuild.front();
 
         entt::entity entity = objectToBuild.object->create(registry);
-        registry.emplace<TransformationComponent>(entity, utility::gridToWorldCoords(objectToBuild.positions[0]), glm::vec3(0.0f, glm::radians(-90.0f) * (int)objectToBuild.direction, 0.0f), glm::vec3(1.0f)).calculateTransform();
+        registry.emplace<TransformationComponent>(entity, utility::normalizedWorldGridToWorldCoords(objectToBuild.positions[0]), glm::vec3(0.0f, glm::radians(-90.0f) * (int)objectToBuild.direction, 0.0f), glm::vec3(1.0f)).calculateTransform();
         registry.emplace<BuildingComponent>(entity, objectToBuild.positions[0]);
 
         BuildEvent event(objectToBuild.positions, objectToBuild.type, BuildAction::ENTITY_CREATED, getShape(objectToBuild.positions[0], objectToBuild.positions[1]));
@@ -102,14 +102,10 @@ glm::ivec2 BuildSystem::getGridPos(const glm::vec2& mousePos) const {
 
     glm::vec3 direction = glm::normalize(glm::vec3(glm::inverse(camera.viewMatrix) * ray_eye));
 
+    // TODO: pay attention to terrain height
     float lambda = -cameraPos.position.y / direction.y;
 
     glm::vec3 intersectionPoint = cameraPos.position + lambda * direction;
-
-    // float gridX = intersectionPoint.x / Configuration::cellSize;
-    // float gridZ = intersectionPoint.z / Configuration::cellSize;
-
-    // return glm::ivec2(glm::floor(gridX), glm::floor(gridZ));
 
     return glm::floor(1.0f / Configuration::cellSize * glm::vec2(intersectionPoint.x, intersectionPoint.z));
 }
@@ -118,7 +114,7 @@ void BuildSystem::setState(BuildingType selectedType, const glm::ivec2& currentP
     // update state variables
     state.building = building;
     state.currentPosition = currentPosition;
-    state.startPosition = building ? startPosition : glm::ivec2(-1);
+    state.startPosition = building ? startPosition : glm::ivec2(-INT_MAX);
     state.selectedBuildingType = selectedType;
     state.xFirst = xFirst;
 

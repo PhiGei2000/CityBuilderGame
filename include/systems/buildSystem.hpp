@@ -39,10 +39,10 @@ class BuildSystem : public System {
         /// @brief Building process ongoing
         bool building = false;
 
-        /// @brief Current position of the build marker
+        /// @brief Current position of the build marker in world grid coordinates
         glm::ivec2 currentPosition;
 
-        /// @brief Start position of the current building process
+        /// @brief Start position of the current building process in world grid coordinates
         glm::ivec2 startPosition;
 
         /// @brief Selected building type
@@ -56,6 +56,7 @@ class BuildSystem : public System {
     std::queue<BuildInfo> objectsToBuild;
 
     /// @brief Returns the current position of the mouse cursor projected to the grid
+    /// @returns The position in normalized world grid coordinates
     glm::ivec2 getGridPos(const glm::vec2& mousePos) const;
 
     /// @brief Sets the current state of the current building process

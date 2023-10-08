@@ -65,7 +65,7 @@ void EnvironmentSystem::update(float dt) {
 
                 while (it != instancedMesh.transformations.end()) {
                     const glm::vec3& objectPosition = (*it).position;
-                    const glm::ivec2 gridPosition = glm::floor(utility::worldToGridCoords(objectPosition));
+                    const glm::ivec2 gridPosition = glm::floor(utility::worldToNormalizedWorldGridCoords(objectPosition));
 
                     if (gridPosition == position) {
                         it = instancedMesh.transformations.erase(it);
@@ -131,12 +131,12 @@ void EnvironmentSystem::handleChunkCreatedEvent(const ChunkCreatedEvent& e) cons
 
     // spawn trees
     for (int i = 0; i < 100; i++) {
-        glm::vec2 chunkGridPos = Configuration::chunkSize / static_cast<float>(RAND_MAX) * glm::vec2(rand(), rand());
-        const glm::vec2 gridPos = utility::chunkGridToGridCoords(chunkGridPos, e.chunkPosition);
+        glm::vec2 chunkGridPos = Configuration::cellsPerChunk / static_cast<float>(RAND_MAX) * glm::vec2(rand(), rand());
+        const glm::vec2& gridPos = utility::normalizedChunkGridToNormalizedWorldGridCoords(e.chunkPosition, chunkGridPos);
 
         TerrainSurfaceTypes surfaceType = game->terrain.getSurfaceType(gridPos);
         if (surfaceType == TerrainSurfaceTypes::GRASS) {
-            glm::vec3 position = glm::vec3(chunkGridPos.x, game->terrain.getTerrainHeight(gridPos), chunkGridPos.y);
+            glm::vec3 position = glm::vec3(Configuration::cellSize * chunkGridPos.x, game->terrain.getTerrainHeight(gridPos), Configuration::cellSize * chunkGridPos.y);
             float angle = (float)rand() / static_cast<float>(RAND_MAX) * 0.5f * glm::pi<float>();
             glm::vec3 scale = glm::vec3((float)rand() / static_cast<float>(RAND_MAX) * 0.5 + 1.5f);
             int type = rand() % 2;
@@ -149,8 +149,8 @@ void EnvironmentSystem::handleChunkCreatedEvent(const ChunkCreatedEvent& e) cons
         instancedMesh.instanceBuffer.fillBuffer(instancedMesh.transformations);
     }
 
-    entt::entity entity = registry.create();
-    MultiInstancedMeshComponent& instancedMesh = registry.emplace<MultiInstancedMeshComponent>(entity, treeMesh, transformations);
-    registry.emplace<TransformationComponent>(entity, static_cast<float>(Configuration::chunkSize) * glm::vec3(e.chunkPosition.x, 0.0f, e.chunkPosition.y), glm::quat(), glm::vec3(1.0f));
-    registry.emplace<EnvironmentComponent>(entity);
+    // entt::entity entity = registry.create();
+    MultiInstancedMeshComponent& instancedMesh = registry.emplace<MultiInstancedMeshComponent>(e.entity, treeMesh, transformations);
+    // registry.emplace<TransformationComponent>(entity, static_cast<float>(Configuration::chunkSize) * glm::vec3(e.chunkPosition.x, 0.0f, e.chunkPosition.y), glm::quat(), glm::vec3(1.0f));
+    registry.emplace<EnvironmentComponent>(e.entity);
 }

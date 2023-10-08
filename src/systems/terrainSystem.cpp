@@ -19,13 +19,11 @@ void TerrainSystem::init() {
 }
 
 void TerrainSystem::generateTerrain(TerrainComponent& terrain, const glm::ivec2& chunkPosition) const {
-    int cellsPerDirection = Configuration::chunkSize / Configuration::cellSize;
+    terrain.heightValues = new float*[Configuration::cellsPerChunk];
+    for (int x = 0; x < Configuration::cellsPerChunk; x++) {
+        terrain.heightValues[x] = new float[Configuration::cellsPerChunk];
 
-    terrain.heightValues = new float*[cellsPerDirection];
-    for (int x = 0; x < cellsPerDirection; x++) {
-        terrain.heightValues[x] = new float[cellsPerDirection];
-
-        for (int y = 0; y < cellsPerDirection; y++) {
+        for (int y = 0; y < Configuration::cellsPerChunk; y++) {
             glm::vec2 pos = noiseScaleFactor * (static_cast<float>(Configuration::cellSize) * glm::vec2(x, y) + static_cast<float>(Configuration::chunkSize) * glm::vec2(chunkPosition));
             float noiseValue = terrainNoise.GetValue(pos.x, pos.y, 0);
             terrain.heightValues[x][y] = glm::floor(noiseValue * 4 + 2) * 2;
@@ -33,17 +31,17 @@ void TerrainSystem::generateTerrain(TerrainComponent& terrain, const glm::ivec2&
     }
 }
 
-void TerrainSystem::generateTerrainQuadMesh(const glm::ivec2& position, const glm::ivec2& chunkPosition, std::vector<Vertex>& terrainVertices) const {
+unsigned int TerrainSystem::generateTerrainQuadMesh(const glm::ivec2& position, const glm::ivec2& chunkPosition, std::vector<Vertex>& terrainVertices) const {
     int x = position.x, y = position.y;
-    TerrainSurfaceTypes surfaceType = game->terrain.getSurfaceType(utility::chunkGridToGridCoords(Configuration::cellSize * position, chunkPosition));
+    TerrainSurfaceTypes surfaceType = game->terrain.getSurfaceType(utility::normalizedChunkGridToNormalizedWorldGridCoords(chunkPosition, position));
     const std::array<glm::vec2, 4>& texCoords = atlas.getQuatTextureCoords(surfaceType == TerrainSurfaceTypes::GRASS ? 1 : 0, 0);
-    const glm::ivec2& chunkOffset = Configuration::chunkSize * chunkPosition;
+    const glm::ivec2& chunkOffset = Configuration::cellsPerChunk * chunkPosition;
 
     // generate corners of the quad
-    glm::vec3 p0 = glm::vec3(x * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + Configuration::cellSize * glm::ivec2(x, y)), y * Configuration::cellSize);
-    glm::vec3 p1 = glm::vec3((x + 1) * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + Configuration::cellSize * glm::ivec2(x + 1, y)), y * Configuration::cellSize);
-    glm::vec3 p2 = glm::vec3(x * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + Configuration::cellSize * glm::ivec2(x, y + 1)), (y + 1) * Configuration::cellSize);
-    glm::vec3 p3 = glm::vec3((x + 1) * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + Configuration::cellSize * glm::ivec2(x + 1, y + 1)), (y + 1) * Configuration::cellSize);
+    glm::vec3 p0 = glm::vec3(x * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x, y)), y * Configuration::cellSize);
+    glm::vec3 p1 = glm::vec3((x + 1) * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x + 1, y)), y * Configuration::cellSize);
+    glm::vec3 p2 = glm::vec3(x * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x, y + 1)), (y + 1) * Configuration::cellSize);
+    glm::vec3 p3 = glm::vec3((x + 1) * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x + 1, y + 1)), (y + 1) * Configuration::cellSize);
 
     // calculate normals
     // glm::vec3 n0 = glm::normalize(glm::cross(p2 - p0, p1 - p0));
@@ -59,36 +57,39 @@ void TerrainSystem::generateTerrainQuadMesh(const glm::ivec2& position, const gl
     terrainVertices.emplace_back(p3, texCoords[3], n2);
     terrainVertices.emplace_back(p2, texCoords[2], n2);
 
-    // *terrainIndicesCount = 6;
+    return 6;
+}
 
-    // // water plane
-    // if (surfaceType == TerrainSurfaceTypes::WATER) {
-    //     p0 = static_cast<float>(Configuration::cellSize) * glm::vec3(x, -0.2f, y);
-    //     p1 = static_cast<float>(Configuration::cellSize) * glm::vec3(x + 1, -0.2f, y);
-    //     p2 = static_cast<float>(Configuration::cellSize) * glm::vec3(x, -0.2f, y + 1);
-    //     p3 = static_cast<float>(Configuration::cellSize) * glm::vec3(x + 1, -0.2f, y + 1);
+unsigned int TerrainSystem::generateWaterQuadMesh(const glm::ivec2& position, const glm::ivec2& chunkPosition, std::vector<Vertex>& waterVertices) const {
+    const glm::ivec2& gridPos = utility::normalizedChunkGridToNormalizedWorldGridCoords(chunkPosition, position);
+    if (game->terrain.getSurfaceType(gridPos) != TerrainSurfaceTypes::WATER) {
+        return 0;
+    }
 
-    //     constexpr glm::vec3 waterNormal = glm::vec3(0.0f, 1.0f, 0.0f);
-    //     constexpr glm::vec2 t0 = glm::vec2(0.0f, 0.0f);
-    //     constexpr glm::vec2 t1 = glm::vec2(1.0f, 0.0f);
-    //     constexpr glm::vec2 t2 = glm::vec2(0.0f, 1.0f);
-    //     constexpr glm::vec2 t3 = glm::vec2(1.0f, 1.0f);
+    float x = position.x, y = position.y;
 
-    //     // TODO: optimize this
-    //     // build triangles
-    //     waterVertices.emplace_back(p0, t0, waterNormal);
-    //     waterVertices.emplace_back(p1, t1, waterNormal);
-    //     waterVertices.emplace_back(p3, t3, waterNormal);
+    glm::vec3 p0 = static_cast<float>(Configuration::cellSize) * glm::vec3(x, -0.2f, y);
+    glm::vec3 p1 = static_cast<float>(Configuration::cellSize) * glm::vec3(x + 1, -0.2f, y);
+    glm::vec3 p2 = static_cast<float>(Configuration::cellSize) * glm::vec3(x, -0.2f, y + 1);
+    glm::vec3 p3 = static_cast<float>(Configuration::cellSize) * glm::vec3(x + 1, -0.2f, y + 1);
 
-    //     waterVertices.emplace_back(p0, t0, waterNormal);
-    //     waterVertices.emplace_back(p3, t3, waterNormal);
-    //     waterVertices.emplace_back(p2, t2, waterNormal);
+    constexpr glm::vec3 waterNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+    constexpr glm::vec2 t0 = glm::vec2(0.0f, 0.0f);
+    constexpr glm::vec2 t1 = glm::vec2(1.0f, 0.0f);
+    constexpr glm::vec2 t2 = glm::vec2(0.0f, 1.0f);
+    constexpr glm::vec2 t3 = glm::vec2(1.0f, 1.0f);
 
-    //     *waterIndicesCount = 6;
-    // }
-    // else {
-    //     *waterIndicesCount = 0;
-    // }
+    // TODO: optimize this
+    // build triangles
+    waterVertices.emplace_back(p0, t0, waterNormal);
+    waterVertices.emplace_back(p1, t1, waterNormal);
+    waterVertices.emplace_back(p3, t3, waterNormal);
+
+    waterVertices.emplace_back(p0, t0, waterNormal);
+    waterVertices.emplace_back(p3, t3, waterNormal);
+    waterVertices.emplace_back(p2, t2, waterNormal);
+
+    return 6;
 }
 
 // TODO: Seperate water mesh generation from surface generation
@@ -101,15 +102,17 @@ void TerrainSystem::generateTerrainMesh(const glm::ivec2& chunkPosition, MeshCom
     std::vector<unsigned int> waterIndices;
     unsigned int currentWaterIndex = 0;
 
-    const glm::ivec2 chunkOffset = Configuration::chunkSize * chunkPosition;
-
     unsigned int terrainIndicesCount, waterIndicesCount;
     for (int x = 0; x < Configuration::cellsPerChunk; x++) {
         for (int y = 0; y < Configuration::cellsPerChunk; y++) {
-            generateTerrainQuadMesh(glm::ivec2(x, y), chunkOffset, terrainVertices);
-
+            terrainIndicesCount = generateTerrainQuadMesh(glm::ivec2(x, y), chunkPosition, terrainVertices);
             for (int i = 0; i < terrainIndicesCount; i++) {
                 terrainIndices.push_back(currentTerrainIndex++);
+            }
+
+            waterIndicesCount = generateWaterQuadMesh(glm::ivec2(x, y), chunkPosition, waterVertices);
+            for (int i = 0; i < waterIndicesCount; i++) {
+                waterIndices.push_back(currentWaterIndex++);
             }
         }
     }
@@ -138,7 +141,7 @@ void TerrainSystem::updateTerrainMesh(const TerrainArea& area) const {
 }
 
 void TerrainSystem::updateTerrainMesh(const TerrainArea& area, MeshComponent& mesh) const {
-    const auto& [chunkPos, pos] = utility::gridToCombinedChunkCoords(area.position);
+    const auto& [chunkPos, pos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(area.position);
     mesh.mesh->geometries["ground"][0].second->bindBuffer();
 
     for (int x = 0; x < area.size.x; x++) {
@@ -173,7 +176,7 @@ void TerrainSystem::update(float dt) {
         const glm::ivec2 position = chunksToGenerate.front();
 
         const entt::entity chunkEntity = registry.create();
-        registry.emplace<TransformationComponent>(chunkEntity, utility::chunkToWorldCoords(position), glm::quat(), glm::vec3(1.0f));
+        registry.emplace<TransformationComponent>(chunkEntity, utility::normalizedChunkGridToWorldCoords(position, glm::vec2(0.0f)), glm::quat(), glm::vec3(1.0f));
         TerrainComponent& terrain = registry.emplace<TerrainComponent>(chunkEntity);
 
         generateTerrain(terrain, position);
@@ -209,7 +212,7 @@ void TerrainSystem::update(float dt) {
     }
 
     const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(game->camera);
-    const glm::ivec2 currentChunk = utility::worldToChunkCoords(cameraTransform.position);
+    const auto [currentChunk, _] = utility::worldToNormalizedChunkGridCoords(cameraTransform.position);
 
     if (currentChunk != lastChunk) {
         lastChunk = currentChunk;
@@ -245,8 +248,7 @@ void TerrainSystem::handleBuildEvent(const BuildEvent& event) {
     }
 
     if (event.type == BuildingType::LIFT_TERRAIN || event.type == BuildingType::LOWER_TERRAIN) {
-        const glm::ivec2& chunkCoords = utility::gridToChunkCoords(event.positions[0]);
-        const glm::ivec2& cellPos = utility::gridToChunkGridCoords(event.positions[0]);
+        const auto& [chunkCoords, cellPos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(event.positions[0]);
 
         const entt::entity terrainEntity = game->terrain.chunkEntities.at(chunkCoords);
         TerrainComponent& terrain = registry.get<TerrainComponent>(terrainEntity);
