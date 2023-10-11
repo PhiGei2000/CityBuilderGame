@@ -13,6 +13,15 @@ enum class TerrainSurfaceTypes {
     BEACH
 };
 
+enum class TerrainSurfaceGeometry {
+    FLAT,
+    FLAT_TILTED,
+    OUTER_CORNER, // unused
+    INNER_CORNER,
+    DIAGONAL_TILTED_BOTTOM,
+    DIAGONAL_TILTED_TOP // unused
+};
+
 class Terrain {
   protected:
     Game* game;
@@ -45,4 +54,9 @@ class Terrain {
     /// @param position The position in normalized world grid coordinates
     /// @return True if the chunk is already generated
     bool positionValid(const glm::vec2& position) const;
+
+    /// @brief Returns the geometry type of the given cell
+    /// @param cell The position of the cell in normalized world grid coordinates
+    /// @return The surface geometry
+    TerrainSurfaceGeometry getGeometry(const glm::ivec2& cell) const;
 };

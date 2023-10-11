@@ -5,6 +5,8 @@
 
 #include "misc/coordinateTransform.hpp"
 
+#include <stdexcept>
+
 Terrain::Terrain(Game* game)
     : game(game) {
 }
@@ -84,4 +86,34 @@ bool Terrain::positionValid(const glm::vec2& position) const {
     const auto& [chunk, _] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
 
     return chunkEntities.contains(chunk);
+}
+
+TerrainSurfaceGeometry Terrain::getGeometry(const glm::ivec2& cell) const {
+    float h0 = getTerrainHeight(cell);
+    float h1 = getTerrainHeight(cell + glm::ivec2(1, 0));
+    float h2 = getTerrainHeight(cell + glm::ivec2(0, 1));
+    float h3 = getTerrainHeight(cell + glm::ivec2(1, 1));
+
+    if (h0 == h1 == h2 == h3) {
+        return TerrainSurfaceGeometry::FLAT;
+    }
+
+    if ((h0 == h1 && h2 == h3) || (h1 == h2 && h0 == h3)) {
+        return TerrainSurfaceGeometry::FLAT_TILTED;
+    }
+
+    if (h1 == h2 == h3) {
+        return h0 < h1 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
+    }
+    else if (h0 == h2 == h3) {
+        return h1 < h0 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
+    }
+    else if (h0 == h1 == h3) {
+        return h2 < h0 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
+    }
+    else if (h0 == h1 == h2) {
+        return h3 < h0 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
+    }
+
+    throw std::runtime_error("Terrain surface type is invalid");
 }

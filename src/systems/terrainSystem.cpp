@@ -54,22 +54,24 @@ unsigned int TerrainSystem::generateTerrainQuadMesh(const glm::ivec2& position, 
     const glm::ivec2& chunkOffset = Configuration::cellsPerChunk * chunkPosition;
 
     // generate corners of the quad
-    glm::vec3 p0 = glm::vec3(x * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x, y)), y * Configuration::cellSize);
-    glm::vec3 p1 = glm::vec3((x + 1) * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x + 1, y)), y * Configuration::cellSize);
-    glm::vec3 p2 = glm::vec3(x * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x, y + 1)), (y + 1) * Configuration::cellSize);
-    glm::vec3 p3 = glm::vec3((x + 1) * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x + 1, y + 1)), (y + 1) * Configuration::cellSize);
+    glm::vec3 corners[4] = {
+        glm::vec3(x * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x, y)), y * Configuration::cellSize),
+        glm::vec3((x + 1) * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x + 1, y)), y * Configuration::cellSize),
+        glm::vec3(x * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x, y + 1)), (y + 1) * Configuration::cellSize),
+        glm::vec3((x + 1) * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x + 1, y + 1)), (y + 1) * Configuration::cellSize),
+    };
 
     // calculate tangent space
-    const auto& [t1, b1, n1] = Vertex::calculateTangentSpace(p0, p1, p3, texCoords[0], texCoords[1], texCoords[3]);
-    const auto& [t2, b2, n2] = Vertex::calculateTangentSpace(p0, p3, p2, texCoords[0], texCoords[3], texCoords[2]);
+    const auto& [t1, b1, n1] = Vertex::calculateTangentSpace(corners[0], corners[1], corners[3], texCoords[0], texCoords[1], texCoords[3]);
+    const auto& [t2, b2, n2] = Vertex::calculateTangentSpace(corners[0], corners[3], corners[2], texCoords[0], texCoords[3], texCoords[2]);
 
     // build triangles (maybe not finished)
-    terrainVertices.emplace_back(p0, texCoords[0], n1, t1, b1);
-    terrainVertices.emplace_back(p1, texCoords[1], n1, t1, b1);
-    terrainVertices.emplace_back(p3, texCoords[3], n1, t1, b1);
-    terrainVertices.emplace_back(p0, texCoords[0], n2, t2, b2);
-    terrainVertices.emplace_back(p3, texCoords[3], n2, t2, b2);
-    terrainVertices.emplace_back(p2, texCoords[2], n2, t2, b2);
+    terrainVertices.emplace_back(corners[0], texCoords[0], n1, t1, b1);
+    terrainVertices.emplace_back(corners[1], texCoords[1], n1, t1, b1);
+    terrainVertices.emplace_back(corners[3], texCoords[3], n1, t1, b1);
+    terrainVertices.emplace_back(corners[0], texCoords[0], n2, t2, b2);
+    terrainVertices.emplace_back(corners[3], texCoords[3], n2, t2, b2);
+    terrainVertices.emplace_back(corners[2], texCoords[2], n2, t2, b2);
 
     return 6;
 }
