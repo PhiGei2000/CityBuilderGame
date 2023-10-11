@@ -4,6 +4,7 @@
 #include "events/events.hpp"
 
 #include "misc/coordinateTransform.hpp"
+#include "misc/ray.hpp"
 #include "misc/utility.hpp"
 
 #include "GLFW/glfw3.h"
@@ -42,41 +43,59 @@ void BuildSystem::update(float dt) {
     if (game->getState() == GameState::BUILD_MODE) {
         // get grid position
         const glm::vec2& mousePos = game->getMousePos();
-        glm::ivec2 gridPos = getGridPos(mousePos);
+        const auto& [intersection, gridPos] = getGridPos(mousePos);
 
         // display build marker and update the build marker position
         buildMarkerComponent.visible = true;
 
-        if (gridPos != buildMarkerComponent.position) {
-            buildMarkerComponent.position = gridPos;
-            transform.position = glm::vec3(gridPos.x * Configuration::cellSize, game->terrain.getTerrainHeight(Configuration::cellSize * gridPos) + 0.1f, gridPos.y * Configuration::cellSize);
-            transform.calculateTransform();
-
-            if (this->state.building) {
-                // render building preview
-                BuildEvent event = BuildEvent{
-                    {gridPos, state.startPosition},
-                    state.selectedBuildingType,
-                    BuildAction::PREVIEW,
-                    getShape(state.startPosition, gridPos)
-                };
-
-                if (state.selectedBuildingType == BuildingType::ROAD) {
-                    event.positions = getRoadNodes(state.startPosition, gridPos);
-                    event.shape = BuildShape::LINE;
+        if (intersection) {
+            if (gridPos != buildMarkerComponent.position) {
+                if (!game->terrain.positionValid(gridPos)) {
+                    goto BuildObjects;
                 }
 
-                const TerrainComponent& terrain = registry.get<TerrainComponent>(registry.view<TerrainComponent>().front());
-                event.valid = this->canBuild(event.positions, event.type, terrain);
+                buildMarkerComponent.position = gridPos;
+                // glm::vec3 offset = glm::vec3(0.0f);
+                // if (state.selectedBuildingType == BuildingType::LIFT_TERRAIN || state.selectedBuildingType == BuildingType::LOWER_TERRAIN) {
+                //     offset = glm::vec3(-0.5f, 0.0f, -0.5f);
+                // }
 
-                game->raiseEvent(event);
+                // transform.position = glm::vec3(gridPos.x * Configuration::cellSize, game->terrain.getTerrainHeight(gridPos) + 0.1f, gridPos.y * Configuration::cellSize) + static_cast<float>(Configuration::cellSize) * offset;
+                const glm::vec2& offset = static_cast<float>(Configuration::cellSize) * (glm::vec2(gridPos) + getBuildmarkerOffset(state.selectedBuildingType));
+                // set height
+                transform.position = glm::vec3(offset.x, game->terrain.getTerrainHeight(gridPos) + 0.1f, offset.y);
+                transform.calculateTransform();
+
+                if (this->state.building) {
+                    // render building preview
+                    BuildEvent event = BuildEvent{
+                        {gridPos, state.startPosition},
+                        state.selectedBuildingType,
+                        BuildAction::PREVIEW,
+                        getShape(state.startPosition, gridPos)
+                    };
+
+                    if (state.selectedBuildingType == BuildingType::ROAD) {
+                        event.positions = getRoadNodes(state.startPosition, gridPos);
+                        event.shape = BuildShape::LINE;
+                    }
+
+                    const TerrainComponent& terrain = registry.get<TerrainComponent>(registry.view<TerrainComponent>().front());
+                    event.valid = this->canBuild(event.positions, event.type, terrain);
+
+                    game->raiseEvent(event);
+                }
             }
+        }
+        else {
+            buildMarkerComponent.visible = false;
         }
     }
     else {
         buildMarkerComponent.visible = false;
     }
 
+BuildObjects:
     while (objectsToBuild.size() > 0) {
         BuildInfo objectToBuild = objectsToBuild.front();
 
@@ -91,23 +110,39 @@ void BuildSystem::update(float dt) {
     }
 }
 
-glm::ivec2 BuildSystem::getGridPos(const glm::vec2& mousePos) const {
+std::pair<bool, glm::ivec2> BuildSystem::getGridPos(const glm::vec2& mousePos) const {
     const CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
-    const TransformationComponent& cameraPos = registry.get<TransformationComponent>(cameraEntity);
+    const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
+    const glm::vec3& cameraPos = cameraTransform.position;
 
     glm::vec4 ray_clip = glm::vec4(mousePos, -1.0f, 1.0f);
     glm::vec4 ray_eye = glm::inverse(camera.projectionMatrix) * ray_clip;
     ray_eye.z = -1;
     ray_eye.w = 0;
 
-    glm::vec3 direction = glm::normalize(glm::vec3(glm::inverse(camera.viewMatrix) * ray_eye));
+    glm::vec3 direction = glm::vec3(glm::inverse(camera.viewMatrix) * ray_eye);
 
-    // TODO: pay attention to terrain height
-    float lambda = -cameraPos.position.y / direction.y;
+    Ray ray(cameraPos, direction);
+    const auto& cells = ray.getCellIntersections(11 * Configuration::cellSize);
 
-    glm::vec3 intersectionPoint = cameraPos.position + lambda * direction;
+    // get cell with first intersection (not perfect yet)
+    int i = 0;
+    while (i < cells.size()) {
+        const auto& [cell, intersection] = cells[i];
+        std::cout << cell << std::endl;
+        if (!game->terrain.positionValid(cell)) {
+            break;
+        }
 
-    return glm::floor(1.0f / Configuration::cellSize * glm::vec2(intersectionPoint.x, intersectionPoint.z));
+        float terrainHeight = game->terrain.getTerrainHeight(cell);
+        if (intersection.y < terrainHeight) {
+            return std::make_pair(true, i > 0 ? cells[i - 1].first : cell);
+        }
+
+        i++;
+    }
+
+    return std::make_pair(false, glm::ivec2());
 }
 
 void BuildSystem::setState(BuildingType selectedType, const glm::ivec2& currentPosition, bool building, const glm::ivec2& startPosition, bool xFirst) {
@@ -193,6 +228,16 @@ bool BuildSystem::canBuild(const std::vector<glm::ivec2>& positions, const Build
     // }
 
     return true;
+}
+
+constexpr glm::vec2 BuildSystem::getBuildmarkerOffset(const BuildingType type) {
+    switch (type) {
+        case BuildingType::LIFT_TERRAIN:
+        case BuildingType::LOWER_TERRAIN:
+            return glm::vec2(-0.5f);
+        default:
+            return glm::vec2(0.0f);
+    }
 }
 
 void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {

@@ -35,4 +35,9 @@ class Terrain {
     /// @param position The position in normalized world grid coords
     /// @return The surface type at the specified position
     TerrainSurfaceTypes getSurfaceType(const glm::vec2& position) const;
+
+    /// @brief Determines if the chunk at the specified position is generated.
+    /// @param position The position in normalized world grid coordinates
+    /// @return True if the chunk is already generated
+    bool positionValid(const glm::vec2& position) const;
 };

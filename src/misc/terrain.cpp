@@ -70,3 +70,9 @@ TerrainSurfaceTypes Terrain::getSurfaceType(const glm::vec2& position) const {
 
     return TerrainSurfaceTypes::GRASS;
 }
+
+bool Terrain::positionValid(const glm::vec2& position) const {
+    const auto& [chunk, _] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
+
+    return chunkEntities.contains(chunk);
+}

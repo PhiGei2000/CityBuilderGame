@@ -57,7 +57,7 @@ class BuildSystem : public System {
 
     /// @brief Returns the current position of the mouse cursor projected to the grid
     /// @returns The position in normalized world grid coordinates
-    glm::ivec2 getGridPos(const glm::vec2& mousePos) const;
+    std::pair<bool, glm::ivec2> getGridPos(const glm::vec2& mousePos) const;
 
     /// @brief Sets the current state of the current building process
     /// @param currentBuildingType The currently selected building type
@@ -85,6 +85,8 @@ class BuildSystem : public System {
     /// @param terrain The terrain information
     /// @return True if the building could be build otherwise false
     bool canBuild(const std::vector<glm::ivec2>& positions, const BuildingType type, const TerrainComponent& terrain) const;
+
+    static constexpr glm::vec2 getBuildmarkerOffset(const BuildingType type);
 
   public:
     BuildSystem(Game* game);
