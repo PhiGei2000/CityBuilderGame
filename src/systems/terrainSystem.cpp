@@ -54,24 +54,34 @@ unsigned int TerrainSystem::generateTerrainQuadMesh(const glm::ivec2& position, 
     const glm::ivec2& chunkOffset = Configuration::cellsPerChunk * chunkPosition;
 
     // generate corners of the quad
-    glm::vec3 corners[4] = {
+    glm::vec3 positions[4] = {
         glm::vec3(x * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x, y)), y * Configuration::cellSize),
         glm::vec3((x + 1) * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x + 1, y)), y * Configuration::cellSize),
         glm::vec3(x * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x, y + 1)), (y + 1) * Configuration::cellSize),
         glm::vec3((x + 1) * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x + 1, y + 1)), (y + 1) * Configuration::cellSize),
     };
 
+    std::array<unsigned int, 3> triangle1, triangle2;
+    if (glm::length(positions[0] - positions[3]) < glm::length(positions[1] - positions[2])) {
+        triangle1 = {0, 1, 3};
+        triangle2 = {0, 3, 2};
+    }
+    else {
+        triangle1 = {0, 1, 2};
+        triangle2 = {1, 3, 2};
+    }
+
     // calculate tangent space
-    const auto& [t1, b1, n1] = Vertex::calculateTangentSpace(corners[0], corners[1], corners[3], texCoords[0], texCoords[1], texCoords[3]);
-    const auto& [t2, b2, n2] = Vertex::calculateTangentSpace(corners[0], corners[3], corners[2], texCoords[0], texCoords[3], texCoords[2]);
+    const auto& [t1, b1, n1] = Vertex::calculateTangentSpace(positions[triangle1[0]], positions[triangle1[1]], positions[triangle1[2]], texCoords[triangle1[0]], texCoords[triangle1[1]], texCoords[triangle1[2]]);
+    const auto& [t2, b2, n2] = Vertex::calculateTangentSpace(positions[triangle2[0]], positions[triangle2[1]], positions[triangle2[2]], texCoords[triangle2[0]], texCoords[triangle2[1]], texCoords[triangle2[2]]);
 
     // build triangles (maybe not finished)
-    terrainVertices.emplace_back(corners[0], texCoords[0], n1, t1, b1);
-    terrainVertices.emplace_back(corners[1], texCoords[1], n1, t1, b1);
-    terrainVertices.emplace_back(corners[3], texCoords[3], n1, t1, b1);
-    terrainVertices.emplace_back(corners[0], texCoords[0], n2, t2, b2);
-    terrainVertices.emplace_back(corners[3], texCoords[3], n2, t2, b2);
-    terrainVertices.emplace_back(corners[2], texCoords[2], n2, t2, b2);
+    terrainVertices.emplace_back(positions[triangle1[0]], texCoords[triangle1[0]], n1, t1, b1);
+    terrainVertices.emplace_back(positions[triangle1[1]], texCoords[triangle1[1]], n1, t1, b1);
+    terrainVertices.emplace_back(positions[triangle1[2]], texCoords[triangle1[2]], n1, t1, b1);
+    terrainVertices.emplace_back(positions[triangle2[0]], texCoords[triangle2[0]], n2, t2, b2);
+    terrainVertices.emplace_back(positions[triangle2[1]], texCoords[triangle2[1]], n2, t2, b2);
+    terrainVertices.emplace_back(positions[triangle2[2]], texCoords[triangle2[2]], n2, t2, b2);
 
     return 6;
 }

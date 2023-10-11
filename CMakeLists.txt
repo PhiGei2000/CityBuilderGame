@@ -91,7 +91,7 @@ else()
         message("glew found")
     endif()
 
-    set(LIBNOISE_LIBRARIES libnoise.so)
+    set(LIBNOISE_LIBRARIES libnoise.a)
 
     include_directories(/usr/include/freetype2)
     include_directories(/usr/include/stb)
