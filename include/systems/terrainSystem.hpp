@@ -16,7 +16,11 @@ struct Vertex;
 
 class TerrainSystem : public System {
   protected:
-    noise::module::Perlin terrainNoise;
+    noise::module::Const terrainHeightScaleNoise;
+    noise::module::Perlin terrainBaseNoise;
+    noise::module::ScaleBias terrainRangeNoise;
+    noise::module::Floor terrainNoiseFloorModule;
+    noise::module::Multiply terrainNoise;
     static constexpr float noiseScaleFactor = 15.0f;
 
     static const TextureAtlas atlas;

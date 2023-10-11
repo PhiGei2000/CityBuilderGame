@@ -13,9 +13,24 @@
 const TextureAtlas TerrainSystem::atlas = TextureAtlas(64.0f, 128.0f, 2, 1);
 
 void TerrainSystem::init() {
-    terrainNoise.SetFrequency(0.0001f);
-    terrainNoise.SetOctaveCount(4);
-    terrainNoise.SetLacunarity(1.9);
+    using namespace noise::module;
+
+    terrainHeightScaleNoise.SetConstValue(Configuration::Terrain::heightSteps);
+    terrainNoise.SetSourceModule(0, terrainHeightScaleNoise);
+
+    terrainBaseNoise.SetFrequency(0.0001f);
+    terrainBaseNoise.SetOctaveCount(4);
+    terrainBaseNoise.SetLacunarity(1.9);
+
+    static constexpr float terrainNoiseScale = Configuration::Terrain::heightRange / 2;
+    // -1 * terrainNoiseScale + offset = minHeight <=> offset = minHeight + terrainNoiseScale
+    terrainRangeNoise.SetBias(Configuration::Terrain::minHeight + terrainNoiseScale);
+    terrainRangeNoise.SetScale(terrainNoiseScale);
+    terrainRangeNoise.SetSourceModule(0, terrainBaseNoise);
+
+    terrainNoiseFloorModule.SetSourceModule(0, terrainRangeNoise);
+
+    terrainNoise.SetSourceModule(1, terrainNoiseFloorModule);
 }
 
 void TerrainSystem::generateTerrain(TerrainComponent& terrain, const glm::ivec2& chunkPosition) const {
@@ -25,8 +40,9 @@ void TerrainSystem::generateTerrain(TerrainComponent& terrain, const glm::ivec2&
 
         for (int y = 0; y < Configuration::cellsPerChunk; y++) {
             glm::vec2 pos = noiseScaleFactor * (static_cast<float>(Configuration::cellSize) * glm::vec2(x, y) + static_cast<float>(Configuration::chunkSize) * glm::vec2(chunkPosition));
+            // noiseValue in [-1,1]
             float noiseValue = terrainNoise.GetValue(pos.x, pos.y, 0);
-            terrain.heightValues[x][y] = glm::floor(noiseValue * 4 + 2) * 2;
+            terrain.heightValues[x][y] = noiseValue;
         }
     }
 }
