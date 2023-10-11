@@ -25,33 +25,29 @@ struct TerrainArea {
         this->size = glm::max(position, position + size) - this->position;
     }
 
+    /// @brief Returns the intersection of the two specified areas
+    /// @param t1 First area
+    /// @param t2 Second area
+    /// @return The intersection
+    static inline TerrainArea getIntersection(const TerrainArea& t1, const TerrainArea& t2) {
+        const glm::ivec2 position = glm::max(t1.position, t2.position);
+        const glm::ivec2 size = glm::min(t1.position + glm::ivec2(t1.size), t2.position + glm::ivec2(t2.size)) - position;
+
+        // no intersection
+        if (size.x < 0 || size.y < 0) {
+            return TerrainArea();
+        }
+
+        return TerrainArea(position, size);
+    }
+
     /// @brief Returns the part of the terrain area which intersects with the chunk at the given position
     /// @param chunk The position of the chunk
     /// @return The part of the terrain area intersecting with the given chunk
     inline TerrainArea getAreaInChunk(const glm::ivec2& chunk) const {
-        const auto& [posChunk, posInsideChunk] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
-        if (posChunk != chunk) {
-            return TerrainArea(glm::ivec2(0), glm::ivec2(0));
-        }
+        const TerrainArea& chunkArea = TerrainArea(chunk * Configuration::cellsPerChunk, glm::uvec2(Configuration::cellsPerChunk));
 
-        glm::uvec2 chunkAreaSize;
-
-        // trim size if the area reaches to the neighbour chunk
-        if (posInsideChunk.x + size.x >= Configuration::chunkSize) {
-            chunkAreaSize.x = Configuration::cellsPerChunk - posInsideChunk.x;
-        }
-        else {
-            chunkAreaSize.x = size.x;
-        }
-
-        if (posInsideChunk.y + size.y >= Configuration::chunkSize) {
-            chunkAreaSize.y = Configuration::cellsPerChunk - posInsideChunk.y;
-        }
-        else {
-            chunkAreaSize.y = size.y;
-        }
-
-        return TerrainArea(position, chunkAreaSize);
+        return getIntersection(*this, chunkArea);
     }
 
     /// @brief Splits the terrain area with respect to chunks
@@ -84,4 +80,20 @@ struct TerrainArea {
 
         return chunkAreas;
     }
+
+    /// @brief Shifts the area by the specified offset. Does not change the size of the area
+    /// @param offset The offset
+    /// @return The shifted area
+    inline TerrainArea operator+(const glm::ivec2& offset) const {
+        return TerrainArea(offset + position, size);
+    }
+
+    inline bool operator==(const TerrainArea& other) const {
+        return position == other.position && size == other.size;
+    }
+
+    inline bool operator!=(const TerrainArea& other) const {
+        return !(*this == other);
+    }
 };
+

@@ -48,14 +48,14 @@ void Geometry::setVertexAttribute(unsigned int index, const VertexAttribute& att
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Geometry::bufferData(const std::vector<float>& vertices, const std::vector<unsigned int>& indices) {
+void Geometry::bufferData(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, unsigned int usage) {
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), usage);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), usage);
 
     drawCount = indices.size();
 
@@ -90,19 +90,19 @@ MeshGeometry::MeshGeometry()
     : Geometry(meshVertexAttributes) {
 }
 
-MeshGeometry::MeshGeometry(const GeometryData& data)
+MeshGeometry::MeshGeometry(const GeometryData& data, unsigned int usage)
     : Geometry(meshVertexAttributes) {
-    bufferData(data);
+    bufferData(data, usage);
 }
 
-void MeshGeometry::bufferData(const GeometryData& data) {
+void MeshGeometry::bufferData(const GeometryData& data, unsigned int usage) {
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
-    glBufferData(GL_ARRAY_BUFFER, data.vertices.size() * sizeof(Vertex), data.vertices.data(), GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.indices.size() * sizeof(unsigned int), data.indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, data.vertices.size() * sizeof(Vertex), data.vertices.data(), usage);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.indices.size() * sizeof(unsigned int), data.indices.data(), usage);
 
     drawCount = data.indices.size();
     culling = data.culling;

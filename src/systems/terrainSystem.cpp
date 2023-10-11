@@ -43,19 +43,17 @@ unsigned int TerrainSystem::generateTerrainQuadMesh(const glm::ivec2& position, 
     glm::vec3 p2 = glm::vec3(x * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x, y + 1)), (y + 1) * Configuration::cellSize);
     glm::vec3 p3 = glm::vec3((x + 1) * Configuration::cellSize, game->terrain.getTerrainHeight(chunkOffset + glm::ivec2(x + 1, y + 1)), (y + 1) * Configuration::cellSize);
 
-    // calculate normals
-    // glm::vec3 n0 = glm::normalize(glm::cross(p2 - p0, p1 - p0));
-    glm::vec3 n1 = glm::normalize(glm::cross(p0 - p1, p3 - p1));
-    glm::vec3 n2 = glm::normalize(glm::cross(p3 - p2, p0 - p2));
-    // glm::vec3 n3 = glm::normalize(glm::cross(p1 - p3, p2 - p3));
+    // calculate tangent space
+    const auto& [t1, b1, n1] = Vertex::calculateTangentSpace(p0, p1, p3, texCoords[0], texCoords[1], texCoords[3]);
+    const auto& [t2, b2, n2] = Vertex::calculateTangentSpace(p0, p3, p2, texCoords[0], texCoords[3], texCoords[2]);
 
     // build triangles (maybe not finished)
-    terrainVertices.emplace_back(p0, texCoords[0], n1);
-    terrainVertices.emplace_back(p1, texCoords[1], n1);
-    terrainVertices.emplace_back(p3, texCoords[3], n1);
-    terrainVertices.emplace_back(p0, texCoords[0], n2);
-    terrainVertices.emplace_back(p3, texCoords[3], n2);
-    terrainVertices.emplace_back(p2, texCoords[2], n2);
+    terrainVertices.emplace_back(p0, texCoords[0], n1, t1, b1);
+    terrainVertices.emplace_back(p1, texCoords[1], n1, t1, b1);
+    terrainVertices.emplace_back(p3, texCoords[3], n1, t1, b1);
+    terrainVertices.emplace_back(p0, texCoords[0], n2, t2, b2);
+    terrainVertices.emplace_back(p3, texCoords[3], n2, t2, b2);
+    terrainVertices.emplace_back(p2, texCoords[2], n2, t2, b2);
 
     return 6;
 }
@@ -92,7 +90,6 @@ unsigned int TerrainSystem::generateWaterQuadMesh(const glm::ivec2& position, co
     return 6;
 }
 
-// TODO: Seperate water mesh generation from surface generation
 void TerrainSystem::generateTerrainMesh(const glm::ivec2& chunkPosition, MeshComponent& mesh) const {
     std::vector<Vertex> terrainVertices;
     std::vector<unsigned int> terrainIndices;
@@ -119,13 +116,13 @@ void TerrainSystem::generateTerrainMesh(const glm::ivec2& chunkPosition, MeshCom
 
     MaterialPtr groundMaterial = resourceManager.getResource<Material>("GROUND_MATERIAL");
     GeometryData terrainData(terrainVertices, terrainIndices, false);
-    GeometryPtr terrainGeometry(new MeshGeometry(terrainData));
+    GeometryPtr terrainGeometry(new MeshGeometry(terrainData, GL_DYNAMIC_DRAW));
     mesh.mesh->geometries["ground"].push_back(std::make_pair(groundMaterial, terrainGeometry));
 
     if (waterVertices.size() > 0) {
         MaterialPtr waterMaterial = resourceManager.getResource<Material>("WATER_MATERIAL");
         GeometryData waterData(waterVertices, waterIndices, false);
-        GeometryPtr waterGeometry(new MeshGeometry(waterData));
+        GeometryPtr waterGeometry(new MeshGeometry(waterData, GL_DYNAMIC_DRAW));
         mesh.mesh->geometries["water"].push_back(std::make_pair(waterMaterial, waterGeometry));
     }
 }
@@ -142,7 +139,8 @@ void TerrainSystem::updateTerrainMesh(const TerrainArea& area) const {
 
 void TerrainSystem::updateTerrainMesh(const TerrainArea& area, MeshComponent& mesh) const {
     const auto& [chunkPos, pos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(area.position);
-    mesh.mesh->geometries["ground"][0].second->bindBuffer();
+
+    mesh.mesh->geometries.at("ground").front().second->bindBuffer();
 
     for (int x = 0; x < area.size.x; x++) {
         std::vector<Vertex> terrainVertices;
@@ -153,8 +151,7 @@ void TerrainSystem::updateTerrainMesh(const TerrainArea& area, MeshComponent& me
             generateTerrainQuadMesh(cellPosition, chunkPos, terrainVertices);
         }
 
-        unsigned int offset = (x * Configuration::cellsPerChunk + area.position.x) * 6;
-
+        unsigned int offset = ((area.position.x + x) * Configuration::cellsPerChunk + area.position.y) * 6;
         glBufferSubData(GL_ARRAY_BUFFER, offset * sizeof(Vertex), terrainVertices.size() * sizeof(Vertex), terrainVertices.data());
     }
 
@@ -259,8 +256,6 @@ void TerrainSystem::handleBuildEvent(const BuildEvent& event) {
                 break;
             case BuildingType::LOWER_TERRAIN:
                 terrain.heightValues[cellPos.x][cellPos.y] -= 2;
-                break;
-            default:
                 break;
         }
 

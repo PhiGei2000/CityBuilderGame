@@ -35,6 +35,15 @@ float Terrain::getTerrainHeight(const glm::vec2& position) const {
     return height;
 }
 
+void Terrain::setTerrainHeight(const glm::ivec2& position, float height) const {
+    const auto& [chunk, pos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
+
+    const entt::entity entity = chunkEntities.at(chunk);
+    const TerrainComponent& terrain = game->getRegistry().get<TerrainComponent>(entity);
+
+    terrain.heightValues[pos.x][pos.y] = height;
+}
+
 TerrainSurfaceTypes Terrain::getSurfaceType(const glm::vec2& position) const {
     constexpr glm::vec2 offsets[9] = {
         glm::vec2(0, 0),

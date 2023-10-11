@@ -1,6 +1,8 @@
 #pragma once
 #include "system.hpp"
 
+#include "misc/terrainArea.hpp"
+
 #include <queue>
 
 #include <glm/glm.hpp>
@@ -9,7 +11,6 @@
 struct TerrainComponent;
 struct MeshComponent;
 struct BuildEvent;
-struct TerrainArea;
 struct TextureAtlas;
 struct Vertex;
 
