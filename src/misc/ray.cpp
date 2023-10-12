@@ -13,10 +13,13 @@ Ray Ray::fromPoints(const glm::vec3& start, const glm::vec3& p) {
 
 std::vector<std::pair<glm::ivec2, glm::vec3>> Ray::getCellIntersections(float maxLength) const {
     std::vector<std::pair<glm::ivec2, glm::vec3>> cells;
-    float lambda, lambdaWorld;
-
     const auto startPos = utility::worldToNormalizedWorldGridCoords(start);
+    if (direction.x == 0.0f && direction.z == 0.0f) {
+        cells.emplace_back(startPos, glm::vec3(INT_MAX));
+        return cells;
+    }
 
+    float lambda;
     int nextX = startPos.x, nextY = startPos.y;
     int xStep = -1, yStep = -1;
     glm::ivec2 currentCell = startPos;
@@ -33,8 +36,8 @@ std::vector<std::pair<glm::ivec2, glm::vec3>> Ray::getCellIntersections(float ma
 
     do {
         // determine next cell
-        float lambdaX = (nextX - startPos.x) / direction.x;
-        float lambdaY = (nextY - startPos.y) / direction.z;
+        float lambdaX = direction.x == 0 ? INT_MAX : (nextX - startPos.x) / direction.x;
+        float lambdaY = direction.z == 0 ? INT_MAX : (nextY - startPos.y) / direction.z;
 
         if (lambdaY < lambdaX) {
             lambda = lambdaY;

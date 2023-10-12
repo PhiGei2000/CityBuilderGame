@@ -176,10 +176,11 @@ void TerrainSystem::updateTerrainMesh(const TerrainArea& area, MeshComponent& me
         for (int y = 0; y < area.size.y; y++) {
             const glm::ivec2& cellPosition = (pos + glm::ivec2(x, y));
 
+            std::cout << "Update terrain at " << cellPosition << std::endl;
             generateTerrainQuadMesh(cellPosition, chunkPos, terrainVertices);
         }
 
-        unsigned int offset = ((area.position.x + x) * Configuration::cellsPerChunk + area.position.y) * 6;
+        unsigned int offset = ((pos.x + x) * Configuration::cellsPerChunk + pos.y) * 6;
         glBufferSubData(GL_ARRAY_BUFFER, offset * sizeof(Vertex), terrainVertices.size() * sizeof(Vertex), terrainVertices.data());
     }
 
@@ -287,6 +288,6 @@ void TerrainSystem::handleBuildEvent(const BuildEvent& event) {
                 break;
         }
 
-        areasToUpdateMesh.emplace(cellPos - glm::ivec2(1), glm::ivec2(3, 3));
+        areasToUpdateMesh.emplace(event.positions[0] - glm::ivec2(1), glm::ivec2(3, 3));
     }
 }
