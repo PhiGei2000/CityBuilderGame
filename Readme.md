@@ -5,7 +5,7 @@ A simple city-building game using C++ and OpenGL.
 ### Features
 - [x] GUI
 - [x] Street placement
-- [ ] procedural terrain generation
+- [x] procedural terrain generation and terrain editing
 - [ ] Traffic
 - [ ] Buildings
 - [ ] Savegames
@@ -28,15 +28,18 @@ Packages (only on Linux):
 - [pugixml](https://github.com/zeux/pugixml)
 - [libnoise](https://github.com/PhiGei2000/libnoise)
 
-### Clone the repository
+### Clone and build
+**1. Clone the repository**
+
     git clone --recursive https://github.com/PhiGei2000/CityBuildingGame.git
+
 the `--recursive` option is only needed on windows to download the libraries from github.
 
-Change your current directory to the downloaded project
+**2. Change your current directory to the downloaded project**
 
     cd ./CityBuilderGame
 
-### Run CMake to build the project
+**3. Run CMake to build the project**
 
     cmake --build ./build
 
@@ -45,26 +48,33 @@ After that keep sure you link or copy the res directory to the build directory
 
     cp -r ./res ./build/
 
-or
+or to create a symbolic link
 
     cd ./build && ln -s ../res res
+**3. Run build script (Linux)**
 
-### Start the game
+    bash ./build.sh
+
+**4. Start the game**
 
     ./cityBuilderGame
 
 ## Controls
 
-| Button | Description |
+| Button(s) | Description |
 | --- | ---|
 | WASD | Move |
-| QE | rotate camera left/right |
-| RF | rotate camera up/down |
+| QE | Rotate camera left/right |
+| RF | Rotate camera up/down |
 | ESC | Main menu |
+| B | Enter/Leave build mode |
 | F3 | Enter debug mode |
 
-## Issues
-Feel free to report issues to the [issues section](https://github.com/PhiGei2000/CityBuilderGame/issues).
+## Issues and questions
+Feel free to report issues and questions to the [issues section](https://github.com/PhiGei2000/CityBuilderGame/issues).
+
+## Demonstration videos
+Check out my [YouTube playlist](https://www.youtube.com/playlist?list=PLi1TZVQkw_fLyYXfnZGTGli4pqM7FvHVu) for demonstration of some features in the game.
 
 ## License
 This code is licensed under the [GNU GLP license](LICENSE)
