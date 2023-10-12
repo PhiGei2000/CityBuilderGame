@@ -15,7 +15,7 @@ std::vector<std::pair<glm::ivec2, glm::vec3>> Ray::getCellIntersections(float ma
     std::vector<std::pair<glm::ivec2, glm::vec3>> cells;
     const auto startPos = utility::worldToNormalizedWorldGridCoords(start);
     if (direction.x == 0.0f && direction.z == 0.0f) {
-        cells.emplace_back(startPos, glm::vec3(INT_MAX));
+        cells.emplace_back(startPos, glm::vec3(static_cast<float>(INT_MAX)));
         return cells;
     }
 
@@ -36,8 +36,8 @@ std::vector<std::pair<glm::ivec2, glm::vec3>> Ray::getCellIntersections(float ma
 
     do {
         // determine next cell
-        float lambdaX = direction.x == 0 ? INT_MAX : (nextX - startPos.x) / direction.x;
-        float lambdaY = direction.z == 0 ? INT_MAX : (nextY - startPos.y) / direction.z;
+        float lambdaX = direction.x == 0 ? static_cast<float>(INT_MAX) : (nextX - startPos.x) / direction.x;
+        float lambdaY = direction.z == 0 ? static_cast<float>(INT_MAX) : (nextY - startPos.y) / direction.z;
 
         if (lambdaY < lambdaX) {
             lambda = lambdaY;
@@ -53,6 +53,6 @@ std::vector<std::pair<glm::ivec2, glm::vec3>> Ray::getCellIntersections(float ma
         const glm::vec3& intersectionPoint = start + Configuration::cellSize * lambda * direction;
 
         cells.emplace_back(currentCell, intersectionPoint);
-    } while (abs(lambda) < maxLength);
+    } while (std::abs(lambda) < maxLength);
     return cells;
 }
