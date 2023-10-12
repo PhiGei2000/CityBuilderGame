@@ -43,7 +43,9 @@ void BuildSystem::update(float dt) {
     if (game->getState() == GameState::BUILD_MODE) {
         // get grid position
         const glm::vec2& mousePos = game->getMousePos();
-        const auto& [intersection, gridPos] = getGridPos(mousePos);
+        const glm::vec2& buildMarkerOffset = getBuildmarkerOffset(state.selectedBuildingType);
+
+        const auto& [intersection, gridPos] = getGridPos(mousePos, -glm::vec3(Configuration::cellSize * buildMarkerOffset.x, 0.0f, Configuration::cellSize * buildMarkerOffset.y));
 
         // display build marker and update the build marker position
         buildMarkerComponent.visible = true;
@@ -55,13 +57,7 @@ void BuildSystem::update(float dt) {
                 }
 
                 buildMarkerComponent.position = gridPos;
-                // glm::vec3 offset = glm::vec3(0.0f);
-                // if (state.selectedBuildingType == BuildingType::LIFT_TERRAIN || state.selectedBuildingType == BuildingType::LOWER_TERRAIN) {
-                //     offset = glm::vec3(-0.5f, 0.0f, -0.5f);
-                // }
-
-                // transform.position = glm::vec3(gridPos.x * Configuration::cellSize, game->terrain.getTerrainHeight(gridPos) + 0.1f, gridPos.y * Configuration::cellSize) + static_cast<float>(Configuration::cellSize) * offset;
-                const glm::vec2& offset = static_cast<float>(Configuration::cellSize) * (glm::vec2(gridPos) + getBuildmarkerOffset(state.selectedBuildingType));
+                const glm::vec2& offset = static_cast<float>(Configuration::cellSize) * (glm::vec2(gridPos) + buildMarkerOffset);
                 // set height
                 transform.position = glm::vec3(offset.x, game->terrain.getTerrainHeight(gridPos) + 0.1f, offset.y);
                 transform.calculateTransform();
@@ -110,10 +106,10 @@ BuildObjects:
     }
 }
 
-std::pair<bool, glm::ivec2> BuildSystem::getGridPos(const glm::vec2& mousePos) const {
+std::pair<bool, glm::ivec2> BuildSystem::getGridPos(const glm::vec2& mousePos, const glm::vec3& offset) const {
     const CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
-    const glm::vec3& cameraPos = cameraTransform.position;
+    const glm::vec3& cameraPos = cameraTransform.position + offset;
 
     glm::vec4 ray_clip = glm::vec4(mousePos, -1.0f, 1.0f);
     glm::vec4 ray_eye = glm::inverse(camera.projectionMatrix) * ray_clip;
@@ -129,7 +125,6 @@ std::pair<bool, glm::ivec2> BuildSystem::getGridPos(const glm::vec2& mousePos) c
     int i = 0;
     while (i < cells.size()) {
         const auto& [cell, intersection] = cells[i];
-        std::cout << cell << std::endl;
         if (!game->terrain.positionValid(cell)) {
             break;
         }

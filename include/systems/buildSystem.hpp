@@ -56,8 +56,9 @@ class BuildSystem : public System {
     std::queue<BuildInfo> objectsToBuild;
 
     /// @brief Returns the current position of the mouse cursor projected to the grid
+    /// @param mousePos Position of the mouse in screen coordinates
     /// @returns The position in normalized world grid coordinates
-    std::pair<bool, glm::ivec2> getGridPos(const glm::vec2& mousePos) const;
+    std::pair<bool, glm::ivec2> getGridPos(const glm::vec2& mousePos, const glm::vec3& offset) const;
 
     /// @brief Sets the current state of the current building process
     /// @param currentBuildingType The currently selected building type
