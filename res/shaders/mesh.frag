@@ -6,7 +6,8 @@ in VS_OUT {
     vec3 tangentLightDirection;
     vec3 tangentViewPos;
     vec3 tangentFragPos;
-} fs_in;
+}
+fs_in;
 
 layout(std140, binding = 1) uniform Camera {
     mat4 view;
@@ -59,6 +60,8 @@ vec3 calcAmbientLight(vec3 ambientColor);
 vec3 calcDiffuseLight(vec3 normal, vec3 diffuseColor);
 vec3 calcSpecularLight(vec3 normal, vec3 specularColor);
 float shadowCalculation(vec3 normal);
+
+float biasValues[cascadeCount] = float[](0.05, 0.005, 0.005, 0.001);
 
 void main() {
     // init colors
@@ -144,9 +147,10 @@ float shadowCalculation(vec3 normal) {
     }
 
     // calculate bias and apply pcf
-    float bias = max(0.00075 * (1.0 - dot(normal, fs_in.tangentLightDirection)), 0.00001);
-    float shadow = 0;
     vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps, 0));
+    float cosTheta = dot(normal, fs_in.tangentLightDirection);
+    float bias = max(biasValues[mapIndex] * (1 - cosTheta), 0.1 * biasValues[mapIndex]);
+    float shadow = 0;
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
             float closestDepth = texture(shadowMaps, vec3(projCoords.xy + vec2(x, y) * texelSize, mapIndex)).r;
