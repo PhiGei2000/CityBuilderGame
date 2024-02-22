@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 
 struct MouseButtonEvent;
+struct MouseMoveEvent;
 struct KeyEvent;
 struct TerrainComponent;
 
@@ -17,68 +18,57 @@ struct Object;
 
 class BuildSystem : public System {
   protected:
-    struct BuildInfo {
-        ObjectPtr object;
-        std::vector<glm::ivec2> positions;
-        Direction direction;
+    // struct BuildInfo {
+    // ObjectPtr object;
+    // std::vector<glm::ivec2> positions;
+    // Direction direction;
 
-        BuildingType type;
+    // BuildingType type;
 
-        inline BuildInfo(ObjectPtr object, const std::vector<glm::ivec2>& positions, BuildingType type, Direction direction = Direction::UNDEFINED)
-            : object(object), positions(positions), type(type), direction(direction) {
-        }
-    };
+    // inline BuildInfo(ObjectPtr object, const std::vector<glm::ivec2>& positions, BuildingType type, Direction direction = Direction::UNDEFINED)
+    //: object(object), positions(positions), type(type), direction(direction) {
+    //}
+    //};
 
     virtual void init() override;
 
     entt::entity cameraEntity;
-    entt::entity buildMarkerEntity;
+    entt::entity currentBuilding;
 
-    /// @brief Structure that represents the state of the current building process
-    struct BuildSystemState {
-        /// @brief Building process ongoing
-        bool building = false;
+    /// @brief Building process ongoing
+    bool building = false;
 
-        /// @brief Current position of the build marker in world grid coordinates
-        glm::ivec2 currentPosition;
+    /// @brief Selected building type
+    BuildingType selectedBuildingType = BuildingType::CLEAR;
 
-        /// @brief Start position of the current building process in world grid coordinates
-        glm::ivec2 startPosition;
-
-        /// @brief Selected building type
-        BuildingType selectedBuildingType = BuildingType::CLEAR;
-
-        /// @brief Only used for road building. Describes if the road first goes to x-Direction or to y-Direction
-        bool xFirst = true;
-    } state;
+    struct GridMouseIntersection {
+        bool intersection;
+        glm::ivec2 position;
+    } gridMouseIntersection;
 
     /// @brief A list of objects that are going to be created
-    std::queue<BuildInfo> objectsToBuild;
+    std::queue<entt::entity> objectsToBuild;
 
     /// @brief Returns the current position of the mouse cursor projected to the grid
     /// @param mousePos Position of the mouse in screen coordinates
     /// @returns The position in normalized world grid coordinates
     std::pair<bool, glm::ivec2> getGridPos(const glm::vec2& mousePos, const glm::vec3& offset) const;
 
-    /// @brief Sets the current state of the current building process
-    /// @param currentBuildingType The currently selected building type
-    /// @param currentPosition The position of the build marker
-    /// @param building True if the building process has been started
-    /// @param startPosition The position where the building process has been started
-    /// @param xFirst The direction of the building
-    void setState(BuildingType currentBuildingType, const glm::ivec2& currentPosition, bool building = false, const glm::ivec2& startPosition = glm::ivec2(-1), bool xFirst = true);
-
-    /// @brief Returns the shape of the current building area according to the start and current position
-    /// @param start The start position of the building process
-    /// @param end The current or end position of the build process
+    /// @brief Returns the shape of the current building area according to the size vector
+    /// @param start The start position of the building process    
     /// @return The type of the shape of the building area
-    static constexpr BuildShape getShape(const glm::ivec2& start, const glm::ivec2& end);
+    static constexpr BuildShape getShape(const glm::ivec2& size);
+
+    /// @brief Returns the default size of the building
+    /// @param type The building type
+    /// @returns The default size vector
+    static constexpr glm::ivec2 getDefaultSize(BuildingType type);
 
     /// @brief Calculates the positions of road nodes based on start and end point of the road
     /// @param start The start position of the road
     /// @param end The end position of the road
     /// @returns The positions of the road nodes
-    std::vector<glm::ivec2> getRoadNodes(const glm::ivec2& start, const glm::ivec2& end) const;
+    //std::vector<glm::ivec2> getRoadNodes(const glm::ivec2& start, const glm::ivec2& end) const;
 
     /// @brief Determines if the given building could be build
     /// @param positions The position data of the building
@@ -87,7 +77,9 @@ class BuildSystem : public System {
     /// @return True if the building could be build otherwise false
     bool canBuild(const std::vector<glm::ivec2>& positions, const BuildingType type, const TerrainComponent& terrain) const;
 
-    static constexpr glm::vec2 getBuildmarkerOffset(const BuildingType type);
+    static constexpr glm::vec3 getBuildmarkerOffset(const BuildingType type);
+
+    void createNewBuilding();
 
   public:
     BuildSystem(Game* game);
@@ -95,6 +87,8 @@ class BuildSystem : public System {
     virtual void update(float dt) override;
 
     void handleMouseButtonEvent(const MouseButtonEvent& e);
+
+    void handleMouseMoveEvent(const MouseMoveEvent& e);
 
     void handleKeyEvent(const KeyEvent& e);
 

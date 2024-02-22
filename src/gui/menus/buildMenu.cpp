@@ -14,7 +14,7 @@ BuildMenu::BuildMenu(Gui* gui)
     cornerRadius = 0;
     itemAligment = ItemAligment::BEGIN;
 
-    liftTerrainButtonTexture = new Texture("res/gui/liftTerrain_icon.png");
+    /*liftTerrainButtonTexture = new Texture("res/gui/liftTerrain_icon.png");
     liftTerrainButton = new IconButton("build_menu.button_liftTerrain", gui, colors::anthraziteGrey, liftTerrainButtonTexture);
     liftTerrainButton->constraints.width = AbsoluteConstraint(64);
     liftTerrainButton->constraints.height = AbsoluteConstraint(64);
@@ -34,7 +34,7 @@ BuildMenu::BuildMenu(Gui* gui)
 
         e.handled = true;
     };
-    addChild(lowerTerrainButton);
+    addChild(lowerTerrainButton);*/
 
     streetButtonTexture = new Texture("res/gui/streetBuilder_icon.png");
     streetButton = new IconButton("build_menu.button_street", gui, colors::anthraziteGrey, streetButtonTexture);

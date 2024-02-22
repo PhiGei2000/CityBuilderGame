@@ -100,6 +100,8 @@ const entt::entity CarSystem::spawnCar(const glm::vec3& position, Direction driv
     // registry.emplace<TransformationComponent>(entity, position, glm::vec3(0.0f, angle, 0.0f), glm::vec3(1.0f));
 
     // return entity;
+
+    return entt::entity();
 }
 
 void CarSystem::handleBuildEvent(BuildEvent& e) {

@@ -144,8 +144,8 @@ void RenderSystem::update(float dt) {
 
     meshShader->use();
     if (game->getState() == GameState::BUILD_MODE) {
-        registry.view<TransformationComponent, MeshComponent, BuildMarkerComponent>()
-            .each([&](const TransformationComponent& transform, const MeshComponent& mesh, const BuildMarkerComponent& buildMarker) {
+        registry.view<TransformationComponent, MeshComponent, BuildingComponent>()
+            .each([&](const TransformationComponent& transform, const MeshComponent& mesh, const BuildingComponent& buildMarker) {
                 meshShader->setMatrix4("model", transform.transform);
                 mesh.mesh->render(meshShader);
             });

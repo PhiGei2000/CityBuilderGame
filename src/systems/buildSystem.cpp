@@ -24,82 +24,61 @@ BuildSystem::BuildSystem(Game* game)
 
     eventDispatcher.sink<BuildEvent>()
         .connect<&BuildSystem::handleBuildEvent>(*this);
+
+    eventDispatcher.sink<MouseMoveEvent>()
+        .connect<&BuildSystem::handleMouseMoveEvent>(*this);
 }
 
 void BuildSystem::init() {
     cameraEntity = registry.view<CameraComponent, TransformationComponent>().front();
 
-    buildMarkerEntity = registry.create();
-    registry.emplace<BuildMarkerComponent>(buildMarkerEntity, glm::ivec2(0.0f), false);
-    registry.emplace<TransformationComponent>(buildMarkerEntity, glm::vec3(0.0f), glm::quat(), glm::vec3(1.0f));
-
-    registry.emplace<MeshComponent>(buildMarkerEntity, resourceManager.getResource<Mesh>("BUILDMARKER_MESH"));
+    createNewBuilding();
 }
 
 void BuildSystem::update(float dt) {
-    BuildMarkerComponent& buildMarkerComponent = registry.get<BuildMarkerComponent>(buildMarkerEntity);
-    TransformationComponent& transform = registry.get<TransformationComponent>(buildMarkerEntity);
-
     if (game->getState() == GameState::BUILD_MODE) {
-        // get grid position
-        const glm::vec2& mousePos = game->getMousePos();
-        const glm::vec2& buildMarkerOffset = getBuildmarkerOffset(state.selectedBuildingType);
+        BuildingComponent& building = registry.get<BuildingComponent>(currentBuilding);
+        if (building.type != selectedBuildingType) {
+            building.type = selectedBuildingType;
+            building.size = getDefaultSize(selectedBuildingType);
+            this->building = false;
+        }
 
-        const auto& [intersection, gridPos] = getGridPos(mousePos, -glm::vec3(Configuration::cellSize * buildMarkerOffset.x, 0.0f, Configuration::cellSize * buildMarkerOffset.y));
+        if (gridMouseIntersection.intersection) {
+            switch (building.type) {
+                case BuildingType::ROAD:
+                    if (this->building) {
+                        const glm::ivec2& difference = gridMouseIntersection.position - building.gridPosition;
 
-        // display build marker and update the build marker position
-        buildMarkerComponent.visible = true;
-
-        if (intersection) {
-            if (gridPos != buildMarkerComponent.position) {
-                if (!game->terrain.positionValid(gridPos)) {
-                    goto BuildObjects;
-                }
-
-                buildMarkerComponent.position = gridPos;
-                const glm::vec2& offset = static_cast<float>(Configuration::cellSize) * (glm::vec2(gridPos) + buildMarkerOffset);
-                // set height
-                transform.position = glm::vec3(offset.x, game->terrain.getTerrainHeight(gridPos) + 0.1f, offset.y);
-                transform.calculateTransform();
-
-                if (this->state.building) {
-                    // render building preview
-                    BuildEvent event = BuildEvent{
-                        {gridPos, state.startPosition},
-                        state.selectedBuildingType,
-                        BuildAction::PREVIEW,
-                        getShape(state.startPosition, gridPos)
-                    };
-
-                    if (state.selectedBuildingType == BuildingType::ROAD) {
-                        event.positions = getRoadNodes(state.startPosition, gridPos);
-                        event.shape = BuildShape::LINE;
+                        if (difference.x > difference.y) {
+                            building.size = glm::ivec2(difference.x, 0);
+                        }
+                        else {
+                            building.size = glm::ivec2(0, difference.y);
+                        }
                     }
-
-                    const TerrainComponent& terrain = registry.get<TerrainComponent>(registry.view<TerrainComponent>().front());
-                    event.valid = this->canBuild(event.positions, event.type, terrain);
-
-                    game->raiseEvent(event);
-                }
+                    else {
+                        building.gridPosition = gridMouseIntersection.position;
+                    }
+                    break;
+                default:
+                    building.gridPosition = gridMouseIntersection.position;
             }
         }
-        else {
-            buildMarkerComponent.visible = false;
-        }
-    }
-    else {
-        buildMarkerComponent.visible = false;
     }
 
 BuildObjects:
     while (objectsToBuild.size() > 0) {
-        BuildInfo objectToBuild = objectsToBuild.front();
+        entt::entity objectToBuild = objectsToBuild.front();
 
-        entt::entity entity = objectToBuild.object->create(registry);
-        registry.emplace<TransformationComponent>(entity, utility::normalizedWorldGridToWorldCoords(objectToBuild.positions[0]), glm::vec3(0.0f, glm::radians(-90.0f) * (int)objectToBuild.direction, 0.0f), glm::vec3(1.0f)).calculateTransform();
-        registry.emplace<BuildingComponent>(entity, objectToBuild.positions[0]);
+        BuildingComponent& building = registry.get<BuildingComponent>(objectToBuild);
+        building.preview = false;
 
-        BuildEvent event(objectToBuild.positions, objectToBuild.type, BuildAction::ENTITY_CREATED, getShape(objectToBuild.positions[0], objectToBuild.positions[1]));
+        registry.emplace<TransformationComponent>(objectToBuild, utility::normalizedWorldGridToWorldCoords(building.gridPosition), glm::vec3(0.0f, glm::radians(-90.0f) * building.rotation, 0.0f), glm::vec3(1.0f)).calculateTransform();
+
+        std::vector<glm::ivec2> positions = {building.gridPosition, building.gridPosition + building.size};
+
+        BuildEvent event(positions, building.type, BuildAction::ENTITY_CREATED, getShape(building.size));
         game->raiseEvent(event);
 
         objectsToBuild.pop();
@@ -140,35 +119,9 @@ std::pair<bool, glm::ivec2> BuildSystem::getGridPos(const glm::vec2& mousePos, c
     return std::make_pair(false, glm::ivec2());
 }
 
-void BuildSystem::setState(BuildingType selectedType, const glm::ivec2& currentPosition, bool building, const glm::ivec2& startPosition, bool xFirst) {
-    // update state variables
-    state.building = building;
-    state.currentPosition = currentPosition;
-    state.startPosition = building ? startPosition : glm::ivec2(-INT_MAX);
-    state.selectedBuildingType = selectedType;
-    state.xFirst = xFirst;
-
-    if (state.building) {
-        std::vector<glm::ivec2> positions;
-        BuildShape shape;
-        if (state.selectedBuildingType == BuildingType::ROAD) {
-            positions = getRoadNodes(startPosition, currentPosition);
-            shape = BuildShape::LINE;
-        }
-        else {
-            positions = {startPosition, currentPosition};
-            shape = getShape(startPosition, currentPosition);
-        }
-
-        BuildEvent event = BuildEvent(positions, state.selectedBuildingType, BuildAction::PREVIEW, shape);
-
-        game->raiseEvent(event);
-    }
-}
-
-constexpr BuildShape BuildSystem::getShape(const glm::ivec2& start, const glm::ivec2& end) {
-    bool x = start.x == end.x;
-    bool y = start.y == end.y;
+constexpr BuildShape BuildSystem::getShape(const glm::ivec2& size) {
+    bool x = size.x == 0;
+    bool y = size.y == 0;
 
     if (x && y) {
         return BuildShape::POINT;
@@ -181,16 +134,25 @@ constexpr BuildShape BuildSystem::getShape(const glm::ivec2& start, const glm::i
     }
 }
 
-std::vector<glm::ivec2> BuildSystem::getRoadNodes(const glm::ivec2& start, const glm::ivec2& end) const {
-    BuildShape shape = getShape(start, end);
-    if (shape == BuildShape::LINE) {
-        return {start, end};
-    }
-    else {
-        glm::ivec2 node = state.xFirst ? glm::ivec2(start.x, end.y) : glm::ivec2(end.x, start.y);
-        return {start, node, end};
+constexpr glm::ivec2 BuildSystem::getDefaultSize(BuildingType type) {
+    switch (type) {
+        case BuildingType::PARKING_LOT:
+            return glm::ivec2(1);
+        default:
+            return glm::ivec2(0);
     }
 }
+
+// std::vector<glm::ivec2> BuildSystem::getRoadNodes(const glm::ivec2& start, const glm::ivec2& end) const {
+// BuildShape shape = getShape(start, end);
+// if (shape == BuildShape::LINE) {
+// return {start, end};
+//}
+// else {
+// glm::ivec2 node = state.xFirst ? glm::ivec2(start.x, end.y) : glm::ivec2(end.x, start.y);
+// return {start, node, end};
+//}
+//}
 
 bool BuildSystem::canBuild(const std::vector<glm::ivec2>& positions, const BuildingType type, const TerrainComponent& terrain) const {
     // if (type == BuildingType::ROAD) {
@@ -225,14 +187,16 @@ bool BuildSystem::canBuild(const std::vector<glm::ivec2>& positions, const Build
     return true;
 }
 
-constexpr glm::vec2 BuildSystem::getBuildmarkerOffset(const BuildingType type) {
+constexpr glm::vec3 BuildSystem::getBuildmarkerOffset(const BuildingType type) {
     switch (type) {
-        case BuildingType::LIFT_TERRAIN:
-        case BuildingType::LOWER_TERRAIN:
-            return glm::vec2(-0.5f);
         default:
-            return glm::vec2(0.0f);
+            return glm::vec3(0.0f);
     }
+}
+
+void BuildSystem::createNewBuilding() {
+    currentBuilding = registry.create();
+    registry.emplace<BuildingComponent>(currentBuilding, selectedBuildingType, glm::vec2(), 0, getDefaultSize(selectedBuildingType), true);
 }
 
 void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
@@ -246,67 +210,74 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
 
     if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
         // get the position of the build marker
-        const BuildMarkerComponent& buildMarker = registry.get<BuildMarkerComponent>(buildMarkerEntity);
+        const BuildingComponent& building = registry.get<BuildingComponent>(currentBuilding);
 
-        BuildingType selectedType = state.selectedBuildingType;
         BuildAction action = BuildAction::DEFAULT;
         BuildShape shape = BuildShape::POINT;
         glm::ivec2 start;
-        std::vector<glm::ivec2> positions = {buildMarker.position};
-
-        state.currentPosition = buildMarker.position;
+        std::vector<glm::ivec2> positions = {building.gridPosition, building.gridPosition + building.size};
 
         bool canBuild;
-        switch (selectedType) {
+        switch (building.type) {
             case BuildingType::ROAD:
-                action = state.building ? BuildAction::END : BuildAction::BEGIN;
+                if (this->building) {
+                    action = BuildAction::END;
 
-                if (action == BuildAction::END) {
-                    start = state.startPosition;
-
-                    positions = getRoadNodes(start, buildMarker.position);
+                    objectsToBuild.emplace(currentBuilding);
+                    createNewBuilding();
                 }
-
-                setState(selectedType, buildMarker.position, !state.building, buildMarker.position, state.xFirst);
+                else {
+                    this->building = true;
+                }
                 break;
             case BuildingType::PARKING_LOT:
                 action = BuildAction::END;
 
-                objectsToBuild.emplace(BuildInfo(resourceManager.getResource<Object>("object.parking_lot"), {buildMarker.position}, BuildingType::PARKING_LOT));
+                objectsToBuild.emplace(currentBuilding);
+                createNewBuilding();
                 break;
             default:
                 break;
         }
 
-        BuildEvent event = BuildEvent(positions, selectedType, action, shape);
+        BuildEvent event = BuildEvent(positions, building.type, action, shape);
 #if DEBUG
         static std::string actionNames[] = {"DEFAULT", "BEGIN", "END"};
 
-        std::cout << "Raising Build Event: {pos: (" << buildMarker.position << "), type: " << selectedType << ", action: " << actionNames[(unsigned int)action] << ", start: (" << start << ")}" << std::endl;
+        std::cout << "Raising Build Event: {pos: (" << positions[0] << "), type: " << building.type << ", action: " << actionNames[(unsigned int)action] << ", start: (" << start << ")}" << std::endl;
 #endif
         game->raiseEvent(event);
     }
+    else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+        BuildingComponent building = registry.get<BuildingComponent>(currentBuilding);
+        building.rotation++;
+    }
+}
+
+void BuildSystem::handleMouseMoveEvent(const MouseMoveEvent& e) {
+    if (game->getState() != GameState::BUILD_MODE)
+        return;
+
+    const auto& [intersection, gridPos] = getGridPos(glm::vec2(e.x, e.y), getBuildmarkerOffset(selectedBuildingType));
+    gridMouseIntersection = {intersection, gridPos};
 }
 
 void BuildSystem::handleKeyEvent(const KeyEvent& e) {
-    if (e.action == GLFW_PRESS) {
-        GameState state = game->getState();
+    if (e.action != GLFW_PRESS)
+        return;
 
-        if (e.key == GLFW_KEY_B) {
-            if (state == GameState::RUNNING) {
-                game->setState(GameState::BUILD_MODE);
-            }
-            else if (state == GameState::BUILD_MODE) {
-                game->setState(GameState::RUNNING);
-            }
+    GameState state = game->getState();
+    if (e.key == GLFW_KEY_B) {
+        if (state == GameState::RUNNING) {
+            game->setState(GameState::BUILD_MODE);
         }
-        else if (e.key == GLFW_KEY_ESCAPE) {
-            if (state == GameState::BUILD_MODE) {
-                game->setState(GameState::RUNNING);
-            }
+        else if (state == GameState::BUILD_MODE) {
+            game->setState(GameState::RUNNING);
         }
-        else if (e.key == GLFW_KEY_X) {
-            setState(this->state.selectedBuildingType, this->state.currentPosition, this->state.building, this->state.startPosition, !this->state.xFirst);
+    }
+    else if (e.key == GLFW_KEY_ESCAPE) {
+        if (state == GameState::BUILD_MODE) {
+            game->setState(GameState::RUNNING);
         }
     }
 }
@@ -320,5 +291,6 @@ void BuildSystem::handleBuildEvent(const BuildEvent& e) {
     std::cout << "Build type selected: " << e.type << std::endl;
 #endif
 
-    setState(e.type, state.currentPosition, false);
+    // setState(e.type, state.currentPosition, false);
+    selectedBuildingType = e.type;
 }

@@ -39,9 +39,10 @@ void TerrainSystem::generateTerrain(TerrainComponent& terrain, const glm::ivec2&
         terrain.heightValues[x] = new float[Configuration::cellsPerChunk];
 
         for (int y = 0; y < Configuration::cellsPerChunk; y++) {
-            glm::vec2 pos = noiseScaleFactor * (static_cast<float>(Configuration::cellSize) * glm::vec2(x, y) + static_cast<float>(Configuration::chunkSize) * glm::vec2(chunkPosition));
+            //glm::vec2 pos = noiseScaleFactor * (static_cast<float>(Configuration::cellSize) * glm::vec2(x, y) + static_cast<float>(Configuration::chunkSize) * glm::vec2(chunkPosition));
             // noiseValue in [-1,1]
-            float noiseValue = terrainNoise.GetValue(pos.x, pos.y, 0);
+            // float noiseValue = terrainNoise.GetValue(pos.x, pos.y, 0);
+            float noiseValue = 0.0f;
             terrain.heightValues[x][y] = noiseValue;
         }
     }
