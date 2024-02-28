@@ -1,4 +1,4 @@
 # cmake build files
 build/
 /.vs
-/CMakeSettings.json
+/CMakePrestes.json

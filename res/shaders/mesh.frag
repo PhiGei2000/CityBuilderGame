@@ -61,7 +61,7 @@ vec3 calcDiffuseLight(vec3 normal, vec3 diffuseColor);
 vec3 calcSpecularLight(vec3 normal, vec3 specularColor);
 float shadowCalculation(vec3 normal);
 
-float biasValues[cascadeCount] = float[](0.05, 0.005, 0.005, 0.001);
+// float biasValues[cascadeCount] = float[](0.05, 0.005, 0.005, 0.001);
 
 void main() {
     // init colors
@@ -147,9 +147,10 @@ float shadowCalculation(vec3 normal) {
     }
 
     // calculate bias and apply pcf
+    float maxShadowBias = 0.0001;
     vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps, 0));
     float cosTheta = dot(normal, fs_in.tangentLightDirection);
-    float bias = max(biasValues[mapIndex] * (1 - cosTheta), 0.1 * biasValues[mapIndex]);
+    float bias = max(maxShadowBias * (1 - cosTheta), maxShadowBias);
     float shadow = 0;
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
