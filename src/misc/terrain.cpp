@@ -56,7 +56,7 @@ void Terrain::setTerrainHeight(const glm::ivec2& position, float height) const {
     const auto& [chunk, pos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
 
     const entt::entity entity = chunkEntities.at(chunk);
-    const TerrainComponent& terrain = game->getRegistry().get<TerrainComponent>(entity);
+    TerrainComponent& terrain = game->getRegistry().get<TerrainComponent>(entity);
 
     terrain.heightValues[pos.x][pos.y] = height;
 }
@@ -109,7 +109,7 @@ TerrainSurfaceGeometry Terrain::getGeometry(const glm::ivec2& cell) const {
     float h2 = getTerrainHeight(cell + glm::ivec2(0, 1));
     float h3 = getTerrainHeight(cell + glm::ivec2(1, 1));
 
-    if (h0 == h1 == h2 == h3) {
+    if (h0 == h1 && h1 == h2 && h2 == h3) {
         return TerrainSurfaceGeometry::FLAT;
     }
 
@@ -117,16 +117,16 @@ TerrainSurfaceGeometry Terrain::getGeometry(const glm::ivec2& cell) const {
         return TerrainSurfaceGeometry::FLAT_TILTED;
     }
 
-    if (h1 == h2 == h3) {
+    if (h1 == h2 && h2 == h3) {
         return h0 < h1 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
     }
-    else if (h0 == h2 == h3) {
+    else if (h0 == h2 && h2 == h3) {
         return h1 < h0 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
     }
-    else if (h0 == h1 == h3) {
+    else if (h0 == h1 && h1 == h3) {
         return h2 < h0 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
     }
-    else if (h0 == h1 == h2) {
+    else if (h0 == h1 && h1 == h2) {
         return h3 < h0 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
     }
 

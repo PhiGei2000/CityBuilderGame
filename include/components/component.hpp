@@ -16,6 +16,7 @@
 #pragma once
 #include <entt/entt.hpp>
 
+/// TODO: Maybe remove assignable components and use std::copy_constructible
 template<bool assignable>
 struct Component {
 };

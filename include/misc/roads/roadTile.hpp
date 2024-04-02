@@ -14,22 +14,36 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+#include "roadTypes.hpp"
+
 #include <glm/glm.hpp>
 
-#include <vector>
+enum class RoadTileType : unsigned char
+{
+    NOT_CONNECTED,
+    END,
+    CURVE,
+    T_CROSSING,
+    CROSSING,
+    STRAIGHT,
+    CURVE_FULL,
+    RAMP,
+    UNDEFINED = 254U,
+    EMPTY = 255U
+};
 
-struct TransformationComponent;
+struct RoadTile {
+    RoadTileType tileType = RoadTileType::EMPTY;
+    int rotation = 0;
+    RoadTypes roadType = RoadTypes::BASIC_STREETS;
 
-class InstanceBuffer {
-  private:
-    unsigned int vbo;
-    unsigned int instancesCount;
+    bool isRoadNode() const;
 
-    friend struct Mesh;
+    bool empty() const;
+    bool notEmpty() const;
+};
 
-  public:
-    InstanceBuffer();
-
-    template<typename TData>
-    void fillBuffer(const std::vector<TData>& offsets);
+struct RoadRenderData {
+    glm::vec2 position;
+    RoadTile roadTile;
 };

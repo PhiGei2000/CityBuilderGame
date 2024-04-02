@@ -13,23 +13,15 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
-#include <glm/glm.hpp>
+#include "misc/roads/roadTypes.hpp"
 
-#include <vector>
+#include "resources/roadPack.hpp"
+#include "resources/resourceManager.hpp"
 
-struct TransformationComponent;
+RoadPackPtr getRoadPack(const ResourceManager& resourceManager, RoadTypes type) {
+    std::string resourceIds[] = {
+        "BASIC_STEETS"
+    };
 
-class InstanceBuffer {
-  private:
-    unsigned int vbo;
-    unsigned int instancesCount;
-
-    friend struct Mesh;
-
-  public:
-    InstanceBuffer();
-
-    template<typename TData>
-    void fillBuffer(const std::vector<TData>& offsets);
-};
+    return resourceManager.getResource<RoadPack>(resourceIds[static_cast<unsigned char>(type)]);
+}

@@ -16,6 +16,7 @@
 #include "resources/roadGeometryGenerator.hpp"
 
 #include "misc/roads/roadSpecs.hpp"
+#include "misc/roads/roadTile.hpp"
 #include "rendering/geometryData.hpp"
 
 #include <glm/glm.hpp>
@@ -23,13 +24,13 @@
 RoadPackGeometry RoadGeometryGenerator::generateRoadPackGeometries(const RoadSpecs& specs) {
     RoadPackGeometry geometries;
 
-    geometries[RoadType::NOT_CONNECTED] = generateNotConnected(specs);
-    geometries[RoadType::STRAIGHT] = generateStraight(specs);
-    geometries[RoadType::CURVE] = generateCurve(specs);
-    geometries[RoadType::T_CROSSING] = generateTCrossing(specs);
-    geometries[RoadType::CROSSING] = generateCrossing(specs);
-    geometries[RoadType::END] = generateEnd(specs);
-    geometries[RoadType::RAMP] = generateRamp(specs);
+    geometries[RoadTileType::NOT_CONNECTED] = generateNotConnected(specs);
+    geometries[RoadTileType::STRAIGHT] = generateStraight(specs);
+    geometries[RoadTileType::CURVE] = generateCurve(specs);
+    geometries[RoadTileType::T_CROSSING] = generateTCrossing(specs);
+    geometries[RoadTileType::CROSSING] = generateCrossing(specs);
+    geometries[RoadTileType::END] = generateEnd(specs);
+    geometries[RoadTileType::RAMP] = generateRamp(specs);
 
     return geometries;
 }
@@ -323,7 +324,7 @@ GeometryData RoadGeometryGenerator::generateTCrossing(const RoadSpecs& specs) {
     data.addData(generateQuad(glm::vec3(-halfGrid, specs.sidewalkHeight, -halfGrid + sidewalkWidth), glm::vec3(0.0f, -(specs.sidewalkHeight - specs.roadwayHeight), 0.0f), glm::vec3(Configuration::cellSize, 0.0f, 0.0f), sidewalkStraightUVAreas[2]));
 
     // roadway
-    data.addData(generateQuad(glm::vec3(-halfGrid, specs.roadwayHeight, -halfGrid + sidewalkWidth), glm::vec3(0.0f, 0.0f, specs.roadwayWidth + sidewalkWidth), glm::vec3(Configuration::cellSize, 0.0f, 0.0f), tCrossingRoadwayUVArea));    
+    data.addData(generateQuad(glm::vec3(-halfGrid, specs.roadwayHeight, -halfGrid + sidewalkWidth), glm::vec3(0.0f, 0.0f, specs.roadwayWidth + sidewalkWidth), glm::vec3(Configuration::cellSize, 0.0f, 0.0f), tCrossingRoadwayUVArea));
 
     // short sidewalks
     data.addData(generateQuadCircleSector(glm::vec3(halfGrid, specs.roadwayHeight, halfGrid), specs.sidewalkHeight - specs.roadwayHeight, sidewalkWidth, specs.verticesPerCircle / 4, 180, 270, sidewalkRoundUVAreas[0]));
@@ -339,7 +340,7 @@ GeometryData RoadGeometryGenerator::generateCrossing(const RoadSpecs& specs) {
     GeometryData data;
     float sidewalkWidth = (Configuration::cellSize - specs.roadwayWidth) / 2.0f;
 
-    // roadway    
+    // roadway
     data.addData(generateQuad(glm::vec3(-halfGrid, specs.roadwayHeight, -halfGrid), glm::vec3(0.0f, 0.0f, Configuration::cellSize), glm::vec3(Configuration::cellSize, 0.0f, 0.0f), crossingRoadwayUVArea));
 
     // sidewalks
@@ -379,7 +380,7 @@ GeometryData RoadGeometryGenerator::generateEnd(const RoadSpecs& specs) {
     data.addData(generateAnnulusSector(glm::vec3(0.0f, specs.roadwayHeight, 0.0f), halfGrid - sidewalkWidth, 0, specs.verticesPerCircle / 2, 90, 270, halfRoadwayClearUVArea));
     data.addData(generateQuadCircleSector(glm::vec3(0.0f, 0.0f, 0.0f), specs.sidewalkHeight, halfGrid, specs.verticesPerCircle / 2, 90, 270, sidewalkStraightUVAreas[0]));
     data.addData(generateAnnulusSector(glm::vec3(0.0f, specs.sidewalkHeight, 0.0f), halfGrid, halfGrid - sidewalkWidth, specs.verticesPerCircle / 2, 90, 270, sidewalkStraightUVAreas[1]));
-    data.addData(generateQuadCircleSector(glm::vec3(0.0f, specs.roadwayHeight, 0.0f), specs.sidewalkHeight - specs.roadwayHeight, halfGrid - sidewalkWidth, specs.verticesPerCircle / 2, 90, 270, sidewalkStraightUVAreas[2], true));    
+    data.addData(generateQuadCircleSector(glm::vec3(0.0f, specs.roadwayHeight, 0.0f), specs.sidewalkHeight - specs.roadwayHeight, halfGrid - sidewalkWidth, specs.verticesPerCircle / 2, 90, 270, sidewalkStraightUVAreas[2], true));
 
     return data;
 }

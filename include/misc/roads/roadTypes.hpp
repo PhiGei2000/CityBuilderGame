@@ -14,16 +14,13 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+#include <memory>
 
-enum class RoadType
-{
-    NOT_CONNECTED,
-    END,
-    CURVE,
-    T_CROSSING,
-    CROSSING,
-    STRAIGHT,
-    CURVE_FULL,
-    RAMP,
-    UNDEFINED = -1
+enum class RoadTypes : unsigned char {
+    BASIC_STREETS,
 };
+
+struct RoadPack;
+class ResourceManager;
+
+std::shared_ptr<RoadPack> getRoadPack(const ResourceManager& resourceManager, RoadTypes type);

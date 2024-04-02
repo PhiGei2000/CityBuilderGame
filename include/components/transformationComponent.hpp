@@ -27,7 +27,7 @@ struct TransformationComponent : public AssignableComponent {
 
     glm::mat4 transform;
 
-    TransformationComponent(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
+    TransformationComponent(const glm::vec3& position, const glm::quat& rotation = glm::quat(), const glm::vec3& scale = glm::vec3(1));
 
     void calculateTransform();
 
@@ -39,7 +39,7 @@ struct TransformationComponent : public AssignableComponent {
     void setRotation(const glm::vec3& eulerAngles);
 
     void addScale(const glm::vec3& scale);
-    void setScale(const glm::vec3& scale);    
+    void setScale(const glm::vec3& scale);
 
     void assignToEntity(const entt::entity entity, entt::registry& registry) const override;
 };

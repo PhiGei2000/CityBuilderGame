@@ -36,11 +36,29 @@ struct Mesh {
     Mesh();
 
     void render(ShaderPtr shader) const;
-    void renderInstanced(ShaderPtr shader, const InstanceBuffer& instanceBuffer) const;
+    template<typename T>
+    inline void renderInstanced(ShaderPtr shader, const InstanceBuffer& instanceBuffer) const {
+        linkInstanceBuffer<T>(instanceBuffer);
+
+        for (const auto& [name, data] : geometries) {
+            for (const auto& [material, geometry] : data) {
+                renderInstancedGeometry(shader, material, geometry, instanceBuffer.instancesCount);
+            }
+        }
+    }
 
     void renderObject(ShaderPtr shader, const std::string& name) const;
-    void renderObjectInstanced(ShaderPtr shader, const std::string& name, const InstanceBuffer& instanceBuffer) const;
+    template<typename T>
+    inline void renderObjectInstanced(ShaderPtr shader, const std::string& name, const InstanceBuffer& instanceBuffer) const {
+        const auto& object = geometries.at(name);
 
+        linkInstanceBuffer<T>(instanceBuffer);
+        for (const auto& [material, geometry] : object) {
+            renderInstancedGeometry(shader, material, geometry, instanceBuffer.instancesCount);
+        }
+    }
+
+    template<typename T>
     void linkInstanceBuffer(const InstanceBuffer& buffer) const;
 };
 

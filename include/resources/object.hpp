@@ -21,17 +21,36 @@
 #include <typeindex>
 #include <vector>
 
+/// @brief This structure is a template for an entity that holds various components.
 struct Object {
   protected:
     std::map<std::type_index, std::shared_ptr<AssignableComponent>> components;
 
   public:
+    /// @brief The name of the object
     std::string name;
 
+    /// @brief Adds a template component to the object. The component type must be an assignable component.
+    /// @tparam TComponent The type of the component
+    /// @param component The component
     template<AssignableComponentType TComponent>
-    void addComponent(const TComponent& component);
+    inline void addComponent(const TComponent& component) {
+        components[typeid(TComponent)] = std::make_shared<TComponent>(component);
+    }
 
-    entt::entity create(entt::registry& registry) const;
+    /// @brief Creates an entity in the given registry and assings the associated components to this entity.
+    /// @param registry The registry in which the component will be created
+    /// @return The created entity
+    inline entt::entity create(entt::registry& registry) const {
+        const entt::entity entity = registry.create();
+
+        for (const auto& [type, component] : components) {
+            component->assignToEntity(entity, registry);
+        }
+
+        return entity;
+    }
 };
 
+/// @brief A resource pointer to an object
 using ObjectPtr = ResourcePtr<Object>;

@@ -59,5 +59,5 @@ void TransformationComponent::setScale(const glm::vec3& scale) {
 }
 
 void TransformationComponent::assignToEntity(const entt::entity entity, entt::registry& registry) const {
-    registry.emplace<TransformationComponent>(entity, position, rotation, scale);
+    registry.emplace<TransformationComponent>(entity, position, rotation, scale).calculateTransform();
 }

@@ -29,24 +29,13 @@ struct RoadComponent;
 struct MeshGeometry;
 
 class RoadSystem : public System {
-  private:
-    void init();
-
-    std::queue<std::pair<glm::ivec2, glm::ivec2>> sectionsToBuild;
-    std::queue<std::pair<glm::ivec2, glm::ivec2>> sectionsToPreview;
-
-    RoadGraph previewGraph;
-
-    entt::entity roadEntity;
+  protected:
+    void createRoadMesh(const RoadComponent& roadComponent, RoadMeshComponent& geometry) const;
 
   public:
     RoadSystem(Game* game);
 
     void update(float dt);
-
-    void createRoadMesh(const RoadGraph& graph, MeshGeometry* geometry, ResourcePtr<RoadPack> roadPack) const;
-
-    void clearRoadGraph(RoadGraph& graph) const;
 
     void handleBuildEvent(const BuildEvent& event);
 };

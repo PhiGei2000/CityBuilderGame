@@ -55,6 +55,7 @@ out vec4 FragColor;
 
 uniform Material material;
 uniform sampler2DArray shadowMaps;
+uniform bool preview;
 
 vec3 calcAmbientLight(vec3 ambientColor);
 vec3 calcDiffuseLight(vec3 normal, vec3 diffuseColor);
@@ -102,6 +103,10 @@ void main() {
             diffuse = calcDiffuseLight(normal, diffuseColor);
             specular = calcSpecularLight(normal, specularColor);
             FragColor = vec4(ambient + (1.0 - shadow) * (diffuse + specular), material.dissolve);
+    }
+
+    if (preview) {
+        FragColor *= vec4(0.0, 0.6, 0.6, 1.0);
     }
 }
 

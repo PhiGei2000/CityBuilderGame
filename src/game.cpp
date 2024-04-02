@@ -58,8 +58,6 @@ void Game::init() {
     );
     registry.emplace<TransformationComponent>(sun, utility::sphericalToCartesian(300.0f, sunAngle, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 
-    // init terrain noise
-
     EntityMoveEvent moveEvent{sun};
     raiseEvent(moveEvent);
 }

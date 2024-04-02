@@ -16,6 +16,7 @@
 #include "rendering/instanceBuffer.hpp"
 
 #include "components/transformationComponent.hpp"
+#include "misc/roads/roadTile.hpp"
 
 #include <GL/glew.h>
 
@@ -23,6 +24,7 @@ InstanceBuffer::InstanceBuffer() {
     glGenBuffers(1, &vbo);
 }
 
+template<>
 void InstanceBuffer::fillBuffer(const std::vector<TransformationComponent>& transformations) {
     std::vector<glm::mat4> matrices;
     matrices.reserve(transformations.size());
@@ -34,6 +36,16 @@ void InstanceBuffer::fillBuffer(const std::vector<TransformationComponent>& tran
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, instancesCount * sizeof(glm::mat4), &matrices[0], GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+template<>
+void InstanceBuffer::fillBuffer(const std::vector<RoadRenderData>& transformations) {
+    instancesCount = transformations.size();
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, instancesCount * sizeof(RoadRenderData), &transformations[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

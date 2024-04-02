@@ -49,14 +49,11 @@ void TerrainSystem::init() {
 }
 
 void TerrainSystem::generateTerrain(TerrainComponent& terrain, const glm::ivec2& chunkPosition) const {
-    terrain.heightValues = new float*[Configuration::cellsPerChunk];
-    for (int x = 0; x < Configuration::cellsPerChunk; x++) {
-        terrain.heightValues[x] = new float[Configuration::cellsPerChunk];
-
-        for (int y = 0; y < Configuration::cellsPerChunk; y++) {
-            //glm::vec2 pos = noiseScaleFactor * (static_cast<float>(Configuration::cellSize) * glm::vec2(x, y) + static_cast<float>(Configuration::chunkSize) * glm::vec2(chunkPosition));
-            // noiseValue in [-1,1]
-            // float noiseValue = terrainNoise.GetValue(pos.x, pos.y, 0);
+    for (int x = 0; x < Configuration::cellsPerChunk + 1; x++) {
+        for (int y = 0; y < Configuration::cellsPerChunk + 1; y++) {
+            // glm::vec2 pos = noiseScaleFactor * (static_cast<float>(Configuration::cellSize) * glm::vec2(x, y) + static_cast<float>(Configuration::chunkSize) * glm::vec2(chunkPosition));
+            //  noiseValue in [-1,1]
+            //  float noiseValue = terrainNoise.GetValue(pos.x, pos.y, 0);
             float noiseValue = 0.0f;
             terrain.heightValues[x][y] = noiseValue;
         }
@@ -207,7 +204,7 @@ void TerrainSystem::updateTerrainMesh(const TerrainArea& area, MeshComponent& me
 
 TerrainSystem::TerrainSystem(Game* game)
     : System(game) {
-    game->getEventDispatcher().sink<BuildEvent>().connect<&TerrainSystem::handleBuildEvent>(*this);
+    // game->getEventDispatcher().sink<BuildEvent>().connect<&TerrainSystem::handleBuildEvent>(*this);
 
     init();
 }
@@ -217,12 +214,15 @@ void TerrainSystem::update(float dt) {
     while (chunksToGenerate.size() > 0) {
         const glm::ivec2 position = chunksToGenerate.front();
 
+        // create chunk and assign components
         const entt::entity chunkEntity = registry.create();
         registry.emplace<TransformationComponent>(chunkEntity, utility::normalizedChunkGridToWorldCoords(position, glm::vec2(0.0f)), glm::quat(), glm::vec3(1.0f));
         TerrainComponent& terrain = registry.emplace<TerrainComponent>(chunkEntity);
-
-        generateTerrain(terrain, position);
+        registry.emplace<RoadComponent>(chunkEntity);
         game->terrain.chunkEntities[position] = chunkEntity;
+
+        // generate terrain height
+        generateTerrain(terrain, position);
         chunksToGenerate.pop();
     }
 
@@ -284,26 +284,26 @@ void TerrainSystem::update(float dt) {
     }
 }
 
-void TerrainSystem::handleBuildEvent(const BuildEvent& event) {
-    if (event.action != BuildAction::DEFAULT) {
-        return;
-    }
-
-    if (event.type == BuildingType::LIFT_TERRAIN || event.type == BuildingType::LOWER_TERRAIN) {
-        const auto& [chunkCoords, cellPos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(event.positions[0]);
-
-        const entt::entity terrainEntity = game->terrain.chunkEntities.at(chunkCoords);
-        TerrainComponent& terrain = registry.get<TerrainComponent>(terrainEntity);
-
-        switch (event.type) {
-            case BuildingType::LIFT_TERRAIN:
-                terrain.heightValues[cellPos.x][cellPos.y] += 2;
-                break;
-            case BuildingType::LOWER_TERRAIN:
-                terrain.heightValues[cellPos.x][cellPos.y] -= 2;
-                break;
-        }
-
-        areasToUpdateMesh.emplace(event.positions[0] - glm::ivec2(1), glm::ivec2(3, 3));
-    }
-}
+// void TerrainSystem::handleBuildEvent(const BuildEvent& event) {
+//     if (event.action != BuildAction::DEFAULT) {
+//         return;
+//     }
+//
+//     if (event.type == BuildingType::LIFT_TERRAIN || event.type == BuildingType::LOWER_TERRAIN) {
+//         const auto& [chunkCoords, cellPos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(event.positions[0]);
+//
+//         const entt::entity terrainEntity = game->terrain.chunkEntities.at(chunkCoords);
+//         TerrainComponent& terrain = registry.get<TerrainComponent>(terrainEntity);
+//
+//         switch (event.type) {
+//             case BuildingType::LIFT_TERRAIN:
+//                 terrain.heightValues[cellPos.x][cellPos.y] += 2;
+//                 break;
+//             case BuildingType::LOWER_TERRAIN:
+//                 terrain.heightValues[cellPos.x][cellPos.y] -= 2;
+//                 break;
+//         }
+//
+//         areasToUpdateMesh.emplace(event.positions[0] - glm::ivec2(1), glm::ivec2(3, 3));
+//     }
+// }

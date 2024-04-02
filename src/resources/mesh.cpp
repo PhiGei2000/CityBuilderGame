@@ -19,6 +19,8 @@
 #include "rendering/instanceBuffer.hpp"
 #include "rendering/shadowBuffer.hpp"
 
+#include "misc/roads/roadTile.hpp"
+
 Mesh::Mesh() {
 }
 
@@ -68,16 +70,6 @@ void Mesh::render(ShaderPtr shader) const {
     }
 }
 
-void Mesh::renderInstanced(ShaderPtr shader, const InstanceBuffer& instanceBuffer) const {
-    linkInstanceBuffer(instanceBuffer);
-
-    for (const auto& [name, data] : geometries) {
-        for (const auto& [material, geometry] : data) {
-            renderInstancedGeometry(shader, material, geometry, instanceBuffer.instancesCount);
-        }
-    }
-}
-
 void Mesh::renderObject(ShaderPtr shader, const std::string& name) const {
     const auto& object = geometries.at(name);
     for (const auto& [material, geometry] : object) {
@@ -85,21 +77,25 @@ void Mesh::renderObject(ShaderPtr shader, const std::string& name) const {
     }
 }
 
-void Mesh::renderObjectInstanced(ShaderPtr shader, const std::string& name, const InstanceBuffer& instanceBuffer) const {
-    const auto& object = geometries.at(name);
-
-    linkInstanceBuffer(instanceBuffer);
-    for (const auto& [material, geometry] : object) {
-        renderInstancedGeometry(shader, material, geometry, instanceBuffer.instancesCount);
-    }
-}
-
-void Mesh::linkInstanceBuffer(const InstanceBuffer& buffer) const {
+template<>
+void Mesh::linkInstanceBuffer<glm::mat4>(const InstanceBuffer& buffer) const {
     for (const auto& [_, subMesh] : geometries) {
         for (const auto& [_, geometry] : subMesh) {
             for (int i = 0; i < 4; i++) {
                 geometry->setVertexAttribute(MeshGeometry::meshVertexAttributes.size() + i, VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(i * sizeof(glm::vec4))}, buffer.vbo, 1);
             }
+        }
+    }
+}
+
+template<>
+void Mesh::linkInstanceBuffer<RoadRenderData>(const InstanceBuffer& buffer) const {
+    int stride = sizeof(glm::vec2) + sizeof(int);
+    int offset = MeshGeometry::meshVertexAttributes.size();
+    for (const auto& [_, subMesh] : geometries) {
+        for (const auto& [_, geometry] : subMesh) {
+            geometry->setVertexAttribute(offset + 1, VertexAttribute{2, GL_FLOAT, GL_FALSE, stride, (void*)0}, buffer.vbo, 1);
+            geometry->setVertexAttribute(offset + 2, VertexAttribute{1, GL_INT, GL_FALSE, stride, (void*)(sizeof(glm::vec2))}, buffer.vbo, 1);
         }
     }
 }

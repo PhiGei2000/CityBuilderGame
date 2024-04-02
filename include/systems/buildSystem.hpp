@@ -28,6 +28,7 @@ struct MouseButtonEvent;
 struct MouseMoveEvent;
 struct KeyEvent;
 struct TerrainComponent;
+struct BuildingComponent;
 
 struct Object;
 
@@ -59,6 +60,8 @@ class BuildSystem : public System {
     struct GridMouseIntersection {
         bool intersection;
         glm::ivec2 position;
+        // glm::ivec2 lastPosition;
+        bool positionChanged;
     } gridMouseIntersection;
 
     /// @brief A list of objects that are going to be created
@@ -70,7 +73,7 @@ class BuildSystem : public System {
     std::pair<bool, glm::ivec2> getGridPos(const glm::vec2& mousePos, const glm::vec3& offset) const;
 
     /// @brief Returns the shape of the current building area according to the size vector
-    /// @param start The start position of the building process    
+    /// @param start The start position of the building process
     /// @return The type of the shape of the building area
     static constexpr BuildShape getShape(const glm::ivec2& size);
 
@@ -94,7 +97,10 @@ class BuildSystem : public System {
 
     static constexpr glm::vec3 getBuildmarkerOffset(const BuildingType type);
 
+    /// @brief Creates a new entity in the registry and assings the components for the currently selected building to this entity. In addition to these a BuildingComponent and a TransformationComponent
     void createNewBuilding();
+
+    void updateMesh(const BuildingComponent& building) const;
 
   public:
     BuildSystem(Game* game);

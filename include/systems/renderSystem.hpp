@@ -17,6 +17,7 @@
 #include "events/events.hpp"
 #include "systems/system.hpp"
 
+#include "components/buildingComponent.hpp"
 #include "components/instancedMeshComponent.hpp"
 #include "components/meshComponent.hpp"
 #include "components/transformationComponent.hpp"
@@ -54,10 +55,25 @@ class RenderSystem : public System {
     inline void renderScene(ShaderPtr shader, entt::exclude_t<T...> exclude = {}) const {
         shader->use();
         shader->setInt("shadowMaps", ShadowBuffer::depthMapOffset);
+        GameState gameState = game->getState();
 
         registry.view<MeshComponent, TransformationComponent>(exclude)
-            .each([&](const MeshComponent& mesh, const TransformationComponent& transform) {
+            .each([&](auto entity, const MeshComponent& mesh, const TransformationComponent& transform) {
                 shader->setMatrix4("model", transform.transform);
+
+                // TODO: Optimize this
+                if (registry.all_of<BuildingComponent>(entity)) {
+                    const BuildingComponent& building = registry.get<BuildingComponent>(entity);
+                    if (building.preview && gameState != GameState::BUILD_MODE) {
+                        return;
+                    }
+
+                    shader->setBool("preview", building.preview);
+                }
+                else {
+                    shader->setBool("preview", false);
+                }
+
                 mesh.mesh->render(shader);
             });
     }
@@ -81,6 +97,14 @@ class RenderSystem : public System {
                     mesh.mesh->renderObjectInstanced(shader, name, instances.instanceBuffer);
                 }
             });
+
+        registry.view<RoadMeshComponent, TransformationComponent>(exclude).each([&](const RoadMeshComponent& road, const TransformationComponent& transform) {
+            shader->setMatrix4("model", transform.transform);
+
+            for (const auto& [name, instances] : road.roadMeshes) {
+                road.mesh->renderObjectInstanced(shader, name, instances.instanceBuffer);
+            }
+        });
     }
 
     void updateLightBuffer(const LightComponent& sunLight, const CameraComponent& component) const;

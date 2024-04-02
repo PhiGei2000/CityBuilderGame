@@ -20,14 +20,15 @@
 
 #include <vector>
 
+template<typename TData>
 struct InstancedMesh {
-    std::vector<TransformationComponent> transformations;
+    std::vector<TData> transformations;
     InstanceBuffer instanceBuffer;
 
     inline InstancedMesh() {
     }
 
-    inline InstancedMesh(const std::vector<TransformationComponent>& transformations)
+    inline InstancedMesh(const std::vector<TData>& transformations)
         : transformations(transformations) {
         instanceBuffer.fillBuffer(transformations);
     }

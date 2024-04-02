@@ -22,7 +22,7 @@
 
 #include <vector>
 
-struct InstancedMeshComponent : public MeshComponent, public InstancedMesh {
+struct InstancedMeshComponent : public MeshComponent, public InstancedMesh<TransformationComponent> {
 
     inline InstancedMeshComponent(const MeshPtr& mesh, const std::vector<TransformationComponent>& transformations)
         : MeshComponent(mesh), InstancedMesh(transformations) {
@@ -34,13 +34,24 @@ struct InstancedMeshComponent : public MeshComponent, public InstancedMesh {
 };
 
 struct MultiInstancedMeshComponent : public MeshComponent {
-    std::unordered_map<std::string, InstancedMesh> transforms;
+    std::unordered_map<std::string, InstancedMesh<TransformationComponent>> transforms;
 
-    inline MultiInstancedMeshComponent(const MeshPtr& mesh, const std::unordered_map<std::string, InstancedMesh>& instanceList)
+    inline MultiInstancedMeshComponent(const MeshPtr& mesh, const std::unordered_map<std::string, InstancedMesh<TransformationComponent>>& instanceList)
         : MeshComponent(mesh), transforms(instanceList) {
     }
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
         registry.emplace<MultiInstancedMeshComponent>(entity, mesh, transforms);
+    }
+};
+
+struct RoadRenderData;
+
+struct RoadMeshComponent : public MeshComponent {
+    using RoadTypeID = std::pair<RoadTypes, RoadTileType>;
+    std::unordered_map<RoadTypeID, InstancedMesh<RoadRenderData>> roadMeshes;
+
+    inline RoadMeshComponent(const MeshPtr& mesh, const std::unordered_map<RoadTypeID, InstancedMesh<RoadRenderData>>& instances)
+        : MeshComponent(mesh), roadMeshes(instances) {
     }
 };

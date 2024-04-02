@@ -63,5 +63,5 @@ class TerrainSystem : public System {
 
     void update(float dt) override;
 
-    void handleBuildEvent(const BuildEvent& event);
+    //void handleBuildEvent(const BuildEvent& event);
 };

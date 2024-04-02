@@ -17,19 +17,28 @@
 
 enum class BuildingType : unsigned int {
     NONE,
-    //LIFT_TERRAIN,
-    //LOWER_TERRAIN,
     CLEAR,
     ROAD,
     PARKING_LOT,
 };
 
-
-#include <string>
 #include <iostream>
+#include <string>
+
 
 inline std::ostream& operator<<(std::ostream& os, BuildingType type) {
-    static std::string typeNames[] = {"NONE", /*"LIFT_TERRAIN", "LOWER_TERRAIN",*/ "DEFAULT", "ROAD", "PARKING_LOT"};
+    static std::string typeNames[] = {"NONE", "DEFAULT", "ROAD", "PARKING_LOT"};
 
     return os << typeNames[(unsigned int)type];
+}
+
+constexpr std::string getBuildingName(BuildingType type) {
+    switch (type) {
+        case BuildingType::PARKING_LOT:
+            return "parking_lot";
+        case BuildingType::ROAD:
+            return "road";
+    }
+
+    return "";
 }

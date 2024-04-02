@@ -13,23 +13,23 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
-#include <glm/glm.hpp>
+#include "misc/roads/roadTile.hpp"
 
-#include <vector>
+bool RoadTile::isRoadNode() const {
+    switch (tileType) {
+        case RoadTileType::STRAIGHT:
+        case RoadTileType::RAMP:
+        case RoadTileType::UNDEFINED:
+            return false;
+        default:
+            return true;
+    }
+}
 
-struct TransformationComponent;
+bool RoadTile::empty() const {
+    return tileType == RoadTileType::EMPTY;
+}
 
-class InstanceBuffer {
-  private:
-    unsigned int vbo;
-    unsigned int instancesCount;
-
-    friend struct Mesh;
-
-  public:
-    InstanceBuffer();
-
-    template<typename TData>
-    void fillBuffer(const std::vector<TData>& offsets);
-};
+bool RoadTile::notEmpty() const {
+    return !empty();
+}

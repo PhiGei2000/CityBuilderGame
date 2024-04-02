@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "misc/roads/roadTypes.hpp"
+#include "misc/roads/roadTile.hpp"
 #include "misc/typedefs.hpp"
 
 #include "rendering/geometryData.hpp"
@@ -25,8 +25,10 @@
 #include <map>
 
 struct RoadPack {
-    std::map<RoadType, GeometryData> roadGeometries;    
+    std::map<RoadTileType, GeometryData> roadGeometries;
 
     ResourcePtr<Shader> shader;
     ResourcePtr<Material> material;
 };
+
+using RoadPackPtr = ResourcePtr<RoadPack>;

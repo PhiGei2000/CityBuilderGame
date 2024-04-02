@@ -18,6 +18,8 @@
 #include "components/components.hpp"
 #include "events/events.hpp"
 
+#include "resources/object.hpp"
+
 #include "misc/coordinateTransform.hpp"
 #include "misc/ray.hpp"
 #include "misc/utility.hpp"
@@ -26,6 +28,7 @@
 
 #include <array>
 #include <iostream>
+#include <type_traits>
 
 BuildSystem::BuildSystem(Game* game)
     : System(game) {
@@ -54,44 +57,84 @@ void BuildSystem::update(float dt) {
     if (game->getState() == GameState::BUILD_MODE) {
         BuildingComponent& building = registry.get<BuildingComponent>(currentBuilding);
         if (building.type != selectedBuildingType) {
-            building.type = selectedBuildingType;
-            building.size = getDefaultSize(selectedBuildingType);
-            this->building = false;
+            registry.destroy(currentBuilding);
+
+            createNewBuilding();
         }
 
         if (gridMouseIntersection.intersection) {
-            switch (building.type) {
-                case BuildingType::ROAD:
-                    if (this->building) {
-                        const glm::ivec2& difference = gridMouseIntersection.position - building.gridPosition;
+            if (gridMouseIntersection.positionChanged) {
+                switch (building.type) {
+                    case BuildingType::ROAD: {
+                        RoadComponent& road = registry.get<RoadComponent>(currentBuilding);
+                        road.clear();
+                        const glm::ivec2& difference = building.gridPosition - gridMouseIntersection.position;
 
-                        if (difference.x > difference.y) {
-                            building.size = glm::ivec2(difference.x, 0);
+                        if (this->building) {
+                            // first node already placed
+                            road.clear();
+                            if (difference.x > difference.y) {
+                                building.size = glm::ivec2(difference.x, 0);
+                            }
+                            else {
+                                building.size = glm::ivec2(0, difference.y);
+                            }
+
+                            // update road graph
+                            // road.graph.insertNode(building.gridPosition);
+                            // road.graph.insertNode(building.gridPosition + glm::ivec2(building.size));
+                            // road.graph.connectNodes(building.gridPosition, building.gridPosition + glm::ivec2(building.size));
                         }
                         else {
-                            building.size = glm::ivec2(0, difference.y);
+                            building.gridPosition = gridMouseIntersection.position;
+                            road.graph.insertNode(building.gridPosition);
                         }
+
+                        road.meshOutdated = true;
                     }
-                    else {
+                        return;
+                    default:
                         building.gridPosition = gridMouseIntersection.position;
-                    }
-                    break;
-                default:
-                    building.gridPosition = gridMouseIntersection.position;
+                }
             }
+
+            gridMouseIntersection.positionChanged = false;
+        }
+
+        // update the transformation component of the current building, so it will be rendered at the right place
+        if (positionChanged) {
+            TransformationComponent& transform = registry.get<TransformationComponent>(currentBuilding);
+            // calculate rotation
+            float angle = building.rotation / 4.0f * glm::pi<float>();
+            float sin = glm::sin(angle);
+            float cos = glm::cos(angle);
+            transform.rotation = glm::quat(cos, 0.0f, sin, 0.0f);
+
+            // calculate position based on rotation
+
+            // rotation | offset
+            // ------------------
+            // 0        | (0,0,0)
+            // 1        | (1,0,0)
+            // 2        | (1,0,1)
+            // 3        | (0,0,1)
+
+            // x-direction: offset.x = 1/2(1 + sin(pi/2 r) - \cos(pi/2 r)) = \sin(pi/4 r) * (\sin(pi/4 * r) + \cos(pi/4 r))
+            // z-direction: offset.y = 1/2(1 - sin(pi/2 r) - cos(pi/2 r)) = sin(pi/4 r) * (sin(pi/4 * r) - cos(pi/4 r))
+            glm::vec2 offset = sin * glm::vec2(sin + cos, sin - cos) * building.size;
+            transform.setPosition(utility::normalizedWorldGridToWorldCoords(glm::vec2(building.gridPosition) + offset));
+
+            transform.calculateTransform();
         }
     }
 
-BuildObjects:
     while (objectsToBuild.size() > 0) {
         entt::entity objectToBuild = objectsToBuild.front();
 
         BuildingComponent& building = registry.get<BuildingComponent>(objectToBuild);
         building.preview = false;
 
-        registry.emplace<TransformationComponent>(objectToBuild, utility::normalizedWorldGridToWorldCoords(building.gridPosition), glm::vec3(0.0f, glm::radians(-90.0f) * building.rotation, 0.0f), glm::vec3(1.0f)).calculateTransform();
-
-        std::vector<glm::ivec2> positions = {building.gridPosition, building.gridPosition + building.size};
+        std::vector<glm::ivec2> positions = {building.gridPosition, building.gridPosition + glm::ivec2(glm::ceil(building.size))};
 
         BuildEvent event(positions, building.type, BuildAction::ENTITY_CREATED, getShape(building.size));
         game->raiseEvent(event);
@@ -158,46 +201,8 @@ constexpr glm::ivec2 BuildSystem::getDefaultSize(BuildingType type) {
     }
 }
 
-// std::vector<glm::ivec2> BuildSystem::getRoadNodes(const glm::ivec2& start, const glm::ivec2& end) const {
-// BuildShape shape = getShape(start, end);
-// if (shape == BuildShape::LINE) {
-// return {start, end};
-//}
-// else {
-// glm::ivec2 node = state.xFirst ? glm::ivec2(start.x, end.y) : glm::ivec2(end.x, start.y);
-// return {start, node, end};
-//}
-//}
-
 bool BuildSystem::canBuild(const std::vector<glm::ivec2>& positions, const BuildingType type, const TerrainComponent& terrain) const {
-    // if (type == BuildingType::ROAD) {
-    //     const unsigned int segementsCount = positions.size() - 1;
-    //     for (int segment = 0; segment < segementsCount; segment++) {
-    //         glm::vec2 direction = positions[segment + 1] - positions[segment];
-    //         const unsigned int edgeLength = glm::length(direction);
-    //         direction = glm::normalize(direction);
-
-    //         for (int i = 0; i <= edgeLength; i++) {
-    //             const glm::vec2 position = Configuration::cellSize * glm::vec2(positions[segment] + i * glm::ivec2(direction));
-    //             const TerrainSurfaceTypes surfaceType = terrain.getSurfaceType(position);
-
-    //             if (i == 0 || i == edgeLength) {
-    //                 if (surfaceType != TerrainSurfaceTypes::FLAT)
-    //                     return false;
-    //             }
-    //             else {
-    //                 if (surfaceType == TerrainSurfaceTypes::EDGE)
-    //                     return false;
-    //                 else if (surfaceType == TerrainSurfaceTypes::DIAGONAL) {
-    //                     const glm::vec2 gradient = terrain.getSurfaceGradient(position);
-    //                     if (glm::dot(gradient, direction) == 0) {
-    //                         return false;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+    // TODO: Implement this when returning to non flat terrain
 
     return true;
 }
@@ -210,8 +215,38 @@ constexpr glm::vec3 BuildSystem::getBuildmarkerOffset(const BuildingType type) {
 }
 
 void BuildSystem::createNewBuilding() {
-    currentBuilding = registry.create();
-    registry.emplace<BuildingComponent>(currentBuilding, selectedBuildingType, glm::vec2(), 0, getDefaultSize(selectedBuildingType), true);
+    static std::string objectIDs[] = {
+        "",                   // NONE
+        "",                   // CLEAR
+        "",                   // ROAD
+        "object.parking_lot", // PARKING_LOT
+    };
+    glm::vec3 position;
+
+    switch (selectedBuildingType) {
+        case BuildingType::ROAD: {
+            currentBuilding = registry.create();
+
+            const RoadComponent& road = registry.emplace<RoadComponent>(currentBuilding);
+            Mesh* roadMesh = new Mesh();
+            roadMesh->geometries["BASIC_STREETS"] = {std::make_pair(resourceManager.getResource<Material>("BASIC_STREET_MATERIAL"), GeometryPtr(new MeshGeometry()))};
+
+            registry.emplace<MeshComponent>(currentBuilding, MeshPtr(roadMesh));
+        } break;
+        case BuildingType::CLEAR:
+        case BuildingType::NONE:
+            currentBuilding = registry.create();
+            break;
+        default: {
+            const std::string& id = "object." + getBuildingName(selectedBuildingType);
+
+            ObjectPtr object = resourceManager.getResource<Object>(id);
+            currentBuilding = object->create(registry);
+        } break;
+    }
+
+    registry.emplace<TransformationComponent>(currentBuilding, glm::vec3());
+    registry.emplace<BuildingComponent>(currentBuilding, selectedBuildingType, glm::ivec2(0), 0, getDefaultSize(selectedBuildingType), true);
 }
 
 void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
@@ -230,7 +265,7 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
         BuildAction action = BuildAction::DEFAULT;
         BuildShape shape = BuildShape::POINT;
         glm::ivec2 start;
-        std::vector<glm::ivec2> positions = {building.gridPosition, building.gridPosition + building.size};
+        std::vector<glm::ivec2> positions = {building.gridPosition, building.gridPosition + glm::ivec2(glm::ceil(building.size))};
 
         bool canBuild;
         switch (building.type) {
@@ -240,6 +275,7 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
 
                     objectsToBuild.emplace(currentBuilding);
                     createNewBuilding();
+                    this->building = false;
                 }
                 else {
                     this->building = true;
@@ -273,8 +309,15 @@ void BuildSystem::handleMouseMoveEvent(const MouseMoveEvent& e) {
     if (game->getState() != GameState::BUILD_MODE)
         return;
 
-    const auto& [intersection, gridPos] = getGridPos(glm::vec2(e.x, e.y), getBuildmarkerOffset(selectedBuildingType));
-    gridMouseIntersection = {intersection, gridPos};
+    glm::vec2 mousePos = game->getMousePos();
+    const auto& [intersection, position]= getGridPos(mousePos, getBuildmarkerOffset(selectedBuildingType));
+
+    gridMouseIntersection.intersection = intersection;
+
+    if (intersection) {
+        gridMouseIntersection.positionChanged |= glm::any(glm::notEqual(position, gridMouseIntersection.position));
+        gridMouseIntersection.position = position;
+    }
 }
 
 void BuildSystem::handleKeyEvent(const KeyEvent& e) {

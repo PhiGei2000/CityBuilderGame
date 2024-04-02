@@ -130,8 +130,8 @@ void RenderSystem::update(float dt) {
     glCullFace(GL_FRONT);
     renderScene(shadowShader, entt::exclude<DebugComponent>);
     renderSceneInstanced(instancedShadowShader, entt::exclude<DebugComponent>);
-    glCullFace(GL_BACK);
 
+    glCullFace(GL_BACK);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     const CameraComponent& camera = registry.get<CameraComponent>(game->camera);
