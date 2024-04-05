@@ -32,9 +32,13 @@ struct RoadComponent : public AssignableComponent {
     bool borders[4][Configuration::cellsPerChunk];
 
     /// @brief `true` if the road was updated and the mesh must be recreated
-    bool meshOutdated;
+    bool meshOutdated = false;
 
     RoadComponent();
+
+    RoadComponent(const RoadTile (&tiles)[Configuration::cellsPerChunk][Configuration::cellsPerChunk]);
+
+    RoadComponent(const RoadTile (&tiles)[Configuration::cellsPerChunk][Configuration::cellsPerChunk], const bool (&borders)[4][Configuration::cellsPerChunk]);
 
     /// @brief Deletes all road information
     void clear();
@@ -53,6 +57,7 @@ struct RoadComponent : public AssignableComponent {
     std::vector<glm::ivec2> getNodes() const;
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
-        registry.emplace<RoadComponent>(entity, roadTiles, meshOutdated);
+        RoadComponent& road = registry.emplace<RoadComponent>(entity, roadTiles);
+        road.meshOutdated = true;
     }
 };

@@ -197,20 +197,20 @@ constexpr bool std::less<glm::ivec2>::operator()(const glm::ivec2& lhs, const gl
 // }
 
 // int RoadGraphNode::getRotation() const {
-//     RoadTileType type = getType();
+//     RoadTileTypes type = getType();
 
 //     switch (type) {
-//         case RoadTileType::STRAIGHT:
+//         case RoadTileTypes::STRAIGHT:
 //             return connected(Direction::NORTH) ? 0 : 1;
-//         case RoadTileType::END: {
+//         case RoadTileTypes::END: {
 //             int i = 0;
 //             while (!connected((Direction)i))
 //                 i++;
 
 //             return i;
 //         }
-//         case RoadTileType::CURVE:
-//         case RoadTileType::CURVE_FULL: {
+//         case RoadTileTypes::CURVE:
+//         case RoadTileTypes::CURVE_FULL: {
 //             int i = 0;
 //             while (!connected((Direction)i))
 //                 i++;
@@ -221,7 +221,7 @@ constexpr bool std::less<glm::ivec2>::operator()(const glm::ivec2& lhs, const gl
 
 //             return connected(Direction::WEST) ? 3 : 0;
 //         }
-//         case RoadTileType::T_CROSSING: {
+//         case RoadTileTypes::T_CROSSING: {
 //             int i = 0;
 //             while (connected((Direction)i))
 //                 i++;
@@ -233,27 +233,27 @@ constexpr bool std::less<glm::ivec2>::operator()(const glm::ivec2& lhs, const gl
 //     }
 // }
 
-// RoadTileType RoadGraphNode::getType() const {
+// RoadTileTypes RoadGraphNode::getType() const {
 //     int connectionsCount = (connected(Direction::NORTH) ? 1 : 0) + (connected(Direction::EAST) ? 1 : 0) + (connected(Direction::SOUTH) ? 1 : 0) + (connected(Direction::WEST) ? 1 : 0);
 
 //     switch (connectionsCount) {
 //         case 0:
-//             return RoadTileType::NOT_CONNECTED;
+//             return RoadTileTypes::NOT_CONNECTED;
 //         case 1:
-//             return RoadTileType::END;
+//             return RoadTileTypes::END;
 //         case 2:
 //             if (connected(Direction::NORTH) == connected(Direction::SOUTH)) {
-//                 return RoadTileType::STRAIGHT;
+//                 return RoadTileTypes::STRAIGHT;
 //             }
 //             else {
-//                 return RoadTileType::CURVE;
+//                 return RoadTileTypes::CURVE;
 //             }
 //         case 3:
-//             return RoadTileType::T_CROSSING;
+//             return RoadTileTypes::T_CROSSING;
 //         case 4:
-//             return RoadTileType::CROSSING;
+//             return RoadTileTypes::CROSSING;
 //         default:
-//             return RoadTileType::UNDEFINED;
+//             return RoadTileTypes::UNDEFINED;
 //     }
 // }
 

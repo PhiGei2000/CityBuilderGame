@@ -26,6 +26,8 @@ struct VertexAttribute {
     unsigned char normalized;
     int stride;
     const void* pointer;
+    int vbo = 0;
+    int divisor = 0;
 };
 
 typedef std::vector<VertexAttribute> VertexAttributes;
@@ -40,7 +42,7 @@ class Geometry {
   public:
     Geometry(const VertexAttributes& attributes, int drawMode = GL_TRIANGLES);
 
-    void setVertexAttribute(unsigned int index, const VertexAttribute& attributes, unsigned int vbo = 0, unsigned int divisor = 0) const;
+    void setVertexAttribute(unsigned int index, const VertexAttribute& attributes) const;
     void bufferData(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, unsigned int usage = GL_STATIC_DRAW);
 
     virtual void draw() const;

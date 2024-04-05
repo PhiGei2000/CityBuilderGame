@@ -26,6 +26,7 @@
 #include "meshComponent.hpp"
 #include "parkingComponent.hpp"
 #include "roadComponent.hpp"
+#include "roadMeshComponent.hpp"
 #include "sunLightComponent.hpp"
 #include "terrainComponent.hpp"
 #include "transformationComponent.hpp"

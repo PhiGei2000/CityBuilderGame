@@ -18,11 +18,33 @@
 #include "misc/utility.hpp"
 
 RoadComponent::RoadComponent() {
-    meshOutdated = false;
-
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < Configuration::cellsPerChunk; j++) {
             borders[i][j] = false;
+        }
+    }
+}
+
+RoadComponent::RoadComponent(const RoadTile (&tiles)[Configuration::cellsPerChunk][Configuration::cellsPerChunk]) {
+    for (int x =0 ; x < Configuration::cellsPerChunk;x++) {
+        for (int y =0 ; y < Configuration::cellsPerChunk; y++) {
+            if (x < 4) {
+                this->borders[x][y] = false;
+            }
+
+            this->roadTiles[x][y] = tiles[x][y];
+        }
+    }
+}
+
+RoadComponent::RoadComponent(const RoadTile (&tiles)[Configuration::cellsPerChunk][Configuration::cellsPerChunk], const bool (&borders)[4][Configuration::cellsPerChunk]) {
+    for (int x =0 ; x < Configuration::cellsPerChunk;x++) {
+        for (int y =0 ; y < Configuration::cellsPerChunk; y++) {
+            if (x < 4) {
+                this->borders[x][y] = borders[x][y];
+            }
+
+            this->roadTiles[x][y] = tiles[x][y];
         }
     }
 }
@@ -49,8 +71,8 @@ void RoadComponent::setRoad(const glm::uvec2& position1, const glm::uvec2& posit
 
     for (int x = min.x; x <= max.x; x++) {
         for (int y = min.y; y <= max.y; y++) {
-            if (roadTiles[x][y].tileType == RoadTileType::EMPTY) {
-                roadTiles[y][y].tileType == RoadTileType::UNDEFINED;
+            if (roadTiles[x][y].tileType == RoadTileTypes::EMPTY) {
+                roadTiles[y][y].tileType == RoadTileTypes::UNDEFINED;
             }
         }
     }
@@ -76,7 +98,7 @@ bool RoadComponent::isConnected(const glm::ivec2& pos, Direction dir) const {
         return borders[directionInt][index];
     }
 
-    return roadTiles[neighbourPos.x][neighbourPos.y].tileType != RoadTileType::EMPTY;
+    return roadTiles[neighbourPos.x][neighbourPos.y].tileType != RoadTileTypes::EMPTY;
 }
 
 void RoadComponent::updateRoadTypes() {
@@ -99,14 +121,14 @@ void RoadComponent::updateRoadTypes() {
                 (connections[2] ? 1 : 0) +
                 (connections[3] ? 1 : 0);
 
-            RoadTileType type = RoadTileType::UNDEFINED;
+            RoadTileTypes type = RoadTileTypes::UNDEFINED;
             int rotation = 0;
             switch (connectionsCount) {
                 case 0: // not connected
-                    type = RoadTileType::NOT_CONNECTED;
+                    type = RoadTileTypes::NOT_CONNECTED;
                     break;
                 case 1: // end
-                    type = RoadTileType::END;
+                    type = RoadTileTypes::END;
                     if (connections[1])
                         rotation = 1;
                     else if (connections[2])
@@ -116,16 +138,16 @@ void RoadComponent::updateRoadTypes() {
                 case 2: // straight or curve
                     // north south
                     if (connections[0] && connections[2]) {
-                        type = RoadTileType::STRAIGHT;
+                        type = RoadTileTypes::STRAIGHT;
                     }
                     // east west
                     else if (connections[1] && connections[3]) {
-                        type = RoadTileType::STRAIGHT;
+                        type = RoadTileTypes::STRAIGHT;
                         rotation = 1;
                     }
                     // curve
                     else {
-                        type = RoadTileType::CURVE_FULL;
+                        type = RoadTileTypes::CURVE_FULL;
 
                         int i = 0;
                         while (!connections[i])
@@ -139,17 +161,17 @@ void RoadComponent::updateRoadTypes() {
                         }
                     }
                     break;
-                case 3: // t crossing
-                    type = RoadTileType::T_CROSSING;
+                case 3: { // t crossing
+                    type = RoadTileTypes::T_CROSSING;
 
                     int i = 0;
                     while (connections[i])
                         i++;
 
                     rotation = i - 3;
-                    break;
+                } break;
                 case 4:
-                    type = RoadTileType::CROSSING;
+                    type = RoadTileTypes::CROSSING;
                     break;
             }
 

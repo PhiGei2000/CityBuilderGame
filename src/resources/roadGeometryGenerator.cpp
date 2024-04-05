@@ -24,13 +24,13 @@
 RoadPackGeometry RoadGeometryGenerator::generateRoadPackGeometries(const RoadSpecs& specs) {
     RoadPackGeometry geometries;
 
-    geometries[RoadTileType::NOT_CONNECTED] = generateNotConnected(specs);
-    geometries[RoadTileType::STRAIGHT] = generateStraight(specs);
-    geometries[RoadTileType::CURVE] = generateCurve(specs);
-    geometries[RoadTileType::T_CROSSING] = generateTCrossing(specs);
-    geometries[RoadTileType::CROSSING] = generateCrossing(specs);
-    geometries[RoadTileType::END] = generateEnd(specs);
-    geometries[RoadTileType::RAMP] = generateRamp(specs);
+    geometries[RoadTileTypes::NOT_CONNECTED] = GeometryPtr(new MeshGeometry(generateNotConnected(specs)));
+    geometries[RoadTileTypes::STRAIGHT] = GeometryPtr(new MeshGeometry(generateStraight(specs)));
+    geometries[RoadTileTypes::CURVE] = GeometryPtr(new MeshGeometry(generateCurve(specs)));
+    geometries[RoadTileTypes::T_CROSSING] = GeometryPtr(new MeshGeometry(generateTCrossing(specs)));
+    geometries[RoadTileTypes::CROSSING] = GeometryPtr(new MeshGeometry(generateCrossing(specs)));
+    geometries[RoadTileTypes::END] = GeometryPtr(new MeshGeometry(generateEnd(specs)));
+    geometries[RoadTileTypes::RAMP] = GeometryPtr(new MeshGeometry(generateRamp(specs)));
 
     return geometries;
 }

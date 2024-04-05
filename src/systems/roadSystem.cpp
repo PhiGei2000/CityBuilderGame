@@ -22,6 +22,7 @@
 #include "misc/direction.hpp"
 #include "misc/utility.hpp"
 #include "resources/roadPack.hpp"
+#include "misc/roads/roadTypes.hpp"
 
 RoadSystem::RoadSystem(Game* game)
     : System(game) {
@@ -55,7 +56,22 @@ void RoadSystem::update(float dt) {
 }
 
 void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& geometry) const {
+    std::map<RoadTypes, std::map<RoadTileTypes, std::vector<RoadRenderData>>> renderData;
 
+    for (int x = 0; x < Configuration::cellsPerChunk; x++) {
+        for (int y = 0; y < Configuration::cellsPerChunk; y++) {
+            const RoadTile& tile = road.roadTiles[x][y];
+            if (tile.notEmpty()) {
+                renderData[tile.roadType][tile.tileType].emplace_back(glm::vec2(x, y), tile.rotation);
+            }
+        }
+    }
+
+    for (const auto& [type, typeTiles] : renderData) {
+        for (const auto& [tileType, tiles] : typeTiles) {
+            geometry.roadMeshes[type][tileType].instanceBuffer.fillBuffer(tiles);
+        }
+    }
 }
 
 void RoadSystem::handleBuildEvent(const BuildEvent& event) {

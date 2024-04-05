@@ -27,6 +27,7 @@
 struct BuildEvent;
 struct RoadComponent;
 struct MeshGeometry;
+struct RoadMeshComponent;
 
 class RoadSystem : public System {
   protected:

@@ -16,10 +16,11 @@
 #pragma once
 #include "roadTypes.hpp"
 
+#include <functional>
+
 #include <glm/glm.hpp>
 
-enum class RoadTileType : unsigned char
-{
+enum class RoadTileTypes : unsigned char {
     NOT_CONNECTED,
     END,
     CURVE,
@@ -32,8 +33,10 @@ enum class RoadTileType : unsigned char
     EMPTY = 255U
 };
 
+constexpr std::string getRoadTileTypeName(RoadTileTypes type);
+
 struct RoadTile {
-    RoadTileType tileType = RoadTileType::EMPTY;
+    RoadTileTypes tileType = RoadTileTypes::EMPTY;
     int rotation = 0;
     RoadTypes roadType = RoadTypes::BASIC_STREETS;
 
@@ -45,5 +48,18 @@ struct RoadTile {
 
 struct RoadRenderData {
     glm::vec2 position;
-    RoadTile roadTile;
+    int rotation;
 };
+
+using RoadTypeID = std::pair<RoadTypes, RoadTileTypes>;
+
+std::string roadTypeID_toString(const RoadTypeID& id);
+
+namespace std {
+    template<>
+    struct less<RoadTypeID> {
+        constexpr bool operator()(const RoadTypeID& lhs, const RoadTypeID& rhs) const {
+            return less<int>().operator()((static_cast<int>(lhs.first) << 8) + static_cast<int>(lhs.second), (static_cast<int>(rhs.first) << 8) + static_cast<int>(rhs.second));
+        }
+    };
+} // namespace std

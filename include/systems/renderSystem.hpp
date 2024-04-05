@@ -20,8 +20,10 @@
 #include "components/buildingComponent.hpp"
 #include "components/instancedMeshComponent.hpp"
 #include "components/meshComponent.hpp"
+#include "components/roadMeshComponent.hpp"
 #include "components/transformationComponent.hpp"
 #include "rendering/shadowBuffer.hpp"
+#include "resources/roadPack.hpp"
 
 #if DEBUG
 #include "rendering/debug/shadowMapRenderer.hpp"
@@ -86,7 +88,7 @@ class RenderSystem : public System {
         registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
             .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {
                 shader->setMatrix4("model", transform.transform);
-                mesh.mesh->renderInstanced(shader, mesh.instanceBuffer);
+                mesh.mesh->renderInstanced<TransformationComponent>(shader, mesh.instanceBuffer);
             });
 
         registry.view<MultiInstancedMeshComponent, TransformationComponent>(exclude)
@@ -94,15 +96,21 @@ class RenderSystem : public System {
                 shader->setMatrix4("model", transform.transform);
 
                 for (const auto& [name, instances] : mesh.transforms) {
-                    mesh.mesh->renderObjectInstanced(shader, name, instances.instanceBuffer);
+                    mesh.mesh->renderObjectInstanced<TransformationComponent>(shader, name, instances.instanceBuffer);
                 }
             });
 
         registry.view<RoadMeshComponent, TransformationComponent>(exclude).each([&](const RoadMeshComponent& road, const TransformationComponent& transform) {
             shader->setMatrix4("model", transform.transform);
 
-            for (const auto& [name, instances] : road.roadMeshes) {
-                road.mesh->renderObjectInstanced(shader, name, instances.instanceBuffer);
+            for (const auto& [typeID, tiles] : road.roadMeshes) {
+                const std::string& roadPackName = getRoadTypeName(typeID);
+                const RoadPackPtr& pack = resourceManager.getResource<RoadPack>(roadPackName);
+
+                for (const auto& [tileType, instances] : tiles) {
+                    pack->roadGeometries.renderObjectInstanced<RoadRenderData>(shader, tileType, instances.instanceBuffer);
+                }
+
             }
         });
     }

@@ -20,6 +20,14 @@ enum class RoadTypes : unsigned char {
     BASIC_STREETS,
 };
 
+inline constexpr std::string getRoadTypeName(RoadTypes type) {
+    std::string roadTypeNames[] = {
+        "BASIC_STEETS",
+    };
+
+    return roadTypeNames[static_cast<int>(type)];
+}
+
 struct RoadPack;
 class ResourceManager;
 

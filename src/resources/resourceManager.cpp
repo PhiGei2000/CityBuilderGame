@@ -154,10 +154,13 @@ void ResourceManager::loadResources() {
             unsigned int verticesPerCircle = resourceNode.attribute("verticesPerCircle").as_uint();
 
             RoadPack* pack = new RoadPack();
-            pack->roadGeometries = RoadGeometryGenerator::generateRoadPackGeometries(RoadSpecs{roadwayWidth, roadwayHeight, sidewalkHeight, verticesPerCircle});
-
             pack->shader = getResource<Shader>(shaderId);
             pack->material = getResource<Material>(materialId);
+
+            const RoadPackGeometry& geometries = RoadGeometryGenerator::generateRoadPackGeometries(RoadSpecs{roadwayWidth, roadwayHeight, sidewalkHeight, verticesPerCircle});
+            for (const auto& [tileType, geometry] : geometries) {
+                pack->roadGeometries.geometries[tileType].emplace_back(pack->material, geometry);
+            }
 
             setResource(id, ResourcePtr<RoadPack>(pack));
         }

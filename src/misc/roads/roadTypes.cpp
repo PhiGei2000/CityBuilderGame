@@ -18,10 +18,7 @@
 #include "resources/roadPack.hpp"
 #include "resources/resourceManager.hpp"
 
-RoadPackPtr getRoadPack(const ResourceManager& resourceManager, RoadTypes type) {
-    std::string resourceIds[] = {
-        "BASIC_STEETS"
-    };
 
-    return resourceManager.getResource<RoadPack>(resourceIds[static_cast<unsigned char>(type)]);
+RoadPackPtr getRoadPack(const ResourceManager& resourceManager, RoadTypes type) {
+    return resourceManager.getResource<RoadPack>(getRoadTypeName(type));
 }

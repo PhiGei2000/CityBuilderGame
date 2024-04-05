@@ -36,7 +36,7 @@ void DebugSystem::init() {
         0.0, 0.0, 1.0};
 
     axisGeo->bufferData(vertices, {0, 1, 2});
-    Mesh* axisMesh = new Mesh();
+    Mesh<>* axisMesh = new Mesh<>();
     axisMesh->geometries[""] = {std::make_pair(MaterialPtr(nullptr), GeometryPtr(axisGeo))};
 
     registry.emplace<MeshComponent>(debugEntity, MeshPtr(axisMesh));

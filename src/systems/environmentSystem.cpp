@@ -138,7 +138,7 @@ void EnvironmentSystem::handleBuildEvent(const BuildEvent& e) {
 }
 
 void EnvironmentSystem::handleChunkCreatedEvent(const ChunkCreatedEvent& e) const {
-    MeshPtr treeMesh = resourceManager.getResource<Mesh>("TREE_MESH");
+    MeshPtr treeMesh = resourceManager.getResource<Mesh<>>("TREE_MESH");
     const TerrainComponent& terrain = registry.get<TerrainComponent>(e.entity);
     std::unordered_map<std::string, InstancedMesh<TransformationComponent>> transformations;
 

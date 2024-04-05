@@ -15,11 +15,28 @@
  */
 #include "misc/roads/roadTile.hpp"
 
+
+std::string roadTileTypeNames[] = {
+    "NOT_CONNECTED",
+    "END",
+    "CURVE",
+    "T_CROSSING",
+    "CROSSING",
+    "STRAIGHT",
+    "CURVE_FULL",
+    "RAMP",
+    "UNDEFINED",
+    "EMPTY"};
+
+constexpr std::string getRoadTileTypeName(RoadTileTypes type) {
+    return roadTileTypeNames[static_cast<int>(type)];
+}
+
 bool RoadTile::isRoadNode() const {
     switch (tileType) {
-        case RoadTileType::STRAIGHT:
-        case RoadTileType::RAMP:
-        case RoadTileType::UNDEFINED:
+        case RoadTileTypes::STRAIGHT:
+        case RoadTileTypes::RAMP:
+        case RoadTileTypes::UNDEFINED:
             return false;
         default:
             return true;
@@ -27,9 +44,13 @@ bool RoadTile::isRoadNode() const {
 }
 
 bool RoadTile::empty() const {
-    return tileType == RoadTileType::EMPTY;
+    return tileType == RoadTileTypes::EMPTY;
 }
 
 bool RoadTile::notEmpty() const {
     return !empty();
+}
+
+std::string roadTypeID_toString(const RoadTypeID& id) {
+    return getRoadTypeName(id.first) + "." + getRoadTileTypeName(id.second);
 }

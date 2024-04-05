@@ -25,11 +25,12 @@ class InstanceBuffer {
     unsigned int vbo;
     unsigned int instancesCount;
 
-    friend struct Mesh;
-
   public:
     InstanceBuffer();
 
     template<typename TData>
     void fillBuffer(const std::vector<TData>& offsets);
+
+    unsigned int getVBO() const;
+    unsigned int getInstancesCount() const;
 };

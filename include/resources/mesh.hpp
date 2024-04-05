@@ -15,51 +15,134 @@
  */
 #pragma once
 #include "rendering/geometry.hpp"
+#include "rendering/instanceBuffer.hpp"
 #include "rendering/material.hpp"
 #include "rendering/shader.hpp"
+#include "resources/roadGeometryGenerator.hpp"
 
 #include "misc/typedefs.hpp"
 
 #include <glm/glm.hpp>
 #include <vector>
 
-class InstanceBuffer;
+template<typename T>
+constexpr VertexAttributes getInstanceBufferVertexAttributes();
 
+template<>
+inline constexpr VertexAttributes getInstanceBufferVertexAttributes<TransformationComponent>() {
+    return VertexAttributes{
+        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(0 * sizeof(glm::vec4)), 0, 1},
+        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(1 * sizeof(glm::vec4)), 0, 1},
+        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)), 0, 1},
+        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)), 0, 1},
+    };
+}
+
+template<>
+inline constexpr VertexAttributes getInstanceBufferVertexAttributes<RoadRenderData>() {
+    int stride = sizeof(glm::vec3) + sizeof(int);
+
+    return VertexAttributes{
+        VertexAttribute{3, GL_FLOAT, GL_FALSE, stride,                   (void*)0, 0, 1},
+        VertexAttribute{1,   GL_INT, GL_FALSE, stride, (void*)(sizeof(glm::vec3)), 0, 1},
+    };
+}
+
+template<typename TKey = std::string>
 struct Mesh {
   protected:
-    void renderGeometry(ShaderPtr& shader, const MaterialPtr& material, const GeometryPtr& geometry) const;
-    void renderInstancedGeometry(ShaderPtr& shader, const MaterialPtr& material, const GeometryPtr& geometry, unsigned int instancesCount) const;
+    inline void renderGeometry(ShaderPtr& shader, const MaterialPtr& material, const GeometryPtr& geometry) const {
+        bool blend = false;
+        if (material) {
+            material->use(shader.get());
+
+            blend = material->dissolve < 1.0f;
+        }
+
+        if (blend) {
+            glEnable(GL_BLEND);
+        }
+
+        geometry->draw();
+
+        if (blend) {
+            glDisable(GL_BLEND);
+        }
+    }
+
+    inline void renderInstancedGeometry(ShaderPtr& shader, const MaterialPtr& material, const GeometryPtr& geometry, unsigned int instancesCount) const {
+        bool blend = false;
+        if (material) {
+            material->use(shader.get());
+
+            blend = material->dissolve < 1.0f;
+        }
+
+        if (blend) {
+            glEnable(GL_BLEND);
+        }
+
+        std::static_pointer_cast<MeshGeometry>(geometry)->drawInstanced(instancesCount);
+
+        if (blend) {
+            glDisable(GL_BLEND);
+        }
+    }
 
   public:
-    std::unordered_map<std::string, std::vector<std::pair<MaterialPtr, GeometryPtr>>> geometries;
+    std::unordered_map<TKey, std::vector<std::pair<MaterialPtr, GeometryPtr>>> geometries;
 
-    Mesh();
+    inline void render(ShaderPtr shader) const {
+        for (const auto& [name, data] : geometries) {
+            for (const auto& [material, geometry] : data) {
+                renderGeometry(shader, material, geometry);
+            }
+        }
+    }
 
-    void render(ShaderPtr shader) const;
     template<typename T>
     inline void renderInstanced(ShaderPtr shader, const InstanceBuffer& instanceBuffer) const {
         linkInstanceBuffer<T>(instanceBuffer);
 
         for (const auto& [name, data] : geometries) {
             for (const auto& [material, geometry] : data) {
-                renderInstancedGeometry(shader, material, geometry, instanceBuffer.instancesCount);
+                renderInstancedGeometry(shader, material, geometry, instanceBuffer.getInstancesCount());
             }
         }
     }
 
-    void renderObject(ShaderPtr shader, const std::string& name) const;
-    template<typename T>
-    inline void renderObjectInstanced(ShaderPtr shader, const std::string& name, const InstanceBuffer& instanceBuffer) const {
-        const auto& object = geometries.at(name);
-
-        linkInstanceBuffer<T>(instanceBuffer);
+    inline void renderObject(ShaderPtr shader, const TKey& key) const {
+        const auto& object = geometries.at(key);
         for (const auto& [material, geometry] : object) {
-            renderInstancedGeometry(shader, material, geometry, instanceBuffer.instancesCount);
+            renderGeometry(shader, material, geometry);
         }
     }
 
     template<typename T>
-    void linkInstanceBuffer(const InstanceBuffer& buffer) const;
+    inline void renderObjectInstanced(ShaderPtr shader, const TKey& key, const InstanceBuffer& instanceBuffer) const {
+        const auto& object = geometries.at(key);
+
+        linkInstanceBuffer<T>(instanceBuffer);
+        for (const auto& [material, geometry] : object) {
+            renderInstancedGeometry(shader, material, geometry, instanceBuffer.getInstancesCount());
+        }
+    }
+
+    template<typename T>
+    inline void linkInstanceBuffer(const InstanceBuffer& buffer) const {
+        unsigned int vbo = buffer.getVBO();
+        unsigned int offset = MeshGeometry::meshVertexAttributes.size();
+
+        const VertexAttributes& vertexAttributes = getInstanceBufferVertexAttributes<T>();
+
+        for (const auto& [_, subMesh] : geometries) {
+            for (const auto& [_, geometry] : subMesh) {
+                for (int i = 0; i < vertexAttributes.size(); i++) {
+                    geometry->setVertexAttribute(offset + i, vertexAttributes[i]);
+                }
+            }
+        }
+    }
 };
 
-using MeshPtr = ResourcePtr<Mesh>;
+using MeshPtr = ResourcePtr<Mesh<>>;

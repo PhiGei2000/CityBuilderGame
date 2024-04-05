@@ -13,6 +13,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
     add_compile_definitions(DEBUG)
 endif()
+add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
 include_directories(./include/)
 
@@ -23,12 +24,12 @@ if(OPENGL_FOUND)
     message("OpenGL found")
 endif()
 
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_LIST_DIR}/lib)
 if(WIN32)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         add_compile_options(/MP)
     endif()
 
-    set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_LIST_DIR}/lib)
 
     # install glfw
     set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -91,7 +92,10 @@ else()
         message("glew found")
     endif()
 
-    set(LIBNOISE_LIBRARIES libnoise.a)
+    # include libnoise
+    add_subdirectory(lib/libnoise)
+    set(LIBNOISE_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/lib/libnoise/src)
+    set(LIBNOISE_LIBRARIES noise)
 
     include_directories(/usr/include/freetype2)
     include_directories(/usr/include/stb)

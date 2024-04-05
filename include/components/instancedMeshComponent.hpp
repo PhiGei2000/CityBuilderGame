@@ -16,6 +16,9 @@
 #pragma once
 #include "meshComponent.hpp"
 
+#include "misc/roads/roadTile.hpp"
+#include "misc/roads/roadTypes.hpp"
+
 #include "rendering/instancedMesh.hpp"
 
 #include <glm/glm.hpp>
@@ -45,13 +48,3 @@ struct MultiInstancedMeshComponent : public MeshComponent {
     }
 };
 
-struct RoadRenderData;
-
-struct RoadMeshComponent : public MeshComponent {
-    using RoadTypeID = std::pair<RoadTypes, RoadTileType>;
-    std::unordered_map<RoadTypeID, InstancedMesh<RoadRenderData>> roadMeshes;
-
-    inline RoadMeshComponent(const MeshPtr& mesh, const std::unordered_map<RoadTypeID, InstancedMesh<RoadRenderData>>& instances)
-        : MeshComponent(mesh), roadMeshes(instances) {
-    }
-};

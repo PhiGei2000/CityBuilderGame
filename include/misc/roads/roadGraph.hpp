@@ -66,7 +66,7 @@ struct RoadGraphEdge {
 //
 //     /// @brief Determines the road type based on the connections
 //     /// @return The determined road type
-//     RoadTileType getType() const;
+//     RoadTileTypes getType() const;
 //
 //     /// @brief Returns the destination of the connection in the specified direction.
 //     /// @param dir The direction.

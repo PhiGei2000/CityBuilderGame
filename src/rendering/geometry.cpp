@@ -45,17 +45,17 @@ Geometry::Geometry(const VertexAttributes& attributes, int drawMode)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Geometry::setVertexAttribute(unsigned int index, const VertexAttribute& attribute, unsigned int vbo, unsigned int divisor) const {
+void Geometry::setVertexAttribute(unsigned int index, const VertexAttribute& attribute) const {
     glBindVertexArray(vao);
     glEnableVertexAttribArray(index);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo == 0 ? this->vbo : vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, attribute.vbo == 0 ? this->vbo : attribute.vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
     glVertexAttribPointer(index, attribute.size, attribute.type, attribute.normalized, attribute.stride, attribute.pointer);
 
-    if (divisor != 0) {
-        glVertexAttribDivisor(index, divisor);
+    if (attribute.divisor != 0) {
+        glVertexAttribDivisor(index, attribute.divisor);
     }
 
     glBindVertexArray(0);

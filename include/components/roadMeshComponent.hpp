@@ -14,22 +14,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "misc/roads/roadTile.hpp"
-#include "resources/mesh.hpp"
-
-#include "rendering/shader.hpp"
-#include "rendering/material.hpp"
-
 #include <map>
 
-struct InstanceBuffer;
+#include "misc/roads/roadTile.hpp"
 
-struct RoadPack {
-    // std::map<RoadTileTypes, GeometryPtr> roadGeometries;
-    Mesh<RoadTileTypes> roadGeometries;
 
-    ResourcePtr<Shader> shader;
-    ResourcePtr<Material> material;
+struct RoadMeshComponent {
+    std::map<RoadTypes, std::map<RoadTileTypes, InstancedMesh<RoadRenderData>>> roadMeshes;
 };
-
-using RoadPackPtr = ResourcePtr<RoadPack>;

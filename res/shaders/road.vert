@@ -6,7 +6,7 @@ layout(location = 2) in vec3 aNormal;
 layout(location = 3) in vec3 aTangent;
 layout(location = 4) in vec3 aBitangent;
 // road tile attributes
-layout(location = 5) in vec2 gridPos; // position inside the current chunk
+layout(location = 5) in vec3 gridPos; // position inside the current chunk
 layout(location = 6) in int rotation;
 
 out VS_OUT {
@@ -51,7 +51,7 @@ void main() {
         vec4(angleCos, 0.0, angleSin, 0.0),
         vec4(0.0, 1.0, 0.0, 0.0),
         vec4(-angleSin, 0.0, angleCos, 0.0),
-        vec4(gridPos.x, 0.0, gridPos.y, 1.0));
+        vec4(gridPos, 1.0));
 
     vec4 position = transform * vec4(aPos, 1.0);
 

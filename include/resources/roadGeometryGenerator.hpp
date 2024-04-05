@@ -15,7 +15,8 @@
  */
 #pragma once
 #include "misc/configuration.hpp"
-#include "misc/roads/roadTypes.hpp"
+#include "misc/roads/roadTile.hpp"
+#include "rendering/geometry.hpp"
 
 #include <glm/glm.hpp>
 #include <map>
@@ -23,7 +24,7 @@
 struct RoadSpecs;
 struct GeometryData;
 
-using RoadPackGeometry = std::map<RoadType, GeometryData>;
+using RoadPackGeometry = std::map<RoadTileTypes, GeometryPtr>;
 
 class RoadGeometryGenerator {
   private:
