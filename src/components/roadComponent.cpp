@@ -72,7 +72,7 @@ void RoadComponent::setRoad(const glm::uvec2& position1, const glm::uvec2& posit
     for (int x = min.x; x <= max.x; x++) {
         for (int y = min.y; y <= max.y; y++) {
             if (roadTiles[x][y].tileType == RoadTileTypes::EMPTY) {
-                roadTiles[y][y].tileType == RoadTileTypes::UNDEFINED;
+                roadTiles[y][y].tileType = RoadTileTypes::UNDEFINED;
             }
         }
     }

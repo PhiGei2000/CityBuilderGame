@@ -26,7 +26,7 @@ struct VertexAttribute {
     unsigned char normalized;
     int stride;
     const void* pointer;
-    int vbo = 0;
+    unsigned int vbo = 0;
     int divisor = 0;
 };
 

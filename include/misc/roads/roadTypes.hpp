@@ -15,6 +15,7 @@
  */
 #pragma once
 #include <memory>
+#include <string>
 
 enum class RoadTypes : unsigned char {
     BASIC_STREETS,

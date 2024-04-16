@@ -26,25 +26,25 @@
 #include <vector>
 
 template<typename T>
-constexpr VertexAttributes getInstanceBufferVertexAttributes();
+constexpr VertexAttributes getInstanceBufferVertexAttributes(unsigned int vbo = 0);
 
 template<>
-inline constexpr VertexAttributes getInstanceBufferVertexAttributes<TransformationComponent>() {
+inline constexpr VertexAttributes getInstanceBufferVertexAttributes<TransformationComponent>(unsigned int vbo) {
     return VertexAttributes{
-        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(0 * sizeof(glm::vec4)), 0, 1},
-        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(1 * sizeof(glm::vec4)), 0, 1},
-        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)), 0, 1},
-        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)), 0, 1},
+        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(0 * sizeof(glm::vec4)), vbo, 1},
+        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(1 * sizeof(glm::vec4)), vbo, 1},
+        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)), vbo, 1},
+        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)), vbo, 1},
     };
 }
 
 template<>
-inline constexpr VertexAttributes getInstanceBufferVertexAttributes<RoadRenderData>() {
+inline constexpr VertexAttributes getInstanceBufferVertexAttributes<RoadRenderData>(unsigned int vbo) {
     int stride = sizeof(glm::vec3) + sizeof(int);
 
     return VertexAttributes{
-        VertexAttribute{3, GL_FLOAT, GL_FALSE, stride,                   (void*)0, 0, 1},
-        VertexAttribute{1,   GL_INT, GL_FALSE, stride, (void*)(sizeof(glm::vec3)), 0, 1},
+        VertexAttribute{3, GL_FLOAT, GL_FALSE, stride,                   (void*)0, vbo, 1},
+        VertexAttribute{1,   GL_INT, GL_FALSE, stride, (void*)(sizeof(glm::vec3)), vbo, 1},
     };
 }
 
@@ -133,7 +133,7 @@ struct Mesh {
         unsigned int vbo = buffer.getVBO();
         unsigned int offset = MeshGeometry::meshVertexAttributes.size();
 
-        const VertexAttributes& vertexAttributes = getInstanceBufferVertexAttributes<T>();
+        const VertexAttributes& vertexAttributes = getInstanceBufferVertexAttributes<T>(vbo);
 
         for (const auto& [_, subMesh] : geometries) {
             for (const auto& [_, geometry] : subMesh) {

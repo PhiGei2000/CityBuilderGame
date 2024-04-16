@@ -2,3 +2,6 @@
 build/
 /.vs
 /CMakePrestes.json
+
+applyCopyright.ps1
+copyright.txt

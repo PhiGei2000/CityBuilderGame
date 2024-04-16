@@ -154,7 +154,7 @@ void Application::run() {
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        stopRequested |= glfwWindowShouldClose(window);
+        stopRequested |= (glfwWindowShouldClose(window) != 0);
     }
 
     glfwDestroyWindow(window);

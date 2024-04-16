@@ -29,7 +29,7 @@ void main() {
     float angleSin = sin(angle);
     float angleCos = cos(angle);
 
-    mat3 transform = mat4(
+    mat4 transform = mat4(
         vec4(angleCos, 0.0, angleSin, 0.0),
         vec4(0.0, 1.0, 0.0, 0.0),
         vec4(-angleSin, 0.0, angleCos, 0.0),
