@@ -77,6 +77,6 @@ BuildMenu::BuildMenu(Gui* gui)
 void BuildMenu::selectBuildingType(BuildingType type) const {
     Game* game = this->gui->getApp()->getGame();
 
-    BuildEvent event = BuildEvent{{}, type, BuildAction::SELECT};
+    BuildEvent event = BuildEvent{entt::entity{}, {}, type, BuildAction::SELECT};
     game->raiseEvent<BuildEvent>(event);
 }

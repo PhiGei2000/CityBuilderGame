@@ -18,7 +18,6 @@
 
 #include "misc/roads/roadTile.hpp"
 
-
 struct RoadMeshComponent {
-    std::map<RoadTypes, std::map<RoadTileTypes, InstancedMesh<RoadRenderData>>> roadMeshes;
+    std::map<RoadTypes, std::map<RoadTileTypes, InstancedMesh<glm::mat4>>> roadMeshes;
 };

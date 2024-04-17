@@ -29,7 +29,7 @@ template<typename T>
 constexpr VertexAttributes getInstanceBufferVertexAttributes(unsigned int vbo = 0);
 
 template<>
-inline constexpr VertexAttributes getInstanceBufferVertexAttributes<TransformationComponent>(unsigned int vbo) {
+inline constexpr VertexAttributes getInstanceBufferVertexAttributes<glm::mat4>(unsigned int vbo) {
     return VertexAttributes{
         VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(0 * sizeof(glm::vec4)), vbo, 1},
         VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(1 * sizeof(glm::vec4)), vbo, 1},
@@ -39,13 +39,8 @@ inline constexpr VertexAttributes getInstanceBufferVertexAttributes<Transformati
 }
 
 template<>
-inline constexpr VertexAttributes getInstanceBufferVertexAttributes<RoadRenderData>(unsigned int vbo) {
-    int stride = sizeof(glm::vec3) + sizeof(int);
-
-    return VertexAttributes{
-        VertexAttribute{3, GL_FLOAT, GL_FALSE, stride,                   (void*)0, vbo, 1},
-        VertexAttribute{1,   GL_INT, GL_FALSE, stride, (void*)(sizeof(glm::vec3)), vbo, 1},
-    };
+inline constexpr VertexAttributes getInstanceBufferVertexAttributes<TransformationComponent>(unsigned int vbo) {
+    return getInstanceBufferVertexAttributes<glm::mat4>(vbo);
 }
 
 template<typename TKey = std::string>

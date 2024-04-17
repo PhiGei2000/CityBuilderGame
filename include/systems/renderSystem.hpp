@@ -45,8 +45,8 @@ class RenderSystem : public System {
 
     unsigned int cameraWidth;
 
-    std::shared_ptr<Shader> shadowShader;
-    std::shared_ptr<Shader> instancedShadowShader;
+    ShaderPtr shadowShader;
+    ShaderPtr instancedShadowShader;
 
     void init() override;
 
@@ -100,19 +100,18 @@ class RenderSystem : public System {
                 }
             });
 
-        // registry.view<RoadMeshComponent, TransformationComponent>(exclude).each([&](const RoadMeshComponent& road, const TransformationComponent& transform) {
-        //     shader->setMatrix4("model", transform.transform);
+        registry.view<RoadMeshComponent, TransformationComponent>(exclude).each([&](const RoadMeshComponent& road, const TransformationComponent& transform) {
+            shader->setMatrix4("model", transform.transform);
 
-        //     for (const auto& [typeID, tiles] : road.roadMeshes) {
-        //         const std::string& roadPackName = getRoadTypeName(typeID);
-        //         const RoadPackPtr& pack = resourceManager.getResource<RoadPack>(roadPackName);
+            for (const auto& [typeID, tiles] : road.roadMeshes) {
+                const std::string& roadPackName = getRoadTypeName(typeID);
+                const RoadPackPtr& pack = resourceManager.getResource<RoadPack>(roadPackName);
 
-        //         for (const auto& [tileType, instances] : tiles) {
-        //             pack->roadGeometries.renderObjectInstanced<RoadRenderData>(shader, tileType, instances.instanceBuffer);
-        //         }
-
-        //     }
-        // });
+                for (const auto& [tileType, instances] : tiles) {
+                    pack->roadGeometries.renderObjectInstanced<glm::mat4>(shader, tileType, instances.instanceBuffer);
+                }
+            }
+        });
     }
 
     void updateLightBuffer(const LightComponent& sunLight, const CameraComponent& component) const;

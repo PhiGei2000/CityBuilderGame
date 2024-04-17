@@ -33,6 +33,16 @@ unsigned int InstanceBuffer::getInstancesCount() const {
 }
 
 template<>
+void InstanceBuffer::fillBuffer(const std::vector<glm::mat4>& transformations) {
+    instancesCount = transformations.size();
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, instancesCount * sizeof(glm::mat4), &transformations[0], GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+template<>
 void InstanceBuffer::fillBuffer(const std::vector<TransformationComponent>& transformations) {
     std::vector<glm::mat4> matrices;
     matrices.reserve(transformations.size());
@@ -40,20 +50,15 @@ void InstanceBuffer::fillBuffer(const std::vector<TransformationComponent>& tran
     for (const auto& transform : transformations) {
         matrices.push_back(transform.transform);
     }
-    instancesCount = matrices.size();
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, instancesCount * sizeof(glm::mat4), &matrices[0], GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    fillBuffer<glm::mat4>(matrices);
 }
 
-template<>
-void InstanceBuffer::fillBuffer(const std::vector<RoadRenderData>& transformations) {
-    instancesCount = transformations.size();
+void InstanceBuffer::clearBuffer() {
+    instancesCount = 0;
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, instancesCount * sizeof(RoadRenderData), &transformations[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

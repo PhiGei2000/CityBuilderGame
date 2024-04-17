@@ -31,6 +31,8 @@ class InstanceBuffer {
     template<typename TData>
     void fillBuffer(const std::vector<TData>& offsets);
 
+    void clearBuffer();
+
     unsigned int getVBO() const;
     unsigned int getInstancesCount() const;
 };

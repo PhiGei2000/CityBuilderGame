@@ -62,6 +62,8 @@ class BuildSystem : public System {
         glm::ivec2 position;
         // glm::ivec2 lastPosition;
         bool positionChanged;
+
+        bool positionUpdated() const;
     } gridMouseIntersection;
 
     /// @brief A list of objects that are going to be created
@@ -86,7 +88,7 @@ class BuildSystem : public System {
     /// @param start The start position of the road
     /// @param end The end position of the road
     /// @returns The positions of the road nodes
-    //std::vector<glm::ivec2> getRoadNodes(const glm::ivec2& start, const glm::ivec2& end) const;
+    // std::vector<glm::ivec2> getRoadNodes(const glm::ivec2& start, const glm::ivec2& end) const;
 
     /// @brief Determines if the given building could be build
     /// @param positions The position data of the building
@@ -95,7 +97,7 @@ class BuildSystem : public System {
     /// @return True if the building could be build otherwise false
     bool canBuild(const std::vector<glm::ivec2>& positions, const BuildingType type, const TerrainComponent& terrain) const;
 
-    static constexpr glm::vec3 getBuildmarkerOffset(const BuildingType type);
+    static constexpr glm::vec3 getBuildingOffset(const BuildingType type);
 
     /// @brief Creates a new entity in the registry and assings the components for the currently selected building to this entity. In addition to these a BuildingComponent and a TransformationComponent
     void createNewBuilding();

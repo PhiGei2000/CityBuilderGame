@@ -33,6 +33,16 @@ enum class RoadTileTypes : unsigned char {
     EMPTY = 255U
 };
 
+inline RoadTileTypes operator++(RoadTileTypes& t, int) {
+    if (t == RoadTileTypes::UNDEFINED || t == RoadTileTypes::EMPTY) {
+        return t;
+    }
+
+    RoadTileTypes prevValue = t;
+    t = static_cast<RoadTileTypes>(static_cast<unsigned char>(t) + 1);
+    return prevValue;
+}
+
 constexpr std::string getRoadTileTypeName(RoadTileTypes type);
 
 struct RoadTile {
@@ -47,8 +57,8 @@ struct RoadTile {
 };
 
 struct RoadRenderData {
-    glm::vec2 position;
-    int rotation;
+    glm::vec3 position;
+    glm::mat3 rotation;
 };
 
 using RoadTypeID = std::pair<RoadTypes, RoadTileTypes>;

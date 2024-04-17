@@ -219,6 +219,7 @@ void TerrainSystem::update(float dt) {
         registry.emplace<TransformationComponent>(chunkEntity, utility::normalizedChunkGridToWorldCoords(position, glm::vec2(0.0f)), glm::quat(), glm::vec3(1.0f));
         TerrainComponent& terrain = registry.emplace<TerrainComponent>(chunkEntity);
         registry.emplace<RoadComponent>(chunkEntity);
+        registry.emplace<RoadMeshComponent>(chunkEntity);
         game->terrain.chunkEntities[position] = chunkEntity;
 
         // generate terrain height

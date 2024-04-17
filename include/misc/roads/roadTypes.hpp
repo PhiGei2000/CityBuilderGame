@@ -19,11 +19,22 @@
 
 enum class RoadTypes : unsigned char {
     BASIC_STREETS,
+    UNDEFINED
 };
+
+inline RoadTypes operator++(RoadTypes& t, int) {
+    if (t == RoadTypes::UNDEFINED) {
+        return RoadTypes::UNDEFINED;
+    }
+
+    RoadTypes prevValue = t;
+    t = static_cast<RoadTypes>(static_cast<unsigned char>(t) + 1);
+    return prevValue;
+}
 
 inline constexpr std::string getRoadTypeName(RoadTypes type) {
     std::string roadTypeNames[] = {
-        "BASIC_STEETS",
+        "BASIC_STREETS",
     };
 
     return roadTypeNames[static_cast<int>(type)];

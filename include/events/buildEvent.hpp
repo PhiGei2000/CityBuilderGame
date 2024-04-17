@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "event.hpp"
+#include "entityEvent.hpp"
 
 #include "misc/buildingType.hpp"
 #include "misc/configuration.hpp"
@@ -25,13 +25,8 @@
 #include <glm/glm.hpp>
 
 enum class BuildAction : unsigned int {
-    DEFAULT,
-    BEGIN,
     END,
-    ENTITY_CREATED,
-    SELECT,
-    PREVIEW,
-    END_PREVIEW
+    SELECT
 };
 
 enum class BuildShape {
@@ -41,7 +36,7 @@ enum class BuildShape {
 };
 
 /// @brief Holds data about building processes
-struct BuildEvent : public Event {
+struct BuildEvent : public EntityEvent {
     /// @brief The position where the building should be created
     std::vector<glm::ivec2> positions;
 
@@ -57,8 +52,8 @@ struct BuildEvent : public Event {
     /// @brief True if the build can be builded on the specified position
     bool valid = true;
 
-    inline BuildEvent(const std::vector<glm::ivec2>& positions, BuildingType type, BuildAction action, BuildShape shape = BuildShape::LINE, bool valid = true)
-        : positions(positions), type(type), action(action), shape(shape) {
+    inline BuildEvent(entt::entity entity, const std::vector<glm::ivec2>& positions, BuildingType type, BuildAction action = BuildAction::END, BuildShape shape = BuildShape::LINE, bool valid = true)
+        : EntityEvent(entity), positions(positions), type(type), action(action), shape(shape) {
     }
 
     inline bool insideArea(const glm::vec2& pos) const {

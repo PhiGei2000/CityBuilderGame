@@ -7,7 +7,7 @@ layout(location = 3) in vec3 aTangent;
 layout(location = 4) in vec3 aBitangent;
 // road tile attributes
 layout(location = 5) in vec3 gridPos; // position inside the current chunk
-layout(location = 6) in int rotation;
+layout(location = 6) in mat3 rotation;
 
 out VS_OUT {
     vec3 FragPos;
@@ -43,20 +43,10 @@ layout(std140, binding = 2) uniform Light {
 uniform mat4 model;
 
 void main() {
-    float angle = radians(rotation * 90);
-    float angleSin = sin(angle);
-    float angleCos = cos(angle);
-
-    mat4 transform = mat4(
-        vec4(angleCos, 0.0, angleSin, 0.0),
-        vec4(0.0, 1.0, 0.0, 0.0),
-        vec4(-angleSin, 0.0, angleCos, 0.0),
-        vec4(gridPos, 1.0));
-
-    vec4 position = transform * vec4(aPos, 1.0);
+    vec4 position = vec4(rotation * aPos + gridPos, 1.0);
 
     // calculate TBN matrix to transform world vectors into tangent space
-    mat3 normalMatrix = transpose(inverse(mat3(model * transform)));
+    mat3 normalMatrix = transpose(inverse(mat3(model) * rotation));
     vec3 T = normalize(normalMatrix * aTangent);
     vec3 B = normalize(normalMatrix * aBitangent);
     vec3 N = normalize(normalMatrix * aNormal);
