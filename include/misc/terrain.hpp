@@ -50,6 +50,12 @@ class Terrain {
     /// @param position The position in normalized world grid coords
     /// @return The terrain height at the specified position
     int getTerrainHeight(const glm::ivec2& position) const;
+
+    /// @brief Returns the terrain heights of the cells corners
+    /// @param position The position in normalized world grid coords
+    /// @return The terrain heights at the specified position
+    std::array<float, 4> getTerrainCellHeights(const glm::ivec2& cellPosition) const;
+
     /// @brief Returns the interpolated terrain height at the specified position
     /// @param position The position in normalized world grid coords
     /// @return The interpolated terrain height at the specified position

@@ -16,13 +16,17 @@
 #pragma once
 #include "component.hpp"
 
+#include "misc/terrain.hpp"
+
 #include "misc/utility.hpp"
 
 #include <ostream>
 
 struct TerrainComponent : public AssignableComponent {
-    /// @brief A 2-d array of height values for each cell
-    float heightValues[Configuration::cellsPerChunk + 1][Configuration::cellsPerChunk + 1];
+    /// @brief A 2d array of height values for each cell
+    float** heightValues;
+    /// @brief A 2d array of the surface types
+    TerrainSurfaceTypes** surfaceTypes;
     /// @brief True if the mesh is generated
     bool meshGenerated = false;
 

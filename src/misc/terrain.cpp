@@ -35,14 +35,25 @@ int Terrain::getTerrainHeight(const glm::ivec2& position) const {
     return terrainComponent.heightValues[pos.x][pos.y];
 }
 
+std::array<float, 4> Terrain::getTerrainCellHeights(const glm::ivec2& position) const {
+    const auto& [chunk, pos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
+
+    const entt::entity entity = chunkEntities.at(chunk);
+    const TerrainComponent& terrainComponent = game->getRegistry().get<TerrainComponent>(entity);
+
+    return std::array<float, 4>({
+        terrainComponent.heightValues[pos.x][pos.y],
+        terrainComponent.heightValues[pos.x + 1][pos.y],
+        terrainComponent.heightValues[pos.x][pos.y + 1],
+        terrainComponent.heightValues[pos.x + 1][pos.y + 1],
+    });
+}
+
 float Terrain::getTerrainHeight(const glm::vec2& position) const {
     const glm::ivec2& cellCoords = glm::floor(position);
 
     // linear interpolation of the height values
-    float h0 = getTerrainHeight(cellCoords);
-    float h1 = getTerrainHeight(cellCoords + glm::ivec2(1, 0));
-    float h2 = getTerrainHeight(cellCoords + glm::ivec2(0, 1));
-    float h3 = getTerrainHeight(cellCoords + glm::ivec2(1, 1));
+    auto [h0, h1, h2, h3] = getTerrainCellHeights(cellCoords);
 
     const glm::vec2& cellPos = position - glm::vec2(cellCoords);
     float x0 = h0 + cellPos.x * (h1 - h0);
@@ -62,39 +73,12 @@ void Terrain::setTerrainHeight(const glm::ivec2& position, float height) const {
 }
 
 TerrainSurfaceTypes Terrain::getSurfaceType(const glm::vec2& position) const {
-    constexpr glm::vec2 offsets[9] = {
-        glm::vec2(0, 0),
-        glm::vec2(1, 0),
-        glm::vec2(0, 1),
-        glm::vec2(1, 1),
-        glm::vec2(-1, 0),
-        glm::vec2(0, -1),
-        glm::vec2(-1, -1),
-        glm::vec2(-1, 1),
-        glm::vec2(1, -1),
-    };
+    const auto& [chunk, pos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
 
-    for (int i = 0; i < 4; i++) {
-        if (getTerrainHeight(position + offsets[i]) < 0.0f) {
-            return TerrainSurfaceTypes::WATER;
-        }
-    }
+    const entt::entity entity = chunkEntities.at(chunk);
+    const TerrainComponent& terrainComponent = game->getRegistry().get<TerrainComponent>(entity);
 
-    int waterCount = 0;
-    for (int i = 0; i < 9; i++) {
-        for (int j = 0; j < 4; j++) {
-            if (getTerrainHeight(position + offsets[j] + offsets[i]) < 0) {
-                waterCount++;
-                j = 4;
-            }
-        }
-    }
-
-    if (waterCount >= 1) {
-        return TerrainSurfaceTypes::BEACH;
-    }
-
-    return TerrainSurfaceTypes::GRASS;
+    return terrainComponent.surfaceTypes[static_cast<int>(glm::floor(pos.x))][static_cast<int>(glm::floor(pos.y))];
 }
 
 bool Terrain::positionValid(const glm::vec2& position) const {
@@ -104,10 +88,7 @@ bool Terrain::positionValid(const glm::vec2& position) const {
 }
 
 TerrainSurfaceGeometry Terrain::getGeometry(const glm::ivec2& cell) const {
-    float h0 = getTerrainHeight(cell);
-    float h1 = getTerrainHeight(cell + glm::ivec2(1, 0));
-    float h2 = getTerrainHeight(cell + glm::ivec2(0, 1));
-    float h3 = getTerrainHeight(cell + glm::ivec2(1, 1));
+    auto [h0, h1, h2, h3] = getTerrainCellHeights(cell);
 
     if (h0 == h1 && h1 == h2 && h2 == h3) {
         return TerrainSurfaceGeometry::FLAT;
