@@ -122,8 +122,9 @@ vec3 calcDiffuseLight(vec3 normal, vec3 diffuseColor) {
 vec3 calcSpecularLight(vec3 normal, vec3 specularColor) {
     vec3 viewDir = normalize(fs_in.tangentViewPos - fs_in.tangentFragPos);
     vec3 halfwayDir = normalize(viewDir + fs_in.tangentLightDirection);
+    float dotVal = max(dot(normal, halfwayDir), 1E-6);
 
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
+    float spec = pow(dotVal, material.shininess);
     return spec * lightSpecular * specularColor;
 }
 
@@ -152,10 +153,11 @@ float shadowCalculation(vec3 normal) {
     }
 
     // calculate bias and apply pcf
-    float maxShadowBias = 0.0001;
+    float shadowBias = 0.0001;
+    float maxShadowBias = 0.0005;
     vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps, 0));
-    float cosTheta = dot(normal, fs_in.tangentLightDirection);
-    float bias = max(maxShadowBias * (1 - cosTheta), maxShadowBias);
+    float cosTheta = dot(normal, -fs_in.tangentLightDirection);
+    float bias = max(shadowBias * (1 - cosTheta), maxShadowBias);
     float shadow = 0;
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {

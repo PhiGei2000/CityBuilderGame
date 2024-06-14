@@ -1,16 +1,17 @@
 newmtl basic_street
-Ns 360.00000
+Ns 32.00000
 Ka 0.40000 0.40000 0.40000
 Kd 1.00000 1.00000 1.00000
-Ks 0.80000 0.80000 0.80000
+Ks 0.20000 0.20000 0.20000
 Ni 1.45000
 d 1.00000
 illum 2
+map_Ka street_diffuse.png
 map_Kd street_diffuse.png
 map_Ks street_diffuse.png
 
 newmtl basic_street_preview
-Ns 360.00000
+Ns 32.00000
 Ka 1.000000 1.000000 1.000000
 Kd 0.000000 0.749000 0.918000
 Ks 0.000000 0.000000 0.000000

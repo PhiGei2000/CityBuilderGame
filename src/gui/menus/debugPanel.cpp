@@ -51,11 +51,11 @@ DebugPanel::DebugPanel(Gui* gui)
     sunDirection->constraints.width = RelativeConstraint(0.9);
     addChild(sunDirection);
 
-    Label* sunPosition = new Label("debug_menu.sunPosition", gui, colors::transparent, "");
-    sunPosition->textAlign = TextAlign::BEGIN;
-    sunPosition->constraints.height = AbsoluteConstraint(30);
-    sunPosition->constraints.width = RelativeConstraint(0.9);
-    addChild(sunPosition);
+    Label* sunAngle = new Label("debug_menu.sunAngle", gui, colors::transparent, "");
+    sunAngle->textAlign = TextAlign::BEGIN;
+    sunAngle->constraints.height = AbsoluteConstraint(30);
+    sunAngle->constraints.width = RelativeConstraint(0.9);
+    addChild(sunAngle);
 
     Label* cameraPos = new Label("debug_menu.cameraPosition", gui, colors::transparent, "");
     cameraPos->textAlign = TextAlign::BEGIN;
@@ -81,8 +81,8 @@ void DebugPanel::update() {
 
     Label* sunDirection = dynamic_cast<Label*>(getChild("debug_menu.sunDirection"));
     sunDirection->text = "Sun direction: (" + std::to_string(sunLight.direction) + ")";
-    Label* sunPosition = dynamic_cast<Label*>(getChild("debug_menu.sunPosition"));
-    sunPosition->text = "Sun position: (" + std::to_string(sunTransform.position) + ")";
+    Label* sunAngle = dynamic_cast<Label*>(getChild("debug_menu.sunAngle"));
+    sunAngle->text = "Sun angle: " + std::to_string(glm::degrees(sunLight.angle));
 
     // camera info
     const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(game->camera);

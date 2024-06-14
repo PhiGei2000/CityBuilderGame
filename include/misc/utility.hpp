@@ -44,11 +44,20 @@ namespace utility {
         return minValue <= value && maxValue >= value;
     }
 
+    template<glm::length_t L, typename T, glm::qualifier Q>
+    constexpr bool inRange(const glm::vec<L, T, Q>& value, const glm::vec<L, T, Q>& min, const glm::vec<L, T, Q>& max) {
+        return glm::all(glm::lessThanEqual(min, value) && glm::greaterThanEqual(max, value));
+    }
+
+    constexpr bool inChunk(const glm::ivec2& pos) {
+        return inRange(pos, glm::ivec2(0), glm::ivec2(Configuration::cellsPerChunk));
+    }
+
     constexpr glm::ivec2 interpolate(const glm::ivec2& start, const glm::ivec2& end, int value) {
         return (end - start) * value + start;
     }
 
-    
+
 } // namespace utility
 
 namespace glm {

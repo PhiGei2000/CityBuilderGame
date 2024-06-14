@@ -46,7 +46,8 @@ void EnvironmentSystem::init() {
 
 void EnvironmentSystem::updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const {
     // sun movement
-    const float sunSpeed = 0.05f;
+    const float sunSpeed = 0.25f;
+    const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(game->camera);
 
     // move sun
     static constexpr float two_pi = 2 * glm::pi<float>();
@@ -58,8 +59,18 @@ void EnvironmentSystem::updateDayNightCycle(float dt, TransformationComponent& s
         sunLight.angle += two_pi;
     }
 
+    if (utility::inRange(sunLight.angle, 0.1f * glm::pi<float>(), 0.9f * glm::pi<float>())) {
+        sunLight.diffuse = glm::sin((sunLight.angle - 0.1f * glm::pi<float>()) / 0.8f) * game->sunLight[1];
+        sunLight.specular = glm::sin((sunLight.angle - 0.1f * glm::pi<float>()) / 0.8f) * game->sunLight[2];
+    }
+    else {
+        sunLight.diffuse = glm::vec3(0);
+        sunLight.specular = glm::vec3(0);
+    }
+
     sunLight.direction = -glm::vec3(glm::cos(sunLight.angle), glm::sin(sunLight.angle), 0.0f);
-    sunTransform.position = -300.0f * sunLight.direction;
+    // TODO: Adjust sun position to camera
+    sunTransform.position = -300.0f * sunLight.direction + glm::vec3(cameraTransform.position.x, 0.0f, cameraTransform.position.z);
 
 #if DEBUG
     std::cout << "sun pos: " << sunTransform.position << "(phi: " << sunLight.angle << ")" << std::endl;
@@ -105,7 +116,7 @@ void EnvironmentSystem::update(float dt) {
 
         entitiesToDestroy.pop();
     }
-    return;
+    // return;
 
     auto& sunLight = registry.get<SunLightComponent>(game->sun);
     auto& sunTransform = registry.get<TransformationComponent>(game->sun);

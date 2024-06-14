@@ -72,7 +72,7 @@ std::pair<glm::mat4, glm::mat4> LightComponent::calculateLightMatrices(const Cam
 
     const glm::vec3 lightUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    const glm::mat4 lightView = glm::lookAt(center + direction, center, lightUp);
+    const glm::mat4 lightView = glm::lookAt(center - direction, center, lightUp);
 
     // calculate light projection matrix
     float minX = FLT_MAX;

@@ -49,12 +49,12 @@ void Game::init() {
     // entities
 
     sun = registry.create();
-    constexpr float sunAngle = glm::radians(45.0f);
+    constexpr float sunAngle = 0.0f;
     registry.emplace<SunLightComponent>(sun,
-                                        sunAngle,        // direction
-                                        glm::vec3(0.5f), // ambient
-                                        glm::vec3(0.9f), // diffuse
-                                        glm::vec3(0.8f)  // specular
+                                        sunAngle,       // direction
+                                        sunLight[0],    // ambient
+                                        sunLight[1],    // diffuse
+                                        sunLight[2]     // specular
     );
     registry.emplace<TransformationComponent>(sun, utility::sphericalToCartesian(300.0f, sunAngle, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 

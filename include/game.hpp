@@ -58,6 +58,12 @@ class Game {
     entt::entity sun = entt::null;
     Terrain terrain;
 
+    glm::vec3 sunLight[3] = {
+        glm::vec3(0.5f), // ambient
+        glm::vec3(0.9f), // diffuse
+        glm::vec3(0.8f)  // specular
+    };
+
     Game(Application* app);
 
     bool debugMode = false;
