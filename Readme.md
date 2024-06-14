@@ -68,7 +68,9 @@ or to create a symbolic link
 | RF | Rotate camera up/down |
 | ESC | Main menu |
 | B | Enter/Leave build mode |
+| F1 | Open debug panel |
 | F3 | Enter debug mode |
+| F4 | Show shadow buffer |
 
 ## Issues and questions
 Feel free to report issues and questions to the [issues section](https://github.com/PhiGei2000/CityBuilderGame/issues).
