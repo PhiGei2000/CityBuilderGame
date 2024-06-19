@@ -54,6 +54,9 @@ struct RoadTile {
 
     bool empty() const;
     bool notEmpty() const;
+
+    bool operator==(const RoadTile& other) const;
+    bool operator!=(const RoadTile& other) const;
 };
 
 struct RoadRenderData {

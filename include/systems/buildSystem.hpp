@@ -51,9 +51,6 @@ class BuildSystem : public System {
     entt::entity cameraEntity;
     entt::entity currentBuilding;
 
-    /// @brief Building process ongoing
-    bool building = false;
-
     /// @brief Selected building type
     BuildingType selectedBuildingType = BuildingType::CLEAR;
 

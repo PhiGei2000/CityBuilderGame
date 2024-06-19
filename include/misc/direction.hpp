@@ -34,11 +34,12 @@ enum class Direction : byte {
 // negative x   | south
 // negative z   | west
 
-static std::map<Direction, glm::vec2> DirectionVectors = {
-    std::make_pair<Direction, glm::vec2>(Direction::NORTH, glm::vec2{1.0f, 0.0f}),
-    std::make_pair<Direction, glm::vec2>(Direction::EAST, glm::vec2{0.0f, 1.0f}),
-    std::make_pair<Direction, glm::vec2>(Direction::SOUTH, glm::vec2{-1.0f, 0.0f}),
-    std::make_pair<Direction, glm::vec2>(Direction::WEST, glm::vec2{0.0f, -1.0f}),
+template<typename T = glm::vec2>
+static std::map<Direction, T> DirectionVectors = {
+    std::make_pair<Direction, T>(Direction::NORTH, T{1.0f, 0.0f}),
+    std::make_pair<Direction, T>(Direction::EAST, T{0.0f, 1.0f}),
+    std::make_pair<Direction, T>(Direction::SOUTH, T{-1.0f, 0.0f}),
+    std::make_pair<Direction, T>(Direction::WEST, T{0.0f, -1.0f}),
 };
 
 namespace utility {

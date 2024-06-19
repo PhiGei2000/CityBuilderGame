@@ -81,10 +81,13 @@ TerrainSurfaceTypes Terrain::getSurfaceType(const glm::vec2& position) const {
     return terrainComponent.surfaceTypes[static_cast<int>(glm::floor(pos.x))][static_cast<int>(glm::floor(pos.y))];
 }
 
+bool Terrain::chunkLoaded(const glm::ivec2& position) const {
+    return chunkEntities.contains(position);
+}
+
 bool Terrain::positionValid(const glm::vec2& position) const {
     const auto& [chunk, _] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
-
-    return chunkEntities.contains(chunk);
+    return chunkLoaded(chunk);
 }
 
 TerrainSurfaceGeometry Terrain::getGeometry(const glm::ivec2& cell) const {

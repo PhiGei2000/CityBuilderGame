@@ -71,6 +71,16 @@ void BuildSystem::update(float dt) {
     }
 
     if (gridMouseIntersection.positionUpdated()) {
+        if (building.type == BuildingType::ROAD) {
+            if (game->getMouseButton(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+                BuildEvent event = BuildEvent(currentBuilding, {building.gridPosition}, BuildingType::ROAD, BuildAction::END, BuildShape::POINT);
+                game->raiseEvent(event);
+
+                createNewBuilding();
+                building = registry.get<BuildingComponent>(currentBuilding);
+            }
+        }
+
         // update the transformation component of the current building, so it will be rendered at the right place
         building.gridPosition = gridMouseIntersection.position;
         TransformationComponent& transform = registry.get<TransformationComponent>(currentBuilding);
@@ -215,11 +225,11 @@ void BuildSystem::createNewBuilding() {
 }
 
 void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
-    if (e.action != GLFW_RELEASE) {
+    if (game->getState() != GameState::BUILD_MODE) {
         return;
     }
 
-    if (game->getState() != GameState::BUILD_MODE) {
+    if (e.action != GLFW_RELEASE) {
         return;
     }
 
@@ -252,6 +262,8 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
     else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
         BuildingComponent building = registry.get<BuildingComponent>(currentBuilding);
         building.rotation++;
+
+        // TODO: Update transform in update()
     }
 }
 

@@ -71,9 +71,14 @@ class Terrain {
     /// @return The surface type at the specified position
     TerrainSurfaceTypes getSurfaceType(const glm::vec2& position) const;
 
+    /// @brief Determines if the chunk with the given chunk coordinates is currently loaded
+    /// @param chunkPos Position of the chunk
+    /// @return `True` if the chunk is currently loaded
+    bool chunkLoaded(const glm::ivec2& chunkPos) const;
+
     /// @brief Determines if the chunk at the specified position is generated.
     /// @param position The position in normalized world grid coordinates
-    /// @return True if the chunk is already generated
+    /// @return `True` if the chunk is already generated
     bool positionValid(const glm::vec2& position) const;
 
     /// @brief Returns the geometry type of the given cell

@@ -15,7 +15,6 @@
  */
 #include "misc/roads/roadTile.hpp"
 
-
 std::string roadTileTypeNames[] = {
     "NOT_CONNECTED",
     "END",
@@ -49,6 +48,14 @@ bool RoadTile::empty() const {
 
 bool RoadTile::notEmpty() const {
     return !empty();
+}
+
+bool RoadTile::operator==(const RoadTile& other) const {
+    return tileType == other.tileType && rotation == other.rotation && roadType == other.roadType;
+}
+
+bool RoadTile::operator!=(const RoadTile& other) const {
+    return !operator==(other);
 }
 
 std::string roadTypeID_toString(const RoadTypeID& id) {

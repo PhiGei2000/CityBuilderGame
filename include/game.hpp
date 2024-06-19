@@ -78,6 +78,7 @@ class Game {
     int getKey(int key) const;
 
     glm::vec2 getMousePos() const;
+    int getMouseButton(int button) const;
 
     void setState(GameState state);
     GameState getState() const;

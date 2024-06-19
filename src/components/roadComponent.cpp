@@ -90,7 +90,7 @@ bool RoadComponent::isConnected(const glm::ivec2& pos, Direction dir) const {
         return false;
     }
 
-    const glm::ivec2& direction = DirectionVectors[dir];
+    const glm::ivec2& direction = DirectionVectors<glm::ivec2>[dir];
     const glm::ivec2& neighbourPos = pos + direction;
     if (neighbourPos.x < 0 || neighbourPos.y < 0 || neighbourPos.x >= Configuration::cellsPerChunk || neighbourPos.t >= Configuration::cellsPerChunk) {
         int directionInt = static_cast<int>(dir);
@@ -109,24 +109,30 @@ void RoadComponent::updateRoadTypes() {
 
     for (int x = 0; x < Configuration::cellsPerChunk; x++) {
         for (int y = 0; y < Configuration::cellsPerChunk; y++) {
-            if (roadTiles[x][y].empty()) {
-                continue;
-            }
-
-            bool connections[4] = {
-                x == Configuration::cellsPerChunk - 1 ? borders[static_cast<int>(Direction::NORTH)][y] : roadTiles[x + 1][y].notEmpty(),
-                y == Configuration::cellsPerChunk - 1 ? borders[static_cast<int>(Direction::EAST)][x] : roadTiles[x][y + 1].notEmpty(),
-                x == 0 ? borders[static_cast<int>(Direction::SOUTH)][y] : roadTiles[x - 1][y].notEmpty(),
-                y == 0 ? borders[static_cast<int>(Direction::WEST)][y] : roadTiles[x][y - 1].notEmpty()};
-
-            const RoadTile& tile = getTileType(connections);
-
-            roadTiles[x][y].tileType = tile.tileType;
-            roadTiles[x][y].rotation = tile.rotation;
+            updateRoad(glm::ivec2(x, y));
         }
     }
+}
 
-    meshOutdated = true;
+void RoadComponent::updateRoad(const glm::ivec2& pos) {
+    if (roadTiles[pos.x][pos.y].empty()) {
+        return;
+    }
+
+    bool connections[4] = {
+        pos.x == Configuration::cellsPerChunk - 1 ? borders[static_cast<int>(Direction::NORTH)][pos.y] : roadTiles[pos.x + 1][pos.y].notEmpty(),
+        pos.y == Configuration::cellsPerChunk - 1 ? borders[static_cast<int>(Direction::EAST)][pos.x] : roadTiles[pos.x][pos.y + 1].notEmpty(),
+        pos.x == 0 ? borders[static_cast<int>(Direction::SOUTH)][pos.y] : roadTiles[pos.x - 1][pos.y].notEmpty(),
+        pos.y == 0 ? borders[static_cast<int>(Direction::WEST)][pos.x] : roadTiles[pos.x][pos.y - 1].notEmpty()};
+
+    const RoadTile& tile = getTileType(connections);
+
+    if (tile != roadTiles[pos.x][pos.y]) {
+        roadTiles[pos.x][pos.y].tileType = tile.tileType;
+        roadTiles[pos.x][pos.y].rotation = tile.rotation;
+
+        meshOutdated = true;
+    }
 }
 
 constexpr RoadTile RoadComponent::getTileType(const bool (&connections)[4]) {

@@ -31,7 +31,7 @@ struct RoadMeshComponent;
 
 class RoadSystem : public System {
   protected:
-    std::queue<std::pair<glm::ivec2, glm::ivec2>> roadsToBuild;
+    std::queue<glm::ivec2> roadsToBuild;
     std::queue<glm::ivec2> chunksToUpdateMesh;
 
     void createRoadMesh(const RoadComponent& roadComponent, RoadMeshComponent& geometry) const;

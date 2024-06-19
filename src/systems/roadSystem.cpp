@@ -45,21 +45,61 @@ void RoadSystem::update(float dt) {
     }
 
     while (!roadsToBuild.empty()) {
-        const auto& [start, end] = roadsToBuild.front();
-        // const glm::ivec2& dir = DirectionVectors[utility::getDirection(end - start)];
+        const glm::ivec2& pos = roadsToBuild.front();
 
-        glm::ivec2 pos = start;
         const auto& [chunk, chunkPos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(pos);
         glm::ivec2 lastChunk = chunk;
         entt::entity chunkEntity = game->terrain.chunkEntities.at(chunk);
 
-        // do {
         RoadComponent& road = registry.get<RoadComponent>(chunkEntity);
         road.roadTiles[chunkPos.x][chunkPos.y].tileType = RoadTileTypes::UNDEFINED;
 
-        road.updateRoadTypes();
+        // update borders
+        Direction dir = Direction::UNDEFINED;
+        int borderPos = -1;
+
+        if (chunkPos.x == Configuration::cellsPerChunk - 1) {
+            dir = Direction::NORTH;
+            borderPos = chunkPos.y;
+        }
+        else if (chunkPos.y == Configuration::cellsPerChunk - 1) {
+            dir = Direction::EAST;
+            borderPos = chunkPos.x;
+        }
+        else if (chunkPos.x == 0) {
+            dir = Direction::SOUTH;
+            borderPos = chunkPos.y;
+        }
+        else if (chunkPos.y == 0) {
+            dir = Direction::WEST;
+            borderPos = chunkPos.x;
+        }
+
+        if (dir != Direction::UNDEFINED) {
+            glm::ivec2 neighbourChunk = chunk + DirectionVectors<glm::ivec2>[dir];
+            if (game->terrain.chunkLoaded(neighbourChunk)) {
+                RoadComponent& neighbourRoads = registry.get<RoadComponent>(game->terrain.chunkEntities[neighbourChunk]);
+
+                neighbourRoads.borders[static_cast<int>(utility::getInverse(dir))][borderPos] = true;
+                glm::ivec2 posInNeighbourChunk = chunkPos - (Configuration::cellsPerChunk - 1) * DirectionVectors<glm::ivec2>[dir];
+                neighbourRoads.updateRoad(posInNeighbourChunk);
+
+                if (neighbourRoads.meshOutdated) {
+                    chunksToUpdateMesh.push(neighbourChunk);
+                }
+            }
+        }
+
+        road.updateRoad(chunkPos);
+        // update neighbour roads
+        for (unsigned int i = 0; i < 4; i++) {
+            const glm::ivec2& pos = chunkPos - DirectionVectors<glm::ivec2>[static_cast<Direction>(i)];
+            if (utility::inChunk(pos)) {
+                road.updateRoad(pos);
+            }
+        }
+
         chunksToUpdateMesh.push(chunk);
-        // } while (pos != end);
         roadsToBuild.pop();
     }
 }
@@ -108,7 +148,7 @@ void RoadSystem::handleBuildEvent(const BuildEvent& event) {
     if (event.type != BuildingType::ROAD || event.action != BuildAction::END)
         return;
 
-    roadsToBuild.emplace(event.positions[0], event.positions[0]);
+    roadsToBuild.emplace(event.positions[0]);
 
     // destroy entity
     registry.destroy(event.entity);

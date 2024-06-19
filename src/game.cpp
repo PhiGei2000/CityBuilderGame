@@ -103,6 +103,10 @@ glm::vec2 Game::getMousePos() const {
     return glm::vec2((float)(2 * x) / width - 1.0f, 1.0f - (float)(2 * y) / height);
 }
 
+int Game::getMouseButton(int button) const {
+    return glfwGetMouseButton(app->getWindow(), button);
+}
+
 void Game::setState(GameState state) {
     this->state = state;
 }
