@@ -16,15 +16,36 @@
 #include "gui/components/label.hpp"
 #include "gui/gui.hpp"
 
-Label::Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, const glm::vec4& textColor)
-    : Widget(id, gui, backgroundColor), text(text), textColor(textColor) {
+Label::Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, const int textSize, const glm::vec4& textColor)
+    : Widget(id, gui, backgroundColor), text(text), textSize(textSize), textColor(textColor) {
+}
+
+Rectangle Label::getBox() const {
+    if (constraints.height.type != ConstraintType::FIT_TO_CONTENT && constraints.width.type != ConstraintType::FIT_TO_CONTENT) {
+        return Widget::getBox();
+    }
+
+    Rectangle parentBox = Widget::getBox();
+
+    if (constraints.height.type == ConstraintType::FIT_TO_CONTENT) {
+        float baselineoffset;
+        float height = gui->textRenderer.getHeight(text, textSize, &baselineoffset);
+        parentBox.height = height;
+    }
+
+    if (constraints.width.type == ConstraintType::FIT_TO_CONTENT) {
+        float width = gui->textRenderer.getWidth(text, textSize);
+        parentBox.width = width;
+    }
+
+    return parentBox;
 }
 
 void Label::render() const {
     if (!visible) {
         return;
     }
-    
+
     Widget::render();
 
     const Rectangle& box = getBox();
@@ -34,7 +55,7 @@ void Label::render() const {
     guiShader->setBool("text", true);
     guiShader->setVector4("color", textColor);
 
-    gui->textRenderer.renderText(text, box, 0.2f, textAlign);
+    gui->textRenderer.renderText(text, box, textSize, textAlign);
 
     guiShader->setBool("flipV", false);
     guiShader->setBool("text", false);

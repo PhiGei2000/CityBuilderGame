@@ -26,14 +26,16 @@ void TextRenderer::init() {
         std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
     }
 
-    static constexpr const char* filename = "res/fonts/Hack-Regular.ttf";
+    static constexpr const char* filename = "res/fonts/Montserrat-Regular.ttf";
 
     FT_Face face;
     if (FT_New_Face(ft, filename, 0, &face)) {
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
     }
 
-    FT_Set_Pixel_Sizes(face, 0, 128);
+    useKerning = FT_HAS_KERNING(face);
+
+    FT_Set_Pixel_Sizes(face, 0, pixelWidth);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     for (unsigned char c = 0; c < 128; c++) {
         if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
@@ -65,6 +67,15 @@ void TextRenderer::init() {
         character.advance = face->glyph->advance.x;
 
         characters[c] = character;
+
+        if (useKerning) {
+            FT_Vector vec;
+            for (unsigned char d = 0; d < 128; d++) {
+                FT_Get_Kerning(face, c, d, FT_KERNING_DEFAULT, &vec);
+
+                kerning.emplace(std::make_pair(c, d), glm::ivec2{vec.x, vec.y});
+            }
+        }
     }
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -78,17 +89,17 @@ void TextRenderer::setScreenSize(float width, float height) {
     screenHeight = height;
 }
 
-float TextRenderer::getWidth(const std::string& text, float scale) const {
+float TextRenderer::getWidth(const std::string& text, int textSize) const {
     float width = 0;
     for (auto it = text.begin(); it != text.end(); it++) {
         const Character& character = characters.at(*it);
-        width += (character.advance >> 6) * scale;
+        width += (character.advance >> 6);
     }
 
-    return width;
+    return width * textSize / pixelWidth;
 }
 
-float TextRenderer::getHeight(const std::string& text, float scale, float* baselineOffset) const {
+float TextRenderer::getHeight(const std::string& text, int textSize, float* baselineOffset) const {
     *baselineOffset = 0;
 
     float height = 0.0f;
@@ -104,63 +115,53 @@ float TextRenderer::getHeight(const std::string& text, float scale, float* basel
         }
     }
 
-    *baselineOffset *= scale;
-    return height * scale;
+    *baselineOffset *= textSize / pixelWidth;
+    return height * textSize / pixelWidth;
 }
 
-void TextRenderer::renderText(const std::string& text, const Rectangle& rect, float maxScale, TextAlign align) const {
+void TextRenderer::renderText(const std::string& text, const Rectangle& rect, int textSize, TextAlign align) const {
     // get width and height of non scaled text
     float baselineOffset;
-    float scale = maxScale;
 
-    float width = getWidth(text, scale);
-    float height = getHeight(text, scale, &baselineOffset);
-
-    // adjust text size if it not fits into the rectangle
-    if (width > rect.width) {
-        scale *= rect.width / width * 0.9;
-
-        width = getWidth(text, scale);
-        height = getHeight(text, scale, &baselineOffset);
-    }
-
-    if (height > rect.height) {
-        scale *= rect.height / height * 0.9;
-
-        width = getWidth(text, scale);
-        height = getHeight(text, scale, &baselineOffset);
-    }
+    float width = getWidth(text, textSize);
+    float height = getHeight(text, textSize, &baselineOffset);
 
     float currentX;
     switch (align) {
-    case TextAlign::BEGIN:
-        currentX = rect.x + (rect.width - width) * 0.05f;
-        break;
-    case TextAlign::CENTER:
-        currentX = rect.x + (rect.width - width) * 0.5f;
-        break;
-    case TextAlign::END:
-        currentX = rect.x + (rect.width - width) * 0.95f;
-        break;
-    default:
-        break;
+        case TextAlign::BEGIN:
+            currentX = rect.x;
+            break;
+        case TextAlign::CENTER:
+            currentX = rect.x + (rect.width - width) * 0.5f;
+            break;
+        case TextAlign::END:
+            currentX = rect.x + (rect.width - width);
+            break;
+        default:
+            break;
     }
     float currentY = rect.y + rect.height - (baselineOffset + (rect.height - height) * 0.5f);
 
     glActiveTexture(GL_TEXTURE0);
 
     for (auto it = text.begin(); it != text.end(); it++) {
+        glm::ivec2 offset(0.0f);
+
         Character character = characters.at(*it);
+        if (it + 1 != text.end() && useKerning) {
+            Character nextChar = characters.at(*(it + 1));
+            offset = kerning.at(std::make_pair(*it, *(it + 1)));
+        }
 
-        float xPos = currentX + character.bearing.x * scale;
-        float yPos = currentY - character.bearing.y * scale;
+        float xPos = currentX + (character.bearing.x + offset.x >> 6) * textSize / pixelWidth;
+        float yPos = currentY - character.bearing.y * textSize / pixelWidth;
 
-        float charHeight = character.size.y * scale;
-        float charWidth = character.size.x * scale;
+        float charHeight = character.size.y * textSize / pixelWidth;
+        float charWidth = character.size.x * textSize / pixelWidth;
 
         glBindTexture(GL_TEXTURE_2D, character.textureId);
 
         quad.draw(xPos, yPos, charWidth, charHeight);
-        currentX += (character.advance >> 6) * scale;
+        currentX += (character.advance >> 6) * textSize / pixelWidth;
     }
 }

@@ -263,5 +263,29 @@ Rectangle StackPanel::getBox() const {
         }
     }
 
+    if (constraints.height.type == ConstraintType::FIT_TO_CONTENT) {
+        float maxHeight = 0.0f;
+        for (const auto child : children) {
+            const Rectangle& childBox = child->getBox();
+            if (childBox.height > maxHeight) {
+                maxHeight = childBox.height;
+            }
+        }
+
+        box.height = maxHeight;
+    }
+
+    if (constraints.width.type == ConstraintType::FIT_TO_CONTENT) {
+        float maxWidth = 0.0f;
+        for (const auto child : children) {
+            const Rectangle& childBox = child->getBox();
+            if (childBox.width > maxWidth) {
+                maxWidth = childBox.width;
+            }
+        }
+
+        box.width = maxWidth;
+    }
+
     return box;
 }

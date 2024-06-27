@@ -92,11 +92,12 @@ Rectangle Widget::getBox() const {
         parentBox = gui->getBox();
     }
     else {
+        // TODO: Split functions to getPos, getWidth and getHeight
         parentBox = parent->getBox();
     }
 
     // set width and height values
-    float width, height;
+    float width = 0, height = 0;
     switch (constraints.height.type) {
         case ConstraintType::ABSOLUTE:
             height = constraints.height.value;

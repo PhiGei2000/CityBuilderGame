@@ -44,7 +44,7 @@ class Widget {
 
     Widget* parent = nullptr;
     glm::vec4 backgroundColor;
-    float cornerRadius = 15.0f;
+    float cornerRadius = 0.0f;
     Constraints constraints;
 
     virtual void show();

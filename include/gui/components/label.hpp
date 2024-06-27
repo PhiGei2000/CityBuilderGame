@@ -25,10 +25,13 @@ class Label : public virtual Widget {
   public:
     std::string text;
     glm::vec4 textColor;
+    int textSize;
 
     TextAlign textAlign = TextAlign::CENTER;
 
-    Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, const glm::vec4& textColor = colors::white);
+    Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, const int textSize = 24, const glm::vec4& textColor = colors::white);
+
+    virtual Rectangle getBox() const;
 
     virtual void render() const override;
 };

@@ -22,3 +22,6 @@
 [submodule "lib/libnoise"]
 	path = lib/libnoise
 	url = https://github.com/PhiGei2000/libnoise
+[submodule "lib/harfbuzz"]
+	path = lib/harfbuzz
+	url = https://github.com/harfbuzz/harfbuzz.git

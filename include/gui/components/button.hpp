@@ -30,7 +30,7 @@ class Button : public virtual Widget {
 
 class TextButton : public Label, public Button {
   public:
-    TextButton(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text);
+    TextButton(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, int textSize = 24, const glm::vec4& textColor = colors::white);
 };
 
 class IconButton : public Icon, public Button {

@@ -43,16 +43,16 @@ Gui::Gui(Application* app, float width, float height)
 }
 
 void Gui::init() {
+    textRenderer.init();
+
     pauseMenu = new PauseMenu(this);
     optionsMenu = new OptionsMenu(this);
     buildMenu = new BuildMenu(this);
     debugPanel = new DebugPanel(this);
-    warningWidget = new Label("warning_label", this, colors::transparent, "", colors::warning);
+    warningWidget = new Label("warning_label", this, colors::transparent, "", 12, colors::warning);
     warningWidget->hide();
 
     widgets = {pauseMenu, optionsMenu, buildMenu, debugPanel};
-
-    textRenderer.init();
 }
 
 void Gui::showMenu(GameMenus menu) {
@@ -222,6 +222,11 @@ void Gui::handleKeyEvent(KeyEvent& e) {
                     }
                     e.handled = true;
                     break;
+            }
+        }
+        else if (app->getGameState() == GameState::PAUSED) {
+            if (e.key == GLFW_KEY_ESCAPE) {
+                popMenu();
             }
         }
     }

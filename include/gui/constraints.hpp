@@ -19,7 +19,8 @@ enum class ConstraintType {
     ABSOLUTE,
     RELATIVE,
     ASPECT,
-    CENTER
+    CENTER,
+    FIT_TO_CONTENT
 };
 
 struct Constraint {
@@ -53,6 +54,12 @@ struct AspectConstraint : public Constraint {
 struct CenterConstraint : public Constraint {
     inline CenterConstraint()
         : Constraint(0, ConstraintType::CENTER) {
+    }
+};
+
+struct FitToContentConstraint : public Constraint {
+    inline FitToContentConstraint()
+        : Constraint(0, ConstraintType::FIT_TO_CONTENT) {
     }
 };
 

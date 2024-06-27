@@ -42,8 +42,12 @@ class TextRenderer {
 
     RenderQuad quad;
     float screenWidth, screenHeight;
+    int pixelWidth = 128;
 
     std::map<char, Character> characters;
+
+    bool useKerning;
+    std::map<std::pair<char, char>, glm::ivec2> kerning;
 
   public:
     glm::vec3 textColor = colors::white;
@@ -51,8 +55,8 @@ class TextRenderer {
     void init();
     void setScreenSize(float width, float height);
 
-    float getWidth(const std::string& text, float scale) const;
-    float getHeight(const std::string& text, float scale, float* baseLineOffset) const;
+    float getWidth(const std::string& text, int textSize) const;
+    float getHeight(const std::string& text, int textSize, float* baseLineOffset) const;
 
-    void renderText(const std::string& text, const Rectangle& rect, float maxScale, TextAlign align) const;
+    void renderText(const std::string& text, const Rectangle& rect, int textSize, TextAlign align) const;
 };

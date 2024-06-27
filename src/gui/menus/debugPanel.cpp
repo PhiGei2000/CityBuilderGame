@@ -28,6 +28,7 @@ DebugPanel::DebugPanel(Gui* gui)
     constraints.x = AbsoluteConstraint(0);
     constraints.y = AbsoluteConstraint(0);
     constraints.width = RelativeConstraint(0.3);
+    constraints.height = RelativeConstraint(1.0);
     cornerRadius = 0.0f;
 
     TextButton* reloadResourcesButton = new TextButton("debug_menu.reloadResourcesButton", gui, colors::anthraziteGrey, "Reload Resources");
@@ -41,25 +42,25 @@ DebugPanel::DebugPanel(Gui* gui)
 
     Label* fpsCounter = new Label("debug_menu.fpsCounter", gui, colors::transparent, "FPS: ");
     fpsCounter->textAlign = TextAlign::BEGIN;
-    fpsCounter->constraints.height = AbsoluteConstraint(30);
+    fpsCounter->constraints.height = FitToContentConstraint();
     fpsCounter->constraints.width = RelativeConstraint(0.9);
     addChild(fpsCounter);
 
-    Label* sunDirection = new Label("debug_menu.sunDirection", gui, colors::transparent, "");
+    Label* sunDirection = new Label("debug_menu.sunDirection", gui, colors::transparent, "", 12);
     sunDirection->textAlign = TextAlign::BEGIN;
-    sunDirection->constraints.height = AbsoluteConstraint(30);
+    sunDirection->constraints.height = FitToContentConstraint();
     sunDirection->constraints.width = RelativeConstraint(0.9);
     addChild(sunDirection);
 
-    Label* sunAngle = new Label("debug_menu.sunAngle", gui, colors::transparent, "");
+    Label* sunAngle = new Label("debug_menu.sunAngle", gui, colors::transparent, "", 12);
     sunAngle->textAlign = TextAlign::BEGIN;
-    sunAngle->constraints.height = AbsoluteConstraint(30);
+    sunAngle->constraints.height = FitToContentConstraint();
     sunAngle->constraints.width = RelativeConstraint(0.9);
     addChild(sunAngle);
 
-    Label* cameraPos = new Label("debug_menu.cameraPosition", gui, colors::transparent, "");
+    Label* cameraPos = new Label("debug_menu.cameraPosition", gui, colors::transparent, "", 12);
     cameraPos->textAlign = TextAlign::BEGIN;
-    cameraPos->constraints.height = AbsoluteConstraint(30);
+    cameraPos->constraints.height = FitToContentConstraint();
     cameraPos->constraints.width = RelativeConstraint(0.9);
     addChild(cameraPos);
 }
