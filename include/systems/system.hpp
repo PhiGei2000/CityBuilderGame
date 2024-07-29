@@ -30,8 +30,12 @@ class System {
 
     virtual void init();
 
+    virtual void destroy();
+
   public:
     System(Game* game);
+
+    ~System();
 
     virtual void update(float dt);
 };

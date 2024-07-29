@@ -37,6 +37,7 @@ void Game::init() {
     systems.push_back(new CameraSystem(this));
     // entities
     camera = registry.view<CameraComponent>().front();
+    sun = registry.create();
 
     // init other systems
     systems.push_back(new BuildSystem(this));
@@ -47,21 +48,6 @@ void Game::init() {
     systems.push_back(new PhysicsSystem(this));
     systems.push_back(new DebugSystem(this));
     systems.push_back(new RenderSystem(this));
-
-    // entities
-
-    sun = registry.create();
-    constexpr float sunAngle = 0.0f;
-    registry.emplace<SunLightComponent>(sun,
-                                        sunAngle,       // direction
-                                        sunLight[0],    // ambient
-                                        sunLight[1],    // diffuse
-                                        sunLight[2]     // specular
-    );
-    registry.emplace<TransformationComponent>(sun, utility::sphericalToCartesian(300.0f, sunAngle, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-
-    EntityMoveEvent moveEvent{sun};
-    raiseEvent(moveEvent);
 }
 
 entt::registry& Game::getRegistry() {

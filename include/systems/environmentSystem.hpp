@@ -31,6 +31,12 @@ class EnvironmentSystem : public System {
     std::queue<entt::entity> entitiesToDestroy;
     std::queue<glm::ivec2> cellsToClear;
 
+    glm::vec3 sunLight[3] = {
+        0.5f * glm::vec3(1.0f, 1.0f, 220.0f / 250.0f),
+        glm::vec3(1.0f, 1.0f, 220.0f / 250.0f),
+        0.8f * glm::vec3(1.0f, 1.0f, 220.0f / 250.0f),
+    };
+
     entt::entity treeEntity;
 
     void updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const;

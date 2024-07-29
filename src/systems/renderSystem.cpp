@@ -126,12 +126,15 @@ void RenderSystem::update(float dt) {
     glClear(GL_DEPTH_BUFFER_BIT);
 
     glCullFace(GL_FRONT);
-    renderSceneShadows(entt::exclude<DebugComponent>);
+    renderSceneShadows(entt::exclude<DebugComponent, SunLightComponent>);
 
     glCullFace(GL_BACK);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     const CameraComponent& camera = registry.get<CameraComponent>(game->camera);
+    const SunLightComponent& sun = registry.get<SunLightComponent>(game->sun);
+
+    glClearColor(sun.diffuse.x, sun.diffuse.y, sun.diffuse.z, 1.0f);
     glViewport(0, 0, camera.width, camera.height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -151,13 +154,13 @@ void RenderSystem::update(float dt) {
 
     renderScene(entt::exclude<DebugComponent>);
 
-    if (game->getState() == GameState::BUILD_MODE) {
-        registry.view<TransformationComponent, MeshComponent, BuildingComponent>()
-            .each([&](const TransformationComponent& transform, const MeshComponent& mesh, const BuildingComponent& buildMarker) {
-                MeshRenderData renderData = {transform.transform};
-                mesh.mesh->render(renderData);
-            });
-    }
+    // if (game->getState() == GameState::BUILD_MODE) {
+    //     registry.view<TransformationComponent, MeshComponent, BuildingComponent>()
+    //         .each([&](const TransformationComponent& transform, const MeshComponent& mesh, const BuildingComponent& buildMarker) {
+    //             MeshRenderData renderData = {transform.transform};
+    //             mesh.mesh->render(renderData);
+    //         });
+    // }
 
     if (game->debugMode) {
         entt::entity debugEntity = registry.view<DebugComponent>().front();

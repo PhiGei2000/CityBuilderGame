@@ -46,7 +46,8 @@ class RenderSystem : public System {
     unsigned int cameraWidth;
 
     ShaderPtr shadowShader;
-    ShaderPtr instancedShadowShader;
+
+    glm::vec4 skyColor = glm::vec4(1.0f, 1.0f, 220.0f / 255.0f, 1.0f);
 
     void init() override;
 

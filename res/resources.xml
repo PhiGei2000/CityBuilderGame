@@ -11,13 +11,12 @@
 	 	<instancedShader vertex="shaders/shadowInstanced.vert" geometry="shaders/shadow.geom" fragment="shaders/shadow.frag" />
 	</resource>
 	<resource type="shader" id="ROAD_SHADER" vertex="shaders/road.vert" fragment="shaders/mesh.frag" />
-	<resource type="shader" id="SHADOW_SHADER" filename="shaders/shadow" />
-	<resource type="shader" id="SHADOW_INSTANCED_SHADER" vertex="shaders/shadowInstanced.vert" geometry="shaders/shadow.geom" fragment="shaders/shadow.frag" />
 	<resource type="shader" id="SHADOW_ROAD_SHADER" vertex="shaders/shadowRoad.vert" geometry="shaders/shadow.geom" fragment="shaders/shadow.frag" />
 	<resource type="shader" id="AXIS_SHADER" filename="shaders/axis" />
 	<resource type="shader" id="RENDER_QUAD_SHADER" filename="shaders/renderQuad" />
 	<resource type="shader" id="STREET_DEBUG_SHADER" filename="shaders/streetDebug" />
 	<resource type="shader" id="TERRAIN_NORMAL_SHADER" filename="shaders/terrainNormal" />
+	<resource type="shader" id="SUN_SHADER" filename="shaders/sun" />
 
 	<!-- meshes -->
 	<resource type="mesh" id="BUILDMARKER_MESH" filename="models/buildMarker.obj" />

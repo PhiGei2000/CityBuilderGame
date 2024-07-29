@@ -42,39 +42,54 @@ EnvironmentSystem::EnvironmentSystem(Game* game)
 }
 
 void EnvironmentSystem::init() {
+
+    constexpr float sunAngle = 0.0f;
+    registry.emplace<SunLightComponent>(game->sun,
+                                        sunAngle,    // direction
+                                        sunLight[0], // ambient
+                                        sunLight[1], // diffuse
+                                        sunLight[2]  // specular
+    );
+    registry.emplace<TransformationComponent>(game->sun,
+                                              utility::sphericalToCartesian(300.0f, sunAngle, 0.0f),
+                                              glm::quat(glm::cos(sunAngle / 2), 0, 0, glm::sin(sunAngle / 2)),
+                                              glm::vec3(50.0f));
+    registry.emplace<MeshComponent>(game->sun, resourceManager.getResource<Mesh<>>("SUN_MESH"));
+
+    EntityMoveEvent moveEvent{game->sun};
+    game->raiseEvent(moveEvent);
 }
 
-void EnvironmentSystem::updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const {
+void EnvironmentSystem::updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sun) const {
     // sun movement
-    const float sunSpeed = 0.25f;
+    constexpr float sunSpeed = 2 * glm::pi<float>() / 600.0f;
+    // constexpr float sunSpeed = 0.1f;
     const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(game->camera);
 
     // move sun
     static constexpr float two_pi = 2 * glm::pi<float>();
-    sunLight.angle += sunSpeed * dt;
-    if (sunLight.angle > two_pi) {
-        sunLight.angle -= two_pi;
+    sun.angle += sunSpeed * dt;
+    if (sun.angle > two_pi) {
+        sun.angle -= two_pi;
     }
-    else if (sunLight.angle < -two_pi) {
-        sunLight.angle += two_pi;
+    else if (sun.angle < -two_pi) {
+        sun.angle += two_pi;
     }
 
-    if (utility::inRange(sunLight.angle, 0.1f * glm::pi<float>(), 0.9f * glm::pi<float>())) {
-        sunLight.diffuse = glm::sin((sunLight.angle - 0.1f * glm::pi<float>()) / 0.8f) * game->sunLight[1];
-        sunLight.specular = glm::sin((sunLight.angle - 0.1f * glm::pi<float>()) / 0.8f) * game->sunLight[2];
+    // intensity
+    if (utility::inRange(sun.angle, 0.1f * glm::pi<float>(), 0.9f * glm::pi<float>())) {
+        sun.diffuse = glm::sin((sun.angle - 0.1f * glm::pi<float>()) / 0.8f) * sunLight[1];
+        sun.specular = glm::sin((sun.angle - 0.1f * glm::pi<float>()) / 0.8f) * sunLight[2];
     }
     else {
-        sunLight.diffuse = glm::vec3(0);
-        sunLight.specular = glm::vec3(0);
+        sun.diffuse = glm::vec3(0);
+        sun.specular = glm::vec3(0);
     }
 
-    sunLight.direction = -glm::vec3(glm::cos(sunLight.angle), glm::sin(sunLight.angle), 0.0f);
-    // TODO: Adjust sun position to camera
-    sunTransform.position = -300.0f * sunLight.direction + glm::vec3(cameraTransform.position.x, 0.0f, cameraTransform.position.z);
-
-#if DEBUG
-    std::cout << "sun pos: " << sunTransform.position << "(phi: " << sunLight.angle << ")" << std::endl;
-#endif
+    sun.direction = -glm::vec3(glm::cos(sun.angle), glm::sin(sun.angle), 0.0f);
+    sunTransform.position = -300.0f * sun.direction + glm::vec3(cameraTransform.position.x, 0.0f, cameraTransform.position.z);
+    sunTransform.rotation = glm::quat(glm::cos(sun.angle / 2), 0, 0, glm::sin(sun.angle / 2));
+    sunTransform.calculateTransform();
 
     EntityMoveEvent e{game->sun};
     game->raiseEvent(e);
