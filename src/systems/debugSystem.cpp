@@ -38,6 +38,7 @@ void DebugSystem::init() {
     axisGeo->bufferData(vertices, {0, 1, 2});
     Mesh<>* axisMesh = new Mesh<>();
     axisMesh->geometries[""] = {std::make_pair(MaterialPtr(nullptr), GeometryPtr(axisGeo))};
+    axisMesh->shader = resourceManager.getResource<Shader>("AXIS_SHADER");
 
     registry.emplace<MeshComponent>(debugEntity, MeshPtr(axisMesh));
     registry.emplace<DebugComponent>(debugEntity);

@@ -256,6 +256,7 @@ TerrainSystem::TerrainSystem(Game* game)
 void TerrainSystem::update(float dt) {
     MaterialPtr groundMaterial = resourceManager.getResource<Material>("GROUND_MATERIAL");
     MaterialPtr waterMaterial = resourceManager.getResource<Material>("WATER_MATERIAL");
+    ShaderPtr meshShader = resourceManager.getResource<Shader>("MESH_SHADER");
 
     for (auto it = meshCreationTasks.begin(); it != meshCreationTasks.end();) {
         if (it->second.valid() && it->second.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
@@ -268,6 +269,7 @@ void TerrainSystem::update(float dt) {
 
             mesh.mesh->geometries["ground"].emplace_back(groundMaterial, new MeshGeometry(terrainGeometry));
             mesh.mesh->geometries["water"].emplace_back(waterMaterial, new MeshGeometry(waterGeometry));
+            mesh.mesh->shader = meshShader;
             terrain.meshGenerated = true;
 
             it = meshCreationTasks.erase(it);

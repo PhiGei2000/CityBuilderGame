@@ -22,7 +22,7 @@
 
 #include <glm/glm.hpp>
 
-class Shader;
+class ShaderProgram;
 
 struct Material {
     // colors
@@ -48,7 +48,7 @@ struct Material {
     Material(ResourcePtr<Texture> diffuse, ResourcePtr<Texture> specular);
     Material(ResourcePtr<Texture> diffuse, ResourcePtr<Texture> specular, float specularStrength, float shininess);
 
-    void use(Shader* shader) const;
+    void use(ShaderProgram* shader) const;
 };
 
 using MaterialPtr = ResourcePtr<Material>;

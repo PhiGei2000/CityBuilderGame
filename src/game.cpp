@@ -33,10 +33,12 @@ Game::Game(Application* app)
 }
 
 void Game::init() {
-    // init systems
+    // init camera system
     systems.push_back(new CameraSystem(this));
+    // entities
     camera = registry.view<CameraComponent>().front();
 
+    // init other systems
     systems.push_back(new BuildSystem(this));
     systems.push_back(new TerrainSystem(this));
     systems.push_back(new RoadSystem(this));
@@ -154,6 +156,7 @@ template void Game::raiseEvent<MouseScrollEvent>(MouseScrollEvent&);
 template void Game::raiseEvent<ChunkCreatedEvent>(ChunkCreatedEvent&);
 template void Game::raiseEvent<ChunkDestroyedEvent>(ChunkDestroyedEvent&);
 template void Game::raiseEvent<ChunkUpdatedEvent>(ChunkUpdatedEvent&);
+template void Game::raiseEvent<EntityMoveEvent>(EntityMoveEvent&);
 
 #if DEBUG
 void Game::log(const std::string& message) {

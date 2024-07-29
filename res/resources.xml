@@ -2,8 +2,14 @@
 <resources>
 
 	<!-- shaders -->
-	<resource type="shader" id="MESH_SHADER" filename="shaders/mesh" />
-	<resource type="shader" id="MESH_INSTANCED_SHADER" vertex="shaders/meshInstanced.vert" fragment="shaders/mesh.frag" />
+	<resource type="shader" id="MESH_SHADER" >
+		<defaultShader filename="shaders/mesh" />
+		<instancedShader vertex="shaders/meshInstanced.vert" fragment="shaders/mesh.frag" />
+	</resource>
+	<resource type="shader" id="SHADOW_SHADER">
+	 	<defaultShader filename="shaders/shadow" />
+	 	<instancedShader vertex="shaders/shadowInstanced.vert" geometry="shaders/shadow.geom" fragment="shaders/shadow.frag" />
+	</resource>
 	<resource type="shader" id="ROAD_SHADER" vertex="shaders/road.vert" fragment="shaders/mesh.frag" />
 	<resource type="shader" id="SHADOW_SHADER" filename="shaders/shadow" />
 	<resource type="shader" id="SHADOW_INSTANCED_SHADER" vertex="shaders/shadowInstanced.vert" geometry="shaders/shadow.geom" fragment="shaders/shadow.frag" />
@@ -16,7 +22,8 @@
 	<!-- meshes -->
 	<resource type="mesh" id="BUILDMARKER_MESH" filename="models/buildMarker.obj" />
 	<resource type="mesh" id="CAR_MESH" filename="models/car.obj" />
-	<resource type="mesh" id="TREE_MESH" filename="models/tree.obj" />
+	<resource type="mesh" id="TREE_MESH" filename="models/tree.obj" shader="MESH_SHADER" />
+	<resource type="mesh" id="SUN_MESH" filename="models/sun.obj" shader="SUN_SHADER" />
 
 	<!-- materials -->
 	<resource type="material" filename="models/basic_street.mtl">

@@ -47,7 +47,6 @@ void RenderSystem::init() {
 
     // shadow rendering
     shadowShader = resourceManager.getResource<Shader>("SHADOW_SHADER");
-    instancedShadowShader = resourceManager.getResource<Shader>("SHADOW_INSTANCED_SHADER");
 }
 
 RenderSystem::RenderSystem(Game* game)
@@ -124,12 +123,10 @@ void RenderSystem::updateLightBuffer(const LightComponent& sunLight, const Camer
 void RenderSystem::update(float dt) {
     // shadows
     shadowBuffer.use();
-    shadowShader->use();
     glClear(GL_DEPTH_BUFFER_BIT);
 
     glCullFace(GL_FRONT);
-    renderScene(shadowShader, entt::exclude<DebugComponent>);
-    renderSceneInstanced(instancedShadowShader, entt::exclude<DebugComponent>);
+    renderSceneShadows(entt::exclude<DebugComponent>);
 
     glCullFace(GL_BACK);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -151,18 +148,14 @@ void RenderSystem::update(float dt) {
 #endif
 
     shadowBuffer.bindTextures();
-    ShaderPtr meshShader = resourceManager.getResource<Shader>("MESH_SHADER");
-    ShaderPtr instancedMeshShader = resourceManager.getResource<Shader>("MESH_INSTANCED_SHADER");
 
-    renderScene(meshShader, entt::exclude<DebugComponent>);
-    renderSceneInstanced(instancedMeshShader, entt::exclude<DebugComponent>);
+    renderScene(entt::exclude<DebugComponent>);
 
-    meshShader->use();
     if (game->getState() == GameState::BUILD_MODE) {
         registry.view<TransformationComponent, MeshComponent, BuildingComponent>()
             .each([&](const TransformationComponent& transform, const MeshComponent& mesh, const BuildingComponent& buildMarker) {
-                meshShader->setMatrix4("model", transform.transform);
-                mesh.mesh->render(meshShader);
+                MeshRenderData renderData = {transform.transform};
+                mesh.mesh->render(renderData);
             });
     }
 
@@ -172,10 +165,9 @@ void RenderSystem::update(float dt) {
         // const DebugComponent& debug = registry.get<DebugComponent>(debugEntity);
         const MeshComponent& mesh = registry.get<MeshComponent>(debugEntity);
         const TransformationComponent& transform = registry.get<TransformationComponent>(debugEntity);
-        ShaderPtr axisShader = resourceManager.getResource<Shader>("AXIS_SHADER");
 
-        axisShader->use();
-        axisShader->setMatrix4("model", transform.transform);
-        mesh.mesh->render(meshShader);
+        MeshRenderData renderData = {transform.transform};
+
+        mesh.mesh->render(renderData);
     }
 }

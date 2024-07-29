@@ -18,12 +18,12 @@
 #include "rendering/renderQuad.hpp"
 #include "rendering/shadowBuffer.hpp"
 
-class Shader;
+class ShaderProgram;
 
 class ShadowMapRenderer {
   private:
     RenderQuad quad;
-    Shader* shadowDebug;
+    ShaderProgram* shadowDebug;
 
   public:
     ShadowMapRenderer();

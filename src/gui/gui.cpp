@@ -114,7 +114,7 @@ Application* Gui::getApp() const {
     return app;
 }
 
-Shader* Gui::getShader() const {
+ShaderProgram* Gui::getShader() const {
     return guiShader;
 }
 

@@ -21,7 +21,7 @@
 #include <math.h>
 
 ShadowMapRenderer::ShadowMapRenderer() {
-    shadowDebug = new Shader("res/shaders/shadowDebug.vert", "res/shaders/shadowDebug.frag");
+    shadowDebug = new ShaderProgram("res/shaders/shadowDebug.vert", "res/shaders/shadowDebug.frag");
 }
 
 ShadowMapRenderer::~ShadowMapRenderer() {

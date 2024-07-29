@@ -24,10 +24,10 @@
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 
-const std::unordered_map<std::string, std::string> Shader::defines = {
+const std::unordered_map<std::string, std::string> ShaderProgram::defines = {
     std::make_pair<std::string, std::string>("cascadeCount", std::to_string(Configuration::SHADOW_CASCADE_COUNT))};
 
-std::string Shader::getSource(const std::string& filename) {
+std::string ShaderProgram::getSource(const std::string& filename) {
     std::ifstream file;
 
     file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -56,7 +56,7 @@ std::string Shader::getSource(const std::string& filename) {
     }
 }
 
-unsigned int Shader::compileShader(int shaderType, const std::string& filename) {
+unsigned int ShaderProgram::compileShader(int shaderType, const std::string& filename) {
     unsigned int shader = glCreateShader(shaderType);
     std::string source = getSource(filename);
     const char* sourcePtr = source.c_str();
@@ -86,7 +86,7 @@ unsigned int Shader::compileShader(int shaderType, const std::string& filename) 
     return shader;
 }
 
-Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
+ShaderProgram::ShaderProgram(const std::string& vertexPath, const std::string& fragmentPath) {
     program = glCreateProgram();
 
     unsigned int vertex = compileShader(GL_VERTEX_SHADER, vertexPath);
@@ -110,7 +110,7 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
     glDeleteShader(fragment);
 }
 
-Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath) {
+ShaderProgram::ShaderProgram(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath) {
     program = glCreateProgram();
 
     unsigned int vertex = compileShader(GL_VERTEX_SHADER, vertexPath);
@@ -137,11 +137,11 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, c
     glDeleteShader(geometry);
 }
 
-void Shader::use() const {
+void ShaderProgram::use() const {
     glUseProgram(program);
 }
 
-unsigned int Shader::getLocation(const std::string& name) {
+unsigned int ShaderProgram::getLocation(const std::string& name) {
     auto it = uniforms.find(name);
     if (it == uniforms.end()) {
         unsigned int location = glGetUniformLocation(program, name.c_str());
@@ -154,42 +154,42 @@ unsigned int Shader::getLocation(const std::string& name) {
     }
 }
 
-void Shader::setBool(const std::string& name, bool value) {
+void ShaderProgram::setBool(const std::string& name, bool value) {
     unsigned int location = getLocation(name);
     glUniform1i(location, (int)value);
 }
 
-void Shader::setInt(const std::string& name, int value) {
+void ShaderProgram::setInt(const std::string& name, int value) {
     unsigned int location = getLocation(name);
     glUniform1i(location, value);
 }
 
-void Shader::setFloat(const std::string& name, float value) {
+void ShaderProgram::setFloat(const std::string& name, float value) {
     unsigned int location = getLocation(name);
     glUniform1f(location, value);
 }
 
-void Shader::setVector2(const std::string& name, const glm::vec2& vec) {
+void ShaderProgram::setVector2(const std::string& name, const glm::vec2& vec) {
     unsigned int location = getLocation(name);
     glUniform2f(location, vec.x, vec.y);
 }
 
-void Shader::setVector3(const std::string& name, const glm::vec3& vec) {
+void ShaderProgram::setVector3(const std::string& name, const glm::vec3& vec) {
     unsigned int location = getLocation(name);
     glUniform3f(location, vec.x, vec.y, vec.z);
 }
 
-void Shader::setVector4(const std::string& name, const glm::vec4& vec) {
+void ShaderProgram::setVector4(const std::string& name, const glm::vec4& vec) {
     unsigned int location = getLocation(name);
     glUniform4f(location, vec.x, vec.y, vec.z, vec.w);
 }
 
-void Shader::setMatrix3(const std::string& name, const glm::mat3& mat) {
+void ShaderProgram::setMatrix3(const std::string& name, const glm::mat3& mat) {
     unsigned int location = getLocation(name);
     glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-void Shader::setMatrix4(const std::string& name, const glm::mat4& mat) {
+void ShaderProgram::setMatrix4(const std::string& name, const glm::mat4& mat) {
     unsigned int location = getLocation(name);
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }

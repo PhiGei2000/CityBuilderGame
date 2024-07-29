@@ -13,30 +13,16 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "gui/components/icon.hpp"
+#pragma once
+#include <glm/glm.hpp>
 
-#include "gui/gui.hpp"
+#include "rendering/shadowBuffer.hpp"
+#include "rendering/shader.hpp"
 
-#include <GL/glew.h>
+struct MeshRenderData {
+    glm::mat4 model;
+    bool preview = false;
+    int shadowMaps = ShadowBuffer::depthMapOffset;
 
-Icon::Icon(const std::string& id, Gui* gui, Texture* texture, const glm::vec4& backgroundColor)
-    : Widget(id, gui, backgroundColor), texture(texture) {
-}
-
-void Icon::render() const {
-    Widget::render();
-
-    glActiveTexture(GL_TEXTURE0);
-
-    const Rectangle& box = getBox();
-
-    ShaderProgram* guiShader = gui->getShader();
-    guiShader->setInt("tex", 0);
-    guiShader->setBool("useTexture", true);
-
-    texture->use(0);
-
-    gui->getRenderQuad().draw(box.x, box.y, box.width, box.height);
-
-    guiShader->setBool("useTexture", false);
-}
+    void uploadToShader(ShaderProgram* shader) const;
+};

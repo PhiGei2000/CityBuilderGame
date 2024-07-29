@@ -28,7 +28,6 @@ struct RoadPack {
     // std::map<RoadTileTypes, GeometryPtr> roadGeometries;
     Mesh<RoadTileTypes> roadGeometries;
 
-    ResourcePtr<Shader> shader;
     ResourcePtr<Material> material;
 };
 

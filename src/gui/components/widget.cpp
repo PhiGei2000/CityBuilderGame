@@ -75,7 +75,7 @@ void Widget::render() const {
 
     Rectangle area = getBox();
 
-    Shader* guiShader = gui->getShader();
+    ShaderProgram* guiShader = gui->getShader();
     guiShader->setVector4("color", backgroundColor);
     guiShader->setVector2("widgetArea.position", glm::vec2{area.x, area.y});
     guiShader->setVector2("widgetArea.size", glm::vec2{area.width, area.height});

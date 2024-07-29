@@ -28,7 +28,7 @@ Material::Material(ResourcePtr<Texture> diffuse, ResourcePtr<Texture> specular, 
     : diffuseTexture(diffuse), specularTexture(specular), specularStrength(specularStrength), shininess(shininess) {
 }
 
-void Material::use(Shader* shader) const {
+void Material::use(ShaderProgram* shader) const {
     bool useAmbientTexture = ambientTexture.get() != nullptr;
     bool useDiffuseTexture = diffuseTexture.get() != nullptr;
     bool useSpecularTexture = specularTexture.get() != nullptr;

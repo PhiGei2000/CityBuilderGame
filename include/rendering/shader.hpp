@@ -21,7 +21,7 @@
 
 #include <glm/glm.hpp>
 
-class Shader {
+class ShaderProgram {
   private:
     unsigned int program = 0;
     std::unordered_map<std::string, unsigned int> uniforms;
@@ -33,8 +33,8 @@ class Shader {
     unsigned int getLocation(const std::string& name);
 
   public:
-    Shader(const std::string& vertexPath, const std::string& fragmentPath);
-    Shader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath);
+    ShaderProgram(const std::string& vertexPath, const std::string& fragmentPath);
+    ShaderProgram(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath);
 
     void use() const;
 
@@ -48,6 +48,11 @@ class Shader {
 
     void setMatrix3(const std::string& name, const glm::mat3& mat);
     void setMatrix4(const std::string& name, const glm::mat4& mat);
+};
+
+struct Shader {
+    ShaderProgram* defaultShader;
+    ShaderProgram* instanced = nullptr;
 };
 
 using ShaderPtr = ResourcePtr<Shader>;

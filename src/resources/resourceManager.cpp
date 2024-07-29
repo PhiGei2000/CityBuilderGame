@@ -48,35 +48,6 @@ const char* ResourceManager::ResourceTypeException::what() const noexcept {
 }
 
 template<>
-void ResourceManager::loadResource<Shader>(const std::string& id, const std::string& filename) {
-    const std::string& vertexPath = resourceDir + filename + ".vert";
-    const std::string& fragmentPath = resourceDir + filename + ".frag";
-    const std::string& geometryPath = resourceDir + filename + ".geom";
-
-    Shader* shader;
-    if (std::filesystem::exists(geometryPath)) {
-        shader = new Shader(vertexPath, fragmentPath, geometryPath);
-    }
-    else {
-        shader = new Shader(vertexPath, fragmentPath);
-    }
-
-    setResource(id, ShaderPtr(shader));
-}
-
-template<>
-void ResourceManager::loadResource<Shader>(const std::string& id, const std::string& vertexPath, const std::string& fragmentPath) {
-    Shader* shader = new Shader(resourceDir + vertexPath, resourceDir + fragmentPath);
-    setResource(id, ShaderPtr(shader));
-}
-
-template<>
-void ResourceManager::loadResource<Shader>(const std::string& id, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath) {
-    Shader* shader = new Shader(resourceDir + vertexPath, resourceDir + fragmentPath, resourceDir + geometryPath);
-    setResource(id, ShaderPtr(shader));
-}
-
-template<>
 void ResourceManager::loadResource<Texture>(const std::string& id, const std::string& filename, bool alpha) {
     Texture* texture = alpha ? new Texture(resourceDir + filename, GL_RGBA) : new Texture(resourceDir + filename);
 
@@ -100,47 +71,131 @@ void ResourceManager::loadResources() {
         const std::string& filename = resourceNode.attribute("filename").as_string();
 
         if (type == "shader") {
-            if (filename.empty()) {
-                const std::string& vertexPath = resourceNode.attribute("vertex").as_string();
-                const std::string& fragmentPath = resourceNode.attribute("fragment").as_string();
-                const std::string& geometryPath = resourceNode.attribute("geometry").as_string();
+            std::string vertexPath = resourceNode.attribute("vertex").as_string();
+            std::string fragmentPath = resourceNode.attribute("fragment").as_string();
+            std::string geometryPath = resourceNode.attribute("geometry").as_string();
 
-                if (geometryPath.empty()) {
-                    loadResource<Shader, const std::string&>(id, vertexPath, fragmentPath);
+            Shader* shader = new Shader();
+            if (filename.empty() && vertexPath.empty()) {
+                // load shaders from child nodes
+                const xml_node& defaultShaderNode = resourceNode.child("defaultShader");
+                const std::string& defaultFilename = defaultShaderNode.attribute("filename").as_string();
+
+                // load default shader
+                if (defaultFilename.empty()) {
+                    vertexPath = defaultShaderNode.attribute("vertex").as_string();
+                    fragmentPath = defaultShaderNode.attribute("fragment").as_string();
+                    geometryPath = defaultShaderNode.attribute("geometry").as_string();
+
+                    if (std::filesystem::exists(resourceDir + geometryPath)) {
+                        shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath, resourceDir + geometryPath);
+                    }
+                    else {
+                        shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath);
+                    }
                 }
                 else {
-                    loadResource<Shader, const std::string&, const std::string&>(id, vertexPath, fragmentPath, geometryPath);
+                    vertexPath = defaultFilename + ".vert";
+                    fragmentPath = defaultFilename + ".frag";
+
+                    if (std::filesystem::exists(resourceDir + defaultFilename + ".geom")) {
+                        geometryPath = defaultFilename + ".geom";
+                        shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath, resourceDir + geometryPath);
+                    }
+                    else {
+                        shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath);
+                    }
+                }
+
+                // load instanced shader
+                const xml_node& instancedShaderNode = resourceNode.child("instancedShader");
+                if (!instancedShaderNode.empty()) {
+                    const std::string& instancedFilename = instancedShaderNode.attribute("filename").as_string();
+                    std::string instancedVertexPath = instancedShaderNode.attribute("vertex").as_string();
+                    std::string instancedFragmentPath = instancedShaderNode.attribute("fragment").as_string();
+                    std::string instancedGeometryPath = instancedShaderNode.attribute("geometry").as_string();
+
+                    if (instancedFilename.empty()) {
+                        if (!instancedGeometryPath.empty() && std::filesystem::exists(resourceDir + instancedGeometryPath)) {
+                            shader->instanced = new ShaderProgram(resourceDir + instancedVertexPath, resourceDir + instancedFragmentPath, resourceDir + instancedGeometryPath);
+                        }
+                        else {
+                            shader->instanced = new ShaderProgram(resourceDir + instancedVertexPath, resourceDir + instancedFragmentPath);
+                        }
+                    }
+                    else {
+                        instancedVertexPath = instancedFilename + ".vert";
+                        instancedFragmentPath = instancedFilename + ".frag";
+
+                        if (std::filesystem::exists(resourceDir + instancedFilename + ".geom")) {
+                            instancedGeometryPath = instancedFilename + ".geom";
+                            shader->instanced = new ShaderProgram(resourceDir + instancedVertexPath, resourceDir + instancedFragmentPath, resourceDir + instancedGeometryPath);
+                        }
+                        else {
+                            shader->instanced = new ShaderProgram(resourceDir + instancedVertexPath, resourceDir + instancedFragmentPath);
+                        }
+                    }
+                }
+            }
+            else if (filename.empty()) {
+                vertexPath = resourceNode.attribute("vertex").as_string();
+                fragmentPath = resourceNode.attribute("fragment").as_string();
+                geometryPath = resourceNode.attribute("geometry").as_string();
+
+                if (!geometryPath.empty() && std::filesystem::exists(resourceDir + geometryPath)) {
+                    shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath, resourceDir + geometryPath);
+                }
+                else {
+                    shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath);
                 }
             }
             else {
-                loadResource<Shader>(id, filename);
+                vertexPath = filename + ".vert";
+                fragmentPath = filename + ".frag";
+
+                if (std::filesystem::exists(resourceDir + filename + ".geom")) {
+                    geometryPath = filename + ".geom";
+                    shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath, resourceDir + geometryPath);
+                }
+                else {
+                    shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath);
+                }
             }
+
+            setResource<Shader>(id, ShaderPtr(shader));
         }
         else if (type == "texture") {
             bool rgba = resourceNode.attribute("rgba").as_bool();
             loadResource<Texture>(id, filename, rgba);
         }
         else if (type == "material") {
-            std::unordered_map<std::string, MaterialPtr> materials = MeshLoader::loadMaterials(resourceDir + filename);
+            if (filename.empty()) {
+            }
+            else {
+                std::unordered_map<std::string, MaterialPtr> materials = MeshLoader::loadMaterials(resourceDir + filename);
 
-            for (const auto& materialNode : resourceNode.children("material")) {
-                const std::string& materialName = materialNode.attribute("name").as_string();
-                const std::string& materialId = materialNode.attribute("id").as_string();
+                for (const auto& materialNode : resourceNode.children("material")) {
+                    const std::string& materialName = materialNode.attribute("name").as_string();
+                    const std::string& materialId = materialNode.attribute("id").as_string();
 
-                try {
-                    MaterialPtr material = materials.at(materialName);
+                    try {
+                        MaterialPtr material = materials.at(materialName);
 
-                    setResource(materialId, material);
-                }
-                catch (std::out_of_range e) {
-                    std::cerr << "Material \"" << materialName << "\" not found in file \"" << filename << "\"" << std::endl;
+                        setResource(materialId, material);
+                    }
+                    catch (std::out_of_range e) {
+                        std::cerr << "Material \"" << materialName << "\" not found in file \"" << filename << "\"" << std::endl;
 
-                    throw e;
+                        throw e;
+                    }
                 }
             }
         }
         else if (type == "mesh") {
+            const std::string& shaderID = resourceNode.attribute("shader").as_string("MESH_SHADER");
+
             MeshPtr mesh = MeshLoader::loadMesh(resourceDir + filename);
+            mesh->shader = getResource<Shader>(shaderID);
 
             setResource(id, mesh);
         }
@@ -154,13 +209,13 @@ void ResourceManager::loadResources() {
             unsigned int verticesPerCircle = resourceNode.attribute("verticesPerCircle").as_uint();
 
             RoadPack* pack = new RoadPack();
-            pack->shader = getResource<Shader>(shaderId);
             pack->material = getResource<Material>(materialId);
 
             const RoadPackGeometry& geometries = RoadGeometryGenerator::generateRoadPackGeometries(RoadSpecs{roadwayWidth, roadwayHeight, sidewalkHeight, verticesPerCircle});
             for (const auto& [tileType, geometry] : geometries) {
                 pack->roadGeometries.geometries[tileType].emplace_back(pack->material, geometry);
             }
+            pack->roadGeometries.shader = getResource<Shader>(shaderId);
 
             setResource(id, ResourcePtr<RoadPack>(pack));
         }

@@ -49,7 +49,7 @@ void Label::render() const {
     Widget::render();
 
     const Rectangle& box = getBox();
-    Shader* guiShader = gui->getShader();
+    ShaderProgram* guiShader = gui->getShader();
 
     guiShader->setBool("flipV", true);
     guiShader->setBool("text", true);

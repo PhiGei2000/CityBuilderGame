@@ -58,7 +58,7 @@ class Gui {
     std::stack<Widget*> navigation;
     std::vector<Widget*> widgets;
 
-    Shader* guiShader = new Shader("res/shaders/renderQuad.vert", "res/shaders/renderQuad.frag");
+    ShaderProgram* guiShader = new ShaderProgram("res/shaders/renderQuad.vert", "res/shaders/renderQuad.frag");
 
     void init();
 
@@ -74,7 +74,7 @@ class Gui {
     void hideWarning() const;
 
     Application* getApp() const;
-    Shader* getShader() const;
+    ShaderProgram* getShader() const;
     const RenderQuad& getRenderQuad() const;
 
     void setScreenSize(float width, float height);

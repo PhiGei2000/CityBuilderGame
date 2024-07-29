@@ -17,6 +17,7 @@
 #include "rendering/geometry.hpp"
 #include "rendering/instanceBuffer.hpp"
 #include "rendering/material.hpp"
+#include "rendering/meshRenderData.hpp"
 #include "rendering/shader.hpp"
 #include "resources/roadGeometryGenerator.hpp"
 
@@ -46,10 +47,15 @@ inline constexpr VertexAttributes getInstanceBufferVertexAttributes<Transformati
 template<typename TKey = std::string>
 struct Mesh {
   protected:
-    inline void renderGeometry(ShaderPtr& shader, const MaterialPtr& material, const GeometryPtr& geometry) const {
+    inline void renderGeometry(const MaterialPtr& material, const GeometryPtr& geometry, Shader* shader = nullptr) const {
         bool blend = false;
         if (material) {
-            material->use(shader.get());
+            if (shader == nullptr) {
+                material->use(this->shader->defaultShader);
+            }
+            else {
+                material->use(shader->defaultShader);
+            }
 
             blend = material->dissolve < 1.0f;
         }
@@ -65,10 +71,15 @@ struct Mesh {
         }
     }
 
-    inline void renderInstancedGeometry(ShaderPtr& shader, const MaterialPtr& material, const GeometryPtr& geometry, unsigned int instancesCount) const {
+    inline void renderInstancedGeometry(const MaterialPtr& material, const GeometryPtr& geometry, unsigned int instancesCount, Shader* shader = nullptr) const {
         bool blend = false;
         if (material) {
-            material->use(shader.get());
+            if (shader == nullptr) {
+                material->use(this->shader->instanced);
+            }
+            else {
+                material->use(shader->instanced);
+            }
 
             blend = material->dissolve < 1.0f;
         }
@@ -85,41 +96,70 @@ struct Mesh {
     }
 
   public:
+    ShaderPtr shader;
     std::unordered_map<TKey, std::vector<std::pair<MaterialPtr, GeometryPtr>>> geometries;
 
-    inline void render(ShaderPtr shader) const {
+    inline void render(const MeshRenderData& renderData, Shader* shader = nullptr) const {
+        if (shader == nullptr) {
+            renderData.uploadToShader(this->shader->defaultShader);
+        }
+        else {
+            renderData.uploadToShader(shader->defaultShader);
+        }
+
         for (const auto& [name, data] : geometries) {
             for (const auto& [material, geometry] : data) {
-                renderGeometry(shader, material, geometry);
+                renderGeometry(material, geometry, shader);
             }
         }
     }
 
     template<typename T>
-    inline void renderInstanced(ShaderPtr shader, const InstanceBuffer& instanceBuffer) const {
-        linkInstanceBuffer<T>(instanceBuffer);
+    inline void renderInstanced(const MeshRenderData& renderData, const InstanceBuffer& instanceBuffer, Shader* shader = nullptr) const {
+        if (shader == nullptr) {
+            renderData.uploadToShader(this->shader->instanced);
+        }
+        else {
+            renderData.uploadToShader(shader->instanced);
+        }
 
+        linkInstanceBuffer<T>(instanceBuffer);
         for (const auto& [name, data] : geometries) {
             for (const auto& [material, geometry] : data) {
-                renderInstancedGeometry(shader, material, geometry, instanceBuffer.getInstancesCount());
+                renderInstancedGeometry(material, geometry, instanceBuffer.getInstancesCount(), shader);
             }
         }
     }
 
-    inline void renderObject(ShaderPtr shader, const TKey& key) const {
+    inline void renderObject(const TKey& key, const MeshRenderData& renderData, Shader* shader = nullptr) const {
         const auto& object = geometries.at(key);
+
+        if (shader == nullptr) {
+            renderData.uploadToShader(this->shader->defaultShader);
+        }
+        else {
+            renderData.uploadToShader(shader->defaultShader);
+        }
+
         for (const auto& [material, geometry] : object) {
-            renderGeometry(shader, material, geometry);
+            renderGeometry(material, geometry, shader);
         }
     }
 
     template<typename T>
-    inline void renderObjectInstanced(ShaderPtr shader, const TKey& key, const InstanceBuffer& instanceBuffer) const {
+    inline void renderObjectInstanced(const TKey& key, const MeshRenderData& renderData, const InstanceBuffer& instanceBuffer, Shader* shader = nullptr) const {
         const auto& object = geometries.at(key);
+
+        if (shader == nullptr) {
+            renderData.uploadToShader(this->shader->instanced);
+        }
+        else {
+            renderData.uploadToShader(shader->instanced);
+        }
 
         linkInstanceBuffer<T>(instanceBuffer);
         for (const auto& [material, geometry] : object) {
-            renderInstancedGeometry(shader, material, geometry, instanceBuffer.getInstancesCount());
+            renderInstancedGeometry(material, geometry, instanceBuffer.getInstancesCount(), shader);
         }
     }
 

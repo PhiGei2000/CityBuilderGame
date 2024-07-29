@@ -31,7 +31,7 @@
 
 struct LightComponent;
 struct CameraComponent;
-struct Shader;
+struct ShaderProgram;
 
 class RenderSystem : public System {
   protected:
@@ -54,14 +54,12 @@ class RenderSystem : public System {
     void onEntityMoved(EntityMoveEvent& event) const;
 
     template<typename... T>
-    inline void renderScene(ShaderPtr shader, entt::exclude_t<T...> exclude = {}) const {
-        shader->use();
-        shader->setInt("shadowMaps", ShadowBuffer::depthMapOffset);
+    inline void renderScene(entt::exclude_t<T...> exclude = {}) const {
         GameState gameState = game->getState();
 
         registry.view<MeshComponent, TransformationComponent>(exclude)
             .each([&](auto entity, const MeshComponent& mesh, const TransformationComponent& transform) {
-                shader->setMatrix4("model", transform.transform);
+                MeshRenderData renderData = {transform.transform};
 
                 // TODO: Optimize this
                 if (registry.all_of<BuildingComponent>(entity)) {
@@ -70,45 +68,86 @@ class RenderSystem : public System {
                         return;
                     }
 
-                    shader->setBool("preview", building.preview);
-                }
-                else {
-                    shader->setBool("preview", false);
+                    renderData.preview = building.preview;
                 }
 
-                mesh.mesh->render(shader);
+                mesh.mesh->render(renderData);
             });
-    }
-
-    template<typename... T>
-    inline void renderSceneInstanced(ShaderPtr shader, entt::exclude_t<T...> exclude = {}) const {
-        shader->use();
-        shader->setInt("shadowMaps", ShadowBuffer::depthMapOffset);
 
         registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
             .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {
-                shader->setMatrix4("model", transform.transform);
-                mesh.mesh->renderInstanced<TransformationComponent>(shader, mesh.instanceBuffer);
+                MeshRenderData renderData = {transform.transform};
+                mesh.mesh->renderInstanced<TransformationComponent>(renderData, mesh.instanceBuffer);
             });
 
         registry.view<MultiInstancedMeshComponent, TransformationComponent>(exclude)
             .each([&](const MultiInstancedMeshComponent& mesh, const TransformationComponent& transform) {
-                shader->setMatrix4("model", transform.transform);
+                MeshRenderData renderData = {transform.transform};
 
                 for (const auto& [name, instances] : mesh.transforms) {
-                    mesh.mesh->renderObjectInstanced<TransformationComponent>(shader, name, instances.instanceBuffer);
+                    mesh.mesh->renderObjectInstanced<TransformationComponent>(name, renderData, instances.instanceBuffer);
                 }
             });
 
         registry.view<RoadMeshComponent, TransformationComponent>(exclude).each([&](const RoadMeshComponent& road, const TransformationComponent& transform) {
-            shader->setMatrix4("model", transform.transform);
+            MeshRenderData renderData = {transform.transform};
 
             for (const auto& [typeID, tiles] : road.roadMeshes) {
                 const std::string& roadPackName = getRoadTypeName(typeID);
                 const RoadPackPtr& pack = resourceManager.getResource<RoadPack>(roadPackName);
 
                 for (const auto& [tileType, instances] : tiles) {
-                    pack->roadGeometries.renderObjectInstanced<glm::mat4>(shader, tileType, instances.instanceBuffer);
+                    pack->roadGeometries.renderObjectInstanced<glm::mat4>(tileType, renderData, instances.instanceBuffer);
+                }
+            }
+        });
+    }
+
+    template<typename... T>
+    inline void renderSceneShadows(entt::exclude_t<T...> exclude = {}) const {
+        GameState gameState = game->getState();
+
+        registry.view<MeshComponent, TransformationComponent>(exclude)
+            .each([&](auto entity, const MeshComponent& mesh, const TransformationComponent& transform) {
+                MeshRenderData renderData = {transform.transform};
+
+                // TODO: Optimize this
+                if (registry.all_of<BuildingComponent>(entity)) {
+                    const BuildingComponent& building = registry.get<BuildingComponent>(entity);
+                    if (building.preview && gameState != GameState::BUILD_MODE) {
+                        return;
+                    }
+
+                    renderData.preview = building.preview;
+                }
+
+                mesh.mesh->render(renderData, shadowShader.get());
+            });
+
+        registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
+            .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {
+                MeshRenderData renderData = {transform.transform};
+                mesh.mesh->renderInstanced<TransformationComponent>(renderData, mesh.instanceBuffer, shadowShader.get());
+            });
+
+        registry.view<MultiInstancedMeshComponent, TransformationComponent>(exclude)
+            .each([&](const MultiInstancedMeshComponent& mesh, const TransformationComponent& transform) {
+                MeshRenderData renderData = {transform.transform};
+
+                for (const auto& [name, instances] : mesh.transforms) {
+                    mesh.mesh->renderObjectInstanced<TransformationComponent>(name, renderData, instances.instanceBuffer, shadowShader.get());
+                }
+            });
+
+        registry.view<RoadMeshComponent, TransformationComponent>(exclude).each([&](const RoadMeshComponent& road, const TransformationComponent& transform) {
+            MeshRenderData renderData = {transform.transform};
+
+            for (const auto& [typeID, tiles] : road.roadMeshes) {
+                const std::string& roadPackName = getRoadTypeName(typeID);
+                const RoadPackPtr& pack = resourceManager.getResource<RoadPack>(roadPackName);
+
+                for (const auto& [tileType, instances] : tiles) {
+                    pack->roadGeometries.renderObjectInstanced<glm::mat4>(tileType, renderData, instances.instanceBuffer, shadowShader.get());
                 }
             }
         });
