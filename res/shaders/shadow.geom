@@ -18,7 +18,7 @@ layout(std140, binding = 2) uniform Light {
 void main() {
     gl_Layer = gl_InvocationID;
     for (int i = 0; i < 3; i++) {
-        gl_Position = lightProjection[gl_InvocationID] * lightView[gl_InvocationID] * gl_in[i].gl_Position;
+        gl_Position = lightProjection[gl_InvocationID] * lightView[gl_InvocationID] * (gl_in[i].gl_Position - 0.05 * vec4(lightDirection, 0.0));
         EmitVertex();
     }
     EndPrimitive();

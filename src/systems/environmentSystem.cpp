@@ -45,10 +45,10 @@ void EnvironmentSystem::init() {
 
     constexpr float sunAngle = 0.0f;
     registry.emplace<SunLightComponent>(game->sun,
-                                        sunAngle,    // direction
-                                        sunLight[0], // ambient
-                                        sunLight[1], // diffuse
-                                        sunLight[2]  // specular
+                                        sunAngle,         // direction
+                                        sunLight.ambient, // ambient
+                                        sunLight.diffuse, // diffuse
+                                        sunLight.specular // specular
     );
     registry.emplace<TransformationComponent>(game->sun,
                                               utility::sphericalToCartesian(300.0f, sunAngle, 0.0f),
@@ -62,9 +62,9 @@ void EnvironmentSystem::init() {
 
 void EnvironmentSystem::updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sun) const {
     // sun movement
-    constexpr float sunSpeed = 2 * glm::pi<float>() / 600.0f;
-    // constexpr float sunSpeed = 0.1f;
-    const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(game->camera);
+    // constexpr float sunSpeed = 2 * glm::pi<float>() / 600.0f; // one day lasts 10 minutes
+    constexpr float sunSpeed = 0.1f;
+    const auto& [cameraTransform, camera] = registry.get<TransformationComponent, CameraComponent>(game->camera);
 
     // move sun
     static constexpr float two_pi = 2 * glm::pi<float>();
@@ -77,17 +77,16 @@ void EnvironmentSystem::updateDayNightCycle(float dt, TransformationComponent& s
     }
 
     // intensity
-    if (utility::inRange(sun.angle, 0.1f * glm::pi<float>(), 0.9f * glm::pi<float>())) {
-        sun.diffuse = glm::sin((sun.angle - 0.1f * glm::pi<float>()) / 0.8f) * sunLight[1];
-        sun.specular = glm::sin((sun.angle - 0.1f * glm::pi<float>()) / 0.8f) * sunLight[2];
-    }
-    else {
-        sun.diffuse = glm::vec3(0);
-        sun.specular = glm::vec3(0);
-    }
+    float factor = glm::clamp(2 * glm::sin(sun.angle), 0.0f, 1.0f);
+
+    sun.ambient = (0.3f * factor + 0.1f) * sunLight.ambient;
+    sun.diffuse = factor * sunLight.diffuse;
+    sun.specular = factor * sunLight.specular;
 
     sun.direction = -glm::vec3(glm::cos(sun.angle), glm::sin(sun.angle), 0.0f);
-    sunTransform.position = -300.0f * sun.direction + glm::vec3(cameraTransform.position.x, 0.0f, cameraTransform.position.z);
+
+    float sunDistance = camera.far - 25.0f * glm::cos(sun.angle - glm::radians(camera.pitch));
+    sunTransform.position = -sunDistance * sun.direction + glm::vec3(cameraTransform.position.x, 0.0f, cameraTransform.position.z);
     sunTransform.rotation = glm::quat(glm::cos(sun.angle / 2), 0, 0, glm::sin(sun.angle / 2));
     sunTransform.calculateTransform();
 
@@ -95,10 +94,22 @@ void EnvironmentSystem::updateDayNightCycle(float dt, TransformationComponent& s
     game->raiseEvent(e);
 }
 
-void EnvironmentSystem::update(float dt) {
-    // TODO: Optimize this
+void EnvironmentSystem::destroyEntities() {
+    while (entitiesToDestroy.size() > 0) {
+        auto entity = entitiesToDestroy.front();
+
+        if (registry.valid(entity)) {
+            registry.destroy(entity);
+        }
+
+        entitiesToDestroy.pop();
+    }
+}
+
+void EnvironmentSystem::clearCells() {
     while (cellsToClear.size() > 0) {
         const glm::ivec2& position = cellsToClear.front();
+
         registry.view<EnvironmentComponent, InstancedMeshComponent, TransformationComponent>()
             .each([&](const EnvironmentComponent& environment, InstancedMeshComponent& instancedMesh, const TransformationComponent& transformation) {
                 auto it = instancedMesh.transformations.begin();
@@ -121,21 +132,16 @@ void EnvironmentSystem::update(float dt) {
             });
         cellsToClear.pop();
     }
+}
 
-    while (entitiesToDestroy.size() > 0) {
-        auto entity = entitiesToDestroy.front();
+void EnvironmentSystem::update(float dt) {
+    // TODO: Optimize this
+    clearCells();
 
-        if (registry.valid(entity)) {
-            registry.destroy(entity);
-        }
+    destroyEntities();
 
-        entitiesToDestroy.pop();
-    }
-    // return;
-
-    auto& sunLight = registry.get<SunLightComponent>(game->sun);
-    auto& sunTransform = registry.get<TransformationComponent>(game->sun);
-
+    SunLightComponent& sunLight = registry.get<SunLightComponent>(game->sun);
+    TransformationComponent& sunTransform = registry.get<TransformationComponent>(game->sun);
     updateDayNightCycle(dt, sunTransform, sunLight);
 }
 
@@ -190,8 +196,6 @@ void EnvironmentSystem::handleChunkCreatedEvent(const ChunkCreatedEvent& e) cons
         instancedMesh.instanceBuffer.fillBuffer(instancedMesh.transformations);
     }
 
-    // entt::entity entity = registry.create();
     MultiInstancedMeshComponent& instancedMesh = registry.emplace<MultiInstancedMeshComponent>(e.entity, treeMesh, transformations);
-    // registry.emplace<TransformationComponent>(entity, static_cast<float>(Configuration::chunkSize) * glm::vec3(e.chunkPosition.x, 0.0f, e.chunkPosition.y), glm::quat(), glm::vec3(1.0f));
     registry.emplace<EnvironmentComponent>(e.entity);
 }
