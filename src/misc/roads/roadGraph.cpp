@@ -23,8 +23,8 @@
 // using IntersectionInfo = RoadGraphEdge::IntersectionInfo;
 
 constexpr bool std::less<glm::ivec2>::operator()(const glm::ivec2& lhs, const glm::ivec2& rhs) const {
-    long left = lhs.x + lhs.y << 8;
-    long right = lhs.x + lhs.y << 8;
+    long left = lhs.x + (lhs.y << 8);
+    long right = rhs.x + (rhs.y << 8);
 
     return left < right;
 }

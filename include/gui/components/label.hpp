@@ -31,7 +31,7 @@ class Label : public virtual Widget {
 
     Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, const int textSize = 24, const glm::vec4& textColor = colors::white);
 
-    virtual Rectangle getBox() const;
+    virtual Rectangle getBox() const override;
 
     virtual void render() const override;
 };

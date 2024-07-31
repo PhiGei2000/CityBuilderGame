@@ -26,6 +26,10 @@ struct InstancedMesh {
     inline InstancedMesh() {
     }
 
+    inline ~InstancedMesh() {
+
+    }
+
     inline InstancedMesh(const std::vector<TData>& transformations)
         : transformations(transformations) {
         instanceBuffer.fillBuffer(transformations);

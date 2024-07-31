@@ -3,7 +3,7 @@
 	<name>Car</name>
 	<mesh filename="models/car.obj" shader="MESH_SHADER" />
 
-	<car></car>
+	<car />
 
-	<velocity></velocity>
+	<velocity />
 </object>

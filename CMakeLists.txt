@@ -129,7 +129,8 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
 set(RESOURCE_PATH ${CMAKE_CURRENT_LIST_DIR}/res)
-if (WIN32)
-    # copy resource directory to build dir
-    file(CREATE_LINK ${CMAKE_CURRENT_LIST_DIR}/res ${CMAKE_CURRENT_BINARY_DIR}/res SYMBOLIC)
+if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/res)
+    # link resource directory to build dir
+    message("Linking resource directory")
+    file(CREATE_LINK ${RESOURCE_PATH} ${CMAKE_CURRENT_BINARY_DIR}/res SYMBOLIC)
 endif()

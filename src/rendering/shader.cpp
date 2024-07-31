@@ -30,7 +30,7 @@ const std::unordered_map<std::string, std::string> ShaderProgram::defines = {
 std::string ShaderProgram::getSource(const std::string& filename) {
     std::ifstream file;
 
-    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    file.exceptions(std::ifstream::badbit);
     try {
         file.open(filename);
         std::string firstLine;
@@ -50,7 +50,7 @@ std::string ShaderProgram::getSource(const std::string& filename) {
         return ss.str();
     }
     catch (std::ifstream::failure e) {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
+        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ\n" << filename << std::endl;
 
         throw e;
     }
@@ -61,16 +61,16 @@ unsigned int ShaderProgram::compileShader(int shaderType, const std::string& fil
     std::string source = getSource(filename);
     const char* sourcePtr = source.c_str();
 
-    glShaderSource(shader, 1, &sourcePtr, NULL);
+    glShaderSource(shader, 1, &sourcePtr, nullptr);
     glCompileShader(shader);
 
     int success;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
         char infoLog[256];
-        glGetShaderInfoLog(shader, 512, NULL, infoLog);
+        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
 
-        std::cout << "ERROR::SHADER::";
+        std::cout <<  filename << "\n" << "ERROR::SHADER::";
         if (shaderType == GL_VERTEX_SHADER) {
             std::cout << "VERTEX::COMPILATION_FAILED\n";
         }
@@ -100,9 +100,9 @@ ShaderProgram::ShaderProgram(const std::string& vertexPath, const std::string& f
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
         char infoLog[512];
-        glGetProgramInfoLog(program, 512, NULL, infoLog);
+        glGetProgramInfoLog(program, 512, nullptr, infoLog);
 
-        std::cout << "ERROR::SHADER::PROGRAM:LINKING_FAILED\n"
+        std::cout << vertexPath << "\nERROR::SHADER::PROGRAM:LINKING_FAILED\n"
                   << infoLog << std::endl;
     }
 
@@ -126,7 +126,7 @@ ShaderProgram::ShaderProgram(const std::string& vertexPath, const std::string& f
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
         char infoLog[512];
-        glGetProgramInfoLog(program, 512, NULL, infoLog);
+        glGetProgramInfoLog(program, 512, nullptr, infoLog);
 
         std::cout << "ERROR::SHADER::PROGRAM:LINKING_FAILED\n"
                   << infoLog << std::endl;

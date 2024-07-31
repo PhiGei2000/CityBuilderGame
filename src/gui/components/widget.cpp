@@ -105,6 +105,8 @@ Rectangle Widget::getBox() const {
         case ConstraintType::RELATIVE:
             height = constraints.height.value * parentBox.height;
             break;
+        default:
+            break;
     }
 
     switch (constraints.width.type) {
@@ -113,6 +115,8 @@ Rectangle Widget::getBox() const {
             break;
         case ConstraintType::RELATIVE:
             width = constraints.width.value * parentBox.width;
+            break;
+        default:
             break;
     }
 
@@ -136,6 +140,8 @@ Rectangle Widget::getBox() const {
         case ConstraintType::CENTER:
             x += (parentBox.width - width) * 0.5f;
             break;
+        default:
+            break;
     }
 
     switch (constraints.y.type) {
@@ -147,6 +153,8 @@ Rectangle Widget::getBox() const {
             break;
         case ConstraintType::CENTER:
             y += (parentBox.height - height) * 0.5f;
+            break;
+        default:
             break;
     }
 

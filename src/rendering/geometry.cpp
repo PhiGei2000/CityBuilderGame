@@ -32,7 +32,7 @@ Geometry::Geometry(const VertexAttributes& attributes, int drawMode)
     for (int i = 0; i < attributes.size(); i++) {
         const VertexAttribute& attribute = attributes[i];
 
-        glVertexAttribPointer(i, attribute.size, attribute.type, attribute.normalized, attribute.stride, attribute.pointer);
+        glVertexAttribPointer(i, attribute.size, attribute.type, attribute.normalized, attribute.stride, (void*)attribute.pointer);
         glEnableVertexAttribArray(i);
 
         offset += attribute.stride;
@@ -52,7 +52,7 @@ void Geometry::setVertexAttribute(unsigned int index, const VertexAttribute& att
     glBindBuffer(GL_ARRAY_BUFFER, attribute.vbo == 0 ? this->vbo : attribute.vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
-    glVertexAttribPointer(index, attribute.size, attribute.type, attribute.normalized, attribute.stride, attribute.pointer);
+    glVertexAttribPointer(index, attribute.size, attribute.type, attribute.normalized, attribute.stride, (void*)attribute.pointer);
 
     if (attribute.divisor != 0) {
         glVertexAttribDivisor(index, attribute.divisor);
@@ -94,11 +94,11 @@ void Geometry::bindBuffer() const {
 }
 
 const VertexAttributes MeshGeometry::meshVertexAttributes = VertexAttributes{
-    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float),                    (void*)0},
-    {2, GL_FLOAT, GL_FALSE, 14 * sizeof(float),  (void*)(3 * sizeof(float))},
-    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float),  (void*)(5 * sizeof(float))},
-    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float),  (void*)(8 * sizeof(float))},
-    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(11 * sizeof(float))}
+    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float),                  0u},
+    {2, GL_FLOAT, GL_FALSE, 14 * sizeof(float),  3u * sizeof(float)},
+    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float),  5u * sizeof(float)},
+    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float),  8u * sizeof(float)},
+    {3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), 11u * sizeof(float)}
 };
 
 MeshGeometry::MeshGeometry()

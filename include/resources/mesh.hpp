@@ -32,10 +32,10 @@ constexpr VertexAttributes getInstanceBufferVertexAttributes(unsigned int vbo = 
 template<>
 inline constexpr VertexAttributes getInstanceBufferVertexAttributes<glm::mat4>(unsigned int vbo) {
     return VertexAttributes{
-        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(0 * sizeof(glm::vec4)), vbo, 1},
-        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(1 * sizeof(glm::vec4)), vbo, 1},
-        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)), vbo, 1},
-        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)), vbo, 1},
+        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), 0u * sizeof(glm::vec4), vbo, 1},
+        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), 1u * sizeof(glm::vec4), vbo, 1},
+        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), 2u * sizeof(glm::vec4), vbo, 1},
+        VertexAttribute{4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), 3u * sizeof(glm::vec4), vbo, 1},
     };
 }
 

@@ -25,7 +25,6 @@ enum class BuildingType : unsigned int {
 #include <iostream>
 #include <string>
 
-
 inline std::ostream& operator<<(std::ostream& os, BuildingType type) {
     static std::string typeNames[] = {"NONE", "DEFAULT", "ROAD", "PARKING_LOT"};
 
@@ -38,7 +37,7 @@ constexpr std::string getBuildingName(BuildingType type) {
             return "parking_lot";
         case BuildingType::ROAD:
             return "road";
+        default:
+            return "";
     }
-
-    return "";
 }
