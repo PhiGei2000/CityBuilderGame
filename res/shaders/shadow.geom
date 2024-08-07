@@ -15,10 +15,12 @@ layout(std140, binding = 2) uniform Light {
     float cascadeFarPlanes[cascadeCount];
 };
 
+float normalFactors[] = {0.07, 0.17, 0.2, 0.5};
+
 void main() {
     gl_Layer = gl_InvocationID;
     for (int i = 0; i < 3; i++) {
-        gl_Position = lightProjection[gl_InvocationID] * lightView[gl_InvocationID] * (gl_in[i].gl_Position - 0.05 * vec4(lightDirection, 0.0));
+        gl_Position = lightProjection[gl_InvocationID] * lightView[gl_InvocationID] * (gl_in[i].gl_Position - normalFactors[gl_InvocationID] * vec4(lightDirection, 0.0));
         EmitVertex();
     }
     EndPrimitive();

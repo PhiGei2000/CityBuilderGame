@@ -153,11 +153,12 @@ float shadowCalculation(vec3 normal) {
     }
 
     // calculate bias and apply pcf
-    float shadowBias = 0.0001;
-    float maxShadowBias = 0.0005;
+    float shadowBias[] = {2E-3, 1.5E-3, 1.5E-3, 0.0001};
+    float maxShadowBias[] = {2E-4, 1.5E-4, 1.5E-4, 0.0005};
     vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps, 0));
-    float cosTheta = dot(normal, -fs_in.tangentLightDirection);
-    float bias = max(shadowBias * (1 - cosTheta), maxShadowBias);
+    float cosTheta = dot(normal, fs_in.tangentLightDirection);
+    float bias = max(abs(shadowBias[mapIndex] * (1 - cosTheta)), maxShadowBias[mapIndex]);
+
     float shadow = 0;
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {

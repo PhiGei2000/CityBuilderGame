@@ -153,7 +153,7 @@ void TextRenderer::renderText(const std::string& text, const Rectangle& rect, in
             offset = kerning.at(std::make_pair(*it, *(it + 1)));
         }
 
-        float xPos = currentX + (character.bearing.x + offset.x >> 6) * textSize / pixelWidth;
+        float xPos = currentX + (character.bearing.x + (offset.x >> 6)) * textSize / pixelWidth;
         float yPos = currentY - character.bearing.y * textSize / pixelWidth;
 
         float charHeight = character.size.y * textSize / pixelWidth;

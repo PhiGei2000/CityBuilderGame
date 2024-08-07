@@ -15,6 +15,7 @@
  */
 #pragma once
 #include <glm/glm.hpp>
+#include <GL/glew.h>
 
 #include <vector>
 
@@ -29,7 +30,14 @@ class InstanceBuffer {
     InstanceBuffer();
 
     template<typename TData>
-    void fillBuffer(const std::vector<TData>& offsets);
+    inline void fillBuffer(const std::vector<TData>& offsets) {
+        instancesCount = offsets.size();
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, instancesCount * sizeof(TData), &offsets[0], GL_DYNAMIC_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
 
     void clearBuffer();
 

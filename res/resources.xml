@@ -10,7 +10,9 @@
 	 	<defaultShader filename="shaders/shadow" />
 	 	<instancedShader vertex="shaders/shadowInstanced.vert" geometry="shaders/shadow.geom" fragment="shaders/shadow.frag" />
 	</resource>
-	<resource type="shader" id="ROAD_SHADER" vertex="shaders/road.vert" fragment="shaders/mesh.frag" />
+	<resource type="shader" id="ROAD_SHADER">
+		<instancedShader vertex="shaders/meshInstanced.vert" fragment="shaders/mesh.frag" />
+	</resource>
 	<resource type="shader" id="SHADOW_ROAD_SHADER" vertex="shaders/shadowRoad.vert" geometry="shaders/shadow.geom" fragment="shaders/shadow.frag" />
 	<resource type="shader" id="AXIS_SHADER" filename="shaders/axis" />
 	<resource type="shader" id="RENDER_QUAD_SHADER" filename="shaders/renderQuad" />

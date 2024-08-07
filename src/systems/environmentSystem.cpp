@@ -43,7 +43,7 @@ EnvironmentSystem::EnvironmentSystem(Game* game)
 
 void EnvironmentSystem::init() {
 
-    constexpr float sunAngle = 0.0f;
+    constexpr float sunAngle = glm::radians(30.0f);
     registry.emplace<SunLightComponent>(game->sun,
                                         sunAngle,         // direction
                                         sunLight.ambient, // ambient
@@ -63,7 +63,7 @@ void EnvironmentSystem::init() {
 void EnvironmentSystem::updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sun) const {
     // sun movement
     // constexpr float sunSpeed = 2 * glm::pi<float>() / 600.0f; // one day lasts 10 minutes
-    constexpr float sunSpeed = 0.1f;
+    constexpr float sunSpeed = 0.0f;
     const auto& [cameraTransform, camera] = registry.get<TransformationComponent, CameraComponent>(game->camera);
 
     // move sun
