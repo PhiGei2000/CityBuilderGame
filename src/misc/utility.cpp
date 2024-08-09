@@ -17,22 +17,22 @@
 
 template<typename T, glm::qualifier Q>
 std::ostream& operator<<(std::ostream& os, const glm::vec<1, T, Q>& vec) {
-    return os << "x: " << vec.x;
+    return os << "(" << vec.x << ")";
 }
 
 template<typename T, glm::qualifier Q>
 std::ostream& operator<<(std::ostream& os, const glm::vec<2, T, Q>& vec) {
-    return os << "x: " << vec.x << " y: " << vec.y;
+    return os << "(" << vec.x << ", " << vec.y << ")";
 }
 
 template<typename T, glm::qualifier Q>
 std::ostream& operator<<(std::ostream& os, const glm::vec<3, T, Q>& vec) {
-    return os << "x: " << vec.x << " y: " << vec.y << " z: " << vec.z;
+    return os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
 }
 
 template<typename T, glm::qualifier Q>
 std::ostream& operator<<(std::ostream& os, const glm::vec<4, T, Q>& vec) {
-    return os << "x: " << vec.x << " y: " << vec.y << " z: " << vec.z << " w: " << vec.w;
+    return os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ", " << vec.w << ")";
 }
 
 template std::ostream& operator<< <int, glm::packed_highp>(std::ostream&, const glm::vec<2, int, glm::packed_highp>&);

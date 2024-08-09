@@ -28,7 +28,14 @@ std::string roadTileTypeNames[] = {
     "EMPTY"};
 
 constexpr std::string getRoadTileTypeName(RoadTileTypes type) {
-    return roadTileTypeNames[static_cast<int>(type)];
+    switch (type) {
+        case RoadTileTypes::UNDEFINED:
+            return "Undefined";
+        case RoadTileTypes::EMPTY:
+            return "Empty";
+        default:
+            return roadTileTypeNames[static_cast<int>(type)];
+    }
 }
 
 bool RoadTile::isRoadNode() const {
@@ -36,6 +43,7 @@ bool RoadTile::isRoadNode() const {
         case RoadTileTypes::STRAIGHT:
         case RoadTileTypes::RAMP:
         case RoadTileTypes::UNDEFINED:
+        case RoadTileTypes::EMPTY:
             return false;
         default:
             return true;

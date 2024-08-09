@@ -14,14 +14,26 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <map>
+#include <glm/glm.hpp>
+#include <functional>
 
-#include "misc/roads/roadTile.hpp"
+template<>
+inline constexpr bool std::less<glm::ivec2>::operator()(const glm::ivec2& x, const glm::ivec2& y) const {
+    if (x.x != y.x) {
+        return x.y < y.y;
+    }
 
-struct RoadMeshComponent {
-    std::map<RoadTypes, std::map<RoadTileTypes, InstancedMesh<glm::mat4>>> roadMeshes;
+    return x.x < x.y;
 
-#if DEBUG
-    Geometry* graphDebugMesh = new Geometry(VertexAttributes{VertexAttribute{3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0u}}, GL_LINES);
-#endif
-};
+}
+
+template<>
+inline constexpr bool std::less<std::pair<glm::ivec2, glm::ivec2>>::operator()(const std::pair<glm::ivec2, glm::ivec2>& x, const std::pair<glm::ivec2, glm::ivec2>& y) const {
+    std::less<glm::ivec2> nodeComparator;
+
+    if (x.first == y.first) {
+        return nodeComparator.operator()(x.second, y.second);
+    }
+
+    return nodeComparator.operator()(x.first, y.first);
+}

@@ -24,6 +24,10 @@
 #include "misc/utility.hpp"
 #include "resources/roadPack.hpp"
 
+#if DEBUG
+#include <GL/gl.h>
+#endif
+
 RoadSystem::RoadSystem(Game* game)
     : System(game) {
 
@@ -91,6 +95,7 @@ void RoadSystem::update(float dt) {
         }
 
         road.updateRoad(chunkPos);
+
         // update neighbour roads
         for (unsigned int i = 0; i < 4; i++) {
             const glm::ivec2& pos = chunkPos - DirectionVectors<glm::ivec2>[static_cast<Direction>(i)];
@@ -99,7 +104,10 @@ void RoadSystem::update(float dt) {
             }
         }
 
-        chunksToUpdateMesh.push(chunk);
+        road.updateRoadGraph();
+        if (road.meshOutdated) {
+            chunksToUpdateMesh.push(chunk);
+        }
         roadsToBuild.pop();
     }
 }
@@ -142,6 +150,26 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& ge
             }
         }
     }
+
+#if DEBUG
+    std::vector<float> positions;
+    std::unordered_map<glm::ivec2, unsigned int> indicesMap;
+    unsigned int currentIndex = 0;
+
+    for (const auto& node : road.graph.getNodes()) {
+        positions.insert(positions.end(), {Configuration::cellSize * (node.x + 0.5f), 1, Configuration::cellSize * (node.y + 0.5f)});
+        indicesMap[node] = currentIndex;
+        currentIndex++;
+    }
+
+    std::vector<unsigned int> indices;
+    for (const auto& [x, y] : road.graph.getEdges()) {
+        indices.push_back(indicesMap[x]);
+        indices.push_back(indicesMap[y]);
+    }
+
+    geometry.graphDebugMesh->bufferData(positions, indices, GL_STATIC_DRAW);
+#endif
 }
 
 void RoadSystem::handleBuildEvent(const BuildEvent& event) {

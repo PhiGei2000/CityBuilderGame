@@ -18,6 +18,7 @@
 #include "misc/configuration.hpp"
 #include "misc/direction.hpp"
 #include "misc/roads/roadTile.hpp"
+#include "misc/roads/roadGraph.hpp"
 
 #include <glm/gtx/hash.hpp>
 #include <map>
@@ -33,6 +34,9 @@ struct RoadComponent : public AssignableComponent {
 
     /// @brief `true` if the road was updated and the mesh must be recreated
     bool meshOutdated = false;
+
+    /// @brief A graph data structure that represents the roads and crossings
+    RoadGraph graph;
 
     RoadComponent();
 
@@ -58,7 +62,9 @@ struct RoadComponent : public AssignableComponent {
 
     /// @brief Determines which positions are road nodes. A road node is every type of road except of straight road pieces
     /// @return A collection of the positions
-    std::vector<glm::ivec2> getNodes() const;
+    std::unordered_set<glm::ivec2> getNodes() const;
+
+    void updateRoadGraph();
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
         RoadComponent& road = registry.emplace<RoadComponent>(entity, roadTiles);

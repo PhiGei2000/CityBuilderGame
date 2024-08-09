@@ -101,6 +101,17 @@ class RenderSystem : public System {
                     pack->roadGeometries.renderObjectInstanced<glm::mat4>(tileType, renderData, instances.instanceBuffer);
                 }
             }
+
+#if DEBUG
+            if (game->debugMode) {
+                ShaderProgram* roadDebugShader = resourceManager.getResource<Shader>("ROAD_DEBUG_SHADER")->defaultShader;
+
+                roadDebugShader->use();
+                roadDebugShader->setMatrix4("model", transform.transform);
+
+                road.graphDebugMesh->draw();
+            }
+#endif
         });
     }
 
