@@ -14,49 +14,52 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-
-#include <glm/gtx/hash.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtx/hash.hpp>
 
+#include <unordered_map>
 #include <unordered_set>
+
+using RoadPath = std::vector<glm::vec3>;
 
 template<>
 struct std::hash<std::pair<glm::ivec2, glm::ivec2>> {
-  inline std::size_t operator()(const std::pair<glm::ivec2, glm::ivec2>& x) const noexcept {
-    glm::ivec4 vec = glm::ivec4(x.first, x.second);
-
-    return std::hash<glm::ivec4>{}(vec);
-  }
+    inline size_t operator()(const std::pair<glm::ivec2, glm::ivec2>& p) const noexcept {
+        return std::hash<glm::ivec4>().operator()(glm::ivec4(p.first, p.second));
+    }
 };
 
 struct RoadGraph {
   public:
     using RoadGraphNode = glm::ivec2;
+    using NodeData = std::array<std::array<RoadPath, 4>, 4>;
     using RoadGraphEdge = std::pair<RoadGraphNode, RoadGraphNode>;
+    using EdgeData = RoadPath;
 
   private:
-    std::unordered_set<RoadGraphNode> nodes;
-    std::unordered_set<RoadGraphEdge> edges;
+    std::unordered_map<glm::ivec2, NodeData> nodes;
+    std::unordered_map<RoadGraphEdge, EdgeData> edges;
 
   public:
-    RoadGraph(const std::unordered_set<RoadGraphNode>& nodes = {}, const std::unordered_set<RoadGraphEdge>& edges = {});
-
     bool adjacent(const RoadGraphNode& x, const RoadGraphNode& y) const;
 
     std::unordered_set<RoadGraphNode> neighbours(const RoadGraphNode& x) const;
 
-    bool addNode(const RoadGraphNode& x);
+    bool addNode(const RoadGraphNode& x, const NodeData& data = {});
 
     bool removeNode(const RoadGraphNode& x);
 
-    bool addEdge(const RoadGraphNode& x, const RoadGraphNode& y);
+    void updateNodeData(const RoadGraphNode& x, const NodeData& data);
+
+    bool addEdge(const RoadGraphNode& x, const RoadGraphNode& y, const EdgeData& data = {});
 
     bool removeEdge(const RoadGraphEdge& e);
 
+    void updateEdgeData(const RoadGraphEdge& e, const EdgeData& data);
+
     void clear();
 
-    const std::unordered_set<RoadGraphNode>& getNodes() const;
+    const std::unordered_map<RoadGraphNode, NodeData>& getNodes() const;
 
-    const std::unordered_set<RoadGraphEdge>& getEdges() const;
+    const std::unordered_map<RoadGraphEdge, EdgeData>& getEdges() const;
 };
-

@@ -22,8 +22,6 @@
 #include <vector>
 #include <array>
 
-using RoadPath = std::vector<glm::vec3>;
-
 class RoadPathGenerator {
   public:
     static RoadPath generateEdgePath(const RoadGraph::RoadGraphEdge& edge, const RoadSpecs& specs);

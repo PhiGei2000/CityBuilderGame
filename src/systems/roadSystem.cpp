@@ -38,6 +38,12 @@ RoadSystem::RoadSystem(Game* game)
     init();
 }
 
+void RoadSystem::init() {
+    const auto& roadTypes = resourceManager.getResources<RoadPack>();
+
+    roadSpecs[RoadTypes::BASIC_ROADS] = roadTypes.at("BASIC_ROADS")->specs;
+}
+
 void RoadSystem::update(float dt) {
     RoadPackPtr roadPack = resourceManager.getResource<RoadPack>("BASIC_ROADS");
 
@@ -87,7 +93,7 @@ void RoadSystem::update(float dt) {
 
                 neighbourRoads.borders[static_cast<int>(utility::getInverse(dir))][borderPos] = true;
                 glm::ivec2 posInNeighbourChunk = chunkPos - (Configuration::cellsPerChunk - 1) * DirectionVectors<glm::ivec2>[dir];
-                neighbourRoads.updateRoad(posInNeighbourChunk);
+                neighbourRoads.updateRoad(posInNeighbourChunk, roadSpecs);
 
                 if (neighbourRoads.meshOutdated) {
                     chunksToUpdateMesh.push(neighbourChunk);
@@ -95,17 +101,17 @@ void RoadSystem::update(float dt) {
             }
         }
 
-        road.updateRoad(chunkPos);
+        road.updateRoad(chunkPos, roadSpecs);
 
         // update neighbour roads
         for (unsigned int i = 0; i < 4; i++) {
             const glm::ivec2& pos = chunkPos - DirectionVectors<glm::ivec2>[static_cast<Direction>(i)];
             if (utility::inChunk(pos)) {
-                road.updateRoad(pos);
+                road.updateRoad(pos, roadSpecs);
             }
         }
 
-        road.updateRoadGraph();
+        road.updateRoadGraph(roadSpecs);
         if (road.meshOutdated) {
             chunksToUpdateMesh.push(chunk);
         }
@@ -160,9 +166,7 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& ge
     unsigned int currentIndex = 0;
 
     RoadPackPtr basicRoads = resourceManager.getResource<RoadPack>("BASIC_ROADS");
-    for (const auto& node : road.graph.getNodes()) {
-        const auto& paths = RoadPathGenerator::generateNodePaths(node, basicRoads->specs, road.roadTiles[node.x][node.y]);
-
+    for (const auto& [node, paths] : road.graph.getNodes()) {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 for (int k = 0; k < paths[i][j].size(); k++) {
@@ -182,8 +186,7 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& ge
         }
     }
 
-    for (const auto& edge : road.graph.getEdges()) {
-        const RoadPath& path = RoadPathGenerator::generateEdgePath(edge, basicRoads->specs);
+    for (const auto& [edge, path] : road.graph.getEdges()) {
         unsigned int pathLength = path.size();
 
         for (int i = 0; i < pathLength; i++) {

@@ -43,7 +43,28 @@ inline RoadTileTypes operator++(RoadTileTypes& t, int) {
     return prevValue;
 }
 
-constexpr std::string getRoadTileTypeName(RoadTileTypes type);
+constexpr std::string getRoadTileTypeName(RoadTileTypes type) {
+    std::string roadTileTypeNames[] = {
+        "NOT_CONNECTED",
+        "END",
+        "CURVE",
+        "T_CROSSING",
+        "CROSSING",
+        "STRAIGHT",
+        "CURVE_FULL",
+        "RAMP",
+        "UNDEFINED",
+        "EMPTY"};
+
+    switch (type) {
+        case RoadTileTypes::UNDEFINED:
+            return "Undefined";
+        case RoadTileTypes::EMPTY:
+            return "Empty";
+        default:
+            return roadTileTypeNames[static_cast<int>(type)];
+    }
+}
 
 struct RoadTile {
     RoadTileTypes tileType = RoadTileTypes::EMPTY;

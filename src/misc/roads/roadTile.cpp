@@ -15,29 +15,6 @@
  */
 #include "misc/roads/roadTile.hpp"
 
-std::string roadTileTypeNames[] = {
-    "NOT_CONNECTED",
-    "END",
-    "CURVE",
-    "T_CROSSING",
-    "CROSSING",
-    "STRAIGHT",
-    "CURVE_FULL",
-    "RAMP",
-    "UNDEFINED",
-    "EMPTY"};
-
-constexpr std::string getRoadTileTypeName(RoadTileTypes type) {
-    switch (type) {
-        case RoadTileTypes::UNDEFINED:
-            return "Undefined";
-        case RoadTileTypes::EMPTY:
-            return "Empty";
-        default:
-            return roadTileTypeNames[static_cast<int>(type)];
-    }
-}
-
 bool RoadTile::isRoadNode() const {
     switch (tileType) {
         case RoadTileTypes::STRAIGHT:

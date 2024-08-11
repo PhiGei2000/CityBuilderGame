@@ -15,6 +15,8 @@
  */
 #include "components/roadComponent.hpp"
 
+#include "misc/roads/roadPathGenerator.hpp"
+
 #include "misc/utility.hpp"
 
 RoadComponent::RoadComponent() {
@@ -101,7 +103,7 @@ bool RoadComponent::isConnected(const glm::ivec2& pos, Direction dir) const {
     return roadTiles[neighbourPos.x][neighbourPos.y].tileType != RoadTileTypes::EMPTY;
 }
 
-void RoadComponent::updateRoadTypes() {
+void RoadComponent::updateRoadTypes(const std::map<RoadTypes, RoadSpecs>& specs) {
     // TODO: Maybe add a flag that indicates that the road component was not updated and no update of the connections is neccessary
     // if (!roadsOutdated) {
     //    return;
@@ -109,12 +111,12 @@ void RoadComponent::updateRoadTypes() {
 
     for (int x = 0; x < Configuration::cellsPerChunk; x++) {
         for (int y = 0; y < Configuration::cellsPerChunk; y++) {
-            updateRoad(glm::ivec2(x, y));
+            updateRoad(glm::ivec2(x, y), specs);
         }
     }
 }
 
-void RoadComponent::updateRoad(const glm::ivec2& pos) {
+void RoadComponent::updateRoad(const glm::ivec2& pos, const std::map<RoadTypes, RoadSpecs>& specs) {
     if (roadTiles[pos.x][pos.y].empty()) {
         return;
     }
@@ -136,10 +138,10 @@ void RoadComponent::updateRoad(const glm::ivec2& pos) {
         meshOutdated = true;
 
         if (tile.isRoadNode()) {
-            graph.addNode(pos);
+            graph.addNode(pos, RoadPathGenerator::generateNodePaths(pos, specs.at(tile.roadType), tile));
         }
         else if (pos.x == 0 || pos.x == Configuration::cellsPerChunk - 1 || pos.y == 0 || pos.y == Configuration::cellsPerChunk - 1) {
-            graph.addNode(pos);
+            graph.addNode(pos, RoadPathGenerator::generateNodePaths(pos, specs.at(tile.roadType), tile));
         }
         else {
             graph.removeNode(pos);
@@ -227,15 +229,15 @@ std::unordered_set<glm::ivec2> RoadComponent::getNodes() const {
     return positions;
 }
 
-void RoadComponent::updateRoadGraph() {
-    const std::unordered_set<RoadGraph::RoadGraphNode>& nodes = graph.getNodes();
+void RoadComponent::updateRoadGraph(const std::map<RoadTypes, RoadSpecs>& specs) {
+    const std::unordered_map<RoadGraph::RoadGraphNode, RoadGraph::NodeData>& nodes = graph.getNodes();
     // identify edges
 
     std::set<RoadGraph::RoadGraphEdge> edges;
     for (auto it = nodes.begin(); it != nodes.end(); it++) {
         for (auto jt = nodes.begin(); jt != it; jt++) {
-            const RoadGraph::RoadGraphNode& x = *it;
-            const RoadGraph::RoadGraphNode& y = *jt;
+            const RoadGraph::RoadGraphNode& x = (*it).first;
+            const RoadGraph::RoadGraphNode& y = (*jt).first;
 
             if (x.x == y.x) {
                 // horizontal (east-west) edge
@@ -265,8 +267,8 @@ void RoadComponent::updateRoadGraph() {
                     }
                 }
 
-                graph.addEdge(x, y);
-                graph.addEdge(y, x);
+                graph.addEdge(x, y, RoadPathGenerator::generateEdgePath(RoadGraph::RoadGraphEdge(x, y), specs.at(roadTiles[x.x][x.y].roadType)));
+                graph.addEdge(y, x, RoadPathGenerator::generateEdgePath(RoadGraph::RoadGraphEdge(y, x), specs.at(roadTiles[x.x][x.y].roadType)));
             }
             else if (x.y == y.y) {
                 // vertical (north-south) edge
@@ -295,8 +297,8 @@ void RoadComponent::updateRoadGraph() {
                     }
                 }
 
-                graph.addEdge(x, y);
-                graph.addEdge(y, x);
+                graph.addEdge(x, y, RoadPathGenerator::generateEdgePath(RoadGraph::RoadGraphEdge(x, y), specs.at(roadTiles[x.x][x.y].roadType)));
+                graph.addEdge(y, x, RoadPathGenerator::generateEdgePath(RoadGraph::RoadGraphEdge(y, x), specs.at(roadTiles[x.x][x.y].roadType)));
             }
 
         nextNodePair:
@@ -304,6 +306,7 @@ void RoadComponent::updateRoadGraph() {
     }
 
     for (const auto& edge : graph.getEdges()) {
-        std::cout << "edge: " << edge.first << " -> " << edge.second << std::endl;
+        const auto& [x, y] = edge.first;
+        std::cout << "edge: " << x << " -> " << y << std::endl;
     }
 }

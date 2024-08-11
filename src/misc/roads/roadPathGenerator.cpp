@@ -16,9 +16,13 @@
 
 #include "misc/roads/roadPathGenerator.hpp"
 
+#include "misc/roads/roadGraph.hpp"
+
 #include "misc/configuration.hpp"
 #include "misc/direction.hpp"
 #include "misc/utility.hpp"
+
+#include <glm/gtc/constants.hpp>
 
 RoadPath RoadPathGenerator::generateEdgePath(const RoadGraph::RoadGraphEdge& edge, const RoadSpecs& specs) {
     const auto& [start, end] = edge;

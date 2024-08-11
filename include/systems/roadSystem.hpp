@@ -34,7 +34,11 @@ class RoadSystem : public System {
     std::queue<glm::ivec2> roadsToBuild;
     std::queue<glm::ivec2> chunksToUpdateMesh;
 
+    std::map<RoadTypes, RoadSpecs> roadSpecs;
+
     void createRoadMesh(const RoadComponent& roadComponent, RoadMeshComponent& geometry) const;
+
+    void init();
 
   public:
     RoadSystem(Game* game);

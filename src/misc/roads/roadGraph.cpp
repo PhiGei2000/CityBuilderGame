@@ -17,26 +17,15 @@
 
 #include "misc/utility.hpp"
 
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
 
 using Node = RoadGraph::RoadGraphNode;
 using Edge = RoadGraph::RoadGraphEdge;
 
-
-RoadGraph::RoadGraph(const std::unordered_set<Node>& nodes, const std::unordered_set<Edge>& edges)
-    : nodes(nodes) {
-
-    for (const auto& [x, y] : edges) {
-        addNode(x);
-        addNode(y);
-
-        addEdge(x, y);
-    }
-}
-
 bool RoadGraph::adjacent(const Node& x, const Node& y) const {
-    for (const auto& [start, end] : edges) {
+    for (const auto& [edge, _] : edges) {
+        const auto& [start, end] = edge;
         if (start == x && end == y) {
             return true;
         }
@@ -48,7 +37,7 @@ bool RoadGraph::adjacent(const Node& x, const Node& y) const {
 std::unordered_set<Node> RoadGraph::neighbours(const Node& x) const {
     std::unordered_set<Node> neighbours;
 
-    for (const Edge& edge : edges) {
+    for (const auto& [edge, _] : edges) {
         if (edge.first == x) {
             neighbours.insert(edge.second);
         }
@@ -57,8 +46,11 @@ std::unordered_set<Node> RoadGraph::neighbours(const Node& x) const {
     return neighbours;
 }
 
-bool RoadGraph::addNode(const Node& x) {
-    return nodes.insert(x).second;
+bool RoadGraph::addNode(const Node& x, const NodeData& data) {
+    bool exists = nodes.contains(x);
+    nodes[x] = data;
+
+    return !exists;
 }
 
 bool RoadGraph::removeNode(const Node& x) {
@@ -72,16 +64,28 @@ bool RoadGraph::removeNode(const Node& x) {
     return (bool)nodes.erase(x);
 }
 
-bool RoadGraph::addEdge(const Node& x, const Node& y) {
+void RoadGraph::updateNodeData(const Node& x, const NodeData& data) {
+    nodes.at(x) = data;
+}
+
+bool RoadGraph::addEdge(const Node& x, const Node& y, const EdgeData& data) {
     if (!(nodes.contains(x) && nodes.contains(y))) {
         throw std::runtime_error("At least one node is not in the node list");
     }
 
-    return edges.emplace(x, y).second;
+    Edge e{x, y};
+    bool exists = edges.contains(e);
+    edges[e] = data;
+
+    return !exists;
 }
 
 bool RoadGraph::removeEdge(const Edge& e) {
     return (bool)edges.erase(e);
+}
+
+void RoadGraph::updateEdgeData(const RoadGraphEdge& e, const EdgeData& data) {
+    edges.at(e) = data;
 }
 
 void RoadGraph::clear() {
@@ -89,10 +93,10 @@ void RoadGraph::clear() {
     edges.clear();
 }
 
-const std::unordered_set<Node>& RoadGraph::getNodes() const {
+const std::unordered_map<Node, RoadGraph::NodeData>& RoadGraph::getNodes() const {
     return nodes;
 }
 
-const std::unordered_set<Edge>& RoadGraph::getEdges() const {
+const std::unordered_map<Edge, RoadGraph::EdgeData>& RoadGraph::getEdges() const {
     return edges;
 }

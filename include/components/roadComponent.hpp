@@ -17,8 +17,9 @@
 #include "component.hpp"
 #include "misc/configuration.hpp"
 #include "misc/direction.hpp"
-#include "misc/roads/roadTile.hpp"
 #include "misc/roads/roadGraph.hpp"
+#include "misc/roads/roadSpecs.hpp"
+#include "misc/roads/roadTile.hpp"
 
 #include <glm/gtx/hash.hpp>
 #include <map>
@@ -54,9 +55,9 @@ struct RoadComponent : public AssignableComponent {
 
     bool isConnected(const glm::ivec2& pos, Direction dir = Direction::UNDEFINED) const;
 
-    void updateRoadTypes();
+    void updateRoadTypes(const std::map<RoadTypes, RoadSpecs>& specs);
 
-    void updateRoad(const glm::ivec2& pos);
+    void updateRoad(const glm::ivec2& pos, const std::map<RoadTypes, RoadSpecs>& specs);
 
     static constexpr RoadTile getTileType(const bool (&connections)[4]);
 
@@ -64,7 +65,7 @@ struct RoadComponent : public AssignableComponent {
     /// @return A collection of the positions
     std::unordered_set<glm::ivec2> getNodes() const;
 
-    void updateRoadGraph();
+    void updateRoadGraph(const std::map<RoadTypes, RoadSpecs>& specs);
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
         RoadComponent& road = registry.emplace<RoadComponent>(entity, roadTiles);
