@@ -104,12 +104,20 @@ class RenderSystem : public System {
 
 #if DEBUG
             if (game->debugMode) {
-                ShaderProgram* roadDebugShader = resourceManager.getResource<Shader>("ROAD_DEBUG_SHADER")->defaultShader;
+                ShaderProgram* roadDebugPointsShader = resourceManager.getResource<Shader>("ROAD_DEBUG_POINTS_SHADER")->defaultShader;
+                ShaderProgram* roadDebugLinesShader = resourceManager.getResource<Shader>("ROAD_DEBUG_LINES_SHADER")->defaultShader;
 
-                roadDebugShader->use();
-                roadDebugShader->setMatrix4("model", transform.transform);
+                roadDebugLinesShader->use();
+                roadDebugLinesShader->setMatrix4("model", transform.transform);
 
                 road.graphDebugMesh->draw();
+
+                glEnable(GL_PROGRAM_POINT_SIZE);
+                roadDebugPointsShader->use();
+                roadDebugPointsShader->setMatrix4("model", transform.transform);
+
+                road.graphDebugMesh->draw();
+                glDisable(GL_PROGRAM_POINT_SIZE);
             }
 #endif
         });

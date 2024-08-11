@@ -18,7 +18,7 @@
 #include <string>
 
 enum class RoadTypes : unsigned char {
-    BASIC_STREETS,
+    BASIC_ROADS,
     UNDEFINED
 };
 
@@ -34,7 +34,7 @@ inline RoadTypes operator++(RoadTypes& t, int) {
 
 inline constexpr std::string getRoadTypeName(RoadTypes type) {
     std::string roadTypeNames[] = {
-        "BASIC_STREETS",
+        "BASIC_ROADS",
     };
 
     return roadTypeNames[static_cast<int>(type)];

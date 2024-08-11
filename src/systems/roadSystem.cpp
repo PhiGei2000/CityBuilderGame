@@ -20,6 +20,7 @@
 #include "misc/configuration.hpp"
 #include "misc/coordinateTransform.hpp"
 #include "misc/direction.hpp"
+#include "misc/roads/roadPathGenerator.hpp"
 #include "misc/roads/roadTypes.hpp"
 #include "misc/utility.hpp"
 #include "resources/roadPack.hpp"
@@ -38,7 +39,7 @@ RoadSystem::RoadSystem(Game* game)
 }
 
 void RoadSystem::update(float dt) {
-    RoadPackPtr roadPack = resourceManager.getResource<RoadPack>("BASIC_STREETS");
+    RoadPackPtr roadPack = resourceManager.getResource<RoadPack>("BASIC_ROADS");
 
     while (!chunksToUpdateMesh.empty()) {
         const entt::entity chunk = game->terrain.chunkEntities.at(chunksToUpdateMesh.front());
@@ -114,21 +115,23 @@ void RoadSystem::update(float dt) {
 
 void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& geometry) const {
     std::map<RoadTypes, std::map<RoadTileTypes, std::vector<glm::mat4>>> transforms;
+    constexpr int sinValues[] = {0, 1, 0, -1};
+    constexpr int cosValues[] = {1, 0, -1, 0};
 
     for (int x = 0; x < Configuration::cellsPerChunk; x++) {
         for (int y = 0; y < Configuration::cellsPerChunk; y++) {
             const RoadTile& tile = road.roadTiles[x][y];
             if (tile.notEmpty()) {
                 const glm::vec3& pos = static_cast<float>(Configuration::cellSize) * glm::vec3(x + 0.5f, 0, y + 0.5f);
-                float cos = glm::cos(glm::radians(90.0f * tile.rotation));
-                float sin = glm::sin(glm::radians(90.0f * tile.rotation));
+                float cos = cosValues[tile.rotation];
+                float sin = sinValues[tile.rotation];
 
                 transforms[tile.roadType][tile.tileType].emplace_back(glm::vec4(cos, 0.0f, sin, 0.0f), glm::vec4(0.0f, 1.0f, 0.0f, 0.0f), glm::vec4(-sin, 0.0f, cos, 0.0f), glm::vec4(pos, 1.0f));
             }
         }
     }
 
-    for (RoadTypes type = RoadTypes::BASIC_STREETS; type < RoadTypes::UNDEFINED; type++) {
+    for (RoadTypes type = RoadTypes::BASIC_ROADS; type < RoadTypes::UNDEFINED; type++) {
         for (RoadTileTypes tileType = RoadTileTypes::NOT_CONNECTED; tileType < RoadTileTypes::CURVE_FULL; tileType++) {
             bool updateBuffer = false;
             if (geometry.roadMeshes.contains(type)) {
@@ -153,22 +156,45 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& ge
 
 #if DEBUG
     std::vector<float> positions;
-    std::unordered_map<glm::ivec2, unsigned int> indicesMap;
+    std::vector<unsigned int> indicesLines;
     unsigned int currentIndex = 0;
 
+    RoadPackPtr basicRoads = resourceManager.getResource<RoadPack>("BASIC_ROADS");
     for (const auto& node : road.graph.getNodes()) {
-        positions.insert(positions.end(), {Configuration::cellSize * (node.x + 0.5f), 1, Configuration::cellSize * (node.y + 0.5f)});
-        indicesMap[node] = currentIndex;
-        currentIndex++;
+        const auto& paths = RoadPathGenerator::generateNodePaths(node, basicRoads->specs, road.roadTiles[node.x][node.y]);
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                for (int k = 0; k < paths[i][j].size(); k++) {
+                    positions.insert(positions.end(), {paths[i][j][k].x, paths[i][j][k].y, paths[i][j][k].z});
+
+                    if (k > 0) {
+                        indicesLines.push_back(currentIndex);
+                    }
+
+                    if (k < paths[i][j].size() - 1) {
+                        indicesLines.push_back(currentIndex);
+                    }
+
+                    currentIndex++;
+                }
+            }
+        }
     }
 
-    std::vector<unsigned int> indices;
-    for (const auto& [x, y] : road.graph.getEdges()) {
-        indices.push_back(indicesMap[x]);
-        indices.push_back(indicesMap[y]);
+    for (const auto& edge : road.graph.getEdges()) {
+        const RoadPath& path = RoadPathGenerator::generateEdgePath(edge, basicRoads->specs);
+        unsigned int pathLength = path.size();
+
+        for (int i = 0; i < pathLength; i++) {
+            positions.insert(positions.end(), {path[i].x, path[i].y, path[i].z});
+            indicesLines.push_back(currentIndex);
+
+            currentIndex++;
+        }
     }
 
-    geometry.graphDebugMesh->bufferData(positions, indices, GL_STATIC_DRAW);
+    geometry.graphDebugMesh->bufferData(positions, indicesLines, GL_STATIC_DRAW);
 #endif
 }
 

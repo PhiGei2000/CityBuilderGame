@@ -204,7 +204,7 @@ void BuildSystem::createNewBuilding() {
         case BuildingType::ROAD: {
             currentBuilding = registry.create();
 
-            RoadPackPtr pack = resourceManager.getResource<RoadPack>("BASIC_STREETS");
+            RoadPackPtr pack = resourceManager.getResource<RoadPack>("BASIC_ROADS");
             MeshComponent& roadMesh = registry.emplace<MeshComponent>(currentBuilding, MeshPtr(new Mesh()));
             roadMesh.mesh->shader = resourceManager.getResource<Shader>("MESH_SHADER");
             roadMesh.mesh->geometries[""] = pack->roadGeometries.geometries.at(RoadTileTypes::NOT_CONNECTED);

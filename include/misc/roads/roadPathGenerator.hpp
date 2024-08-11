@@ -13,16 +13,20 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
+#include "misc/roads/roadGraph.hpp"
+#include "misc/roads/roadSpecs.hpp"
+#include "misc/roads/roadTile.hpp"
 
-#include "resources/roadPack.hpp"
+#include <glm/glm.hpp>
+#include <vector>
+#include <array>
 
-#include "resources/roadGeometryGenerator.hpp"
+using RoadPath = std::vector<glm::vec3>;
 
-RoadPack::RoadPack(const RoadSpecs& specs, MaterialPtr material, ShaderPtr shader)
-    : specs(specs), roadGeometries(shader) {
-        const auto& geometries = RoadGeometryGenerator::generateRoadPackGeometries(specs);
+class RoadPathGenerator {
+  public:
+    static RoadPath generateEdgePath(const RoadGraph::RoadGraphEdge& edge, const RoadSpecs& specs);
 
-        for (const auto& [type, geometry] : geometries) {
-            roadGeometries.geometries[type] = std::vector{std::make_pair(material, geometry)};
-        }
-}
+    static std::array<std::array<RoadPath, 4>, 4> generateNodePaths(const RoadGraph::RoadGraphNode& node, const RoadSpecs& specs, const RoadTile& tile);
+};

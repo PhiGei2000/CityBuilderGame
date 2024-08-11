@@ -20,9 +20,13 @@
 #include <map>
 
 enum class Direction : byte {
+    /// @brief Positive x
     NORTH,
+    /// @brief Positive z
     EAST,
+    /// @brief Negative x
     SOUTH,
+    /// @brief Negative z
     WEST,
     UNDEFINED
 };

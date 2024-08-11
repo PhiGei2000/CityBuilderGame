@@ -36,8 +36,8 @@ RoadGraph::RoadGraph(const std::unordered_set<Node>& nodes, const std::unordered
 }
 
 bool RoadGraph::adjacent(const Node& x, const Node& y) const {
-    for (const Edge& edge : edges) {
-        if (edge.first == x && edge.second == y) {
+    for (const auto& [start, end] : edges) {
+        if (start == x && end == y) {
             return true;
         }
     }

@@ -138,6 +138,9 @@ void RoadComponent::updateRoad(const glm::ivec2& pos) {
         if (tile.isRoadNode()) {
             graph.addNode(pos);
         }
+        else if (pos.x == 0 || pos.x == Configuration::cellsPerChunk - 1 || pos.y == 0 || pos.y == Configuration::cellsPerChunk - 1) {
+            graph.addNode(pos);
+        }
         else {
             graph.removeNode(pos);
         }
@@ -199,7 +202,7 @@ constexpr RoadTile RoadComponent::getTileType(const bool (&connections)[4]) {
             while (connections[i])
                 i++;
 
-            rotation = i - 3;
+            rotation = (i + 1) % 4;
         } break;
         case 4:
             type = RoadTileTypes::CROSSING;
@@ -210,6 +213,7 @@ constexpr RoadTile RoadComponent::getTileType(const bool (&connections)[4]) {
 }
 
 std::unordered_set<glm::ivec2> RoadComponent::getNodes() const {
+    // unused
     std::unordered_set<glm::ivec2> positions;
 
     for (int x = 0; x < Configuration::cellsPerChunk; x++) {
@@ -230,8 +234,8 @@ void RoadComponent::updateRoadGraph() {
     std::set<RoadGraph::RoadGraphEdge> edges;
     for (auto it = nodes.begin(); it != nodes.end(); it++) {
         for (auto jt = nodes.begin(); jt != it; jt++) {
-            const glm::ivec2& x = *it;
-            const glm::ivec2& y = *jt;
+            const RoadGraph::RoadGraphNode& x = *it;
+            const RoadGraph::RoadGraphNode& y = *jt;
 
             if (x.x == y.x) {
                 // horizontal (east-west) edge
@@ -239,13 +243,25 @@ void RoadComponent::updateRoadGraph() {
                 int end = glm::max(x.y, y.y);
 
                 // check if any nodes are between x and y
+                // TODO: Check if the road type is changing
                 for (int i = start + 1; i < end; i++) {
-                    if (roadTiles[x.x][i].empty() || nodes.contains(glm::ivec2{x.x, i})) {
+                    if (roadTiles[x.x][i].empty()) {
+                        // nodes x and y are not connected
                         goto nextNodePair;
                     }
-                    else if (roadTiles[x.x][i].notEmpty() && graph.adjacent(x, x + glm::ivec2(0, i))) {
-                        graph.removeEdge(RoadGraph::RoadGraphEdge(x, x + glm::ivec2(0, i)));
-                        graph.removeEdge(RoadGraph::RoadGraphEdge(x + glm::ivec2(0, i), x));
+                    else if (nodes.contains(glm::ivec2{x.x, i})) {
+                        if (graph.adjacent(x, y)) {
+                            std::cout << "Removing edge " << x << " -> " << y << "! There is a new node " << glm::ivec2{x.x, i} << " in between" << std::endl;
+
+                            // there is another node beween x and y but the nodes x and y are connected in the graph
+                            graph.removeEdge(RoadGraph::RoadGraphEdge(x, y));
+                            graph.removeEdge(RoadGraph::RoadGraphEdge(y, x));
+                            goto nextNodePair;
+                        }
+                        else {
+                            // there is another node beween x and y and the nodes are connected with roads but not in the graph
+                            goto nextNodePair;
+                        }
                     }
                 }
 
@@ -255,16 +271,27 @@ void RoadComponent::updateRoadGraph() {
             else if (x.y == y.y) {
                 // vertical (north-south) edge
                 int start = glm::min(x.x, y.x);
-                int end = glm::max(x.x, y.y);
+                int end = glm::max(x.x, y.x);
 
                 // check if any nodes are between x and y
                 for (int i = start + 1; i < end; i++) {
-                    if (roadTiles[i][x.y].empty() || nodes.contains(glm::ivec2(i, x.y))) {
+                    if (roadTiles[i][x.y].empty()) {
+                        // nodes x and y are not connected
                         goto nextNodePair;
                     }
-                    else if (roadTiles[i][x.y].notEmpty() && graph.adjacent(x, x + glm::ivec2(i, 0))) {
-                        graph.removeEdge(RoadGraph::RoadGraphEdge(x, x + glm::ivec2(i, 0)));
-                        graph.removeEdge(RoadGraph::RoadGraphEdge(x + glm::ivec2(i, 0), x));
+                    else if (nodes.contains(glm::ivec2(i, x.y))) {
+                        if (graph.adjacent(x, y)) {
+                            // there is another node beween x and y and the nodes x and y are connected in the graph
+                            std::cout << "Removing edge " << x << " -> " << y << "! There is a node " << glm::ivec2{i, x.y} << " in between" << std::endl;
+
+                            graph.removeEdge(RoadGraph::RoadGraphEdge(x, y));
+                            graph.removeEdge(RoadGraph::RoadGraphEdge(y, x));
+                            goto nextNodePair;
+                        }
+                        else {
+                            // there is another node beween x and y and the nodes are connected with roads but not in the graph
+                            goto nextNodePair;
+                        }
                     }
                 }
 

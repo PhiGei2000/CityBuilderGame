@@ -48,7 +48,7 @@ constexpr std::string getRoadTileTypeName(RoadTileTypes type);
 struct RoadTile {
     RoadTileTypes tileType = RoadTileTypes::EMPTY;
     int rotation = 0;
-    RoadTypes roadType = RoadTypes::BASIC_STREETS;
+    RoadTypes roadType = RoadTypes::BASIC_ROADS;
 
     bool isRoadNode() const;
 

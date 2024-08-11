@@ -153,95 +153,6 @@ void ResourceManager::loadResources() {
             else /*if (vertexFilename.empty())*/ {
                 loadResource<Shader, const std::string&, const std::string&, bool>(id, filename, "", "", false);
             }
-
-            // Shader* shader = new Shader();
-            // if (filename.empty() && vertexPath.empty()) {
-            //     // load shaders from child nodes
-            //     const xml_node& defaultShaderNode = resourceNode.child("defaultShader");
-            //     const std::string& defaultFilename = defaultShaderNode.attribute("filename").as_string();
-
-            //     // load default shader
-            //     if (defaultFilename.empty()) {
-            //         vertexPath = defaultShaderNode.attribute("vertex").as_string();
-            //         fragmentPath = defaultShaderNode.attribute("fragment").as_string();
-            //         geometryPath = defaultShaderNode.attribute("geometry").as_string();
-
-            //         if (std::filesystem::exists(resourceDir + geometryPath)) {
-            //             shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath, resourceDir + geometryPath);
-            //         }
-            //         else {
-            //             shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath);
-            //         }
-            //     }
-            //     else {
-            //         vertexPath = defaultFilename + ".vert";
-            //         fragmentPath = defaultFilename + ".frag";
-
-            //         if (std::filesystem::exists(resourceDir + defaultFilename + ".geom")) {
-            //             geometryPath = defaultFilename + ".geom";
-            //             shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath, resourceDir + geometryPath);
-            //         }
-            //         else {
-            //             shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath);
-            //         }
-            //     }
-
-            //     // load instanced shader
-            //     const xml_node& instancedShaderNode = resourceNode.child("instancedShader");
-            //     if (!instancedShaderNode.empty()) {
-            //         const std::string& instancedFilename = instancedShaderNode.attribute("filename").as_string();
-            //         std::string instancedVertexPath = instancedShaderNode.attribute("vertex").as_string();
-            //         std::string instancedFragmentPath = instancedShaderNode.attribute("fragment").as_string();
-            //         std::string instancedGeometryPath = instancedShaderNode.attribute("geometry").as_string();
-
-            //         if (instancedFilename.empty()) {
-            //             if (!instancedGeometryPath.empty() && std::filesystem::exists(resourceDir + instancedGeometryPath)) {
-            //                 shader->instanced = new ShaderProgram(resourceDir + instancedVertexPath, resourceDir + instancedFragmentPath, resourceDir + instancedGeometryPath);
-            //             }
-            //             else {
-            //                 shader->instanced = new ShaderProgram(resourceDir + instancedVertexPath, resourceDir + instancedFragmentPath);
-            //             }
-            //         }
-            //         else {
-            //             instancedVertexPath = instancedFilename + ".vert";
-            //             instancedFragmentPath = instancedFilename + ".frag";
-
-            //             if (std::filesystem::exists(resourceDir + instancedFilename + ".geom")) {
-            //                 instancedGeometryPath = instancedFilename + ".geom";
-            //                 shader->instanced = new ShaderProgram(resourceDir + instancedVertexPath, resourceDir + instancedFragmentPath, resourceDir + instancedGeometryPath);
-            //             }
-            //             else {
-            //                 shader->instanced = new ShaderProgram(resourceDir + instancedVertexPath, resourceDir + instancedFragmentPath);
-            //             }
-            //         }
-            //     }
-            // }
-            // else if (filename.empty()) {
-            //     vertexPath = resourceNode.attribute("vertex").as_string();
-            //     fragmentPath = resourceNode.attribute("fragment").as_string();
-            //     geometryPath = resourceNode.attribute("geometry").as_string();
-
-            //     if (!geometryPath.empty() && std::filesystem::exists(resourceDir + geometryPath)) {
-            //         shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath, resourceDir + geometryPath);
-            //     }
-            //     else {
-            //         shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath);
-            //     }
-            // }
-            // else {
-            //     vertexPath = filename + ".vert";
-            //     fragmentPath = filename + ".frag";
-
-            //     if (std::filesystem::exists(resourceDir + filename + ".geom")) {
-            //         geometryPath = filename + ".geom";
-            //         shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath, resourceDir + geometryPath);
-            //     }
-            //     else {
-            //         shader->defaultShader = new ShaderProgram(resourceDir + vertexPath, resourceDir + fragmentPath);
-            //     }
-            // }
-
-            // setResource<Shader>(id, ShaderPtr(shader));
         }
         else if (type == "texture") {
             bool rgba = resourceNode.attribute("rgba").as_bool();
@@ -278,24 +189,20 @@ void ResourceManager::loadResources() {
 
             setResource(id, mesh);
         }
-        else if (type == "streetPack") {
+        else if (type == "roadPack") {
             const std::string& shaderId = resourceNode.attribute("shader").as_string();
             const std::string& materialId = resourceNode.attribute("material").as_string();
 
-            float roadwayWidth = resourceNode.attribute("roadwayWidth").as_float();
-            float roadwayHeight = resourceNode.attribute("roadwayHeight").as_float();
-            float sidewalkHeight = resourceNode.attribute("sidewalkHeight").as_float();
-            unsigned int verticesPerCircle = resourceNode.attribute("verticesPerCircle").as_uint();
+            RoadSpecs specs = {
+                resourceNode.attribute("roadwayWidth").as_float(),
+                resourceNode.attribute("roadwayHeight").as_float(),
+                resourceNode.attribute("sidewalkHeight").as_float(),
+                resourceNode.attribute("verticesPerCircle").as_uint()};
 
-            RoadPack* pack = new RoadPack();
-            pack->material = getResource<Material>(materialId);
+            MaterialPtr material = getResource<Material>(materialId);
+            ShaderPtr shader = getResource<Shader>(shaderId);
 
-            const RoadPackGeometry& geometries = RoadGeometryGenerator::generateRoadPackGeometries(RoadSpecs{roadwayWidth, roadwayHeight, sidewalkHeight, verticesPerCircle});
-            for (const auto& [tileType, geometry] : geometries) {
-                pack->roadGeometries.geometries[tileType].emplace_back(pack->material, geometry);
-            }
-            pack->roadGeometries.shader = getResource<Shader>(shaderId);
-
+            RoadPack* pack = new RoadPack(specs, material, shader);
             setResource(id, ResourcePtr<RoadPack>(pack));
         }
     }

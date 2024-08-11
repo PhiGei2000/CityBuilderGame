@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "misc/roads/roadTile.hpp"
+#include "misc/roads/roadSpecs.hpp"
 #include "resources/mesh.hpp"
 
 #include "rendering/shader.hpp"
@@ -25,10 +26,13 @@
 struct InstanceBuffer;
 
 struct RoadPack {
-    // std::map<RoadTileTypes, GeometryPtr> roadGeometries;
+    RoadSpecs specs;
+
     Mesh<RoadTileTypes> roadGeometries;
 
     ResourcePtr<Material> material;
+
+    RoadPack(const RoadSpecs& specs, ResourcePtr<Material> material, ResourcePtr<Shader> shader);
 };
 
 using RoadPackPtr = ResourcePtr<RoadPack>;

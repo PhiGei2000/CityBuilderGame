@@ -99,6 +99,14 @@ struct Mesh {
     ShaderPtr shader;
     std::unordered_map<TKey, std::vector<std::pair<MaterialPtr, GeometryPtr>>> geometries;
 
+    inline Mesh() {
+
+    }
+
+    inline Mesh(ShaderPtr shader, const std::unordered_map<TKey, std::vector<std::pair<MaterialPtr, GeometryPtr>>>& geometries = {})
+        : shader(shader), geometries(geometries) {
+    }
+
     inline void render(const MeshRenderData& renderData, Shader* shader = nullptr) const {
         if (shader == nullptr) {
             renderData.uploadToShader(this->shader->defaultShader);
