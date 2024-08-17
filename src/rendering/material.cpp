@@ -29,33 +29,15 @@ Material::Material(ResourcePtr<Texture> diffuse, ResourcePtr<Texture> specular, 
 }
 
 void Material::use(ShaderProgram* shader) const {
-    bool useAmbientTexture = ambientTexture.get() != nullptr;
-    bool useDiffuseTexture = diffuseTexture.get() != nullptr;
-    bool useSpecularTexture = specularTexture.get() != nullptr;
-
-    // set colors
-    shader->setVector3("material.ambientColor", ambientColor);
-    shader->setVector3("material.diffuseColor", diffuseColor);
-    shader->setVector3("material.specularColor", specularColor);
-
     // set textures
-    shader->setBool("material.useAmbientTexture", useAmbientTexture);
-    if (useAmbientTexture) {
-        ambientTexture->use(0);
-        shader->setInt("material.ambientTexture", 0);
-    }
+    ambientTexture->use(0);
+    shader->setInt("material.ambientTexture", 0);
 
-    shader->setBool("material.useDiffuseTexture", useDiffuseTexture);
-    if (useDiffuseTexture) {
-        diffuseTexture->use(1);
-        shader->setInt("material.diffuseTexture", 1);
-    }
+    diffuseTexture->use(1);
+    shader->setInt("material.diffuseTexture", 1);
 
-    shader->setBool("material.useSpecularTexture", useSpecularTexture);
-    if (useSpecularTexture) {
-        specularTexture->use(2);
-        shader->setInt("material.specularTexture", 2);
-    }
+    specularTexture->use(2);
+    shader->setInt("material.specularTexture", 2);
 
     // normal map
     if (normalMap) {
@@ -68,5 +50,4 @@ void Material::use(ShaderProgram* shader) const {
     shader->setFloat("material.specularStrength", specularStrength);
     shader->setFloat("material.dissolve", dissolve);
 
-    shader->setInt("material.illuminationModel", illuminationModel);
 }

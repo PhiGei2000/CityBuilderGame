@@ -233,6 +233,9 @@ std::unordered_map<std::string, MaterialPtr> MeshLoader::loadMaterials(const std
         std::string prefix;
         std::string materialName;
         float r, g, b;
+        glm::vec3 ambientColor = glm::vec3(1.0f);
+        glm::vec3 diffuseColor = glm::vec3(1.0f);
+        glm::vec3 specularColor = glm::vec3(1.0f);
 
         for (std::string line; std::getline(ss, line);) {
             if (line.empty())
@@ -262,7 +265,7 @@ std::unordered_map<std::string, MaterialPtr> MeshLoader::loadMaterials(const std
                 sline >> g;
                 sline >> b;
 
-                mtl->ambientColor = glm::vec3(r, g, b);
+                ambientColor = glm::vec3(r, g, b);
             }
             // diffuse color
             else if (prefix == "Kd") {
@@ -270,7 +273,7 @@ std::unordered_map<std::string, MaterialPtr> MeshLoader::loadMaterials(const std
                 sline >> g;
                 sline >> b;
 
-                mtl->diffuseColor = glm::vec3(r, g, b);
+                diffuseColor = glm::vec3(r, g, b);
             }
             // specular color
             else if (prefix == "Ks") {
@@ -278,7 +281,7 @@ std::unordered_map<std::string, MaterialPtr> MeshLoader::loadMaterials(const std
                 sline >> g;
                 sline >> b;
 
-                mtl->specularColor = glm::vec3(r, g, b);
+                specularColor = glm::vec3(r, g, b);
             }
             // specular highlights aka shininess
             else if (prefix == "Ns") {
@@ -296,18 +299,18 @@ std::unordered_map<std::string, MaterialPtr> MeshLoader::loadMaterials(const std
                 sline >> mtl->dissolve;
             }
             // illumination model
-            else if (prefix == "illum") {
-                int value;
-                sline >> value;
+            // else if (prefix == "illum") {
+            //     int value;
+            //     sline >> value;
 
-                if (value < 0 && value > 2) {
-                    std::cerr << "Failed to load material \"" << materialName << "\". Illumination model " << value << " not supported";
+            //     if (value < 0 && value > 2) {
+            //         std::cerr << "Failed to load material \"" << materialName << "\". Illumination model " << value << " not supported";
 
-                    throw std::invalid_argument("Illumination model value out of range");
-                }
+            //         throw std::invalid_argument("Illumination model value out of range");
+            //     }
 
-                mtl->illuminationModel = value;
-            }
+            //     mtl->illuminationModel = value;
+            // }
             // ambient map
             else if (prefix == "map_Ka") {
                 std::string filename;
@@ -350,6 +353,20 @@ std::unordered_map<std::string, MaterialPtr> MeshLoader::loadMaterials(const std
 
             mtl->normalMap = loadTexture("res/textures/default_normal.png", GL_RGB);
         }
+
+        // replace missing textures with colors
+        if (mtl->ambientTexture == nullptr) {
+            mtl->ambientTexture = TexturePtr(new Texture(ambientColor, 1, 1));
+        }
+
+        if (mtl->diffuseTexture == nullptr) {
+            mtl->diffuseTexture = TexturePtr(new Texture(diffuseColor, 1, 1));
+        }
+
+        if (mtl->specularTexture == nullptr) {
+            mtl->specularTexture = TexturePtr(new Texture(specularColor, 1, 1));
+        }
+
 
         materials.emplace(materialName, mtl);
 

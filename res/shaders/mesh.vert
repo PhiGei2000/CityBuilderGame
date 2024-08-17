@@ -54,7 +54,7 @@ void main() {
     vs_out.TexCoord = aTexCoord;
 
     // transform light direction vector to tangent space
-    vs_out.tangentLightDirection = -normalize(vs_out.TBN * lightDirection);
+    vs_out.tangentLightDirection = normalize(vs_out.TBN * lightDirection);
     // transform view and fragment position to tangent space
     vs_out.tangentViewPos = vs_out.TBN * viewPos;
     vs_out.tangentFragPos = vs_out.TBN * vs_out.FragPos;
