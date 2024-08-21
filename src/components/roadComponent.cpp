@@ -302,6 +302,7 @@ void RoadComponent::updateRoadGraph(const std::map<RoadTypes, RoadSpecs>& specs)
             }
 
         nextNodePair:
+            continue;
         }
     }
 

@@ -18,7 +18,6 @@
 #include "components/transformationComponent.hpp"
 #include "misc/roads/roadTile.hpp"
 
-
 InstanceBuffer::InstanceBuffer() {
     glGenBuffers(1, &vbo);
 }
@@ -29,19 +28,6 @@ unsigned int InstanceBuffer::getVBO() const {
 
 unsigned int InstanceBuffer::getInstancesCount() const {
     return instancesCount;
-}
-
-
-template<>
-void InstanceBuffer::fillBuffer(const std::vector<TransformationComponent>& transformations) {
-    std::vector<glm::mat4> matrices;
-    matrices.reserve(transformations.size());
-
-    for (const auto& transform : transformations) {
-        matrices.push_back(transform.transform);
-    }
-
-    fillBuffer<glm::mat4>(matrices);
 }
 
 void InstanceBuffer::clearBuffer() {

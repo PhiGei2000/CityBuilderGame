@@ -27,6 +27,7 @@
 #include "misc/utility.hpp"
 
 #include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp>
 
 #include <format>
 
@@ -116,7 +117,7 @@ void EnvironmentSystem::clearCells() {
                 bool needsUpdate = false;
 
                 while (it != instancedMesh.transformations.end()) {
-                    const glm::vec3& objectPosition = (*it).position;
+                    const glm::vec3& objectPosition = it->operator[](3);
                     const glm::ivec2 gridPosition = glm::floor(utility::worldToNormalizedWorldGridCoords(objectPosition));
 
                     if (gridPosition == position) {
@@ -172,7 +173,7 @@ void EnvironmentSystem::handleBuildEvent(const BuildEvent& e) {
 void EnvironmentSystem::handleChunkCreatedEvent(const ChunkCreatedEvent& e) const {
     MeshPtr treeMesh = resourceManager.getResource<Mesh<>>("TREE_MESH");
     const TerrainComponent& terrain = registry.get<TerrainComponent>(e.entity);
-    std::unordered_map<std::string, InstancedMesh<TransformationComponent>> transformations;
+    std::unordered_map<std::string, InstancedMesh<glm::mat4>> transformations;
 
     const std::array<std::string, 2> treeNames = {"tree01", "tree02"};
 
@@ -188,7 +189,14 @@ void EnvironmentSystem::handleChunkCreatedEvent(const ChunkCreatedEvent& e) cons
             glm::vec3 scale = glm::vec3((float)rand() / static_cast<float>(RAND_MAX) * 0.5 + 1.5f);
             int type = rand() % 2;
 
-            transformations[treeNames[type]].transformations.emplace_back(position, glm::quat(glm::vec3(0, angle, 0)), scale);
+            float cosAngle = glm::cos(angle);
+            float sinAngle = glm::sin(angle);
+
+            transformations[treeNames[type]].transformations.emplace_back(
+                glm::vec4(scale.x * cosAngle, 0, -scale.x * sinAngle, 0),
+                glm::vec4(0, scale.y, 0, 0),
+                glm::vec4(scale.z * sinAngle, 0, scale.z * cosAngle, 0),
+                glm::vec4(cosAngle * position.x + sinAngle * position.z, position.y, -sinAngle * position.x + cosAngle * position.z, 1));
         }
     }
 

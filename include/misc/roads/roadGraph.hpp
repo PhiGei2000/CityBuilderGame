@@ -19,6 +19,8 @@
 
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
+#include <array>
 
 using RoadPath = std::vector<glm::vec3>;
 
@@ -45,7 +47,7 @@ struct RoadGraph {
 
     std::unordered_set<RoadGraphNode> neighbours(const RoadGraphNode& x) const;
 
-    bool addNode(const RoadGraphNode& x, const NodeData& data = {});
+    bool addNode(const RoadGraphNode& x, const NodeData& data = NodeData());
 
     bool removeNode(const RoadGraphNode& x);
 

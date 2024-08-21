@@ -78,5 +78,6 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "algorithm": "cpp"
-    }
+    },
+    "cmake.useCMakePresets": "never"
 }

@@ -14,8 +14,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <glm/glm.hpp>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
 
 #include <vector>
 
@@ -34,7 +34,7 @@ class InstanceBuffer {
         instancesCount = offsets.size();
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, instancesCount * sizeof(TData), &offsets[0], GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, instancesCount * sizeof(TData), offsets.data(), GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }

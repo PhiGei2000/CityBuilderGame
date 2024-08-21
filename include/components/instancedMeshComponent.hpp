@@ -25,9 +25,9 @@
 
 #include <vector>
 
-struct InstancedMeshComponent : public MeshComponent, public InstancedMesh<TransformationComponent> {
+struct InstancedMeshComponent : public MeshComponent, public InstancedMesh<glm::mat4> {
 
-    inline InstancedMeshComponent(const MeshPtr& mesh, const std::vector<TransformationComponent>& transformations)
+    inline InstancedMeshComponent(const MeshPtr& mesh, const std::vector<glm::mat4>& transformations)
         : MeshComponent(mesh), InstancedMesh(transformations) {
     }
 
@@ -37,9 +37,9 @@ struct InstancedMeshComponent : public MeshComponent, public InstancedMesh<Trans
 };
 
 struct MultiInstancedMeshComponent : public MeshComponent {
-    std::unordered_map<std::string, InstancedMesh<TransformationComponent>> transforms;
+    std::unordered_map<std::string, InstancedMesh<glm::mat4>> transforms;
 
-    inline MultiInstancedMeshComponent(const MeshPtr& mesh, const std::unordered_map<std::string, InstancedMesh<TransformationComponent>>& instanceList)
+    inline MultiInstancedMeshComponent(const MeshPtr& mesh, const std::unordered_map<std::string, InstancedMesh<glm::mat4>>& instanceList)
         : MeshComponent(mesh), transforms(instanceList) {
     }
 
