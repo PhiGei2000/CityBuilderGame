@@ -25,6 +25,7 @@ class Icon : public virtual Widget {
 
   public:
     Icon(const std::string& id, Gui* gui, Texture* texture, const glm::vec4& backgroundColor = colors::transparent);
+    ~Icon();
 
     void render() const override;
 };

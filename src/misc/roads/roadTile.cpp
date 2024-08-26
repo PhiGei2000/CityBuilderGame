@@ -44,5 +44,5 @@ bool RoadTile::operator!=(const RoadTile& other) const {
 }
 
 std::string roadTypeID_toString(const RoadTypeID& id) {
-    return getRoadTypeName(id.first) + "." + getRoadTileTypeName(id.second);
+    return id.first + "." + getRoadTileTypeName(id.second);
 }

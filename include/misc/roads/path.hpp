@@ -14,28 +14,23 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "../colors.hpp"
-#include "widget.hpp"
-#include "../colors.hpp"
+#include <vector>
 
-#include "rendering/textRenderer.hpp"
-#include <string>
+#include <glm/glm.hpp>
 
-// enum class HorizontalTextAlignment {
-//   BEGIN, CENTER, END
-// };
+struct Path {
+  private:
+    std::vector<glm::vec3> positions;
 
-class Label : public virtual Widget {
   public:
-    std::string text;
-    glm::vec4 textColor;
-    int textSize;
+    Path();
+    Path(const std::initializer_list<glm::vec3>& positions);
 
-    TextAlign textAlign = TextAlign::CENTER;
+    int length() const;
 
-    Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, const int textSize = 24, const glm::vec4& textColor = colors::white);
+    void add(const glm::vec3& position);
+    void join(const Path& other);
+    void removeFirst(int count = 1);
 
-    virtual Rectangle getBox() const override;
-
-    virtual void render() const override;
+    const glm::vec3& operator[](int index) const;
 };

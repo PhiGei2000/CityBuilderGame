@@ -74,7 +74,7 @@ std::array<std::array<RoadPath, 4>, 4> RoadPathGenerator::generateNodePaths(cons
     // };
 
     auto addToPath = [&](int i, int j, float x, float z) {
-        paths[i % 4][j % 4].push_back(static_cast<float>(Configuration::cellSize) * glm::vec3(cos * x - sin * z + 0.5f + node.x, 0.0f, sin * x + cos * z + 0.5f + node.y) + glm::vec3(0.0f, specs.roadwayHeight, 0.0f));
+        paths[i % 4][j % 4].add(static_cast<float>(Configuration::cellSize) * glm::vec3(cos * x - sin * z + 0.5f + node.x, 0.0f, sin * x + cos * z + 0.5f + node.y) + glm::vec3(0.0f, specs.roadwayHeight, 0.0f));
     };
 
     float anglePerPoint = 2 * glm::pi<float>() / specs.verticesPerCircle;

@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "component.hpp"
+#include "misc/direction.hpp"
 
 #include <vector>
 
@@ -28,12 +29,14 @@ struct ParkingSpot {
     /// @brief The position of the parking spot
     glm::vec3 position;
     /// @brief True if the parking spot is occupied by an entity, otherwise false
-    bool occupied = false;
+    bool occupied;
+    /// @brief The direction of the parking spot
+    Direction direction;
     /// @brief The entity occupying the parking spot
     entt::entity entity = entt::null;
 
-    inline ParkingSpot(const std::string& id, const glm::vec3& position)
-        : id(id), position(position) {
+    inline ParkingSpot(const std::string& id, const glm::vec3& position, Direction direction, bool occupied = false)
+        : id(id), position(position), direction(direction), occupied(occupied) {
     }
 };
 

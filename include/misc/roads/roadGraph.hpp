@@ -14,6 +14,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+#include "misc/roads/path.hpp"
+
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
 
@@ -22,7 +24,7 @@
 #include <vector>
 #include <array>
 
-using RoadPath = std::vector<glm::vec3>;
+using RoadPath = Path;
 
 template<>
 struct std::hash<std::pair<glm::ivec2, glm::ivec2>> {
@@ -34,7 +36,10 @@ struct std::hash<std::pair<glm::ivec2, glm::ivec2>> {
 struct RoadGraph {
   public:
     using RoadGraphNode = glm::ivec2;
-    using NodeData = std::array<std::array<RoadPath, 4>, 4>;
+    struct NodeData {
+        std::array<std::array<RoadPath, 4>, 4> paths;
+    };
+
     using RoadGraphEdge = std::pair<RoadGraphNode, RoadGraphNode>;
     using EdgeData = RoadPath;
 

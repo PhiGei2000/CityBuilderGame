@@ -16,10 +16,20 @@
 #include "resources/objectLoader.hpp"
 
 #include "components/components.hpp"
+#include "gui/menus/buildMenu.hpp"
 #include "resources/meshLoader.hpp"
 #include "resources/resourceManager.hpp"
 
 #include <iostream>
+
+const std::unordered_map<std::string, ObjectLoader::NodeNames> ObjectLoader::nodeNames = {
+    std::make_pair("name", NodeNames::NAME),
+    std::make_pair("mesh", NodeNames::MESH),
+    std::make_pair("parking", NodeNames::PARKING),
+    std::make_pair("car", NodeNames::CAR),
+    std::make_pair("path", NodeNames::PATH),
+    std::make_pair("velocity", NodeNames::VELCOITY),
+    std::make_pair("buildable", NodeNames::BUILDABLE)};
 
 using namespace pugi;
 
@@ -42,7 +52,7 @@ MeshComponent ObjectLoader::loadComponent<MeshComponent>(const xml_node& node) {
     const std::string& filename = node.attribute("filename").as_string();
     const std::string& shaderID = node.attribute("shader").as_string();
 
-    MeshPtr mesh = MeshLoader::loadMesh(resourceManager.resourceDir + filename);
+    MeshPtr mesh = MeshLoader::loadMesh(resourceManager.resourceDir/filename);
     mesh->shader = resourceManager.getResource<Shader>(shaderID);
 
     return MeshComponent(mesh);
@@ -56,27 +66,43 @@ ParkingComponent ObjectLoader::loadComponent<ParkingComponent>(const xml_node& n
     for (const xml_node& parkingSpotNode : node.children("parkingSpot")) {
         const std::string& id = parkingSpotNode.attribute("id").as_string();
         const std::string& position = parkingSpotNode.attribute("position").as_string();
+        const std::string& direction = parkingSpotNode.attribute("direction").as_string("NORTH");
+        const bool occupied = parkingSpotNode.attribute("occupied").as_bool(false);
+
+        static const std::unordered_map<std::string, Direction> directions = {
+            std::make_pair("NORTH", Direction::NORTH),
+            std::make_pair("EAST", Direction::EAST),
+            std::make_pair("SOUTH", Direction::SOUTH),
+            std::make_pair("WEST", Direction::WEST)};
+
+        Direction dir;
+        try {
+            dir = directions.at(direction);
+        }
+        catch (std::out_of_range) {
+            dir = Direction::UNDEFINED;
+        }
 
         std::stringstream posStream(position);
         posStream >> x;
         posStream >> y;
         posStream >> z;
-        spots.emplace_back(id, glm::vec3(x, y, z));
+        spots.emplace_back(id, glm::vec3(x, y, z), dir, occupied);
     }
 
     return ParkingComponent(spots);
 }
 
 template<>
-CarPathComponent ObjectLoader::loadComponent<CarPathComponent>(const xml_node& node) {
-    std::unordered_map<std::string, CarPath> paths;
+PathComponent ObjectLoader::loadComponent<PathComponent>(const xml_node& node) {
+    std::unordered_map<std::string, Path> paths;
 
     float x, y, z;
     for (const xml_node& pathNode : node.children("path")) {
         const std::string& id = pathNode.attribute("id").as_string();
         const std::string& direction = pathNode.attribute("direction").as_string();
 
-        std::vector<glm::vec3> positions;
+        Path path;
         for (const xml_node& positionNode : pathNode.children("node")) {
             const std::string& position = positionNode.attribute("position").as_string();
 
@@ -84,18 +110,13 @@ CarPathComponent ObjectLoader::loadComponent<CarPathComponent>(const xml_node& n
             posStream >> x;
             posStream >> y;
             posStream >> z;
-            positions.emplace_back(glm::vec3(x, y, z));
+            path.add(glm::vec3(x, y, z));
         }
 
-        if (direction == "in") {
-            paths[id].pathIn = positions;
-        }
-        else if (direction == "out") {
-            paths[id].pathOut = positions;
-        }
+        paths[id] = Path(path);
     }
 
-    return CarPathComponent(paths);
+    return PathComponent(paths);
 }
 
 template<>
@@ -103,7 +124,10 @@ VelocityComponent ObjectLoader::loadComponent<VelocityComponent>(const xml_node&
     return VelocityComponent();
 }
 
-ObjectPtr ObjectLoader::loadObject(const std::string& filename) {
+void ObjectLoader::loadBuildMenu(const xml_node& node) const {
+}
+
+ObjectPtr ObjectLoader::loadObject(const std::string& filename, BuildMenuEntry* entry) {
     xml_document doc;
     xml_parse_result result = doc.load_file(filename.c_str());
 
@@ -114,27 +138,61 @@ ObjectPtr ObjectLoader::loadObject(const std::string& filename) {
         throw std::runtime_error(message);
     }
 
-    Object* object = new Object();
+    bool buildable = !(doc.child("object").children("buildable").empty());
+
+    Object* object = buildable ? new BuildableObject("") : new Object();
     for (const auto& node : doc.child("object")) {
         const std::string& name = node.name();
+        const NodeNames nodeName = nodeNames.at(name);
 
-        if (name == "name") {
-            object->name = node.text().as_string();
-        }
-        else if (name == "mesh") {
-            object->addComponent<MeshComponent>(loadComponent<MeshComponent>(node));
-        }
-        else if (name == "parking") {
-            object->addComponent<ParkingComponent>(loadComponent<ParkingComponent>(node));
-        }
-        else if (name == "car") {
-            object->addComponent<CarComponent>(loadComponent<CarComponent>(node));
-        }
-        else if (name == "carPath") {
-            object->addComponent<CarPathComponent>(loadComponent<CarPathComponent>(node));
-        }
-        else if (name == "velocity") {
-            object->addComponent<VelocityComponent>(loadComponent<VelocityComponent>(node));
+        switch (nodeName) {
+            case NodeNames::NAME:
+                object->name = node.text().as_string();
+                break;
+            case NodeNames::MESH:
+                object->addComponent<MeshComponent>(loadComponent<MeshComponent>(node));
+                break;
+            case NodeNames::PARKING:
+                object->addComponent<ParkingComponent>(loadComponent<ParkingComponent>(node));
+                break;
+            case NodeNames::CAR:
+                object->addComponent<CarComponent>(loadComponent<CarComponent>(node));
+                break;
+            case NodeNames::PATH:
+                object->addComponent<PathComponent>(loadComponent<PathComponent>(node));
+                break;
+            case NodeNames::VELCOITY:
+                object->addComponent<VelocityComponent>(loadComponent<VelocityComponent>(node));
+                break;
+            case NodeNames::BUILDABLE: {
+                BuildableObject* buildable = reinterpret_cast<BuildableObject*>(object);
+
+                const std::string& buildingID = node.attribute("id").as_string();
+                const std::string& category = node.attribute("category").as_string();
+                const std::string& section = node.attribute("section").as_string();
+                const std::string& iconFilename = node.attribute("iconFilename").as_string();
+
+                buildable->buildingInfo.buildingID = category + "." + buildingID;
+
+                entry->name = object->name;
+                entry->category = getBuildingCategory(category);
+                entry->section = section;
+                entry->buildingID = buildable->buildingInfo.buildingID;
+                entry->iconFilename = iconFilename;
+
+                std::stringstream defaultSize(node.attribute("defaultSize").as_string("1 1"));
+
+                defaultSize >> buildable->buildingInfo.defaultSize.x;
+                defaultSize >> buildable->buildingInfo.defaultSize.y;
+
+                std::stringstream offset(node.attribute("offset").as_string("0 0 0"));
+                offset >> buildable->buildingInfo.offset.x;
+                offset >> buildable->buildingInfo.offset.y;
+                offset >> buildable->buildingInfo.offset.z;
+            } break;
+            default:
+                std::cout << "Undefined node name \"" << name << "\" in file " << filename << std::endl;
+                break;
         }
     }
 

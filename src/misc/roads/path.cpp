@@ -13,29 +13,35 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
-#include "../colors.hpp"
-#include "widget.hpp"
-#include "../colors.hpp"
+#include "misc/roads/path.hpp"
 
-#include "rendering/textRenderer.hpp"
-#include <string>
+Path::Path() {
+}
 
-// enum class HorizontalTextAlignment {
-//   BEGIN, CENTER, END
-// };
+Path::Path(const std::initializer_list<glm::vec3>& positions)
+    : positions(positions) {
+}
 
-class Label : public virtual Widget {
-  public:
-    std::string text;
-    glm::vec4 textColor;
-    int textSize;
+int Path::length() const {
+    return positions.size();
+}
 
-    TextAlign textAlign = TextAlign::CENTER;
+void Path::add(const glm::vec3& position) {
+    positions.push_back(position);
+}
 
-    Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, const int textSize = 24, const glm::vec4& textColor = colors::white);
+void Path::join(const Path& other) {
+    positions.insert(positions.end(), other.positions.begin(), other.positions.end());
+}
 
-    virtual Rectangle getBox() const override;
+void Path::removeFirst(int count) {
+    if (count >= length()) {
+        positions.clear();
+    }
 
-    virtual void render() const override;
-};
+    positions.erase(positions.begin(), positions.begin() + count);
+}
+
+const glm::vec3& Path::operator[](int index) const {
+    return positions[index];
+}

@@ -18,6 +18,7 @@
 #include "application.hpp"
 #include "components/components.hpp"
 #include "events/events.hpp"
+#include "gui/menus/buildMenu.hpp"
 #include "misc/coordinateTransform.hpp"
 #include "misc/utility.hpp"
 #include "rendering/geometry.hpp"
@@ -26,7 +27,7 @@
 #include "systems/systems.hpp"
 
 Game::Game(Application* app)
-    : app(app), resourceManager("res/"), terrain(this) {
+    : app(app), resourceManager("res/", app), terrain(this) {
     logStream = std::ofstream("log.txt");
 
     init();
@@ -97,6 +98,13 @@ int Game::getMouseButton(int button) const {
 
 void Game::setState(GameState state) {
     this->state = state;
+
+    if (state == GameState::BUILD_MODE) {
+        app->getGui()->getBuildMenu()->show();
+    }
+    else {
+        app->getGui()->getBuildMenu()->hide();
+    }
 }
 
 GameState Game::getState() const {
@@ -143,6 +151,7 @@ template void Game::raiseEvent<ChunkCreatedEvent>(ChunkCreatedEvent&);
 template void Game::raiseEvent<ChunkDestroyedEvent>(ChunkDestroyedEvent&);
 template void Game::raiseEvent<ChunkUpdatedEvent>(ChunkUpdatedEvent&);
 template void Game::raiseEvent<EntityMoveEvent>(EntityMoveEvent&);
+template void Game::raiseEvent<BuildingSelectedEvent>(BuildingSelectedEvent&);
 
 #if DEBUG
 void Game::log(const std::string& message) {

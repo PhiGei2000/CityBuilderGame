@@ -53,7 +53,7 @@ class Gui {
 
     BuildMenu* buildMenu;
     DebugPanel* debugPanel;
-  Label* warningWidget;
+    Label* warningWidget;
 
     std::stack<Widget*> navigation;
     std::vector<Widget*> widgets;
@@ -76,6 +76,7 @@ class Gui {
     Application* getApp() const;
     ShaderProgram* getShader() const;
     const RenderQuad& getRenderQuad() const;
+    BuildMenu* getBuildMenu() const;
 
     void setScreenSize(float width, float height);
     Rectangle getBox() const;

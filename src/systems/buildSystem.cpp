@@ -50,6 +50,9 @@ BuildSystem::BuildSystem(Game* game)
 
     eventDispatcher.sink<MouseMoveEvent>()
         .connect<&BuildSystem::handleMouseMoveEvent>(*this);
+
+    eventDispatcher.sink<BuildingSelectedEvent>()
+        .connect<&BuildSystem::handleBuildingSelectedEvent>(*this);
 }
 
 void BuildSystem::init() {
@@ -64,16 +67,16 @@ void BuildSystem::update(float dt) {
     }
 
     BuildingComponent& building = registry.get<BuildingComponent>(currentBuilding);
-    if (building.type != selectedBuildingType) {
+    if (building.buildingID != selectedBuildingID) {
         registry.destroy(currentBuilding);
 
         createNewBuilding();
     }
 
-    if (gridMouseIntersection.positionUpdated()) {
-        if (building.type == BuildingType::ROAD) {
+    if (gridMouseIntersection.positionUpdated() || buildingRotationUpdated) {
+        if (building.buildingID.starts_with("infrastructure.road")) {
             if (game->getMouseButton(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-                BuildEvent event = BuildEvent(currentBuilding, {building.gridPosition}, BuildingType::ROAD, BuildAction::END, BuildShape::POINT);
+                BuildEvent event = BuildEvent(currentBuilding, {building.gridPosition}, building.buildingID, BuildShape::POINT);
                 game->raiseEvent(event);
 
                 createNewBuilding();
@@ -83,29 +86,38 @@ void BuildSystem::update(float dt) {
 
         // update the transformation component of the current building, so it will be rendered at the right place
         building.gridPosition = gridMouseIntersection.position;
-        TransformationComponent& transform = registry.get<TransformationComponent>(currentBuilding);
-        // calculate rotation
-        float angle = glm::radians(building.rotation * 90.0f);
-        float sin = glm::sin(angle);
-        float cos = glm::cos(angle);
-        transform.rotation = glm::quat(cos, 0.0f, sin, 0.0f);
 
         // calculate position based on rotation
+        TransformationComponent& transform = registry.get<TransformationComponent>(currentBuilding);
+        glm::vec3 offset = getBuildingOffset(building.buildingID);
 
         // rotation | offset
         // ------------------
         // 0        | (0,0,0)
-        // 1        | (1,0,0)
+        // 1        | (0,0,1)
         // 2        | (1,0,1)
-        // 3        | (0,0,1)
+        // 3        | (1,0,0)
 
-        // x-direction: offset.x = 1/2(1 + sin(pi/2 r) - \cos(pi/2 r)) = \sin(pi/4 r) * (\sin(pi/4 * r) + \cos(pi/4 r))
-        // z-direction: offset.y = 1/2(1 - sin(pi/2 r) - cos(pi/2 r)) = sin(pi/4 r) * (sin(pi/4 * r) - cos(pi/4 r))
-        glm::vec3 offset = sin * glm::vec3((sin + cos) * building.size.x, 0.0f, (sin - cos) * building.size.y) + getBuildingOffset(building.type);
+        switch (building.rotation) {
+            case 1:
+                offset.z += static_cast<float>(Configuration::cellSize) * building.size.x;
+                break;
+            case 2:
+                offset.x += static_cast<float>(Configuration::cellSize) * building.size.x;
+                offset.z += static_cast<float>(Configuration::cellSize) * building.size.y;
+                break;
+            case 3:
+                offset.x += static_cast<float>(Configuration::cellSize) * building.size.y;
+                break;
+            default:
+                break;
+        }
+
         transform.setPosition(utility::normalizedWorldGridToWorldCoords(glm::vec2(building.gridPosition)) + offset);
-
         transform.calculateTransform();
+
         gridMouseIntersection.positionChanged = false;
+        buildingRotationUpdated = false;
     }
 
     while (objectsToBuild.size() > 0) {
@@ -167,62 +179,49 @@ constexpr BuildShape BuildSystem::getShape(const glm::ivec2& size) {
     }
 }
 
-constexpr glm::ivec2 BuildSystem::getDefaultSize(BuildingType type) {
-    switch (type) {
-        case BuildingType::PARKING_LOT:
-            return glm::ivec2(2);
-        default:
-            return glm::ivec2(1);
-    }
+const glm::ivec2& BuildSystem::getDefaultSize(std::string buildingID) {
+    const BuildableObjectPtr object = resourceManager.getResource<BuildableObject>(buildingID);
+
+    return object->buildingInfo.defaultSize;
 }
 
-bool BuildSystem::canBuild(const std::vector<glm::ivec2>& positions, const BuildingType type, const TerrainComponent& terrain) const {
+bool BuildSystem::canBuild(const std::vector<glm::ivec2>& positions, const std::string buildingID, const TerrainComponent& terrain) const {
     // TODO: Implement this when returning to non flat terrain
 
     return true;
 }
 
-constexpr glm::vec3 BuildSystem::getBuildingOffset(const BuildingType type) {
-    switch (type) {
-        case BuildingType::ROAD:
-            return static_cast<float>(Configuration::cellSize) * glm::vec3(0.5f, 0.0f, 0.5f);
-        default:
-            return glm::vec3(0.0f);
+const glm::vec3 BuildSystem::getBuildingOffset(const std::string& buildingID) {
+    if (buildingID.starts_with("infrastructure.roads")) {
+        return static_cast<float>(Configuration::cellSize) * glm::vec3(0.5f, 0.0f, 0.5f);
     }
+
+    const BuildableObjectPtr object = resourceManager.getResource<BuildableObject>(buildingID);
+
+    return object->buildingInfo.offset;
 }
 
 void BuildSystem::createNewBuilding() {
-    static std::string objectIDs[] = {
-        "",                   // NONE
-        "",                   // CLEAR
-        "",                   // ROAD
-        "object.parking_lot", // PARKING_LOT
-    };
-    glm::vec3 position;
+    glm::ivec2 defaultSize = glm::ivec2(1);
+    glm::vec3 offset = glm::vec3(0.0f);
 
-    switch (selectedBuildingType) {
-        case BuildingType::ROAD: {
-            currentBuilding = registry.create();
+    if (selectedBuildingID.starts_with("infrastructure.roads")) {
+        currentBuilding = registry.create();
 
-            RoadPackPtr pack = resourceManager.getResource<RoadPack>("BASIC_ROADS");
-            MeshComponent& roadMesh = registry.emplace<MeshComponent>(currentBuilding, MeshPtr(new Mesh()));
-            roadMesh.mesh->shader = resourceManager.getResource<Shader>("MESH_SHADER");
-            roadMesh.mesh->geometries[""] = pack->roadGeometries.geometries.at(RoadTileTypes::NOT_CONNECTED);
-        } break;
-        case BuildingType::CLEAR:
-        case BuildingType::NONE:
-            currentBuilding = registry.create();
-            break;
-        default: {
-            const std::string& id = "object." + getBuildingName(selectedBuildingType);
+        RoadPackPtr pack = resourceManager.getResource<RoadPack>(selectedBuildingID);
+        MeshComponent& roadMesh = registry.emplace<MeshComponent>(currentBuilding, MeshPtr(new Mesh()));
 
-            ObjectPtr object = resourceManager.getResource<Object>(id);
-            currentBuilding = object->create(registry);
-        } break;
+        roadMesh.mesh->shader = pack->roadGeometries.shader;
+        roadMesh.mesh->geometries[""] = pack->roadGeometries.geometries.at(RoadTileTypes::NOT_CONNECTED);
+    }
+    else {
+        BuildableObjectPtr object = resourceManager.getResource<BuildableObject>(selectedBuildingID);
+        currentBuilding = object->create(registry);
+        defaultSize = object->buildingInfo.defaultSize;
     }
 
     registry.emplace<TransformationComponent>(currentBuilding, glm::vec3());
-    registry.emplace<BuildingComponent>(currentBuilding, selectedBuildingType, glm::ivec2(0), 0, getDefaultSize(selectedBuildingType), true);
+    registry.emplace<BuildingComponent>(currentBuilding, selectedBuildingID, glm::ivec2(0), 0, defaultSize, true);
 }
 
 void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
@@ -246,25 +245,25 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
         entt::entity entityToBuild = currentBuilding;
 
         bool canBuild;
-        switch (building.type) {
-            case BuildingType::ROAD:
-                // do not add the builded road to the building queue. The building process is handled by the road system
-                createNewBuilding();
-                break;
-            default:
-                objectsToBuild.emplace(currentBuilding);
-                createNewBuilding();
-                break;
+        if (!building.buildingID.starts_with("infrastructure.road")) {
+            objectsToBuild.emplace(currentBuilding);
         }
+        createNewBuilding();
 
-        BuildEvent event = BuildEvent(entityToBuild, positions, building.type, BuildAction::END, shape);
+        BuildEvent event = BuildEvent(entityToBuild, positions, building.buildingID, shape);
         game->raiseEvent(event);
     }
     else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
-        BuildingComponent building = registry.get<BuildingComponent>(currentBuilding);
-        building.rotation++;
+        auto [building, transform] = registry.get<BuildingComponent, TransformationComponent>(currentBuilding);
+        building.rotation = (building.rotation + 1) % 4;
 
-        // TODO: Update transform in update()
+        float angle = glm::radians(building.rotation * 90.0f);
+        float sin = glm::sin(angle / 2.0f);
+        float cos = glm::cos(angle / 2.0f);
+        transform.rotation = glm::quat(cos, 0.0f, sin, 0.0f);
+        transform.calculateTransform();
+
+        buildingRotationUpdated = true;
     }
 }
 
@@ -273,7 +272,7 @@ void BuildSystem::handleMouseMoveEvent(const MouseMoveEvent& e) {
         return;
 
     glm::vec2 mousePos = game->getMousePos();
-    const auto& [intersection, position] = getGridPos(mousePos, getBuildingOffset(selectedBuildingType));
+    const auto& [intersection, position] = getGridPos(mousePos, getBuildingOffset(selectedBuildingID));
 
     gridMouseIntersection.intersection = intersection;
 
@@ -304,9 +303,8 @@ void BuildSystem::handleKeyEvent(const KeyEvent& e) {
 }
 
 void BuildSystem::handleBuildEvent(const BuildEvent& e) {
-    if (e.action != BuildAction::SELECT) {
-        return;
-    }
+}
 
-    selectedBuildingType = e.type;
+void BuildSystem::handleBuildingSelectedEvent(const BuildingSelectedEvent& e) {
+    this->selectedBuildingID = e.buildingID;
 }

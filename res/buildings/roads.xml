@@ -1,0 +1,6 @@
+<?xml version="1.0" standalone="yes" encoding="utf-8" ?>
+<roads>
+    <roadPack id="basic_roads" name="Basic roads" icon="gui/streetBuilder_icon.png" shader="ROAD_SHADER" material="BASIC_ROAD_MATERIAL" >
+        <roadSpecs roadwayWidth="0.6" roadwayHeight="0.1" sidewalkHeight="0.2" verticesPerCircle="64" />
+    </roadPack>
+</roads>

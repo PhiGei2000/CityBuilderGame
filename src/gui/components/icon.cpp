@@ -23,7 +23,15 @@ Icon::Icon(const std::string& id, Gui* gui, Texture* texture, const glm::vec4& b
     : Widget(id, gui, backgroundColor), texture(texture) {
 }
 
+Icon::~Icon() {
+    delete texture;
+}
+
 void Icon::render() const {
+    if (!visible) {
+        return;
+    }
+
     Widget::render();
 
     glActiveTexture(GL_TEXTURE0);

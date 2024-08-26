@@ -103,7 +103,7 @@ bool RoadComponent::isConnected(const glm::ivec2& pos, Direction dir) const {
     return roadTiles[neighbourPos.x][neighbourPos.y].tileType != RoadTileTypes::EMPTY;
 }
 
-void RoadComponent::updateRoadTypes(const std::map<RoadTypes, RoadSpecs>& specs) {
+void RoadComponent::updateRoadTypes(const std::map<std::string, RoadSpecs>& specs) {
     // TODO: Maybe add a flag that indicates that the road component was not updated and no update of the connections is neccessary
     // if (!roadsOutdated) {
     //    return;
@@ -116,7 +116,7 @@ void RoadComponent::updateRoadTypes(const std::map<RoadTypes, RoadSpecs>& specs)
     }
 }
 
-void RoadComponent::updateRoad(const glm::ivec2& pos, const std::map<RoadTypes, RoadSpecs>& specs) {
+void RoadComponent::updateRoad(const glm::ivec2& pos, const std::map<std::string, RoadSpecs>& specs) {
     if (roadTiles[pos.x][pos.y].empty()) {
         return;
     }
@@ -138,10 +138,10 @@ void RoadComponent::updateRoad(const glm::ivec2& pos, const std::map<RoadTypes, 
         meshOutdated = true;
 
         if (tile.isRoadNode()) {
-            graph.addNode(pos, RoadPathGenerator::generateNodePaths(pos, specs.at(tile.roadType), tile));
+            graph.addNode(pos, RoadGraph::NodeData{RoadPathGenerator::generateNodePaths(pos, specs.at(roadTiles[pos.x][pos.y].roadType), tile)});
         }
         else if (pos.x == 0 || pos.x == Configuration::cellsPerChunk - 1 || pos.y == 0 || pos.y == Configuration::cellsPerChunk - 1) {
-            graph.addNode(pos, RoadPathGenerator::generateNodePaths(pos, specs.at(tile.roadType), tile));
+            graph.addNode(pos, RoadGraph::NodeData{RoadPathGenerator::generateNodePaths(pos, specs.at(roadTiles[pos.x][pos.y].roadType), tile)});
         }
         else {
             graph.removeNode(pos);
@@ -229,7 +229,7 @@ std::unordered_set<glm::ivec2> RoadComponent::getNodes() const {
     return positions;
 }
 
-void RoadComponent::updateRoadGraph(const std::map<RoadTypes, RoadSpecs>& specs) {
+void RoadComponent::updateRoadGraph(const std::map<std::string, RoadSpecs>& specs) {
     const std::unordered_map<RoadGraph::RoadGraphNode, RoadGraph::NodeData>& nodes = graph.getNodes();
     // identify edges
 

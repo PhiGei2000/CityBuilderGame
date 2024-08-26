@@ -19,6 +19,6 @@
 #include "resources/resourceManager.hpp"
 
 
-RoadPackPtr getRoadPack(const ResourceManager& resourceManager, RoadTypes type) {
-    return resourceManager.getResource<RoadPack>(getRoadTypeName(type));
+RoadPackPtr getRoadPack(const ResourceManager& resourceManager, const std::string& type) {
+    return resourceManager.getResource<RoadPack>(type);
 }

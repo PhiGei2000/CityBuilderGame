@@ -19,21 +19,29 @@
 
 class IconButton;
 class Texture;
+class Label;
+
+struct BuildMenuEntry {
+    std::string name;
+    std::string section;
+    BuildingCategory category;
+
+    std::string buildingID;
+    std::string iconFilename;
+};
 
 class BuildMenu : public StackPanel {
   private:
-    Texture* liftTerrainButtonTexture;
-    Texture* lowerTerrainButtonTexture;
-    Texture* streetButtonTexture;
-    Texture* parkingLotButtonTexture;
+    Label* title;
 
-    IconButton* liftTerrainButton;
-    IconButton* lowerTerrainButton;
-    IconButton* streetButton;
-    IconButton* parkingLotButton;
+    std::map<BuildingCategory, std::pair<Label*, StackPanel*>> categories;
+    std::unordered_map<std::string, IconButton*> buttons;
 
-    void selectBuildingType(BuildingType type) const;
+    void selectBuildingType(const std::string& buildingID) const;
 
   public:
     BuildMenu(Gui* gui);
+    ~BuildMenu();
+
+    void addBuildingEntry(const BuildMenuEntry& menuEntry);
 };

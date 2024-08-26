@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<object>
+    <name>House</name>
+    <mesh filename="models/house.obj" shader="MESH_SHADER" />
+
+    <buildable id="house" category="residential" defaultSize="2 2" iconFilename="gui/house_icon.png" />
+
+    <parking>
+        <parkingSpot id="parkingSpot0" position="7.77807 0.1 6.94487" direction="" />
+    </parking>
+</object>

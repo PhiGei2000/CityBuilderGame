@@ -122,6 +122,10 @@ const RenderQuad& Gui::getRenderQuad() const {
     return quad;
 }
 
+BuildMenu* Gui::getBuildMenu() const {
+    return buildMenu;
+}
+
 void Gui::setScreenSize(float width, float height) {
     // set new screen size and update the text renderer screen size
     this->width = width;
@@ -168,14 +172,7 @@ void Gui::render() const {
         navigation.top()->render();
     }
 
-    if (app->getGameState() == GameState::BUILD_MODE) {
-        buildMenu->show();
-        buildMenu->render();
-    }
-    else {
-        buildMenu->hide();
-    }
-
+    buildMenu->render();
     debugPanel->render();
 
     warningWidget->render();

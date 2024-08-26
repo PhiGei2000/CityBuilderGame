@@ -11,6 +11,7 @@
 	 	<instancedShader vertex="shaders/shadowInstanced.vert" geometry="shaders/shadow.geom" fragment="shaders/shadow.frag" />
 	</resource>
 	<resource type="shader" id="ROAD_SHADER">
+		<defaultShader filename="shaders/mesh" />
 		<instancedShader vertex="shaders/meshInstanced.vert" fragment="shaders/mesh.frag" />
 	</resource>
 	<resource type="shader" id="SHADOW_ROAD_SHADER" vertex="shaders/shadowRoad.vert" geometry="shaders/shadow.geom" fragment="shaders/shadow.frag" />
@@ -40,5 +41,5 @@
 
 	<!-- streets -->
 	<!-- roadway width values are relative to cell size, height values are absolute values -->
-	<resource type="roadPack" id="BASIC_ROADS" roadwayWidth="0.6" roadwayHeight="0.1" sidewalkHeight="0.2" verticesPerCircle="64" shader="ROAD_SHADER" material="BASIC_ROAD_MATERIAL" />
+	<!-- <resource type="roadPack" id="BASIC_ROADS" roadwayWidth="0.6" roadwayHeight="0.1" sidewalkHeight="0.2" verticesPerCircle="64" shader="ROAD_SHADER" material="BASIC_ROAD_MATERIAL" /> -->
 </resources>

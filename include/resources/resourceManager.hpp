@@ -22,6 +22,9 @@
 #include <string>
 #include <typeindex>
 #include <unordered_map>
+#include <filesystem>
+
+class Application;
 
 class ResourceManager {
   private:
@@ -34,6 +37,7 @@ class ResourceManager {
     std::unordered_map<std::string, ResourceHolder> resources;
 
     ObjectLoader objectLoader;
+    const Application* app;
 
     template<typename T>
     inline void setResource(const std::string& id, ResourcePtr<T> data) {
@@ -48,7 +52,7 @@ class ResourceManager {
     }
 
   public:
-    const std::string resourceDir;
+    const std::filesystem::path resourceDir;
 
     struct ResourceTypeException : public std::exception {
       private:
@@ -60,7 +64,7 @@ class ResourceManager {
         const char* what() const noexcept override;
     };
 
-    ResourceManager(const std::string& resourceDir);
+    ResourceManager(const std::string& resourceDir, const Application* app);
 
     void loadResources();
 

@@ -34,13 +34,13 @@ struct Constraint {
 };
 
 struct AbsoluteConstraint : public Constraint {
-    inline AbsoluteConstraint(float value)
+    inline AbsoluteConstraint(float value = 0.0f)
         : Constraint(value, ConstraintType::ABSOLUTE) {
     }
 };
 
 struct RelativeConstraint : public Constraint {
-    inline RelativeConstraint(float value)
+    inline RelativeConstraint(float value = 1.0f)
         : Constraint(value, ConstraintType::RELATIVE) {
     }
 };

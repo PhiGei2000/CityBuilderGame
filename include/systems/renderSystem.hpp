@@ -93,8 +93,7 @@ class RenderSystem : public System {
         registry.view<RoadMeshComponent, TransformationComponent>(exclude).each([&](const RoadMeshComponent& road, const TransformationComponent& transform) {
             MeshRenderData renderData = {transform.transform};
 
-            for (const auto& [typeID, tiles] : road.roadMeshes) {
-                const std::string& roadPackName = getRoadTypeName(typeID);
+            for (const auto& [roadPackName, tiles] : road.roadMeshes) {
                 const RoadPackPtr& pack = resourceManager.getResource<RoadPack>(roadPackName);
 
                 for (const auto& [tileType, instances] : tiles) {
@@ -162,8 +161,7 @@ class RenderSystem : public System {
         registry.view<RoadMeshComponent, TransformationComponent>(exclude).each([&](const RoadMeshComponent& road, const TransformationComponent& transform) {
             MeshRenderData renderData = {transform.transform};
 
-            for (const auto& [typeID, tiles] : road.roadMeshes) {
-                const std::string& roadPackName = getRoadTypeName(typeID);
+            for (const auto& [roadPackName, tiles] : road.roadMeshes) {
                 const RoadPackPtr& pack = resourceManager.getResource<RoadPack>(roadPackName);
 
                 for (const auto& [tileType, instances] : tiles) {

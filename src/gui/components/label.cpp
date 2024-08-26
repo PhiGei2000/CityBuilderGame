@@ -48,7 +48,11 @@ void Label::render() const {
 
     Widget::render();
 
-    const Rectangle& box = getBox();
+    Rectangle box = getBox();
+    if (textAlign == TextAlign::BEGIN) {
+        box.x += 10.0f;
+    }
+
     ShaderProgram* guiShader = gui->getShader();
 
     guiShader->setBool("flipV", true);

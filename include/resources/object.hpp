@@ -17,6 +17,8 @@
 #include "components/component.hpp"
 #include "misc/typedefs.hpp"
 
+#include <glm/glm.hpp>
+
 #include <string>
 #include <typeindex>
 #include <vector>
@@ -29,6 +31,16 @@ struct Object {
   public:
     /// @brief The name of the object
     std::string name;
+
+    /// @brief `True` if the object is buildable
+    bool buildable = false;
+
+    inline Object() {
+    }
+
+    inline Object(const std::string& name)
+        : name(name) {
+    }
 
     /// @brief Adds a template component to the object. The component type must be an assignable component.
     /// @tparam TComponent The type of the component
@@ -52,5 +64,25 @@ struct Object {
     }
 };
 
+struct BuildableObject : public Object {
+    struct BuildingInfo {
+        glm::ivec2 defaultSize = glm::ivec2(1);
+        glm::vec3 offset = glm::vec3(0.0f);
+        std::string buildingID;
+    } buildingInfo;
+
+    inline BuildableObject(const std::string& buildingID) {
+        buildingInfo.buildingID = buildingID;
+        buildable = true;
+    }
+
+    inline BuildableObject(const std::string& name, const std::string& buildingID)
+        : Object(name) {
+        buildingInfo.buildingID = buildingID;
+        buildable = true;
+    }
+};
+
 /// @brief A resource pointer to an object
 using ObjectPtr = ResourcePtr<Object>;
+using BuildableObjectPtr = ResourcePtr<BuildableObject>;

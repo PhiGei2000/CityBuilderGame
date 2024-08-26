@@ -15,6 +15,8 @@
  */
 #include "resources/resourceManager.hpp"
 
+#include "application.hpp"
+#include "gui/menus/buildMenu.hpp"
 #include "misc/roads/roadSpecs.hpp"
 #include "rendering/geometry.hpp"
 #include "rendering/material.hpp"
@@ -33,8 +35,8 @@
 
 using namespace pugi;
 
-ResourceManager::ResourceManager(const std::string& resourceDir)
-    : resourceDir(resourceDir), objectLoader(*this) {
+ResourceManager::ResourceManager(const std::string& resourceDir, const Application* app)
+    : resourceDir(resourceDir), objectLoader(*this), app(app) {
 
     loadResources();
 }
@@ -54,14 +56,14 @@ void ResourceManager::loadResource<Shader>(const std::string& id, const std::str
     std::string geometryPath;
 
     if (fragmentFilename.empty()) {
-        vertexPath = resourceDir + vertexFilename + ".vert";
-        fragmentPath = resourceDir + vertexFilename + ".frag";
-        geometryPath = resourceDir + vertexFilename + ".geom";
+        vertexPath = resourceDir/(vertexFilename + ".vert");
+        fragmentPath = resourceDir/(vertexFilename + ".frag");
+        geometryPath = resourceDir/(vertexFilename + ".geom");
     }
     else {
-        vertexPath = resourceDir + vertexFilename;
-        fragmentPath = resourceDir + fragmentFilename;
-        geometryPath = resourceDir + geometryFilename;
+        vertexPath = resourceDir/vertexFilename;
+        fragmentPath = resourceDir/fragmentFilename;
+        geometryPath = resourceDir/geometryFilename;
     }
 
     ShaderProgram* shader = nullptr;
@@ -88,14 +90,14 @@ void ResourceManager::loadResource<Shader>(const std::string& id, const std::str
 
 template<>
 void ResourceManager::loadResource<Texture>(const std::string& id, const std::string& filename, bool alpha) {
-    Texture* texture = alpha ? new Texture(resourceDir + filename, GL_RGBA) : new Texture(resourceDir + filename);
+    Texture* texture = alpha ? new Texture(resourceDir/filename, GL_RGBA) : new Texture(resourceDir/filename);
 
     setResource(id, TexturePtr(texture));
 }
 
 void ResourceManager::loadResources() {
     xml_document doc;
-    xml_parse_result result = doc.load_file((resourceDir + "resources.xml").c_str());
+    xml_parse_result result = doc.load_file((resourceDir/"resources.xml").c_str());
 
     if (!result) {
         std::cerr << "ResourceManager::loadResources "
@@ -162,7 +164,7 @@ void ResourceManager::loadResources() {
             if (filename.empty()) {
             }
             else {
-                std::unordered_map<std::string, MaterialPtr> materials = MeshLoader::loadMaterials(resourceDir + filename);
+                std::unordered_map<std::string, MaterialPtr> materials = MeshLoader::loadMaterials(resourceDir/filename);
 
                 for (const auto& materialNode : resourceNode.children("material")) {
                     const std::string& materialName = materialNode.attribute("name").as_string();
@@ -184,37 +186,71 @@ void ResourceManager::loadResources() {
         else if (type == "mesh") {
             const std::string& shaderID = resourceNode.attribute("shader").as_string("MESH_SHADER");
 
-            MeshPtr mesh = MeshLoader::loadMesh(resourceDir + filename);
+            MeshPtr mesh = MeshLoader::loadMesh(resourceDir/filename);
             mesh->shader = getResource<Shader>(shaderID);
 
             setResource(id, mesh);
         }
         else if (type == "roadPack") {
-            const std::string& shaderId = resourceNode.attribute("shader").as_string();
-            const std::string& materialId = resourceNode.attribute("material").as_string();
-
-            RoadSpecs specs = {
-                resourceNode.attribute("roadwayWidth").as_float(),
-                resourceNode.attribute("roadwayHeight").as_float(),
-                resourceNode.attribute("sidewalkHeight").as_float(),
-                resourceNode.attribute("verticesPerCircle").as_uint()};
-
-            MaterialPtr material = getResource<Material>(materialId);
-            ShaderPtr shader = getResource<Shader>(shaderId);
-
-            RoadPack* pack = new RoadPack(specs, material, shader);
-            setResource(id, ResourcePtr<RoadPack>(pack));
         }
     }
 
-    // objects
-    std::string buildingsPath = resourceDir + "objects";
+    // buildings
+    std::filesystem::path buildingsPath = resourceDir/"buildings";
+    std::string roadsFile = buildingsPath/"roads.xml";
+
+    result = doc.load_file(roadsFile.c_str());
+
+    if (!result) {
+        std::string message = "Failed to load file " + roadsFile;
+        std::cout << message << std::endl;
+
+        throw std::runtime_error(message);
+    }
+
+    BuildMenu* buildMenu = app->getGui()->getBuildMenu();
+    for (const auto& node : doc.child("roads").children("roadPack")) {
+        const std::string& id = node.attribute("id").as_string();
+        const std::string& name = node.attribute("name").as_string();
+        const std::string& icon = node.attribute("icon").as_string();
+        const std::string& shaderId = node.attribute("shader").as_string();
+        const std::string& materialId = node.attribute("material").as_string();
+
+        const auto& specsNode = node.child("roadSpecs");
+        RoadSpecs specs = {
+            specsNode.attribute("roadwayWidth").as_float(),
+            specsNode.attribute("roadwayHeight").as_float(),
+            specsNode.attribute("sidewalkHeight").as_float(),
+            specsNode.attribute("verticesPerCircle").as_uint()};
+
+        MaterialPtr material = getResource<Material>(materialId);
+        ShaderPtr shader = getResource<Shader>(shaderId);
+
+        const std::string& buildingID = "infrastructure.roads." + id;
+        RoadPack* pack = new RoadPack(specs, material, shader);
+        setResource(buildingID, ResourcePtr<RoadPack>(pack));
+
+        buildMenu->addBuildingEntry(BuildMenuEntry{name, "roads", BuildingCategory::INFRASTRUCTURE, buildingID, resourceDir/icon});
+    }
+
     for (const auto& entry : std::filesystem::directory_iterator(buildingsPath)) {
         if (entry.path().extension() == ".xml") {
-            const std::string& id = "object." + entry.path().stem().string();
-            ObjectPtr object = objectLoader.loadObject(entry.path().string());
+            if (entry.path().filename() == "roads.xml") {
+                continue;
+            }
 
-            setResource(id, object);
+            BuildMenuEntry menuEntry;
+            ObjectPtr object = objectLoader.loadObject(entry.path().string(), &menuEntry);
+            const std::string& id = object->buildable ? menuEntry.buildingID : "object." + object->name;
+
+            if (object->buildable) {
+                menuEntry.iconFilename = resourceDir/menuEntry.iconFilename;
+                buildMenu->addBuildingEntry(menuEntry);
+            setResource<BuildableObject>(id, std::reinterpret_pointer_cast<BuildableObject>(object));
+            }
+            else {
+                setResource(id, object);
+            }
         }
     }
 }

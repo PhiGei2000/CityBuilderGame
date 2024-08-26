@@ -15,9 +15,9 @@
  */
 #pragma once
 
+#include "icon.hpp"
 #include "label.hpp"
 #include "widget.hpp"
-#include "icon.hpp"
 
 class Button : public virtual Widget {
   public:
@@ -35,5 +35,5 @@ class TextButton : public Label, public Button {
 
 class IconButton : public Icon, public Button {
   public:
-   IconButton(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, Texture* icon);
+    IconButton(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, Texture* icon);
 };

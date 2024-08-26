@@ -34,25 +34,16 @@ struct Object;
 
 class BuildSystem : public System {
   protected:
-    // struct BuildInfo {
-    // ObjectPtr object;
-    // std::vector<glm::ivec2> positions;
-    // Direction direction;
-
-    // BuildingType type;
-
-    // inline BuildInfo(ObjectPtr object, const std::vector<glm::ivec2>& positions, BuildingType type, Direction direction = Direction::UNDEFINED)
-    //: object(object), positions(positions), type(type), direction(direction) {
-    //}
-    //};
-
     virtual void init() override;
 
     entt::entity cameraEntity;
     entt::entity currentBuilding;
 
     /// @brief Selected building type
-    BuildingType selectedBuildingType = BuildingType::CLEAR;
+    std::string selectedBuildingID = "infrastructure.roads.basic_roads";
+
+    /// @brief True if the rotation of the building was modified
+    bool buildingRotationUpdated = false;
 
     struct GridMouseIntersection {
         bool intersection;
@@ -79,7 +70,7 @@ class BuildSystem : public System {
     /// @brief Returns the default size of the building
     /// @param type The building type
     /// @returns The default size vector
-    static constexpr glm::ivec2 getDefaultSize(BuildingType type);
+    const glm::ivec2& getDefaultSize(std::string buildingID);
 
     /// @brief Calculates the positions of road nodes based on start and end point of the road
     /// @param start The start position of the road
@@ -92,9 +83,9 @@ class BuildSystem : public System {
     /// @param type The building type
     /// @param terrain The terrain information
     /// @return True if the building could be build otherwise false
-    bool canBuild(const std::vector<glm::ivec2>& positions, const BuildingType type, const TerrainComponent& terrain) const;
+    bool canBuild(const std::vector<glm::ivec2>& positions, const std::string buildingID, const TerrainComponent& terrain) const;
 
-    static constexpr glm::vec3 getBuildingOffset(const BuildingType type);
+    const glm::vec3 getBuildingOffset(const std::string& buildingID);
 
     /// @brief Creates a new entity in the registry and assings the components for the currently selected building to this entity. In addition to these a BuildingComponent and a TransformationComponent
     void createNewBuilding();
@@ -113,4 +104,6 @@ class BuildSystem : public System {
     void handleKeyEvent(const KeyEvent& e);
 
     void handleBuildEvent(const BuildEvent& e);
+
+    void handleBuildingSelectedEvent(const BuildingSelectedEvent& e);
 };

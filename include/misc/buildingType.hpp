@@ -14,30 +14,43 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+#include <algorithm>
+#include <string>
+#include <map>
+#include <stdexcept>
+#include <format>
 
-enum class BuildingType : unsigned int {
-    NONE,
-    CLEAR,
-    ROAD,
-    PARKING_LOT,
+enum class BuildingCategory : unsigned int {
+    INFRASTRUCTURE,
+    RESIDENTIAL,
+    INDUSTRIAL,
+    BUILDING_CATEGORY_COUNT
 };
 
-#include <iostream>
-#include <string>
+inline const BuildingCategory getBuildingCategory(const std::string& str) {
+    std::string lower_str = str;
+    std::transform(str.begin(), str.end(), lower_str.begin(), [](unsigned char c) { return std::tolower(c); });
 
-inline std::ostream& operator<<(std::ostream& os, BuildingType type) {
-    static std::string typeNames[] = {"NONE", "DEFAULT", "ROAD", "PARKING_LOT"};
-
-    return os << typeNames[(unsigned int)type];
-}
-
-constexpr std::string getBuildingName(BuildingType type) {
-    switch (type) {
-        case BuildingType::PARKING_LOT:
-            return "parking_lot";
-        case BuildingType::ROAD:
-            return "road";
-        default:
-            return "";
+    if (lower_str == "infrastructure") {
+        return BuildingCategory::INFRASTRUCTURE;
     }
+    else if (lower_str == "residential") {
+        return BuildingCategory::RESIDENTIAL;
+    }
+    else if (lower_str == "industrial") {
+        return BuildingCategory::INDUSTRIAL;
+    }
+
+    throw std::invalid_argument(std::format("unknown BuildingCategory: \"{}\"", str));
 }
+
+inline const std::string to_string(const BuildingCategory category) {
+    static const std::map<BuildingCategory, std::string> names = {
+        std::make_pair(BuildingCategory::INFRASTRUCTURE, "infrastructure"),
+        std::make_pair(BuildingCategory::RESIDENTIAL, "residual"),
+        std::make_pair(BuildingCategory::INDUSTRIAL, "industrial"),
+    };
+
+    return names.at(category);
+}
+

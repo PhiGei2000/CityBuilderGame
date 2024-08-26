@@ -44,6 +44,12 @@ void Container::handleMouseMoveEvent(MouseMoveEvent& e) {
 void Container::addChild(Widget* child) {
     children.push_back(child);
     child->parent = this;
+    if (visible) {
+        child->show();
+    }
+    else {
+        child->hide();
+    }
 
     setChildConstraints();
 }
@@ -81,6 +87,10 @@ void Container::update() {
 }
 
 void Container::render() const {
+    if (!visible) {
+        return;
+    }
+
     Widget::render();
 
     for (const Widget* child : children) {

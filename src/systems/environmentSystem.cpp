@@ -147,26 +147,25 @@ void EnvironmentSystem::update(float dt) {
 }
 
 void EnvironmentSystem::handleBuildEvent(const BuildEvent& e) {
-    if (e.action == BuildAction::END) {
-        switch (e.shape) {
-            case BuildShape::POINT:
-                cellsToClear.emplace(e.positions[0]);
-                break;
-            case BuildShape::LINE: {
-                int segmentsCount = e.positions.size() - 1;
-                for (int i = 0; i < segmentsCount; i++) {
-                    const glm::ivec2 direction = glm::normalize(e.positions[i + 1] - e.positions[i]);
-                    glm::ivec2 current = e.positions[i];
 
-                    while (current != e.positions[i + 1]) {
-                        cellsToClear.push(current);
-                        current += direction;
-                    }
+    switch (e.shape) {
+        case BuildShape::POINT:
+            cellsToClear.emplace(e.positions[0]);
+            break;
+        case BuildShape::LINE: {
+            int segmentsCount = e.positions.size() - 1;
+            for (int i = 0; i < segmentsCount; i++) {
+                const glm::ivec2 direction = glm::normalize(e.positions[i + 1] - e.positions[i]);
+                glm::ivec2 current = e.positions[i];
+
+                while (current != e.positions[i + 1]) {
+                    cellsToClear.push(current);
+                    current += direction;
                 }
-            } break;
-            case BuildShape::AREA: {
-            } break;
-        }
+            }
+        } break;
+        case BuildShape::AREA: {
+        } break;
     }
 }
 

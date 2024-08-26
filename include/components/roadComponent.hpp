@@ -23,6 +23,7 @@
 
 #include <glm/gtx/hash.hpp>
 #include <map>
+#include <string>
 #include <unordered_map>
 
 /// @brief A component that represents roads in one chunk
@@ -55,9 +56,9 @@ struct RoadComponent : public AssignableComponent {
 
     bool isConnected(const glm::ivec2& pos, Direction dir = Direction::UNDEFINED) const;
 
-    void updateRoadTypes(const std::map<RoadTypes, RoadSpecs>& specs);
+    void updateRoadTypes(const std::map<std::string, RoadSpecs>& specs);
 
-    void updateRoad(const glm::ivec2& pos, const std::map<RoadTypes, RoadSpecs>& specs);
+    void updateRoad(const glm::ivec2& pos, const std::map<std::string, RoadSpecs>& specs);
 
     static constexpr RoadTile getTileType(const bool (&connections)[4]);
 
@@ -65,7 +66,7 @@ struct RoadComponent : public AssignableComponent {
     /// @return A collection of the positions
     std::unordered_set<glm::ivec2> getNodes() const;
 
-    void updateRoadGraph(const std::map<RoadTypes, RoadSpecs>& specs);
+    void updateRoadGraph(const std::map<std::string, RoadSpecs>& specs);
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
         RoadComponent& road = registry.emplace<RoadComponent>(entity, roadTiles);

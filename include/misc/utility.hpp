@@ -18,7 +18,6 @@
 
 #include <glm/glm.hpp>
 
-#include "../misc/buildingType.hpp"
 #include "configuration.hpp"
 
 template<typename T, glm::qualifier Q>
@@ -27,9 +26,6 @@ template<typename T, glm::qualifier Q>
 std::ostream& operator<<(std::ostream& os, const glm::vec<3, T, Q>& vec);
 template<typename T, glm::qualifier Q>
 std::ostream& operator<<(std::ostream& os, const glm::vec<4, T, Q>& vec);
-
-std::ostream& operator<<(std::ostream& os, BuildingType type);
-
 namespace std {
     template<typename T, glm::qualifier Q>
     std::string to_string(const glm::vec<3, T, Q>& vec) {

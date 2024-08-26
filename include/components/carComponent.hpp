@@ -15,19 +15,18 @@
  */
 #pragma once
 #include "component.hpp"
-
-#include <queue>
+#include "misc/roads/path.hpp"
 
 #include <glm/glm.hpp>
 
-struct CarComponent : public AssignableComponent {    
+struct CarComponent : public AssignableComponent {
     bool driving = false;
-    
-    glm::vec3 lastPathPosition;
-    std::queue<glm::vec3> currentPath;
+
+    float positionOnPath;
+    Path currentPath;
 
     inline CarComponent() {
-    }    
+    }
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
         registry.emplace<CarComponent>(entity);

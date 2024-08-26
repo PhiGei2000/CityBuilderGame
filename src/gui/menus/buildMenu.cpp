@@ -21,62 +21,78 @@
 #include "gui/components/button.hpp"
 #include "gui/gui.hpp"
 
+#include <cctype>
+
 BuildMenu::BuildMenu(Gui* gui)
-    : StackPanel("build_menu", gui, StackOrientation::COLUMN, colors::anthraziteGrey) {
+    : StackPanel("build_menu", gui, StackOrientation::COLUMN, colors::anthraziteGrey, ItemAligment::BEGIN) {
+    this->outerSpacing = false;
+    this->spacing = 0.0f;
 
-    constraints.width = AbsoluteConstraint(128);
-    constraints.x = RelativeConstraint(0.0f);
-    cornerRadius = 0;
-    itemAligment = ItemAligment::BEGIN;
+    constraints.x = CenterConstraint();
+    constraints.y = CenterConstraint();
+    constraints.width = RelativeConstraint(0.75f);
+    constraints.height = RelativeConstraint(0.75f);
 
-    /*liftTerrainButtonTexture = new Texture("res/gui/liftTerrain_icon.png");
-    liftTerrainButton = new IconButton("build_menu.button_liftTerrain", gui, colors::anthraziteGrey, liftTerrainButtonTexture);
-    liftTerrainButton->constraints.width = AbsoluteConstraint(64);
-    liftTerrainButton->constraints.height = AbsoluteConstraint(64);
-    liftTerrainButton->onClick += [&](MouseButtonEvent& e) {
-        this->selectBuildingType(BuildingType::LIFT_TERRAIN);
+    title = new Label("build_menu.title", gui, colors::darkGrey, "Build menu");
+    title->constraints.x = AbsoluteConstraint();
+    title->constraints.y = AbsoluteConstraint();
+    title->constraints.height = AbsoluteConstraint(32.0f);
+    title->textAlign = TextAlign::BEGIN;
+    addChild(title);
 
-        e.handled = true;
-    };
-    addChild(liftTerrainButton);
+    for (unsigned int i = 0 ; i < static_cast<unsigned int>(BuildingCategory::BUILDING_CATEGORY_COUNT); i++) {
+        BuildingCategory category = static_cast<BuildingCategory>(i);
+        std::string categoryName = to_string(category);
 
-    lowerTerrainButtonTexture = new Texture("res/gui/lowerTerrain_icon.png");
-    lowerTerrainButton = new IconButton("build_menu.button_lowerTerrain", gui, colors::anthraziteGrey, lowerTerrainButtonTexture);
-    lowerTerrainButton->constraints.width = AbsoluteConstraint(64);
-    lowerTerrainButton->constraints.height = AbsoluteConstraint(64);
-    lowerTerrainButton->onClick += [&](MouseButtonEvent& e) {
-        this->selectBuildingType(BuildingType::LOWER_TERRAIN);
+        categoryName[0] = std::toupper(categoryName[0]);
 
-        e.handled = true;
-    };
-    addChild(lowerTerrainButton);*/
+        Label* categoryLabel = new Label(std::format("build_menu.label_{}", categoryName), gui, colors::darkGrey, categoryName, 12);
+        categoryLabel->constraints.height = AbsoluteConstraint(18.0f);
+        categoryLabel->textAlign = TextAlign::BEGIN;
+        addChild(categoryLabel);
 
-    streetButtonTexture = new Texture("res/gui/streetBuilder_icon.png");
-    streetButton = new IconButton("build_menu.button_street", gui, colors::anthraziteGrey, streetButtonTexture);
-    streetButton->constraints.width = AbsoluteConstraint(64);
-    streetButton->constraints.height = AbsoluteConstraint(64);
-    streetButton->onClick += [&](MouseButtonEvent& e) {
-        this->selectBuildingType(BuildingType::ROAD);
+        StackPanel* categoryStackPanel = new StackPanel(std::format("build_menu.stackPanel_{}", categoryName), gui, StackOrientation::ROW, colors::transparent, ItemAligment::BEGIN);
+        categoryStackPanel->constraints.height = AbsoluteConstraint(64.0f);
+        addChild(categoryStackPanel);
 
-        e.handled = true;
-    };
-    addChild(streetButton);
-
-    parkingLotButtonTexture = new Texture("res/gui/parking_lot_icon.png");
-    parkingLotButton = new IconButton("build_menu.button_parkingLot", gui, colors::anthraziteGrey, parkingLotButtonTexture);
-    parkingLotButton->constraints.width = AbsoluteConstraint(64);
-    parkingLotButton->constraints.height = AbsoluteConstraint(64);
-    parkingLotButton->onClick += [&](MouseButtonEvent& e) {
-        this->selectBuildingType(BuildingType::PARKING_LOT);
-
-        e.handled = true;
-    };
-    addChild(parkingLotButton);
+        categories[category] = std::make_pair(categoryLabel, categoryStackPanel);
+    }
 }
 
-void BuildMenu::selectBuildingType(BuildingType type) const {
+BuildMenu::~BuildMenu() {
+    for (const auto& [_, iconButton] : buttons) {
+        delete iconButton;
+    }
+
+    for (const auto& [_, category] : categories) {
+        delete category.first;
+        delete category.second;
+    }
+
+    delete title;
+}
+
+void BuildMenu::addBuildingEntry(const BuildMenuEntry& entry) {
+    Texture* iconTexture = new Texture(entry.iconFilename);
+
+    IconButton* button = new IconButton(std::format("build_menu.button_{}", entry.buildingID), gui, colors::anthraziteGrey, iconTexture);
+
+    button->constraints.width = AbsoluteConstraint(64);
+    button->constraints.height = AbsoluteConstraint(64);
+    button->onClick += [=, this](MouseButtonEvent& e) {
+        this->selectBuildingType(entry.buildingID);
+
+        e.handled = true;
+        this->hide();
+    };
+
+    StackPanel* panel = categories.at(entry.category).second;
+    panel->addChild(button);
+}
+
+void BuildMenu::selectBuildingType(const std::string& buildingID) const {
     Game* game = this->gui->getApp()->getGame();
 
-    BuildEvent event = BuildEvent{entt::entity{}, {}, type, BuildAction::SELECT};
-    game->raiseEvent<BuildEvent>(event);
+    BuildingSelectedEvent event = BuildingSelectedEvent(buildingID);
+    game->raiseEvent<BuildingSelectedEvent>(event);
 }

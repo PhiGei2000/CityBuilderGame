@@ -33,77 +33,50 @@ CarSystem::CarSystem(Game* game)
 }
 
 void CarSystem::update(float dt) {
-    // bool carDriving = false;
+    // update cars
+    registry.view<CarComponent, TransformationComponent, VelocityComponent>().each(CarSystem::updateCar);
 
-    // float threshold = 0.9999f;
-    // registry.view<ParkingComponent, BuildingComponent, CarPathComponent>().each(
-    //     [&](ParkingComponent& parking, const BuildingComponent& building, const CarPathComponent& carPathComponent) {
-    //         const glm::vec3& offset = utility::gridToWorldCoords(building.gridPosition);
-
-    //         for (ParkingSpot& spot : parking.parkingSpots) {
-    //             if (spot.occupied) {
-    //                 if (rand() / rand_max > threshold) {
-    //                     // get path
-    //                     const CarPath& path = carPathComponent.paths.at(spot.id);
-
-    //                     // set car path
-    //                     const entt::entity carEntity = spot.entity;
-    //                     CarComponent& car = registry.get<CarComponent>(carEntity);
-    //                     car.currentPath = {};
-    //                     for (const glm::vec3& pos : path.pathOut) {
-    //                         car.currentPath.push(pos + offset);
-    //                     }
-
-    //                     car.lastPathPosition = car.currentPath.front();
-    //                     car.currentPath.pop();
-    //                     car.driving = true;
-
-    //                     // set car velocity
-    //                     const glm::vec3& direction = glm::normalize(car.currentPath.front() - car.lastPathPosition);
-    //                     VelocityComponent& velocity = registry.get<VelocityComponent>(carEntity);
-
-    //                     velocity.linearVelocity = 0.8f * direction;
-
-    //                     // clear parking spot
-    //                     spot.occupied = false;
-    //                     spot.entity = entt::null;
-    //                 }
-    //             }
-    //         }
-    //     });
-
-    // // update driving cars
-    // registry.view<CarComponent, TransformationComponent, VelocityComponent>().each(updateCar);
+    // TODO: Implement path finding
 }
 
 void CarSystem::updateCar(CarComponent& car, TransformationComponent& transform, VelocityComponent& velocity) {
-    // if (car.driving) {
-    //     float traveledDistance = glm::length(transform.position - car.lastPathPosition);
-    //     float distanceToTravel = glm::length(car.currentPath.front() - car.lastPathPosition);
+    if (car.driving) {
+        if (car.currentPath.length() == 1 && car.positionOnPath > 1.0f) {
+            car.driving = false;
+            return;
+        }
 
-    //     // car has reached next path node
-    //     if (traveledDistance >= distanceToTravel) {
-    //         car.lastPathPosition = car.currentPath.front();
-    //         transform.position = car.currentPath.front();
+        const glm::vec3& pathSegmentStart = car.currentPath[0];
+        const glm::vec3& pathSegmentEnd = car.currentPath[1];
+        const glm::vec3& pathSegement = pathSegmentEnd - pathSegmentStart;
 
-    //         car.currentPath.pop();
-    //         // car has reached destination
-    //         if (car.currentPath.size() == 0) {
-    //             car.driving = false;
-    //             velocity.linearVelocity = glm::vec3(0.0f);
-    //             return;
-    //         }
+        const glm::vec3& posOnPath = transform.position - pathSegmentStart;
 
-    //         glm::vec3 direction = glm::normalize(car.currentPath.front() - car.lastPathPosition);
-    //         float yaw = glm::acos(direction.x);
-    //         float pitch = glm::asin(direction.y);
+        car.positionOnPath = glm::dot(posOnPath, pathSegement) / (glm::length(posOnPath) * glm::length(pathSegement));
 
-    //         transform.setRotation(glm::vec3(pitch, yaw, 0.0f));
-    //         transform.calculateTransform();
+        if (car.positionOnPath >= 1.0f) {
+            transform.setPosition(pathSegmentEnd);
+            transform.calculateTransform();
 
-    //         velocity.linearVelocity = 2.0f * direction;
-    //     }
-    // }
+            car.currentPath.removeFirst();
+            car.positionOnPath = 0.0f;
+            if (car.currentPath.length() >= 1.0f) {
+                const glm::vec3& nextSegment = car.currentPath[1] - car.currentPath[0];
+
+                const glm::vec3& rotationAxis = glm::normalize(glm::vec3(0.0f, nextSegment.z, -nextSegment.y)); //= glm::cross(glm::vec3(1.0f, 0.0f, 0.0f), nextSegment)
+                const float cosTheta = nextSegment.x / glm::length(nextSegment);
+
+                const float sinThetaHalf = glm::sqrt(0.5f * (1 - cosTheta)); // theta in [0; pi]
+                const float cosThetaHalf = glm::sqrt(0.5f * (1 + cosTheta)); // theta in [-pi; pi]
+
+                transform.rotation = glm::quat(sinThetaHalf, cosThetaHalf * rotationAxis.x, cosThetaHalf * rotationAxis.y, cosThetaHalf * rotationAxis.z); // = e^(theta/2 * (ix + jy + kz))
+            }
+            else {
+                car.driving = false;
+                velocity.linearVelocity = glm::vec3(0);
+            }
+        }
+    }
 }
 
 const entt::entity CarSystem::spawnCar(const glm::vec3& position, Direction drivingDirection) const {
@@ -120,23 +93,13 @@ const entt::entity CarSystem::spawnCar(const glm::vec3& position, Direction driv
 }
 
 void CarSystem::handleBuildEvent(BuildEvent& e) {
-    // static constexpr float threshold = 0.5f;
+    if (registry.any_of<ParkingComponent>(e.entity)) {
+        ParkingComponent& parkingComponent = registry.get<ParkingComponent>(e.entity);
 
-    // if (e.type == BuildingType::PARKING_LOT && e.action == BuildAction::ENTITY_CREATED) {
-    //     const glm::vec3& position = utility::gridToWorldCoords(e.positions[0]);
-
-    //     registry.view<BuildingComponent, ParkingComponent>().each(
-    //         [&](const BuildingComponent& building, ParkingComponent& parking) {
-    //             if (e.positions[0] == building.gridPosition) {
-    //                 for (ParkingSpot& parkingSpot : parking.parkingSpots) {
-    //                     if (rand() / rand_max > threshold) {
-    //                         entt::entity car = spawnCar(position + parkingSpot.position, Direction::NORTH);
-
-    //                         parkingSpot.entity = car;
-    //                         parkingSpot.occupied = true;
-    //                     }
-    //                 }
-    //             }
-    //         });
-    // }
+        for (auto& parkingSpot : parkingComponent.parkingSpots) {
+            if (parkingSpot.occupied) {
+                spawnCar(parkingSpot.position, parkingSpot.direction);
+            }
+        }
+    }
 }

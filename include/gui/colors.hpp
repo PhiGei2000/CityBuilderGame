@@ -18,6 +18,7 @@
 
 namespace colors {
     static constexpr glm::vec4 anthraziteGrey = glm::vec4(0.29f, 0.314f, 0.329f, 0.9f);
+    static constexpr glm::vec4 darkGrey = glm::vec4(0.193f, 0.209f, 0.219f, 0.9f);
     static constexpr glm::vec4 white = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     static constexpr glm::vec4 black = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 

@@ -253,6 +253,19 @@ std::unordered_map<std::string, MaterialPtr> MeshLoader::loadMaterials(const std
                         mtl->normalMap = loadTexture("res/textures/default_normal.png", GL_RGB);
                     }
 
+                    // replace missing textures with colors
+                    if (mtl->ambientTexture == nullptr) {
+                        mtl->ambientTexture = TexturePtr(new Texture(ambientColor, 1, 1));
+                    }
+
+                    if (mtl->diffuseTexture == nullptr) {
+                        mtl->diffuseTexture = TexturePtr(new Texture(diffuseColor, 1, 1));
+                    }
+
+                    if (mtl->specularTexture == nullptr) {
+                        mtl->specularTexture = TexturePtr(new Texture(specularColor, 1, 1));
+                    }
+
                     materials.emplace(materialName, mtl);
                 }
 
@@ -366,7 +379,6 @@ std::unordered_map<std::string, MaterialPtr> MeshLoader::loadMaterials(const std
         if (mtl->specularTexture == nullptr) {
             mtl->specularTexture = TexturePtr(new Texture(specularColor, 1, 1));
         }
-
 
         materials.emplace(materialName, mtl);
 

@@ -24,11 +24,6 @@
 
 #include <glm/glm.hpp>
 
-enum class BuildAction : unsigned int {
-    END,
-    SELECT
-};
-
 enum class BuildShape {
     POINT,
     LINE,
@@ -41,10 +36,7 @@ struct BuildEvent : public EntityEvent {
     std::vector<glm::ivec2> positions;
 
     /// @brief The type of the building
-    BuildingType type;
-
-    /// @brief The action to perform
-    BuildAction action;
+    std::string buildingID;
 
     /// @brief The shape of the building.
     BuildShape shape = BuildShape::LINE;
@@ -52,8 +44,8 @@ struct BuildEvent : public EntityEvent {
     /// @brief True if the build can be builded on the specified position
     bool valid = true;
 
-    inline BuildEvent(entt::entity entity, const std::vector<glm::ivec2>& positions, BuildingType type, BuildAction action = BuildAction::END, BuildShape shape = BuildShape::LINE, bool valid = true)
-        : EntityEvent(entity), positions(positions), type(type), action(action), shape(shape) {
+    inline BuildEvent(entt::entity entity, const std::vector<glm::ivec2>& positions, const std::string& buildingID, BuildShape shape = BuildShape::LINE, bool valid = true)
+        : EntityEvent(entity), positions(positions), buildingID(buildingID), shape(shape) {
     }
 
     inline bool insideArea(const glm::vec2& pos) const {
@@ -83,5 +75,13 @@ struct BuildEvent : public EntityEvent {
         }
 
         return false;
+    }
+};
+
+struct BuildingSelectedEvent : public Event {
+    std::string buildingID;
+
+    inline BuildingSelectedEvent(const std::string& buildingID)
+        : buildingID(buildingID) {
     }
 };

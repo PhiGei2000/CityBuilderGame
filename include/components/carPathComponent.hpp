@@ -15,33 +15,29 @@
  */
 #pragma once
 #include "component.hpp"
+#include "misc/roads/path.hpp"
 
 #include <unordered_map>
 #include <vector>
 
 #include <glm/glm.hpp>
 
-struct CarPath {
-    std::vector<glm::vec3> pathIn;
-    std::vector<glm::vec3> pathOut;
-};
+struct PathComponent : public AssignableComponent {
+    std::unordered_map<std::string, Path> paths;
 
-struct CarPathComponent : public AssignableComponent {
-    std::unordered_map<std::string, CarPath> paths;
-
-    inline CarPathComponent(std::unordered_map<std::string, CarPath>&& paths)
+    inline PathComponent(std::unordered_map<std::string, Path>&& paths)
         : paths(paths) {
     }
 
-    inline CarPathComponent(const std::unordered_map<std::string, CarPath>& paths)
+    inline PathComponent(const std::unordered_map<std::string, Path>& paths)
         : paths(paths) {
     }
 
-    inline CarPathComponent(std::initializer_list<std::pair<const std::string, CarPath>> paths = {})
+    inline PathComponent(std::initializer_list<std::pair<const std::string, Path>> paths = {})
         : paths(paths) {
     }
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
-        registry.emplace<CarPathComponent>(entity, paths);
+        registry.emplace<PathComponent>(entity, paths);
     }
 };

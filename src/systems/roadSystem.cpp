@@ -41,12 +41,12 @@ RoadSystem::RoadSystem(Game* game)
 void RoadSystem::init() {
     const auto& roadTypes = resourceManager.getResources<RoadPack>();
 
-    roadSpecs[RoadTypes::BASIC_ROADS] = roadTypes.at("BASIC_ROADS")->specs;
+    for (const auto& [buildingID, roadPack] : roadTypes) {
+        roadSpecs[buildingID] = roadPack->specs;
+    }
 }
 
 void RoadSystem::update(float dt) {
-    RoadPackPtr roadPack = resourceManager.getResource<RoadPack>("BASIC_ROADS");
-
     while (!chunksToUpdateMesh.empty()) {
         const entt::entity chunk = game->terrain.chunkEntities.at(chunksToUpdateMesh.front());
 
@@ -56,7 +56,7 @@ void RoadSystem::update(float dt) {
     }
 
     while (!roadsToBuild.empty()) {
-        const glm::ivec2& pos = roadsToBuild.front();
+        const auto& [pos, type] = roadsToBuild.front();
 
         const auto& [chunk, chunkPos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(pos);
         glm::ivec2 lastChunk = chunk;
@@ -64,6 +64,7 @@ void RoadSystem::update(float dt) {
 
         RoadComponent& road = registry.get<RoadComponent>(chunkEntity);
         road.roadTiles[chunkPos.x][chunkPos.y].tileType = RoadTileTypes::UNDEFINED;
+        road.roadTiles[chunkPos.x][chunkPos.y].roadType = type;
 
         // update borders
         Direction dir = Direction::UNDEFINED;
@@ -120,7 +121,7 @@ void RoadSystem::update(float dt) {
 }
 
 void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& geometry) const {
-    std::map<RoadTypes, std::map<RoadTileTypes, std::vector<glm::mat4>>> transforms;
+    std::map<std::string, std::map<RoadTileTypes, std::vector<glm::mat4>>> transforms;
     constexpr int sinValues[] = {0, 1, 0, -1};
     constexpr int cosValues[] = {1, 0, -1, 0};
 
@@ -137,7 +138,7 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& ge
         }
     }
 
-    for (RoadTypes type = RoadTypes::BASIC_ROADS; type < RoadTypes::UNDEFINED; type++) {
+    for (const auto& [type, _] : resourceManager.getResources<RoadPack>()) {
         for (RoadTileTypes tileType = RoadTileTypes::NOT_CONNECTED; tileType < RoadTileTypes::CURVE_FULL; tileType++) {
             bool updateBuffer = false;
             if (geometry.roadMeshes.contains(type)) {
@@ -165,18 +166,20 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& ge
     std::vector<unsigned int> indicesLines;
     unsigned int currentIndex = 0;
 
-    RoadPackPtr basicRoads = resourceManager.getResource<RoadPack>("BASIC_ROADS");
-    for (const auto& [node, paths] : road.graph.getNodes()) {
+    // RoadPackPtr basicRoads = resourceManager.getResource<RoadPack>("BASIC_ROADS");
+    for (const auto& [node, nodeData] : road.graph.getNodes()) {
+        const auto& paths = nodeData.paths;
+
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                for (int k = 0; k < paths[i][j].size(); k++) {
+                for (int k = 0; k < paths[i][j].length(); k++) {
                     positions.insert(positions.end(), {paths[i][j][k].x, paths[i][j][k].y, paths[i][j][k].z});
 
                     if (k > 0) {
                         indicesLines.push_back(currentIndex);
                     }
 
-                    if (k < paths[i][j].size() - 1) {
+                    if (k < paths[i][j].length() - 1) {
                         indicesLines.push_back(currentIndex);
                     }
 
@@ -187,7 +190,7 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& ge
     }
 
     for (const auto& [edge, path] : road.graph.getEdges()) {
-        unsigned int pathLength = path.size();
+        unsigned int pathLength = path.length();
 
         for (int i = 0; i < pathLength; i++) {
             positions.insert(positions.end(), {path[i].x, path[i].y, path[i].z});
@@ -202,10 +205,10 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& ge
 }
 
 void RoadSystem::handleBuildEvent(const BuildEvent& event) {
-    if (event.type != BuildingType::ROAD || event.action != BuildAction::END)
+    if (!event.buildingID.starts_with("infrastructure.road"))
         return;
 
-    roadsToBuild.emplace(event.positions[0]);
+    roadsToBuild.emplace(event.positions[0], event.buildingID);
 
     // destroy entity
     registry.destroy(event.entity);
