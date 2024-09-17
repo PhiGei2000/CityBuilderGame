@@ -19,7 +19,7 @@
 #include <glm/glm.hpp>
 
 struct Path {
-  private:
+  protected:
     std::vector<glm::vec3> positions;
 
   public:
@@ -33,4 +33,11 @@ struct Path {
     void removeFirst(int count = 1);
 
     const glm::vec3& operator[](int index) const;
+};
+
+struct CarPath : public Path {
+  public:
+    std::tuple<glm::vec3, glm::vec3, glm::vec3> getCurrentSegment() const;
+
+    std::tuple<glm::ivec2, glm::ivec2> getPathEndTile() const;
 };

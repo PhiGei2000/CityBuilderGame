@@ -85,6 +85,17 @@ bool Terrain::chunkLoaded(const glm::ivec2& position) const {
     return chunkEntities.contains(position);
 }
 
+const std::vector<glm::ivec2> Terrain::getLoadedChunks() const {
+    std::vector<glm::ivec2> chunks(chunkEntities.size());
+    std::transform(chunkEntities.begin(), chunkEntities.end(),
+        std::inserter(chunks, chunks.begin()),
+        [](const std::pair<glm::ivec2, entt::entity>& pair) {
+            return pair.first;
+        });
+
+    return chunks;
+}
+
 bool Terrain::positionValid(const glm::vec2& position) const {
     const auto& [chunk, _] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
     return chunkLoaded(chunk);

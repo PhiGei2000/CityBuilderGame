@@ -76,6 +76,8 @@ class Terrain {
     /// @return `True` if the chunk is currently loaded
     bool chunkLoaded(const glm::ivec2& chunkPos) const;
 
+    const std::vector<glm::ivec2> getLoadedChunks() const;
+
     /// @brief Determines if the chunk at the specified position is generated.
     /// @param position The position in normalized world grid coordinates
     /// @return `True` if the chunk is already generated

@@ -18,6 +18,7 @@
 
 #include "events/buildEvent.hpp"
 #include "misc/direction.hpp"
+#include "misc/roads/roadGraph.hpp"
 
 struct CarComponent;
 struct TransformationComponent;
@@ -25,16 +26,21 @@ struct VelocityComponent;
 
 class CarSystem : public System {
   protected:
+    unsigned int carsCount = 0;
     void init() override;
 
     static void updateCar(CarComponent& carComponent, TransformationComponent& transform, VelocityComponent& velocity);
+    void updateCarPath(CarComponent& carComponent) const;
+
+    void spawnCars();
 
   public:
     CarSystem(Game* game);
 
     void update(float dt) override;
 
-    const entt::entity spawnCar(const glm::vec3& position, Direction drivingDirection) const;
+    const entt::entity spawnCar(const RoadPath& path) const;
+    const entt::entity spawnCar(const glm::vec3& position, float roation) const;
 
     void handleBuildEvent(BuildEvent& e);
 };

@@ -44,7 +44,7 @@ struct RoadGraph {
     using EdgeData = RoadPath;
 
   private:
-    std::unordered_map<glm::ivec2, NodeData> nodes;
+    std::unordered_map<RoadGraphNode, NodeData> nodes;
     std::unordered_map<RoadGraphEdge, EdgeData> edges;
 
   public:
@@ -69,4 +69,6 @@ struct RoadGraph {
     const std::unordered_map<RoadGraphNode, NodeData>& getNodes() const;
 
     const std::unordered_map<RoadGraphEdge, EdgeData>& getEdges() const;
+
+    const NodeData& getNodeData(const RoadGraphNode& node) const;
 };

@@ -16,8 +16,8 @@
 #include "systems/carSystem.hpp"
 
 #include "components/components.hpp"
-#include "misc/utility.hpp"
 #include "misc/coordinateTransform.hpp"
+#include "misc/utility.hpp"
 
 static constexpr float rand_max = static_cast<float>(RAND_MAX);
 
@@ -33,63 +33,144 @@ CarSystem::CarSystem(Game* game)
 }
 
 void CarSystem::update(float dt) {
+    spawnCars();
+
     // update cars
     registry.view<CarComponent, TransformationComponent, VelocityComponent>().each(CarSystem::updateCar);
 
     // TODO: Implement path finding
+    registry.view<CameraComponent>().each(updateCarPath);
 }
 
 void CarSystem::updateCar(CarComponent& car, TransformationComponent& transform, VelocityComponent& velocity) {
-    if (car.driving) {
-        if (car.currentPath.length() == 1 && car.positionOnPath > 1.0f) {
-            car.driving = false;
-            return;
-        }
+    if (!car.driving) {
+        return;
+    }
 
-        const glm::vec3& pathSegmentStart = car.currentPath[0];
-        const glm::vec3& pathSegmentEnd = car.currentPath[1];
-        const glm::vec3& pathSegement = pathSegmentEnd - pathSegmentStart;
+    const auto& [pathSegmentStart, pathSegmentEnd, pathSegement] = car.currentPath.getCurrentSegment();
 
-        const glm::vec3& posOnPath = transform.position - pathSegmentStart;
+    const glm::vec3& posOnPath = transform.position - pathSegmentStart;
 
-        car.positionOnPath = glm::dot(posOnPath, pathSegement) / (glm::length(posOnPath) * glm::length(pathSegement));
+    car.positionOnPath = glm::length(posOnPath) == 0 ? 0.0f : glm::dot(posOnPath, pathSegement) / (glm::length(posOnPath) * glm::length(pathSegement));
 
-        if (car.positionOnPath >= 1.0f) {
-            transform.setPosition(pathSegmentEnd);
-            transform.calculateTransform();
+    if (car.positionOnPath >= 1.0f) {
+        transform.setPosition(pathSegmentEnd);
+        transform.calculateTransform();
 
-            car.currentPath.removeFirst();
-            car.positionOnPath = 0.0f;
-            if (car.currentPath.length() >= 1.0f) {
-                const glm::vec3& nextSegment = car.currentPath[1] - car.currentPath[0];
+        car.currentPath.removeFirst();
+        car.positionOnPath = 0.0f;
+    }
 
-                const glm::vec3& rotationAxis = glm::normalize(glm::vec3(0.0f, nextSegment.z, -nextSegment.y)); //= glm::cross(glm::vec3(1.0f, 0.0f, 0.0f), nextSegment)
-                const float cosTheta = nextSegment.x / glm::length(nextSegment);
+    if (car.currentPath.length() > 1) {
+        const glm::vec3& nextSegment = car.currentPath[1] - car.currentPath[0];
 
-                const float sinThetaHalf = glm::sqrt(0.5f * (1 - cosTheta)); // theta in [0; pi]
-                const float cosThetaHalf = glm::sqrt(0.5f * (1 + cosTheta)); // theta in [-pi; pi]
+        const glm::vec3& newX = glm::normalize(nextSegment);
+        const glm::vec3& newZ = glm::cross(newX, glm::vec3(0.0f, 1.0f, 0.0f));
+        const glm::vec3& newY = glm::cross(newZ, newX);
 
-                transform.rotation = glm::quat(sinThetaHalf, cosThetaHalf * rotationAxis.x, cosThetaHalf * rotationAxis.y, cosThetaHalf * rotationAxis.z); // = e^(theta/2 * (ix + jy + kz))
-            }
-            else {
-                car.driving = false;
-                velocity.linearVelocity = glm::vec3(0);
+        transform.rotation = glm::quat(glm::mat4(glm::vec4(newX, 0.0f), glm::vec4(newY, 0.0f), glm::vec4(newZ, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))); // = e^(theta/2 * (ix + jy + kz))
+        transform.calculateTransform();
+
+        velocity.linearVelocity = Configuration::carVelocity * glm::normalize(nextSegment);
+    }
+    else {
+        car.driving = false;
+        velocity.linearVelocity = glm::vec3(0.0f);
+    }
+}
+
+void CarSystem::updateCarPath(CarComponent& car) const {
+    if (car.currentPath.length() != 2) {
+        return;
+    }
+
+    const auto& [chunk, tilePos] = car.currentPath.getPathEndTile();
+    if (!game->terrain.chunkLoaded(chunk)) {
+        return;
+    }
+
+    const entt::entity chunkEntity = game->terrain.chunkEntities.at(chunk);
+    const RoadGraph& graph = registry.get<RoadComponent>(chunkEntity).graph;
+    const RoadGraph::NodeData& endNode = graph.getNodeData(tilePos);
+
+    const auto [_, _, direction] = car.currentPath.getCurrentSegment();
+    int incommingDirection = static_cast<int>(utility::getDirection(glm::vec2(-direction.x, -direction.z)));
+
+    int outgoingDirecion = 0;
+    while (outgoingDirecion < 4 && endNode.paths[incommingDirection][outgoingDirecion].length() == 0) {
+        outgoingDirecion++;
+    }
+
+    if (outgoingDirecion > 3) {
+        return;
+    }
+
+    car.currentPath.join(endNode.paths[incommingDirection][outgoingDirecion]);
+}
+
+void CarSystem::spawnCars() {
+    if (game->getState() != GameState::RUNNING) {
+        return;
+    }
+
+    const auto& loadedChunks = game->terrain.getLoadedChunks();
+    if (loadedChunks.empty()) {
+        return;
+    }
+
+    if (carsCount >= Configuration::maxCars) {
+        return;
+    }
+
+    auto chunk = game->terrain.chunkEntities.at(loadedChunks[rand() % loadedChunks.size()]);
+    const auto& roadComponent = registry.get<RoadComponent>(chunk);
+    const auto& nodes = roadComponent.graph.getNodes();
+    if (nodes.empty()) {
+        return;
+    }
+
+    int nodeIndex = rand() % nodes.size();
+
+    auto nodeIt = nodes.begin();
+    for (int i = 0; i < nodeIndex; i++) {
+        nodeIt = nodeIt.operator++();
+    }
+
+    if (roadComponent.roadTiles[nodeIt->first.x][nodeIt->first.y].tileType == RoadTileTypes::NOT_CONNECTED) {
+        return;
+    }
+
+    for (int s = 0; s < 4; s++) {
+        for (int e = 0; e < 4; e++) {
+            if (nodeIt->second.paths[s][e].length() > 0) {
+                spawnCar(nodeIt->second.paths[s][e]);
+                carsCount++;
+                return;
             }
         }
     }
 }
 
-const entt::entity CarSystem::spawnCar(const glm::vec3& position, Direction drivingDirection) const {
-    // float angle = -(int)drivingDirection * glm::radians(90.0f);
+const entt::entity CarSystem::spawnCar(const RoadPath& path) const {
+    ObjectPtr car = resourceManager.getResource<Object>("object.Car");
 
-    // ObjectPtr car = resourceManager.getResource<Object>("object.car");
+    entt::entity entity = car->create(registry);
+    CarComponent& carComponent = registry.get<CarComponent>(entity);
+    carComponent.currentPath.join(path);
+    carComponent.driving = true;
 
-    // entt::entity entity = car->create(registry);
-    // registry.emplace<TransformationComponent>(entity, position, glm::vec3(0.0f, angle, 0.0f), glm::vec3(1.0f));
+    registry.emplace<TransformationComponent>(entity, path[0], glm::vec3(0.0f), glm::vec3(1.0f));
 
-    // return entity;
+    return entity;
+}
 
-    return entt::entity();
+const entt::entity CarSystem::spawnCar(const glm::vec3& position, float rotation) const {
+    ObjectPtr car = resourceManager.getResource<Object>("object.Car");
+
+    entt::entity entity = car->create(registry);
+    registry.emplace<TransformationComponent>(entity, position, glm::vec3(0.0f, rotation, 0.0f), glm::vec3(1.0f));
+
+    return entity;
 }
 
 void CarSystem::handleBuildEvent(BuildEvent& e) {
@@ -98,7 +179,7 @@ void CarSystem::handleBuildEvent(BuildEvent& e) {
 
         for (auto& parkingSpot : parkingComponent.parkingSpots) {
             if (parkingSpot.occupied) {
-                spawnCar(parkingSpot.position, parkingSpot.direction);
+                spawnCar(parkingSpot.position, -static_cast<int>(parkingSpot.direction) * glm::radians(90.0f));
             }
         }
     }

@@ -100,3 +100,7 @@ const std::unordered_map<Node, RoadGraph::NodeData>& RoadGraph::getNodes() const
 const std::unordered_map<Edge, RoadGraph::EdgeData>& RoadGraph::getEdges() const {
     return edges;
 }
+
+const RoadGraph::NodeData& RoadGraph::getNodeData(const RoadGraphNode& node) const {
+    return nodes.at(node);
+}

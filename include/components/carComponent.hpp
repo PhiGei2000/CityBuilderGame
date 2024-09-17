@@ -23,7 +23,7 @@ struct CarComponent : public AssignableComponent {
     bool driving = false;
 
     float positionOnPath;
-    Path currentPath;
+    CarPath currentPath;
 
     inline CarComponent() {
     }
