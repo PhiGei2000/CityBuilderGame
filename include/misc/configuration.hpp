@@ -45,7 +45,7 @@ class Configuration {
     static constexpr float cameraHeight = 15.0f;
 
     /// @brief Maximum number of cars
-    static constexpr unsigned int maxCars = 2;
+    static constexpr unsigned int maxCars = 1;
     /// @brief Velocity of one car
     static constexpr float carVelocity = 1.0f;
 

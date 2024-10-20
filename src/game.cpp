@@ -28,7 +28,9 @@
 
 Game::Game(Application* app)
     : app(app), resourceManager("res/", app), terrain(this) {
+#if DEBUG
     logStream = std::ofstream("log.txt");
+#endif
 
     init();
 }
@@ -52,6 +54,10 @@ void Game::init() {
 }
 
 entt::registry& Game::getRegistry() {
+    return registry;
+}
+
+const entt::registry& Game::getRegistry() const {
     return registry;
 }
 

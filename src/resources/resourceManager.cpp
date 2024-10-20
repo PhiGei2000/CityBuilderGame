@@ -51,9 +51,9 @@ const char* ResourceManager::ResourceTypeException::what() const noexcept {
 
 template<>
 void ResourceManager::loadResource<Shader>(const std::string& id, const std::string& vertexFilename, const std::string& fragmentFilename, const std::string& geometryFilename, bool instanced) {
-    std::string vertexPath;
-    std::string fragmentPath;
-    std::string geometryPath;
+    std::filesystem::path vertexPath;
+    std::filesystem::path fragmentPath;
+    std::filesystem::path geometryPath;
 
     if (fragmentFilename.empty()) {
         vertexPath = resourceDir/(vertexFilename + ".vert");
@@ -68,10 +68,10 @@ void ResourceManager::loadResource<Shader>(const std::string& id, const std::str
 
     ShaderProgram* shader = nullptr;
     if (!std::filesystem::exists(geometryPath) || geometryPath == resourceDir) {
-        shader = new ShaderProgram(vertexPath, fragmentPath);
+        shader = new ShaderProgram(vertexPath.string(), fragmentPath.string());
     }
     else {
-        shader = new ShaderProgram(vertexPath, fragmentPath, geometryPath);
+        shader = new ShaderProgram(vertexPath.string(), fragmentPath.string(), geometryPath.string());
     }
 
     bool resourceExists = resources.contains(id);
@@ -90,7 +90,8 @@ void ResourceManager::loadResource<Shader>(const std::string& id, const std::str
 
 template<>
 void ResourceManager::loadResource<Texture>(const std::string& id, const std::string& filename, bool alpha) {
-    Texture* texture = alpha ? new Texture(resourceDir/filename, GL_RGBA) : new Texture(resourceDir/filename);
+    std::filesystem::path texturePath = resourceDir/filename;
+    Texture* texture = alpha ? new Texture(texturePath.string(), GL_RGBA) : new Texture(texturePath.string());
 
     setResource(id, TexturePtr(texture));
 }
@@ -164,7 +165,7 @@ void ResourceManager::loadResources() {
             if (filename.empty()) {
             }
             else {
-                std::unordered_map<std::string, MaterialPtr> materials = MeshLoader::loadMaterials(resourceDir/filename);
+                std::unordered_map<std::string, MaterialPtr> materials = MeshLoader::loadMaterials((resourceDir/filename).string());
 
                 for (const auto& materialNode : resourceNode.children("material")) {
                     const std::string& materialName = materialNode.attribute("name").as_string();
@@ -186,7 +187,7 @@ void ResourceManager::loadResources() {
         else if (type == "mesh") {
             const std::string& shaderID = resourceNode.attribute("shader").as_string("MESH_SHADER");
 
-            MeshPtr mesh = MeshLoader::loadMesh(resourceDir/filename);
+            MeshPtr mesh = MeshLoader::loadMesh((resourceDir/filename).string());
             mesh->shader = getResource<Shader>(shaderID);
 
             setResource(id, mesh);
@@ -197,12 +198,12 @@ void ResourceManager::loadResources() {
 
     // buildings
     std::filesystem::path buildingsPath = resourceDir/"buildings";
-    std::string roadsFile = buildingsPath/"roads.xml";
+    std::filesystem::path roadsFile = buildingsPath/"roads.xml";
 
     result = doc.load_file(roadsFile.c_str());
 
     if (!result) {
-        std::string message = "Failed to load file " + roadsFile;
+        std::string message = "Failed to load file " + roadsFile.string();
         std::cout << message << std::endl;
 
         throw std::runtime_error(message);
@@ -230,7 +231,7 @@ void ResourceManager::loadResources() {
         RoadPack* pack = new RoadPack(specs, material, shader);
         setResource(buildingID, ResourcePtr<RoadPack>(pack));
 
-        buildMenu->addBuildingEntry(BuildMenuEntry{name, "roads", BuildingCategory::INFRASTRUCTURE, buildingID, resourceDir/icon});
+        buildMenu->addBuildingEntry(BuildMenuEntry{name, "roads", BuildingCategory::INFRASTRUCTURE, buildingID, (resourceDir/icon).string()});
     }
 
     for (const auto& entry : std::filesystem::directory_iterator(buildingsPath)) {
@@ -244,7 +245,7 @@ void ResourceManager::loadResources() {
             const std::string& id = object->buildable ? menuEntry.buildingID : "object." + object->name;
 
             if (object->buildable) {
-                menuEntry.iconFilename = resourceDir/menuEntry.iconFilename;
+                menuEntry.iconFilename = (resourceDir/menuEntry.iconFilename).string();
                 buildMenu->addBuildingEntry(menuEntry);
             setResource<BuildableObject>(id, std::reinterpret_pointer_cast<BuildableObject>(object));
             }

@@ -166,7 +166,6 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& ge
     std::vector<unsigned int> indicesLines;
     unsigned int currentIndex = 0;
 
-    // RoadPackPtr basicRoads = resourceManager.getResource<RoadPack>("BASIC_ROADS");
     for (const auto& [node, nodeData] : road.graph.getNodes()) {
         const auto& paths = nodeData.paths;
 

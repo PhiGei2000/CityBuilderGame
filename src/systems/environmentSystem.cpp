@@ -108,11 +108,11 @@ void EnvironmentSystem::destroyEntities() {
 }
 
 void EnvironmentSystem::clearCells() {
-    while (cellsToClear.size() > 0) {
-        const glm::ivec2& position = cellsToClear.front();
 
-        registry.view<EnvironmentComponent, InstancedMeshComponent, TransformationComponent>()
-            .each([&](const EnvironmentComponent& environment, InstancedMeshComponent& instancedMesh, const TransformationComponent& transformation) {
+    registry.view<EnvironmentComponent, InstancedMeshComponent, TransformationComponent>()
+        .each([&](const EnvironmentComponent& environment, InstancedMeshComponent& instancedMesh, const TransformationComponent& transformation) {
+            while (cellsToClear.size() > 0) {
+                const glm::ivec2& position = cellsToClear.front();
                 auto it = instancedMesh.transformations.begin();
                 bool needsUpdate = false;
 
@@ -130,9 +130,9 @@ void EnvironmentSystem::clearCells() {
                 }
 
                 instancedMesh.instanceBuffer.fillBuffer(instancedMesh.transformations);
-            });
-        cellsToClear.pop();
-    }
+            }
+            cellsToClear.pop();
+        });
 }
 
 void EnvironmentSystem::update(float dt) {

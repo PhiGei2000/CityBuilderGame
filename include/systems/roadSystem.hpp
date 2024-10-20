@@ -16,7 +16,7 @@
 #pragma once
 #include "system.hpp"
 
-#include "misc/roads/roadGraph.hpp"
+#include "misc/roads/graph.hpp"
 #include "resources/roadPack.hpp"
 
 #include <queue>

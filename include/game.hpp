@@ -63,6 +63,7 @@ class Game {
     bool debugMode = false;
 
     entt::registry& getRegistry();
+    const entt::registry& getRegistry() const;
     entt::dispatcher& getEventDispatcher();
     ResourceManager& getResourceManager();
 

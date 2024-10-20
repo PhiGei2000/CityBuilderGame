@@ -17,7 +17,7 @@
 #include "component.hpp"
 #include "misc/configuration.hpp"
 #include "misc/direction.hpp"
-#include "misc/roads/roadGraph.hpp"
+#include "misc/roads/graph.hpp"
 #include "misc/roads/roadSpecs.hpp"
 #include "misc/roads/roadTile.hpp"
 
@@ -28,6 +28,10 @@
 
 /// @brief A component that represents roads in one chunk
 struct RoadComponent : public AssignableComponent {
+  private:
+    bool checkEdge(const glm::ivec2& x, const glm::ivec2& y, int index);
+
+  public:
     /// @brief This array holds
     RoadTile roadTiles[Configuration::cellsPerChunk][Configuration::cellsPerChunk];
 
@@ -58,7 +62,7 @@ struct RoadComponent : public AssignableComponent {
 
     void updateRoadTypes(const std::map<std::string, RoadSpecs>& specs);
 
-    void updateRoad(const glm::ivec2& pos, const std::map<std::string, RoadSpecs>& specs);
+    bool updateRoad(const glm::ivec2& pos, const std::map<std::string, RoadSpecs>& specs);
 
     static constexpr RoadTile getTileType(const bool (&connections)[4]);
 

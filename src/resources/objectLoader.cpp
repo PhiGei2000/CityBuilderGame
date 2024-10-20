@@ -52,7 +52,7 @@ MeshComponent ObjectLoader::loadComponent<MeshComponent>(const xml_node& node) {
     const std::string& filename = node.attribute("filename").as_string();
     const std::string& shaderID = node.attribute("shader").as_string();
 
-    MeshPtr mesh = MeshLoader::loadMesh(resourceManager.resourceDir/filename);
+    MeshPtr mesh = MeshLoader::loadMesh((resourceManager.resourceDir/filename).string());
     mesh->shader = resourceManager.getResource<Shader>(shaderID);
 
     return MeshComponent(mesh);

@@ -33,13 +33,19 @@ CarSystem::CarSystem(Game* game)
 }
 
 void CarSystem::update(float dt) {
+    if (game->getState() != GameState::RUNNING) {
+        return;
+    }
+
     spawnCars();
 
     // update cars
     registry.view<CarComponent, TransformationComponent, VelocityComponent>().each(CarSystem::updateCar);
 
     // TODO: Implement path finding
-    registry.view<CameraComponent>().each(updateCarPath);
+    // registry.view<CarComponent>().each([&](CarComponent& car) {
+    //     updateCarPath(car);
+    // });
 }
 
 void CarSystem::updateCar(CarComponent& car, TransformationComponent& transform, VelocityComponent& velocity) {
@@ -51,7 +57,8 @@ void CarSystem::updateCar(CarComponent& car, TransformationComponent& transform,
 
     const glm::vec3& posOnPath = transform.position - pathSegmentStart;
 
-    car.positionOnPath = glm::length(posOnPath) == 0 ? 0.0f : glm::dot(posOnPath, pathSegement) / (glm::length(posOnPath) * glm::length(pathSegement));
+    car.positionOnPath = glm::length(posOnPath) / glm::length(pathSegement);
+    std::cout << "Car position on path: " << car.positionOnPath << std::endl;
 
     if (car.positionOnPath >= 1.0f) {
         transform.setPosition(pathSegmentEnd);
@@ -71,7 +78,7 @@ void CarSystem::updateCar(CarComponent& car, TransformationComponent& transform,
         transform.rotation = glm::quat(glm::mat4(glm::vec4(newX, 0.0f), glm::vec4(newY, 0.0f), glm::vec4(newZ, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))); // = e^(theta/2 * (ix + jy + kz))
         transform.calculateTransform();
 
-        velocity.linearVelocity = Configuration::carVelocity * glm::normalize(nextSegment);
+        velocity.linearVelocity = Configuration::carVelocity * newX;
     }
     else {
         car.driving = false;
@@ -91,7 +98,7 @@ void CarSystem::updateCarPath(CarComponent& car) const {
 
     const entt::entity chunkEntity = game->terrain.chunkEntities.at(chunk);
     const RoadGraph& graph = registry.get<RoadComponent>(chunkEntity).graph;
-    const RoadGraph::NodeData& endNode = graph.getNodeData(tilePos);
+    const RoadGraph::NodeDataType& endNode = graph.getNodeData(tilePos);
 
     const auto [_, _, direction] = car.currentPath.getCurrentSegment();
     int incommingDirection = static_cast<int>(utility::getDirection(glm::vec2(-direction.x, -direction.z)));
@@ -124,34 +131,24 @@ void CarSystem::spawnCars() {
 
     auto chunk = game->terrain.chunkEntities.at(loadedChunks[rand() % loadedChunks.size()]);
     const auto& roadComponent = registry.get<RoadComponent>(chunk);
-    const auto& nodes = roadComponent.graph.getNodes();
-    if (nodes.empty()) {
+    const auto& edges = roadComponent.graph.getEdges();
+    if (edges.empty()) {
         return;
     }
 
-    int nodeIndex = rand() % nodes.size();
+    std::size_t edgeIndex = rand() % edges.size();
+    auto nodeIt = edges.begin();
+    std::advance(nodeIt, edgeIndex);
 
-    auto nodeIt = nodes.begin();
-    for (int i = 0; i < nodeIndex; i++) {
-        nodeIt = nodeIt.operator++();
-    }
-
-    if (roadComponent.roadTiles[nodeIt->first.x][nodeIt->first.y].tileType == RoadTileTypes::NOT_CONNECTED) {
+    const auto& [edge, path] = *nodeIt;
+    if (path.length() == 0) {
         return;
     }
 
-    for (int s = 0; s < 4; s++) {
-        for (int e = 0; e < 4; e++) {
-            if (nodeIt->second.paths[s][e].length() > 0) {
-                spawnCar(nodeIt->second.paths[s][e]);
-                carsCount++;
-                return;
-            }
-        }
-    }
+    spawnCar(path);
 }
 
-const entt::entity CarSystem::spawnCar(const RoadPath& path) const {
+const entt::entity CarSystem::spawnCar(const RoadPath& path) {
     ObjectPtr car = resourceManager.getResource<Object>("object.Car");
 
     entt::entity entity = car->create(registry);
@@ -160,16 +157,18 @@ const entt::entity CarSystem::spawnCar(const RoadPath& path) const {
     carComponent.driving = true;
 
     registry.emplace<TransformationComponent>(entity, path[0], glm::vec3(0.0f), glm::vec3(1.0f));
+    carsCount++;
 
     return entity;
 }
 
-const entt::entity CarSystem::spawnCar(const glm::vec3& position, float rotation) const {
+const entt::entity CarSystem::spawnCar(const glm::vec3& position, float rotation) {
     ObjectPtr car = resourceManager.getResource<Object>("object.Car");
 
     entt::entity entity = car->create(registry);
     registry.emplace<TransformationComponent>(entity, position, glm::vec3(0.0f, rotation, 0.0f), glm::vec3(1.0f));
 
+    carsCount++;
     return entity;
 }
 

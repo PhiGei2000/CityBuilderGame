@@ -16,7 +16,7 @@
 
 #include "misc/roads/roadPathGenerator.hpp"
 
-#include "misc/roads/roadGraph.hpp"
+#include "misc/roads/graph.hpp"
 
 #include "misc/configuration.hpp"
 #include "misc/direction.hpp"
@@ -24,7 +24,7 @@
 
 #include <glm/gtc/constants.hpp>
 
-RoadPath RoadPathGenerator::generateEdgePath(const RoadGraph::RoadGraphEdge& edge, const RoadSpecs& specs) {
+RoadPath RoadPathGenerator::generateEdgePath(const RoadGraph::EdgeType& edge, const RoadSpecs& specs) {
     const auto& [start, end] = edge;
     if (glm::length(end - start) <= 1) {
         return {};
@@ -59,7 +59,7 @@ RoadPath RoadPathGenerator::generateEdgePath(const RoadGraph::RoadGraphEdge& edg
     return {pathBegin, pathEnd};
 }
 
-std::array<std::array<RoadPath, 4>, 4> RoadPathGenerator::generateNodePaths(const RoadGraph::RoadGraphNode& node, const RoadSpecs& specs, const RoadTile& tile) {
+std::array<std::array<RoadPath, 4>, 4> RoadPathGenerator::generateNodePaths(const RoadGraph::NodeType& node, const RoadSpecs& specs, const RoadTile& tile) {
     std::array<std::array<RoadPath, 4>, 4> paths;
 
     constexpr int sinValues[] = {0, 1, 0, -1};

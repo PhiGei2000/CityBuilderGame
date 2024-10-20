@@ -14,6 +14,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+#include <queue>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -36,7 +37,10 @@ struct Path {
 };
 
 struct CarPath : public Path {
-  public:
+    std::queue<glm::ivec2> roadNodes;
+
+    /// @brief Returns the current segment of the path
+    /// @return Start, end and connection vector (end - start) of the first path segment
     std::tuple<glm::vec3, glm::vec3, glm::vec3> getCurrentSegment() const;
 
     std::tuple<glm::ivec2, glm::ivec2> getPathEndTile() const;

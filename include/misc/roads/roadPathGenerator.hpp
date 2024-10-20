@@ -14,7 +14,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "misc/roads/roadGraph.hpp"
+#include "misc/roads/graph.hpp"
 #include "misc/roads/roadSpecs.hpp"
 #include "misc/roads/roadTile.hpp"
 
@@ -24,7 +24,7 @@
 
 class RoadPathGenerator {
   public:
-    static RoadPath generateEdgePath(const RoadGraph::RoadGraphEdge& edge, const RoadSpecs& specs);
+    static RoadPath generateEdgePath(const RoadGraph::EdgeType& edge, const RoadSpecs& specs);
 
-    static std::array<std::array<RoadPath, 4>, 4> generateNodePaths(const RoadGraph::RoadGraphNode& node, const RoadSpecs& specs, const RoadTile& tile);
+    static std::array<std::array<RoadPath, 4>, 4> generateNodePaths(const RoadGraph::NodeType& node, const RoadSpecs& specs, const RoadTile& tile);
 };
