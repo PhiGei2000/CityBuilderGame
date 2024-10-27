@@ -66,7 +66,7 @@ if(WIN32)
     set(LIBNOISE_LIBRARIES noise)
 
     set(FREETYPE_INCLUDE_DIRS ./lib/freetype/include)
-    find_file(FREETYPE_LIBRARY freetype.lib HINTS "${CMAKE_CURRENT_LIST_DIR}/lib/freetype/release static/win64")
+    find_file(FREETYPE_LIBRARY freetype.lib HINTS "${CMAKE_CURRENT_LIST_DIR}/lib/freetype/release static/vs2015-2022/win64")
 else()
     find_package(glm REQUIRED)
     if (GLM_FOUND)
