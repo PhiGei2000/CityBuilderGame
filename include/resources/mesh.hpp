@@ -44,6 +44,10 @@ inline constexpr VertexAttributes getInstanceBufferVertexAttributes<Transformati
     return getInstanceBufferVertexAttributes<glm::mat4>(vbo);
 }
 
+enum class MeshShadingMode {
+    WIREFRAME, SOLID
+};
+
 template<typename TKey = std::string>
 struct Mesh {
   protected:

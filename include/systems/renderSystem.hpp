@@ -76,7 +76,9 @@ class RenderSystem : public System {
                 mesh.mesh->render(renderData);
             });
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        if (game->terrain.shadingMode == MeshShadingMode::WIREFRAME) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
 
         registry.view<MeshComponent, TransformationComponent, TerrainComponent>(exclude)
             .each([&](auto entity, const MeshComponent& mesh, const TransformationComponent& transform, const TerrainComponent& terrain) {
@@ -84,7 +86,9 @@ class RenderSystem : public System {
                 mesh.mesh->render(renderData);
             });
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        if (game->terrain.shadingMode == MeshShadingMode::WIREFRAME) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
 
         registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
             .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {

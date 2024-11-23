@@ -63,6 +63,15 @@ DebugPanel::DebugPanel(Gui* gui)
     cameraPos->constraints.height = FitToContentConstraint();
     cameraPos->constraints.width = RelativeConstraint(0.9);
     addChild(cameraPos);
+
+    TextButton* terrainShadingModeButton = new TextButton("debug_menu.terrainShadingModeButton", gui, colors::anthraziteGrey, "Terrain Shading");
+    terrainShadingModeButton->constraints.height = AbsoluteConstraint(30);
+    terrainShadingModeButton->constraints.width = RelativeConstraint(0.9);
+    terrainShadingModeButton->onClick += [&](const MouseButtonEvent& e) {
+        Application* app = this->gui->getApp();
+        app->getGame()->terrain.shadingMode = app->getGame()->terrain.shadingMode == MeshShadingMode::SOLID ? MeshShadingMode::WIREFRAME : MeshShadingMode::SOLID;
+    };
+    addChild(terrainShadingModeButton);
 }
 
 void DebugPanel::update() {

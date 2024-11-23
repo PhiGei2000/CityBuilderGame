@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "misc/triangle.hpp"
+#include "resources/mesh.hpp"
 
 #include <unordered_map>
 
@@ -44,6 +45,8 @@ class Terrain {
     Game* game;
 
   public:
+    MeshShadingMode shadingMode = MeshShadingMode::SOLID;
+
     Terrain(Game* game);
 
     std::unordered_map<glm::ivec2, entt::entity> chunkEntities;
