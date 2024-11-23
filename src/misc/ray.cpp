@@ -71,3 +71,7 @@ std::vector<std::pair<glm::ivec2, glm::vec3>> Ray::getCellIntersections(float ma
     } while (std::abs(lambda) < maxLength);
     return cells;
 }
+
+glm::vec3 Ray::getPoint(float lambda) const {
+    return start + lambda * direction;
+}

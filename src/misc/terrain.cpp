@@ -88,10 +88,10 @@ bool Terrain::chunkLoaded(const glm::ivec2& position) const {
 const std::vector<glm::ivec2> Terrain::getLoadedChunks() const {
     std::vector<glm::ivec2> chunks(chunkEntities.size());
     std::transform(chunkEntities.begin(), chunkEntities.end(),
-        std::inserter(chunks, chunks.begin()),
-        [](const std::pair<glm::ivec2, entt::entity>& pair) {
-            return pair.first;
-        });
+                   std::inserter(chunks, chunks.begin()),
+                   [](const std::pair<glm::ivec2, entt::entity>& pair) {
+                       return pair.first;
+                   });
 
     return chunks;
 }
@@ -126,4 +126,25 @@ TerrainSurfaceGeometry Terrain::getGeometry(const glm::ivec2& cell) const {
     }
 
     throw std::runtime_error("Terrain surface type is invalid");
+}
+
+std::vector<Triangle> Terrain::getSurfaceTriangles(const glm::ivec2& cell) const {
+    const int x = cell.x, y = cell.y;
+
+    auto [h0, h1, h2, h3] = getTerrainCellHeights(cell);
+    glm::vec3 positions[4] = {
+        glm::vec3(x * Configuration::cellSize, h0, y * Configuration::cellSize),
+        glm::vec3((x + 1) * Configuration::cellSize, h1, y * Configuration::cellSize),
+        glm::vec3(x * Configuration::cellSize, h2, (y + 1) * Configuration::cellSize),
+        glm::vec3((x + 1) * Configuration::cellSize, h3, (y + 1) * Configuration::cellSize),
+    };
+
+    if (glm::length(positions[0] - positions[3]) < glm::length(positions[1] - positions[2])) {
+        return {Triangle(positions[0], positions[1], positions[3]),
+                Triangle(positions[0], positions[3], positions[2])};
+    }
+    else {
+        return {Triangle(positions[0], positions[1], positions[2]),
+                Triangle(positions[1], positions[3], positions[2])};
+    }
 }

@@ -14,6 +14,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+#include "misc/triangle.hpp"
+
 #include <unordered_map>
 
 #include <entt/entt.hpp>
@@ -87,4 +89,6 @@ class Terrain {
     /// @param cell The position of the cell in normalized world grid coordinates
     /// @return The surface geometry
     TerrainSurfaceGeometry getGeometry(const glm::ivec2& cell) const;
+
+    std::vector<Triangle> getSurfaceTriangles(const glm::ivec2& cell) const;
 };

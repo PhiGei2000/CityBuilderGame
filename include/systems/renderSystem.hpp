@@ -21,6 +21,7 @@
 #include "components/instancedMeshComponent.hpp"
 #include "components/meshComponent.hpp"
 #include "components/roadMeshComponent.hpp"
+#include "components/terrainComponent.hpp"
 #include "components/transformationComponent.hpp"
 #include "rendering/shadowBuffer.hpp"
 #include "resources/roadPack.hpp"
@@ -58,7 +59,7 @@ class RenderSystem : public System {
     inline void renderScene(entt::exclude_t<T...> exclude = {}) const {
         GameState gameState = game->getState();
 
-        registry.view<MeshComponent, TransformationComponent>(exclude)
+        registry.view<MeshComponent, TransformationComponent>(entt::exclude<T..., TerrainComponent>)
             .each([&](auto entity, const MeshComponent& mesh, const TransformationComponent& transform) {
                 MeshRenderData renderData = {transform.transform};
 
@@ -74,6 +75,16 @@ class RenderSystem : public System {
 
                 mesh.mesh->render(renderData);
             });
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        registry.view<MeshComponent, TransformationComponent, TerrainComponent>(exclude)
+            .each([&](auto entity, const MeshComponent& mesh, const TransformationComponent& transform, const TerrainComponent& terrain) {
+                MeshRenderData renderData = {transform.transform};
+                mesh.mesh->render(renderData);
+            });
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
             .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {

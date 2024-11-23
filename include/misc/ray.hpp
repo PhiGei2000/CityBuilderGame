@@ -40,4 +40,9 @@ struct Ray {
     /// @param maxLength Maximum distance in world coordinate units
     /// @return Pairs of cells (in normalized world grid coordinates) and intersection points (in world coordinates)
     std::vector<std::pair<glm::ivec2, glm::vec3>> getCellIntersections(float maxLength) const;
+
+    /// @brief Gets the point start + lambda * direction
+    /// @param lambda The parameter
+    /// @return The point
+    glm::vec3 getPoint(float lambda) const;
 };

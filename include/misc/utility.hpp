@@ -46,7 +46,7 @@ namespace utility {
     }
 
     constexpr bool inChunk(const glm::ivec2& pos) {
-        return inRange(pos, glm::ivec2(0), glm::ivec2(Configuration::cellsPerChunk));
+        return inRange(pos, glm::ivec2(0), glm::ivec2(Configuration::cellsPerChunk - 1));
     }
 
     constexpr glm::ivec2 interpolate(const glm::ivec2& start, const glm::ivec2& end, int value) {

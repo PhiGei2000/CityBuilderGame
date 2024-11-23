@@ -23,6 +23,7 @@
 
 #include "misc/coordinateTransform.hpp"
 #include "misc/ray.hpp"
+#include "misc/triangle.hpp"
 #include "misc/utility.hpp"
 
 #include "GLFW/glfw3.h"
@@ -133,7 +134,7 @@ void BuildSystem::update(float dt) {
 std::pair<bool, glm::ivec2> BuildSystem::getGridPos(const glm::vec2& mousePos, const glm::vec3& offset) const {
     const CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(cameraEntity);
-    const glm::vec3& cameraPos = cameraTransform.position + offset;
+    const glm::vec3& cameraPos = cameraTransform.position; // + offset;
 
     glm::vec4 ray_clip = glm::vec4(mousePos, -1.0f, 1.0f);
     glm::vec4 ray_eye = glm::inverse(camera.projectionMatrix) * ray_clip;
@@ -146,19 +147,25 @@ std::pair<bool, glm::ivec2> BuildSystem::getGridPos(const glm::vec2& mousePos, c
     const auto& cells = ray.getCellIntersections(11 * Configuration::cellSize);
 
     // get cell with first intersection (not perfect yet)
-    int i = 0;
-    while (i < cells.size()) {
+
+    for (int i = 0; i < cells.size(); i++) {
         const auto& [cell, intersection] = cells[i];
         if (!game->terrain.positionValid(cell)) {
             break;
         }
 
-        float terrainHeight = game->terrain.getTerrainHeight(cell);
-        if (intersection.y < terrainHeight) {
-            return std::make_pair(true, i > 0 ? cells[i - 1].first : cell);
+        const auto& triangles = game->terrain.getSurfaceTriangles(cell);
+        float minLambda = FLT_MAX;
+        for (const auto& triangle : triangles) {
+            const auto& [intersection, lambda] = triangle.intersectionPoint(ray);
+            if (intersection && lambda < minLambda) {
+                minLambda = lambda;
+            }
         }
 
-        i++;
+        if (minLambda < FLT_MAX) {
+            return std::make_pair(true, cell);
+        }
     }
 
     return std::make_pair(false, glm::ivec2());
@@ -220,8 +227,8 @@ void BuildSystem::createNewBuilding() {
         defaultSize = object->buildingInfo.defaultSize;
     }
 
-    registry.emplace<TransformationComponent>(currentBuilding, glm::vec3());
-    registry.emplace<BuildingComponent>(currentBuilding, selectedBuildingID, glm::ivec2(0), 0, defaultSize, true);
+    registry.emplace<TransformationComponent>(currentBuilding, utility::normalizedWorldGridToWorldCoords(glm::vec2(gridMouseIntersection.position)) + getBuildingOffset(selectedBuildingID)).calculateTransform();
+    registry.emplace<BuildingComponent>(currentBuilding, selectedBuildingID, gridMouseIntersection.position, 0, defaultSize, true);
 }
 
 void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
@@ -273,6 +280,7 @@ void BuildSystem::handleMouseMoveEvent(const MouseMoveEvent& e) {
 
     glm::vec2 mousePos = game->getMousePos();
     const auto& [intersection, position] = getGridPos(mousePos, getBuildingOffset(selectedBuildingID));
+    std::cout << position << std::endl;
 
     gridMouseIntersection.intersection = intersection;
 
