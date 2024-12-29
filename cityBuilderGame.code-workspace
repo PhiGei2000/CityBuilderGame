@@ -136,7 +136,8 @@
 			"coroutine": "cpp",
 			"hash_set": "cpp",
 			"shared_mutex": "cpp",
-			"stdfloat": "cpp"
+			"stdfloat": "cpp",
+			"resumable": "cpp"
 		}
 	}
 }

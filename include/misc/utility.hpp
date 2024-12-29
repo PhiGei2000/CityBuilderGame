@@ -53,7 +53,6 @@ namespace utility {
         return (end - start) * value + start;
     }
 
-
 } // namespace utility
 
 namespace glm {
@@ -74,3 +73,10 @@ namespace glm {
         return x.x * y.x + x.y * y.x;
     }
 } // namespace glm
+
+template<>
+struct std::less<glm::ivec2> {
+    bool operator()(const glm::ivec2& first, const glm::ivec2& second) const {
+        return first.x < second.x || (first.x == second.x && first.y < second.y);
+    }
+};

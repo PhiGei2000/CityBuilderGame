@@ -15,9 +15,10 @@
  */
 #pragma once
 #include "misc/triangle.hpp"
+#include "misc/utility.hpp"
 #include "resources/mesh.hpp"
 
-#include <unordered_map>
+#include <map>
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
@@ -25,10 +26,9 @@
 
 class Game;
 
-enum class TerrainSurfaceTypes {
+enum class TerrainSurfaceTypes : unsigned int {
     GRASS,
-    WATER,
-    BEACH
+    SAND,
 };
 
 enum class TerrainSurfaceGeometry {
@@ -49,12 +49,12 @@ class Terrain {
 
     Terrain(Game* game);
 
-    std::unordered_map<glm::ivec2, entt::entity> chunkEntities;
+    std::map<glm::ivec2, entt::entity> chunkEntities;
 
     /// @brief Returns the terrain height of the cell at the specified position
     /// @param position The position in normalized world grid coords
     /// @return The terrain height at the specified position
-    int getTerrainHeight(const glm::ivec2& position) const;
+    float getTerrainHeight(const glm::ivec2& position) const;
 
     /// @brief Returns the terrain heights of the cells corners
     /// @param position The position in normalized world grid coords
@@ -91,7 +91,7 @@ class Terrain {
     /// @brief Returns the geometry type of the given cell
     /// @param cell The position of the cell in normalized world grid coordinates
     /// @return The surface geometry
-    TerrainSurfaceGeometry getGeometry(const glm::ivec2& cell) const;
+    // TerrainSurfaceGeometry getGeometry(const glm::ivec2& cell) const;
 
     std::vector<Triangle> getSurfaceTriangles(const glm::ivec2& cell) const;
 };

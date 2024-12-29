@@ -31,5 +31,6 @@ struct TextureAtlas {
 
     TextureAtlas(float width, float height, int rows, int cols);
 
-    std::array<glm::vec2, 4> getQuatTextureCoords(int row, int col) const;
+    std::array<glm::vec2, 4> getQuadTextureCoords(int index) const;
+    std::array<glm::vec2, 4> getQuadTextureCoords(int row, int col) const;
 };

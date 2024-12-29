@@ -26,13 +26,13 @@ Terrain::Terrain(Game* game)
     : game(game) {
 }
 
-int Terrain::getTerrainHeight(const glm::ivec2& position) const {
+float Terrain::getTerrainHeight(const glm::ivec2& position) const {
     const auto& [chunk, pos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
 
     const entt::entity entity = chunkEntities.at(chunk);
     const TerrainComponent& terrainComponent = game->getRegistry().get<TerrainComponent>(entity);
 
-    return terrainComponent.heightValues[pos.x][pos.y];
+    return terrainComponent.terrain[pos].value.terrainHeights[0];
 }
 
 std::array<float, 4> Terrain::getTerrainCellHeights(const glm::ivec2& position) const {
@@ -40,12 +40,13 @@ std::array<float, 4> Terrain::getTerrainCellHeights(const glm::ivec2& position) 
 
     const entt::entity entity = chunkEntities.at(chunk);
     const TerrainComponent& terrainComponent = game->getRegistry().get<TerrainComponent>(entity);
+    const TerrainData& data = terrainComponent.terrain[glm::ivec2(pos)].value;
 
     return std::array<float, 4>({
-        terrainComponent.heightValues[pos.x][pos.y],
-        terrainComponent.heightValues[pos.x + 1][pos.y],
-        terrainComponent.heightValues[pos.x][pos.y + 1],
-        terrainComponent.heightValues[pos.x + 1][pos.y + 1],
+        data.terrainHeights[0],
+        data.terrainHeights[1],
+        data.terrainHeights[2],
+        data.terrainHeights[3],
     });
 }
 
@@ -68,8 +69,9 @@ void Terrain::setTerrainHeight(const glm::ivec2& position, float height) const {
 
     const entt::entity entity = chunkEntities.at(chunk);
     TerrainComponent& terrain = game->getRegistry().get<TerrainComponent>(entity);
+    const TerrainData& oldValue = terrain.terrain[pos].value;
 
-    terrain.heightValues[pos.x][pos.y] = height;
+    terrain.terrain.setValue(pos, TerrainData(height, oldValue.surfaceType));
 }
 
 TerrainSurfaceTypes Terrain::getSurfaceType(const glm::vec2& position) const {
@@ -78,7 +80,7 @@ TerrainSurfaceTypes Terrain::getSurfaceType(const glm::vec2& position) const {
     const entt::entity entity = chunkEntities.at(chunk);
     const TerrainComponent& terrainComponent = game->getRegistry().get<TerrainComponent>(entity);
 
-    return terrainComponent.surfaceTypes[static_cast<int>(glm::floor(pos.x))][static_cast<int>(glm::floor(pos.y))];
+    return terrainComponent.terrain[glm::ivec2(glm::floor(pos))].value.surfaceType;
 }
 
 bool Terrain::chunkLoaded(const glm::ivec2& position) const {
@@ -101,32 +103,32 @@ bool Terrain::positionValid(const glm::vec2& position) const {
     return chunkLoaded(chunk);
 }
 
-TerrainSurfaceGeometry Terrain::getGeometry(const glm::ivec2& cell) const {
-    auto [h0, h1, h2, h3] = getTerrainCellHeights(cell);
+// TerrainSurfaceGeometry Terrain::getGeometry(const glm::ivec2& cell) const {
+//     auto [h0, h1, h2, h3] = getTerrainCellHeights(cell);
 
-    if (h0 == h1 && h1 == h2 && h2 == h3) {
-        return TerrainSurfaceGeometry::FLAT;
-    }
+//     if (h0 == h1 && h1 == h2 && h2 == h3) {
+//         return TerrainSurfaceGeometry::FLAT;
+//     }
 
-    if ((h0 == h1 && h2 == h3) || (h1 == h2 && h0 == h3)) {
-        return TerrainSurfaceGeometry::FLAT_TILTED;
-    }
+//     if ((h0 == h1 && h2 == h3) || (h1 == h2 && h0 == h3)) {
+//         return TerrainSurfaceGeometry::FLAT_TILTED;
+//     }
 
-    if (h1 == h2 && h2 == h3) {
-        return h0 < h1 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
-    }
-    else if (h0 == h2 && h2 == h3) {
-        return h1 < h0 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
-    }
-    else if (h0 == h1 && h1 == h3) {
-        return h2 < h0 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
-    }
-    else if (h0 == h1 && h1 == h2) {
-        return h3 < h0 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
-    }
+//     if (h1 == h2 && h2 == h3) {
+//         return h0 < h1 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
+//     }
+//     else if (h0 == h2 && h2 == h3) {
+//         return h1 < h0 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
+//     }
+//     else if (h0 == h1 && h1 == h3) {
+//         return h2 < h0 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
+//     }
+//     else if (h0 == h1 && h1 == h2) {
+//         return h3 < h0 ? TerrainSurfaceGeometry::DIAGONAL_TILTED_BOTTOM : TerrainSurfaceGeometry::INNER_CORNER;
+//     }
 
-    throw std::runtime_error("Terrain surface type is invalid");
-}
+//     throw std::runtime_error("Terrain surface type is invalid");
+// }
 
 std::vector<Triangle> Terrain::getSurfaceTriangles(const glm::ivec2& cell) const {
     const int x = cell.x, y = cell.y;

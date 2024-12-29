@@ -16,6 +16,7 @@
 #pragma once
 #include "system.hpp"
 
+#include "misc/quadtree.hpp"
 #include "misc/terrainArea.hpp"
 
 #include <future>
@@ -31,14 +32,10 @@ struct BuildEvent;
 struct TextureAtlas;
 struct Vertex;
 struct GeometryData;
+struct TerrainData;
 
 class TerrainSystem : public System {
   protected:
-    struct TerrainCreationData {
-        float** heightValues;
-        TerrainSurfaceTypes** surfaceTypes;
-    };
-
     noise::module::Const terrainHeightScaleNoise;
     noise::module::Perlin terrainBaseNoise;
     noise::module::ScaleBias terrainRangeNoise;
@@ -60,12 +57,12 @@ class TerrainSystem : public System {
     void init() override;
 
     float getTerrainHeight(const glm::ivec2& pos) const;
-    TerrainCreationData generateTerrain(const glm::ivec2& chunkPosition) const;
+    Quadtree<TerrainData> generateTerrain(const glm::ivec2& chunkPosition) const;
 
-    static std::pair<GeometryData, GeometryData> generateTerrainMesh(const glm::ivec2& chunkPosition, float** const heightMap, TerrainSurfaceTypes** const surfaceTypes);
+    static std::pair<GeometryData, GeometryData> generateTerrainMesh(const glm::ivec2& chunkPosition, const Quadtree<TerrainData>& terrainData);
 
-    static unsigned int generateTerrainQuadMesh(const glm::ivec2& position, const glm::ivec2& chunkPosition, std::vector<Vertex>& terrainVertices, float** const heightMap, TerrainSurfaceTypes surfaceType);
-    static unsigned int generateWaterQuadMesh(const glm::ivec2& position, const glm::ivec2& chunkPosition, std::vector<Vertex>& waterVertices);
+    static std::pair<unsigned int, unsigned int> generateTerrainQuadMesh(const glm::ivec2& chunkPosition, std::vector<Vertex>& terrainVertices, std::vector<Vertex>& waterVertices, const Quadtree<TerrainData>& terrainData);
+    static unsigned int generateQuad(const glm::vec2& position, float size, const float heights[4], unsigned int textureID, std::vector<Vertex>& vertices);
 
     void updateTerrainMesh(const TerrainArea& area) const;
     void updateTerrainMesh(const TerrainArea& area, MeshComponent& mesh) const;

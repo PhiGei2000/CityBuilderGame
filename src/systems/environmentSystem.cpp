@@ -177,25 +177,25 @@ void EnvironmentSystem::handleChunkCreatedEvent(const ChunkCreatedEvent& e) cons
     const std::array<std::string, 2> treeNames = {"tree01", "tree02"};
 
     // spawn trees
-    for (int i = 0; i < 100; i++) {
-        glm::vec2 chunkGridPos = Configuration::cellsPerChunk / static_cast<float>(RAND_MAX) * glm::vec2(rand(), rand());
+    for (int i = 0; i < 300; i++) {
+        glm::vec2 chunkGridPos = Configuration::cellsPerChunk / static_cast<float>(RAND_MAX) * glm::max(glm::vec2(rand() - 1, rand() - 1), glm::vec2(0));
+
         const glm::vec2& gridPos = utility::normalizedChunkGridToNormalizedWorldGridCoords(e.chunkPosition, chunkGridPos);
 
-        TerrainSurfaceTypes surfaceType = game->terrain.getSurfaceType(gridPos);
-        if (surfaceType == TerrainSurfaceTypes::GRASS) {
+        if (game->terrain.getSurfaceType(gridPos) == TerrainSurfaceTypes::GRASS) {
             glm::vec3 position = glm::vec3(Configuration::cellSize * chunkGridPos.x, game->terrain.getTerrainHeight(gridPos), Configuration::cellSize * chunkGridPos.y);
             float angle = (float)rand() / static_cast<float>(RAND_MAX) * 0.5f * glm::pi<float>();
-            glm::vec3 scale = glm::vec3((float)rand() / static_cast<float>(RAND_MAX) * 0.5 + 1.5f);
+            glm::vec3 scale = glm::vec3((float)rand() / static_cast<float>(RAND_MAX) * 0.5 + 1.0f);
             int type = rand() % 2;
 
-            float cosAngle = glm::cos(angle);
-            float sinAngle = glm::sin(angle);
+            // float cosAngle = glm::cos(angle);
+            // float sinAngle = glm::sin(angle);
 
-            transformations[treeNames[type]].transformations.emplace_back(
-                glm::vec4(scale.x * cosAngle, 0, -scale.x * sinAngle, 0),
-                glm::vec4(0, scale.y, 0, 0),
-                glm::vec4(scale.z * sinAngle, 0, scale.z * cosAngle, 0),
-                glm::vec4(cosAngle * position.x + sinAngle * position.z, position.y, -sinAngle * position.x + cosAngle * position.z, 1));
+            glm::mat4 transform(1.0f);
+            transform = glm::translate(transform, position);
+            transform = glm::rotate(transform, angle, glm::vec3(0.0f, 1.0f, 0.0f));
+            transform = glm::scale(transform, scale);
+            transformations[treeNames[type]].transformations.push_back(transform);
         }
     }
 

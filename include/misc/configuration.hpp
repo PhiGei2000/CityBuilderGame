@@ -21,10 +21,10 @@ class Configuration {
   public:
     /// @brief The size of one building cell in meters
     static constexpr int cellSize = 5;
-    /// @brief The size of one chunk in meters
-    static constexpr int chunkSize = 200;
     /// @brief The number of cells in a chunk in one direction
-    static constexpr int cellsPerChunk = chunkSize / cellSize;
+    static constexpr int cellsPerChunk = 32;
+    /// @brief The size of one chunk in meters
+    static constexpr int chunkSize = cellSize * cellsPerChunk;
 
     class Terrain {
       public:

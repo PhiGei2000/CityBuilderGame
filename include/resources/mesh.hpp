@@ -101,13 +101,13 @@ struct Mesh {
 
   public:
     ShaderPtr shader;
-    std::unordered_map<TKey, std::vector<std::pair<MaterialPtr, GeometryPtr>>> geometries;
+    std::map<TKey, std::vector<std::pair<MaterialPtr, GeometryPtr>>> geometries;
 
     inline Mesh() {
 
     }
 
-    inline Mesh(ShaderPtr shader, const std::unordered_map<TKey, std::vector<std::pair<MaterialPtr, GeometryPtr>>>& geometries = {})
+    inline Mesh(ShaderPtr shader, const std::map<TKey, std::vector<std::pair<MaterialPtr, GeometryPtr>>>& geometries = {})
         : shader(shader), geometries(geometries) {
     }
 

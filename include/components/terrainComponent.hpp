@@ -16,28 +16,70 @@
 #pragma once
 #include "component.hpp"
 
+#include "misc/quadtree.hpp"
 #include "misc/terrain.hpp"
 
 #include "misc/utility.hpp"
 
 #include <ostream>
 
+struct TerrainData {
+    float terrainHeights[4];
+    TerrainSurfaceTypes surfaceType;
+
+    TerrainData()
+        : surfaceType(TerrainSurfaceTypes::GRASS) {
+        terrainHeights[0] = 0;
+        terrainHeights[1] = 0;
+        terrainHeights[2] = 0;
+        terrainHeights[3] = 0;
+    }
+
+    TerrainData(float height, TerrainSurfaceTypes surfaceType)
+        : surfaceType(surfaceType) {
+        terrainHeights[0] = height;
+        terrainHeights[1] = height;
+        terrainHeights[2] = height;
+        terrainHeights[3] = height;
+    }
+
+    TerrainData(float heights[4], TerrainSurfaceTypes surfaceType)
+        : surfaceType(surfaceType) {
+        terrainHeights[0] = heights[0];
+        terrainHeights[1] = heights[1];
+        terrainHeights[2] = heights[2];
+        terrainHeights[3] = heights[3];
+    }
+
+    bool water() const {
+        for (int i = 0; i < 4; i++) {
+            if (terrainHeights[i] < 0.0f) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    inline bool operator==(const TerrainData& other) const {
+        return terrainHeights[0] == other.terrainHeights[0] && terrainHeights[1] == other.terrainHeights[1] && terrainHeights[2] == other.terrainHeights[2] && terrainHeights[3] == other.terrainHeights[3] && surfaceType == other.surfaceType;
+    }
+};
+
 struct TerrainComponent : public AssignableComponent {
     /// @brief A 2d array of height values for each cell
-    float** heightValues;
+    // float** heightValues;
     /// @brief A 2d array of the surface types
-    TerrainSurfaceTypes** surfaceTypes;
+    // TerrainSurfaceTypes** surfaceTypes;
     /// @brief True if the mesh is generated
     bool meshGenerated = false;
+
+    Quadtree<TerrainData> terrain;
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
         int cellsPerDirection = Configuration::chunkSize / Configuration::cellSize;
 
         TerrainComponent& newTerrain = registry.emplace<TerrainComponent>(entity);
-        for (int x = 0; x < cellsPerDirection + 1; x++) {
-            for (int y = 0; y < cellsPerDirection + 1; y++) {
-                newTerrain.heightValues[x][y] = heightValues[x][y];
-            }
-        }
+        newTerrain.terrain = terrain;
     }
 };
