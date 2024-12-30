@@ -19,9 +19,12 @@
 #include "renderQuad.hpp"
 #include "shader.hpp"
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
+// #include <ft2build.h>
+// #include FT_FREETYPE_H
 #include <glm/glm.hpp>
+
+#define STB_TRUETYPE_IMPLEMENTATION
+#include <stb_truetype.h>
 
 #include <map>
 
@@ -33,21 +36,32 @@ enum class TextAlign {
 
 class TextRenderer {
   private:
-    struct Character {
-        unsigned int textureId;
-        glm::ivec2 size;
-        glm::ivec2 bearing;
-        unsigned int advance;
+    struct GlyphInfo {
+        glm::vec3 positions[4];
+        glm::vec2 texCoords[4];
+        float offsetX = 0;
+        float offsetY = 0;
     };
 
     RenderQuad quad;
     float screenWidth, screenHeight;
     int pixelWidth = 128;
 
-    std::map<char, Character> characters;
+    struct Font {
+        const unsigned int size = 40;
+        const unsigned int atlasWidth = 1024;
+        const unsigned int atlasHeight = 1024;
+        const unsigned int oversampleX = 2;
+        const unsigned int oversampleY = 2;
+        const unsigned int firstChar = ' ';
+        const unsigned int charCount = '~' - ' ';
+        std::unique_ptr<stbtt_packedchar[]> charInfo;
+        unsigned int texture = 0;
+    } font;
 
-    bool useKerning;
-    std::map<std::pair<char, char>, glm::ivec2> kerning;
+    std::map<char, GlyphInfo> glyphInfos;
+
+    void initGlyphs();
 
   public:
     glm::vec3 textColor = colors::white;
