@@ -22,7 +22,6 @@ Packages (only on Linux):
 - [glm](https://github.com/g-truc/glm)
 - [glfw](https://github.com/glfw/glfw)
 - [glew](https://github.com/nigels-com/glew)
-- [Freetype2](https://github.com/ubawurinna/freetype-windows-binaries)
 - [stb image](https://github.com/nothings/stb/blob/master/stb_image.h)
 - [entt](https://github.com/skypjack/entt)
 - [pugixml](https://github.com/zeux/pugixml)
