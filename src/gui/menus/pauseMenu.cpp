@@ -29,6 +29,8 @@ PauseMenu::PauseMenu(Gui* gui)
     TextButton* _continue = new TextButton("mainMenu_continue", gui, colors::anthraziteGrey, "Back to game");
     _continue->constraints.height = AbsoluteConstraint(45.0f);
     _continue->constraints.width = RelativeConstraint(0.9f);
+    _continue->textAlign = TextAlign::CENTER;
+    _continue->textColor =colors::white;
     _continue->onClick += [&](const MouseButtonEvent& e) {
         this->onResumeButtonClick(e);
     };
@@ -38,6 +40,8 @@ PauseMenu::PauseMenu(Gui* gui)
     TextButton* options = new TextButton("mainMenu_options", gui, colors::anthraziteGrey, "Options");
     options->constraints.height = AbsoluteConstraint(45.0f);
     options->constraints.width = RelativeConstraint(0.9f);
+    options->textAlign = TextAlign::CENTER;
+    options->textColor = colors::white;
     options->onClick += [&](const MouseButtonEvent& e) {
         this->onOptionsButtonClick(e);
     };
@@ -47,6 +51,8 @@ PauseMenu::PauseMenu(Gui* gui)
     TextButton* saveAndExit = new TextButton("mainMenu_saveExit", gui, colors::anthraziteGrey, "Save and Exit");
     saveAndExit->constraints.height = AbsoluteConstraint(45.0f);
     saveAndExit->constraints.width = RelativeConstraint(0.9f);
+    saveAndExit->textAlign = TextAlign::CENTER;
+    saveAndExit->textColor = colors::white;
     saveAndExit->onClick += [&](const MouseButtonEvent& e) {
         this->onExitButtonClick(e);
     };

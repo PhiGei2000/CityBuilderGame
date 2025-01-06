@@ -24,7 +24,6 @@
 #include <pugixml.hpp>
 
 class ResourceManager;
-struct BuildMenuEntry;
 
 class ObjectLoader {
   protected:
@@ -50,5 +49,5 @@ class ObjectLoader {
   public:
     ObjectLoader(ResourceManager& resourceManager);
 
-    ObjectPtr loadObject(const std::string& filename, BuildMenuEntry* entry);
+    ObjectPtr loadObject(const std::string& filename);
 };

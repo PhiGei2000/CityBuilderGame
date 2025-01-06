@@ -18,11 +18,11 @@
 
 #include "resources/roadGeometryGenerator.hpp"
 
-RoadPack::RoadPack(const RoadSpecs& specs, MaterialPtr material, ShaderPtr shader)
-    : specs(specs), roadGeometries(shader) {
-        const auto& geometries = RoadGeometryGenerator::generateRoadPackGeometries(specs);
+RoadPack::RoadPack(const std::string& name, const RoadSpecs& specs, MaterialPtr material, ShaderPtr shader, const std::string& icon)
+    : specs(specs), roadGeometries(shader), name(name), icon(icon) {
+    const auto& geometries = RoadGeometryGenerator::generateRoadPackGeometries(specs);
 
-        for (const auto& [type, geometry] : geometries) {
-            roadGeometries.geometries[type] = std::vector{std::make_pair(material, geometry)};
-        }
+    for (const auto& [type, geometry] : geometries) {
+        roadGeometries.geometries[type] = std::vector{std::make_pair(material, geometry)};
+    }
 }

@@ -39,20 +39,7 @@
 
 Gui::Gui(Application* app, float width, float height)
     : app(app), width(width), height(height) {
-    init();
-}
 
-void Gui::init() {
-    textRenderer.init();
-
-    pauseMenu = new PauseMenu(this);
-    optionsMenu = new OptionsMenu(this);
-    buildMenu = new BuildMenu(this);
-    debugPanel = new DebugPanel(this);
-    warningWidget = new Label("warning_label", this, colors::transparent, "", 12, colors::warning);
-    warningWidget->hide();
-
-    widgets = {pauseMenu, optionsMenu, buildMenu, debugPanel};
 }
 
 void Gui::showMenu(GameMenus menu) {
@@ -131,8 +118,6 @@ void Gui::setScreenSize(float width, float height) {
     this->width = width;
     this->height = height;
 
-    textRenderer.setScreenSize(width, height);
-
     // update widgets
     for (const auto& widget : widgets) {
         Container* container;
@@ -142,13 +127,31 @@ void Gui::setScreenSize(float width, float height) {
     }
 }
 
+void Gui::getScreenSize(float* width, float* height) const {
+    *width = this->width;
+    *height = this->height;
+}
+
 Rectangle Gui::getBox() const {
     return Rectangle{0, 0, width, height};
 }
 
+void Gui::init() {
+    pauseMenu = new PauseMenu(this);
+    optionsMenu = new OptionsMenu(this);
+    buildMenu = new BuildMenu(this);
+    debugPanel = new DebugPanel(this);
+    warningWidget = new Label("warning_label", this, colors::transparent, "", nullptr, 12, TextAlign::BEGIN, colors::warning);
+    warningWidget->hide();
+
+    widgets = {pauseMenu, optionsMenu, buildMenu, debugPanel};
+}
+
 void Gui::update() {
     for (Widget* widget : widgets) {
-        widget->update();
+        if (widget->isVisible()) {
+            widget->update();
+        }
     }
 }
 

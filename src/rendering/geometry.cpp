@@ -45,6 +45,12 @@ Geometry::Geometry(const VertexAttributes& attributes, int drawMode)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+Geometry::~Geometry() {
+    glDeleteBuffers(1, &vao);
+    glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &ebo);
+}
+
 void Geometry::setVertexAttribute(unsigned int index, const VertexAttribute& attribute) const {
     glBindVertexArray(vao);
     glEnableVertexAttribArray(index);
@@ -57,22 +63,6 @@ void Geometry::setVertexAttribute(unsigned int index, const VertexAttribute& att
     if (attribute.divisor != 0) {
         glVertexAttribDivisor(index, attribute.divisor);
     }
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-void Geometry::bufferData(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, unsigned int usage) {
-    glBindVertexArray(vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), usage);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), usage);
-
-    drawCount = indices.size();
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

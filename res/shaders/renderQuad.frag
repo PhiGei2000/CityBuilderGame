@@ -23,24 +23,25 @@ out vec4 FragColor;
 
 void main() {
     // render round corners if radius is greather than zero
-    if (cornerRadius > 0) {
-        // calculate vector pointing from the current frag to the nearest inner edge
-        vec2 r = vec2(cornerRadius);
-        // left bottom corner to frag pos
-        vec2 u = fragPosition - (widgetArea.position + r);
-        // frag pos to top right corner
-        vec2 v = widgetArea.position + widgetArea.size - r - fragPosition;
+    // if (cornerRadius > 0) {
+    //     // calculate vector pointing from the current frag to the nearest inner edge
+    //     vec2 r = vec2(cornerRadius);
+    //     // left bottom corner to frag pos
+    //     vec2 u = fragPosition - (widgetArea.position + r);
+    //     // frag pos to top right corner
+    //     vec2 v = widgetArea.position + widgetArea.size - r - fragPosition;
 
-        // minimum distance vector
-        vec2 d = min(u,v);        
-        if (d.x < 0 && d.y < 0 && length(d) > cornerRadius) {
-            discard;
-        }
-    }    
+    //     // minimum distance vector
+    //     vec2 d = min(u, v);
+    //     if (d.x < 0 && d.y < 0 && length(d) > cornerRadius) {
+    //         discard;
+    //     }
+    // }
 
     // render text and texture
     if (text) {
-        vec4 sampled = vec4(1.0, 1.0, 1.0, texture(tex, texCoord).r);
+        float val = texture(tex, texCoord).r;
+        vec4 sampled = vec4(val, val, val, val);
         FragColor = color * sampled;
     }
     // render texture

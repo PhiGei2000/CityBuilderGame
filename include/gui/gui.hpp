@@ -18,7 +18,6 @@
 
 #include "rendering/renderQuad.hpp"
 #include "rendering/shader.hpp"
-#include "rendering/textRenderer.hpp"
 
 #include <stack>
 
@@ -35,10 +34,10 @@ struct MouseButtonEvent;
 struct MouseMoveEvent;
 
 enum class GameMenus {
-  NONE,
-  MAIN_MENU,
-  PAUSE_MENU,
-  OPTIONS_MENU
+    NONE,
+    MAIN_MENU,
+    PAUSE_MENU,
+    OPTIONS_MENU
 };
 
 class Gui {
@@ -60,12 +59,8 @@ class Gui {
 
     ShaderProgram* guiShader = new ShaderProgram("res/shaders/renderQuad.vert", "res/shaders/renderQuad.frag");
 
-    void init();
-
   public:
     Gui(Application* app, float width, float height);
-
-    TextRenderer textRenderer;
 
     void showMenu(GameMenus gameMenu);
     void popMenu();
@@ -79,8 +74,10 @@ class Gui {
     BuildMenu* getBuildMenu() const;
 
     void setScreenSize(float width, float height);
+    void getScreenSize(float* width, float* height) const;
     Rectangle getBox() const;
 
+    void init();
     void update();
 
     void render() const;

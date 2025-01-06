@@ -14,26 +14,44 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "../colors.hpp"
+#include "gui/colors.hpp"
+#include "rendering/geometry.hpp"
+#include "resources/font.hpp"
 #include "widget.hpp"
-#include "../colors.hpp"
 
-#include "rendering/textRenderer.hpp"
 #include <string>
 
-// enum class HorizontalTextAlignment {
-//   BEGIN, CENTER, END
-// };
+enum class TextAlign {
+    BEGIN,
+    CENTER,
+    END
+};
 
 class Label : public virtual Widget {
+  protected:
+    Geometry geometry;
+    float textWidth, textHeight, baselineOffset = 0;
+    // TextRenderer textRenderer;
+
+    struct TextVertex {
+        glm::vec2 position;
+        glm::vec2 texCoord;
+
+        static const VertexAttributes attributes;
+    };
+
   public:
     std::string text;
+    TextAlign textAlign;
     glm::vec4 textColor;
+    FontPtr font;
     int textSize;
 
-    TextAlign textAlign = TextAlign::CENTER;
+    Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, FontPtr font = nullptr, const int textSize = 24, TextAlign align = TextAlign::BEGIN, const glm::vec4& textColor = colors::white);
 
-    Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, const int textSize = 24, const glm::vec4& textColor = colors::white);
+    void updateTextGeometry();
+
+    virtual void update() override;
 
     virtual Rectangle getBox() const override;
 

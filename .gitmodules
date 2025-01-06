@@ -4,9 +4,6 @@
 [submodule "lib/glfw"]
 	path = lib/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "lib/freetype"]
-	path = lib/freetype
-	url = https://github.com/ubawurinna/freetype-windows-binaries
 [submodule "lib/stb"]
 	path = lib/stb
 	url = https://github.com/nothings/stb.git

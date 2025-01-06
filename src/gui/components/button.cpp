@@ -46,8 +46,8 @@ void Button::handleMouseButtonEvent(MouseButtonEvent& event) {
     }
 }
 
-TextButton::TextButton(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, int textSize, const glm::vec4& textColor)
-    : Label(id, gui, backgroundColor, text, textSize, textColor), Widget(id, gui, backgroundColor), Button(id, gui, backgroundColor) {
+TextButton::TextButton(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, FontPtr font, int textSize, TextAlign textAlign, const glm::vec4& textColor)
+    : Label(id, gui, backgroundColor, text, font, textSize, textAlign, textColor), Widget(id, gui, backgroundColor), Button(id, gui, backgroundColor) {
 
     // hover effect text color
     onMouseEnter += [&](const MouseMoveEvent& e) {

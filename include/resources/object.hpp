@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "components/component.hpp"
+#include "gui/menus/buildMenu.hpp"
 #include "misc/typedefs.hpp"
 
 #include <glm/glm.hpp>
@@ -70,6 +71,8 @@ struct BuildableObject : public Object {
         glm::vec3 offset = glm::vec3(0.0f);
         std::string buildingID;
     } buildingInfo;
+
+    BuildMenuEntry buildMenuEntry;
 
     inline BuildableObject(const std::string& buildingID) {
         buildingInfo.buildingID = buildingID;

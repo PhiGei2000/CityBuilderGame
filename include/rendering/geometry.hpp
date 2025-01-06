@@ -41,9 +41,26 @@ class Geometry {
 
   public:
     Geometry(const VertexAttributes& attributes, int drawMode = GL_TRIANGLES);
+    ~Geometry();
 
     void setVertexAttribute(unsigned int index, const VertexAttribute& attributes) const;
-    void bufferData(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, unsigned int usage = GL_STATIC_DRAW);
+
+    template<typename T>
+    inline void bufferData(const std::vector<T>& vertices, const std::vector<unsigned int>& indices, unsigned int usage = GL_STATIC_DRAW) {
+        glBindVertexArray(vao);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(T), vertices.data(), usage);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), usage);
+
+        drawCount = indices.size();
+
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
 
     virtual void draw() const;
 

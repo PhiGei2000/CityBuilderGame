@@ -14,8 +14,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "../../misc/buildingType.hpp"
-#include "../components/stackPanel.hpp"
+#include "gui/components/stackPanel.hpp"
+#include "misc/buildingType.hpp"
 
 class IconButton;
 class Texture;

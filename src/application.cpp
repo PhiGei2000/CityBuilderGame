@@ -128,6 +128,8 @@ void Application::init() {
 
     // init game
     game = new Game(this);
+
+    gui->init();
 }
 
 Application::Application() {

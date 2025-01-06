@@ -127,7 +127,7 @@ VelocityComponent ObjectLoader::loadComponent<VelocityComponent>(const xml_node&
 void ObjectLoader::loadBuildMenu(const xml_node& node) const {
 }
 
-ObjectPtr ObjectLoader::loadObject(const std::string& filename, BuildMenuEntry* entry) {
+ObjectPtr ObjectLoader::loadObject(const std::string& filename) {
     xml_document doc;
     xml_parse_result result = doc.load_file(filename.c_str());
 
@@ -174,11 +174,11 @@ ObjectPtr ObjectLoader::loadObject(const std::string& filename, BuildMenuEntry* 
 
                 buildable->buildingInfo.buildingID = category + "." + buildingID;
 
-                entry->name = object->name;
-                entry->category = getBuildingCategory(category);
-                entry->section = section;
-                entry->buildingID = buildable->buildingInfo.buildingID;
-                entry->iconFilename = iconFilename;
+                buildable->buildMenuEntry.name = object->name;
+                buildable->buildMenuEntry.category = getBuildingCategory(category);
+                buildable->buildMenuEntry.section = section;
+                buildable->buildMenuEntry.buildingID = buildable->buildingInfo.buildingID;
+                buildable->buildMenuEntry.iconFilename = iconFilename;
 
                 std::stringstream defaultSize(node.attribute("defaultSize").as_string("1 1"));
 

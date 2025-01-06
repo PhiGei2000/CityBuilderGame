@@ -20,6 +20,7 @@
 #include "misc/roads/roadSpecs.hpp"
 #include "rendering/geometry.hpp"
 #include "rendering/material.hpp"
+#include "resources/font.hpp"
 #include "resources/mesh.hpp"
 #include "resources/meshLoader.hpp"
 #include "resources/objectLoader.hpp"
@@ -56,14 +57,14 @@ void ResourceManager::loadResource<Shader>(const std::string& id, const std::str
     std::filesystem::path geometryPath;
 
     if (fragmentFilename.empty()) {
-        vertexPath = resourceDir/(vertexFilename + ".vert");
-        fragmentPath = resourceDir/(vertexFilename + ".frag");
-        geometryPath = resourceDir/(vertexFilename + ".geom");
+        vertexPath = resourceDir / (vertexFilename + ".vert");
+        fragmentPath = resourceDir / (vertexFilename + ".frag");
+        geometryPath = resourceDir / (vertexFilename + ".geom");
     }
     else {
-        vertexPath = resourceDir/vertexFilename;
-        fragmentPath = resourceDir/fragmentFilename;
-        geometryPath = resourceDir/geometryFilename;
+        vertexPath = resourceDir / vertexFilename;
+        fragmentPath = resourceDir / fragmentFilename;
+        geometryPath = resourceDir / geometryFilename;
     }
 
     ShaderProgram* shader = nullptr;
@@ -90,15 +91,20 @@ void ResourceManager::loadResource<Shader>(const std::string& id, const std::str
 
 template<>
 void ResourceManager::loadResource<Texture>(const std::string& id, const std::string& filename, bool alpha) {
-    std::filesystem::path texturePath = resourceDir/filename;
+    std::filesystem::path texturePath = resourceDir / filename;
     Texture* texture = alpha ? new Texture(texturePath.string(), GL_RGBA) : new Texture(texturePath.string());
 
     setResource(id, TexturePtr(texture));
 }
 
+template<>
+void ResourceManager::loadResource<Font>(const std::string& id, const std::string& filename) {
+    setResource(id, FontPtr(new Font(filename)));
+}
+
 void ResourceManager::loadResources() {
     xml_document doc;
-    xml_parse_result result = doc.load_file((resourceDir/"resources.xml").c_str());
+    xml_parse_result result = doc.load_file((resourceDir / "resources.xml").c_str());
 
     if (!result) {
         std::cerr << "ResourceManager::loadResources "
@@ -165,7 +171,7 @@ void ResourceManager::loadResources() {
             if (filename.empty()) {
             }
             else {
-                std::unordered_map<std::string, MaterialPtr> materials = MeshLoader::loadMaterials((resourceDir/filename).string());
+                std::unordered_map<std::string, MaterialPtr> materials = MeshLoader::loadMaterials((resourceDir / filename).string());
 
                 for (const auto& materialNode : resourceNode.children("material")) {
                     const std::string& materialName = materialNode.attribute("name").as_string();
@@ -187,7 +193,7 @@ void ResourceManager::loadResources() {
         else if (type == "mesh") {
             const std::string& shaderID = resourceNode.attribute("shader").as_string("MESH_SHADER");
 
-            MeshPtr mesh = MeshLoader::loadMesh((resourceDir/filename).string());
+            MeshPtr mesh = MeshLoader::loadMesh((resourceDir / filename).string());
             mesh->shader = getResource<Shader>(shaderID);
 
             setResource(id, mesh);
@@ -197,8 +203,8 @@ void ResourceManager::loadResources() {
     }
 
     // buildings
-    std::filesystem::path buildingsPath = resourceDir/"buildings";
-    std::filesystem::path roadsFile = buildingsPath/"roads.xml";
+    std::filesystem::path buildingsPath = resourceDir / "buildings";
+    std::filesystem::path roadsFile = buildingsPath / "roads.xml";
 
     result = doc.load_file(roadsFile.c_str());
 
@@ -209,7 +215,6 @@ void ResourceManager::loadResources() {
         throw std::runtime_error(message);
     }
 
-    BuildMenu* buildMenu = app->getGui()->getBuildMenu();
     for (const auto& node : doc.child("roads").children("roadPack")) {
         const std::string& id = node.attribute("id").as_string();
         const std::string& name = node.attribute("name").as_string();
@@ -228,10 +233,8 @@ void ResourceManager::loadResources() {
         ShaderPtr shader = getResource<Shader>(shaderId);
 
         const std::string& buildingID = "infrastructure.roads." + id;
-        RoadPack* pack = new RoadPack(specs, material, shader);
+        RoadPack* pack = new RoadPack(name, specs, material, shader, (resourceDir / icon).string());
         setResource(buildingID, ResourcePtr<RoadPack>(pack));
-
-        buildMenu->addBuildingEntry(BuildMenuEntry{name, "roads", BuildingCategory::INFRASTRUCTURE, buildingID, (resourceDir/icon).string()});
     }
 
     for (const auto& entry : std::filesystem::directory_iterator(buildingsPath)) {
@@ -240,18 +243,31 @@ void ResourceManager::loadResources() {
                 continue;
             }
 
-            BuildMenuEntry menuEntry;
-            ObjectPtr object = objectLoader.loadObject(entry.path().string(), &menuEntry);
-            const std::string& id = object->buildable ? menuEntry.buildingID : "object." + object->name;
+            ObjectPtr object = objectLoader.loadObject(entry.path().string());
 
             if (object->buildable) {
-                menuEntry.iconFilename = (resourceDir/menuEntry.iconFilename).string();
-                buildMenu->addBuildingEntry(menuEntry);
-            setResource<BuildableObject>(id, std::reinterpret_pointer_cast<BuildableObject>(object));
+                auto buildableObject = std::reinterpret_pointer_cast<BuildableObject>(object);
+                buildableObject->buildMenuEntry.iconFilename = (resourceDir / buildableObject->buildMenuEntry.iconFilename).string();
+                setResource<BuildableObject>(buildableObject->buildMenuEntry.buildingID, buildableObject);
             }
             else {
-                setResource(id, object);
+                setResource(object->name, object);
             }
         }
     }
+
+    // fonts
+    // std::filesystem::path fontsDirectory = resourceDir / "fonts";
+    // for (const auto& entry : std::filesystem::directory_iterator(fontsDirectory)) {
+    //     if (entry.path().extension() != ".ttf") {
+    //         continue;
+    //     }
+
+    //     std::string id = entry.path().filename().string();
+    //     id = id.substr(0, id.size() - 4);
+
+    //     loadResource<Font>(id, entry.path().string());
+    // }
+
+    loadResource<Font>("Montserrat-Regular", resourceDir / "fonts"/ "Montserrat-Regular.ttf");
 }

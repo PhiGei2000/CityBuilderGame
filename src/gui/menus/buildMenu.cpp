@@ -20,6 +20,8 @@
 #include "events/mouseEvents.hpp"
 #include "gui/components/button.hpp"
 #include "gui/gui.hpp"
+#include "resources/object.hpp"
+#include "resources/roadPack.hpp"
 
 #include <cctype>
 
@@ -33,20 +35,20 @@ BuildMenu::BuildMenu(Gui* gui)
     constraints.width = RelativeConstraint(0.75f);
     constraints.height = RelativeConstraint(0.75f);
 
-    title = new Label("build_menu.title", gui, colors::darkGrey, "Build menu");
+    title = new Label("build_menu.title", gui, colors::darkGrey, "Build menu", nullptr);
     title->constraints.x = AbsoluteConstraint();
     title->constraints.y = AbsoluteConstraint();
     title->constraints.height = AbsoluteConstraint(32.0f);
     title->textAlign = TextAlign::BEGIN;
     addChild(title);
 
-    for (unsigned int i = 0 ; i < static_cast<unsigned int>(BuildingCategory::BUILDING_CATEGORY_COUNT); i++) {
+    for (unsigned int i = 0; i < static_cast<unsigned int>(BuildingCategory::BUILDING_CATEGORY_COUNT); i++) {
         BuildingCategory category = static_cast<BuildingCategory>(i);
         std::string categoryName = to_string(category);
 
         categoryName[0] = std::toupper(categoryName[0]);
 
-        Label* categoryLabel = new Label(std::format("build_menu.label_{}", categoryName), gui, colors::darkGrey, categoryName, 12);
+        Label* categoryLabel = new Label(std::format("build_menu.label_{}", categoryName), gui, colors::darkGrey, categoryName, nullptr, 12);
         categoryLabel->constraints.height = AbsoluteConstraint(18.0f);
         categoryLabel->textAlign = TextAlign::BEGIN;
         addChild(categoryLabel);
@@ -56,6 +58,15 @@ BuildMenu::BuildMenu(Gui* gui)
         addChild(categoryStackPanel);
 
         categories[category] = std::make_pair(categoryLabel, categoryStackPanel);
+    }
+
+    const ResourceManager& resourceManager = gui->getApp()->getGame()->getResourceManager();
+    for (const auto& [roadPackID, roadPack] : resourceManager.getResources<RoadPack>()) {
+        addBuildingEntry(BuildMenuEntry{roadPack->name, "roads", BuildingCategory::INFRASTRUCTURE, roadPackID, roadPack->icon});
+    }
+
+    for (const auto& [buildingID, building] : resourceManager.getResources<BuildableObject>()) {
+        addBuildingEntry(building->buildMenuEntry);
     }
 }
 

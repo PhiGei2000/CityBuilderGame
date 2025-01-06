@@ -24,7 +24,8 @@ enum class BuildingCategory : unsigned int {
     INFRASTRUCTURE,
     RESIDENTIAL,
     INDUSTRIAL,
-    BUILDING_CATEGORY_COUNT
+    BUILDING_CATEGORY_COUNT,
+    UNDEFINED
 };
 
 inline const BuildingCategory getBuildingCategory(const std::string& str) {
