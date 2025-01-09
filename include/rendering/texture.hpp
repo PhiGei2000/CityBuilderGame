@@ -23,6 +23,7 @@
 class Texture {
   protected:
     unsigned int texture;
+    int width, height;
 
   public:
     Texture(const std::string& filename);
@@ -31,6 +32,8 @@ class Texture {
     Texture(const glm::vec4& rgba, int width, int height);
 
     void use(unsigned int texUnit) const;
+
+    glm::vec2 applyHalfPixelCorrection(const glm::vec2& texCoord) const;
 };
 
 using TexturePtr = ResourcePtr<Texture>;

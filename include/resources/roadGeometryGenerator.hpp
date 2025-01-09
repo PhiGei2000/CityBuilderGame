@@ -33,29 +33,30 @@ class RoadGeometryGenerator {
         float sizeU, sizeV;
     };
 
+    static constexpr float halfPixelSize = 0.5f / 512.0f;
     static constexpr float halfGrid = Configuration::cellSize / 2.0f;
 
-    static constexpr UVArea roadwayUVArea = {0.125f, 0.0f, 0.25f, 0.5f};
-    static constexpr UVArea halfRoadwayUVArea = {0.125f, 0.0f, 0.25f, 0.25f};
-    static constexpr UVArea roadwayClearUVArea = {0.5f, 0.5f, 0.5f, 0.5f};
-    static constexpr UVArea halfRoadwayClearUVArea = {0.5f, 0.5f, 0.25f, 0.25f};
+    static constexpr UVArea roadwayUVArea = {0.125f + halfPixelSize, 0.0f + halfPixelSize, 0.25f - 2 * halfPixelSize, 0.5f - 2 * halfPixelSize};
+    static constexpr UVArea halfRoadwayUVArea = {0.125f + halfPixelSize, 0.0f + halfPixelSize, 0.25f - 2 * halfPixelSize, 0.25f - 2 * halfPixelSize};
+    static constexpr UVArea roadwayClearUVArea = {0.5f + halfPixelSize, 0.5f + halfPixelSize, 0.5f - 2 * halfPixelSize, 0.5f - 2 * halfPixelSize};
+    static constexpr UVArea halfRoadwayClearUVArea = {0.5f + halfPixelSize, 0.5f + halfPixelSize, 0.25f - 2 * halfPixelSize, 0.25f - 2 * halfPixelSize};
 
     static constexpr UVArea sidewalkStraightUVAreas[] = {
-        {  0.5f, 0.0f, 0.125f, 0.5f},
-        {0.625f, 0.0f,  0.25f, 0.5f},
-        {0.875f, 0.0f, 0.125f, 0.5f}
+        {  0.5f + halfPixelSize, 0.0f + halfPixelSize, 0.125f - 2 * halfPixelSize, 0.5f - 2 * halfPixelSize},
+        {0.625f + halfPixelSize, 0.0f + halfPixelSize,  0.25f - 2 * halfPixelSize, 0.5f - 2 * halfPixelSize},
+        {0.875f + halfPixelSize, 0.0f + halfPixelSize, 0.125f - 2 * halfPixelSize, 0.5f - 2 * halfPixelSize}
     };
     static constexpr UVArea halfSidewalkStraightUVAreas[] = {
-        {  0.5f, 0.0f, 0.125f, 0.25f},
-        {0.625f, 0.0f,  0.25f, 0.25f},
-        {0.875f, 0.0f, 0.125f, 0.25f}
+        {  0.5f + halfPixelSize, 0.0f + halfPixelSize, 0.125f - 2 * halfPixelSize, 0.25f - 2 * halfPixelSize},
+        {0.625f + halfPixelSize, 0.0f + halfPixelSize,  0.25f - 2 * halfPixelSize, 0.25f - 2 * halfPixelSize},
+        {0.875f + halfPixelSize, 0.0f + halfPixelSize, 0.125f - 2 * halfPixelSize, 0.25f - 2 * halfPixelSize}
     };
     static constexpr UVArea sidewalkRoundUVAreas[] = {
-        {  0.5f, 0.0f, 0.125f,   0.5f},
-        {0.625f, 0.0f, 0.375f, 0.375f}
+        {  0.5f + halfPixelSize, 0.0f + halfPixelSize, 0.125f - 2 * halfPixelSize,   0.5f - 2 * halfPixelSize},
+        {0.625f + halfPixelSize, 0.0f + halfPixelSize, 0.375f - 2 * halfPixelSize, 0.375f - 2 * halfPixelSize}
     };
-    static constexpr UVArea crossingRoadwayUVArea = {0.0f, 0.5f, 0.5f, 0.5f};
-    static constexpr UVArea tCrossingRoadwayUVArea = {0.125f, 0.5f, 0.375f, 0.5f};
+    static constexpr UVArea crossingRoadwayUVArea = {0.0f + halfPixelSize, 0.5f + halfPixelSize, 0.5f- 2 * halfPixelSize, 0.5f - 2 * halfPixelSize};
+    static constexpr UVArea tCrossingRoadwayUVArea = {0.125f + halfPixelSize, 0.5f + halfPixelSize, 0.375f- 2 * halfPixelSize, 0.5f - 2 * halfPixelSize};
 
     static GeometryData generateQuad(const glm::vec3& pos, const glm::vec3& first, const glm::vec3& second, const UVArea& uvs);
 

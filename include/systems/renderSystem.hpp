@@ -124,6 +124,7 @@ class RenderSystem : public System {
 
     template<typename... T>
     inline void renderSceneShadows(entt::exclude_t<T...> exclude = {}) const {
+        return;
         GameState gameState = game->getState();
 
         registry.view<MeshComponent, TransformationComponent>(exclude)
