@@ -38,7 +38,7 @@ BuildMenu::BuildMenu(Gui* gui)
     title = new Label("build_menu.title", gui, colors::darkGrey, "Build menu", nullptr);
     title->constraints.x = AbsoluteConstraint();
     title->constraints.y = AbsoluteConstraint();
-    title->constraints.height = AbsoluteConstraint(32.0f);
+    title->constraints.height = AbsoluteConstraint(48.0f);
     title->textAlign = TextAlign::BEGIN;
     addChild(title);
 
@@ -54,7 +54,7 @@ BuildMenu::BuildMenu(Gui* gui)
         addChild(categoryLabel);
 
         StackPanel* categoryStackPanel = new StackPanel(std::format("build_menu.stackPanel_{}", categoryName), gui, StackOrientation::ROW, colors::transparent, ItemAligment::BEGIN);
-        categoryStackPanel->constraints.height = AbsoluteConstraint(64.0f);
+        categoryStackPanel->constraints.height = AbsoluteConstraint(84.0f);
         addChild(categoryStackPanel);
 
         categories[category] = std::make_pair(categoryLabel, categoryStackPanel);
@@ -88,6 +88,7 @@ void BuildMenu::addBuildingEntry(const BuildMenuEntry& entry) {
 
     IconButton* button = new IconButton(std::format("build_menu.button_{}", entry.buildingID), gui, colors::anthraziteGrey, iconTexture);
 
+    button->constraints.y = AbsoluteConstraint(10.0f);
     button->constraints.width = AbsoluteConstraint(64);
     button->constraints.height = AbsoluteConstraint(64);
     button->onClick += [=, this](MouseButtonEvent& e) {

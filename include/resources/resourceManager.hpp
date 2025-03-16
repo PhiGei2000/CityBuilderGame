@@ -19,10 +19,10 @@
 
 #include "objectLoader.hpp"
 
+#include <filesystem>
 #include <string>
 #include <typeindex>
 #include <unordered_map>
-#include <filesystem>
 
 class Application;
 
@@ -45,6 +45,7 @@ class ResourceManager {
 
         if (resources.contains(id)) {
             resources[id].data.swap(dataPtr);
+            delete data.get();
         }
         else {
             resources[id] = ResourceHolder{std::type_index(typeid(T)), dataPtr};

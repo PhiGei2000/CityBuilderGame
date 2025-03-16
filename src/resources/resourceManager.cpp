@@ -256,18 +256,6 @@ void ResourceManager::loadResources() {
         }
     }
 
-    // fonts
-    // std::filesystem::path fontsDirectory = resourceDir / "fonts";
-    // for (const auto& entry : std::filesystem::directory_iterator(fontsDirectory)) {
-    //     if (entry.path().extension() != ".ttf") {
-    //         continue;
-    //     }
-
-    //     std::string id = entry.path().filename().string();
-    //     id = id.substr(0, id.size() - 4);
-
-    //     loadResource<Font>(id, entry.path().string());
-    // }
-
-    loadResource<Font>("Montserrat-Regular", resourceDir / "fonts"/ "Montserrat-Regular.ttf");
+    loadResource<Font>("Montserrat-Regular", (resourceDir / "fonts"/ "Montserrat-Regular.ttf").string());
 }
+
