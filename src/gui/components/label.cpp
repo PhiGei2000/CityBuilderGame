@@ -27,6 +27,7 @@ const VertexAttributes Label::TextVertex::attributes = {
 Label::Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, FontPtr font, const int textSize, TextAlign textAlign, const glm::vec4& textColor)
     : Widget(id, gui, backgroundColor), text(text), textAlign(textAlign), textColor(textColor), textSize(textSize), geometry(TextVertex::attributes) {
     this->font = font == nullptr ? gui->getApp()->getGame()->getResourceManager().getResource<Font>("Montserrat-Regular") : font;
+    updateTextGeometry();
 }
 
 Rectangle Label::getBox() const {

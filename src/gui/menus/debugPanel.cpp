@@ -34,7 +34,7 @@ DebugPanel::DebugPanel(Gui* gui)
     TextButton* reloadResourcesButton = new TextButton("debug_menu.reloadResourcesButton", gui, colors::anthraziteGrey, "Reload Resources");
     reloadResourcesButton->constraints.height = AbsoluteConstraint(30);
     reloadResourcesButton->constraints.width = RelativeConstraint(0.9);
-    reloadResourcesButton->textSize=12;
+    reloadResourcesButton->textSize = 12;
     reloadResourcesButton->onClick += [&](const MouseButtonEvent& e) {
         Application* app = this->gui->getApp();
         app->getGame()->reloadResources();
@@ -42,10 +42,9 @@ DebugPanel::DebugPanel(Gui* gui)
     addChild(reloadResourcesButton);
 
     Label* fpsCounter = new Label("debug_menu.fpsCounter", gui, colors::transparent, "FPS: ");
-    fpsCounter->textColor = colors::white;
     fpsCounter->constraints.height = FitToContentConstraint();
     fpsCounter->constraints.width = RelativeConstraint(0.9);
-    fpsCounter->textSize=12;
+    fpsCounter->textSize = 12;
     addChild(fpsCounter);
 
     Label* sunDirection = new Label("debug_menu.sunDirection", gui, colors::transparent, "");

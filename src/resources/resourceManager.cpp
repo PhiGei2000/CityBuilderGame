@@ -251,11 +251,10 @@ void ResourceManager::loadResources() {
                 setResource<BuildableObject>(buildableObject->buildMenuEntry.buildingID, buildableObject);
             }
             else {
-                setResource(object->name, object);
+                setResource("object." + object->name, object);
             }
         }
     }
 
-    loadResource<Font>("Montserrat-Regular", (resourceDir / "fonts"/ "Montserrat-Regular.ttf").string());
+    loadResource<Font>("Montserrat-Regular", (resourceDir / "fonts" / "Montserrat-Regular.ttf").string());
 }
-
