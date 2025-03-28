@@ -227,40 +227,6 @@ std::pair<GeometryData, GeometryData> TerrainSystem::generateTerrainMesh(const g
     return std::make_pair(terrainData, waterData);
 }
 
-void TerrainSystem::updateTerrainMesh(const TerrainArea& area) const {
-    const std::unordered_map<glm::ivec2, TerrainArea>& chunkAreas = area.getChunkAreas();
-
-    for (const auto& [chunkPos, chunkArea] : chunkAreas) {
-        auto mesh = registry.get<MeshComponent>(game->terrain.chunkEntities[chunkPos]);
-
-        updateTerrainMesh(chunkArea, mesh);
-    }
-}
-
-void TerrainSystem::updateTerrainMesh(const TerrainArea& area, MeshComponent& mesh) const {
-    // const auto& [chunkPos, pos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(area.position);
-
-    // mesh.mesh->geometries.at("ground").front().second->bindBuffer();
-
-    // for (int x = 0; x < area.size.x; x++) {
-    //     std::vector<Vertex> terrainVertices;
-
-    //     for (int y = 0; y < area.size.y; y++) {
-    //         const glm::ivec2& cellPosition = (pos + glm::ivec2(x, y));
-
-    //         std::cout << "Update terrain at " << cellPosition << std::endl;
-    //         generateTerrainQuadMesh(cellPosition, chunkPos, terrainVertices);
-    //     }
-
-    //     unsigned int offset = ((pos.x + x) * Configuration::cellsPerChunk + pos.y) * 6;
-    //     glBufferSubData(GL_ARRAY_BUFFER, offset * sizeof(Vertex), terrainVertices.size() * sizeof(Vertex), terrainVertices.data());
-    // }
-
-    // glBindVertexArray(0);
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
 TerrainSystem::TerrainSystem(Game* game)
     : System(game) {
     // game->getEventDispatcher().sink<BuildEvent>().connect<&TerrainSystem::handleBuildEvent>(*this);
@@ -298,11 +264,51 @@ void TerrainSystem::update(float dt) {
         }
     }
 
-    // create mesh
-    while (chunksToCreateMesh.size() > 0 && meshCreationTasks.size() < maxThreads) {
-        const glm::ivec2 position = chunksToCreateMesh.front();
+    for (auto it = meshUpdateTasks.begin(); it != meshUpdateTasks.end();) {
+        if (it->second.valid() && it->second.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+            const glm::ivec2 chunkPos = it->first;
+            const auto& [terrainGeometry, waterGeometry] = it->second.get();
 
-        const entt::entity chunkEntity = game->terrain.chunkEntities[position];
+            entt::entity chunk = game->terrain.chunkEntities[chunkPos];
+            TerrainComponent& terrain = registry.get<TerrainComponent>(chunk);
+            MeshComponent& mesh = registry.get<MeshComponent>(chunk);
+
+            mesh.mesh->geometries["0ground"][0].second->bufferData(terrainGeometry.vertices, terrainGeometry.indices);
+            mesh.mesh->geometries["1water"][0].second->bufferData(waterGeometry.vertices, waterGeometry.indices);
+
+            terrain.meshOutdated = false;
+
+            it = meshUpdateTasks.erase(it);
+        }
+        else {
+            it++;
+        }
+    }
+
+    for (const auto& [chunkPos, chunkEntity] : game->terrain.chunkEntities) {
+        const TerrainComponent& terrain = registry.get<TerrainComponent>(chunkEntity);
+        if (terrain.meshOutdated) {
+            chunksToUpdateMesh.push(chunkPos);
+        }
+    }
+
+    // update mesh
+    while (chunksToUpdateMesh.size() > 0 && meshUpdateTasks.size() + meshCreationTasks.size() < maxThreads) {
+        const glm::ivec2& position = chunksToUpdateMesh.front();
+
+        const entt::entity chunkEntity = game->terrain.chunkEntities.at(position);
+        const TerrainComponent& terrain = registry.get<TerrainComponent>(chunkEntity);
+
+        meshUpdateTasks.emplace_back(position, std::async(std::launch::async, &TerrainSystem::generateTerrainMesh, position, terrain.terrain));
+
+        chunksToUpdateMesh.pop();
+    }
+
+    // create mesh
+    while (chunksToCreateMesh.size() > 0 && meshUpdateTasks.size() + meshCreationTasks.size() < maxThreads) {
+        const glm::ivec2& position = chunksToCreateMesh.front();
+
+        const entt::entity chunkEntity = game->terrain.chunkEntities.at(position);
         const TerrainComponent& terrain = registry.get<TerrainComponent>(chunkEntity);
 
         meshCreationTasks.emplace_back(position, std::async(std::launch::async, &TerrainSystem::generateTerrainMesh, position, terrain.terrain));
@@ -329,14 +335,6 @@ void TerrainSystem::update(float dt) {
 
         chunksToCreateMesh.push(position);
     }
-
-    // while (areasToUpdateMesh.size() > 0) {
-    //     const TerrainArea area = areasToUpdateMesh.front();
-
-    //     updateTerrainMesh(area);
-
-    //     areasToUpdateMesh.pop();
-    // }
 
     const TransformationComponent& cameraTransform = registry.get<TransformationComponent>(game->camera);
     const auto [currentChunk, _] = utility::worldToNormalizedChunkGridCoords(cameraTransform.position);

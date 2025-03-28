@@ -77,7 +77,18 @@ struct Quadtree {
         return data.subtrees[subnodeIndex].getNode(key);
     }
 
-    NodeType& setValue(const glm::ivec2& key, const TValue& value) {
+    inline NodeType& createLeaf(const glm::ivec2& key, int size = 1) {
+        if (data.nodeSize <= size) {
+            return data;
+        }
+
+        int subtreeIndex = getSubnodeIndex(key);
+        split();
+
+        return data.subtrees[subtreeIndex].createLeaf(key, size);
+    }
+
+    inline NodeType& setValue(const glm::ivec2& key, const TValue& value) {
         if (data.nodeSize == 1 && data.key == key) {
             data.value = value;
             return data;

@@ -20,6 +20,8 @@
 #include "events/keyEvent.hpp"
 #include "events/mouseEvents.hpp"
 
+struct CameraComponent;
+
 class CameraSystem : public System {
   protected:
     entt::entity cameraEntity;
@@ -30,6 +32,8 @@ class CameraSystem : public System {
     int inputX = 0, inputZ = 0;
 
     virtual void init() override;
+
+    std::pair<glm::vec3, glm::vec2> getCameraMovement(const CameraComponent& camera) const;
 
   public:
     CameraSystem(Game* game);

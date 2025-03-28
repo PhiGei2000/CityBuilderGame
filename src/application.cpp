@@ -79,16 +79,18 @@ void Application::init() {
     // anti-aliasing
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-#if DEBUG
-    window = glfwCreateWindow(800, 600, "City Building Game", NULL, NULL);
-#else
-    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-
     int x, y, width, height;
+    GLFWmonitor* monitor = NULL;
+#if DEBUG
+    width = 800;
+    height = 600;
+#else
+    monitor = glfwGetPrimaryMonitor();
+
     glfwGetMonitorWorkarea(monitor, &x, &y, &width, &height);
 
-    window = glfwCreateWindow(width, height, "City Building Game", monitor, NULL);
 #endif
+    window = glfwCreateWindow(width, height, "City Building Game", monitor, NULL);
 
     if (window == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
@@ -128,6 +130,9 @@ void Application::init() {
 
     // init game
     game = new Game(this);
+
+    FramebufferSizeEvent framebufferSizeEvent{width, height};
+    game->raiseEvent(framebufferSizeEvent);
 
     gui->init();
 }

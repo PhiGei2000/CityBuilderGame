@@ -43,39 +43,10 @@ void CameraSystem::update(float dt) {
     CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     TransformationComponent& transform = registry.get<TransformationComponent>(cameraEntity);
 
-    glm::vec3 xzCameraFront = glm::vec3(camera.front.x, 0.0f, camera.front.z);
-    glm::vec3 xzCameraRight = glm::vec3(camera.right.x, 0.0f, camera.right.z);
-
     const static float cameraSpeed = 10.0f;
     const static float cameraRotationSpeed = 10.0f;
 
-    glm::vec3 cameraMoveDirection = glm::vec3(0.0f);
-    glm::vec2 cameraRotationDirection = glm::vec2(0.0f);
-
-    if (game->getKey(GLFW_KEY_W) == GLFW_PRESS) {
-        cameraMoveDirection += xzCameraFront;
-    }
-    if (game->getKey(GLFW_KEY_S) == GLFW_PRESS) {
-        cameraMoveDirection -= xzCameraFront;
-    }
-    if (game->getKey(GLFW_KEY_D) == GLFW_PRESS) {
-        cameraMoveDirection += xzCameraRight;
-    }
-    if (game->getKey(GLFW_KEY_A) == GLFW_PRESS) {
-        cameraMoveDirection -= xzCameraRight;
-    }
-    if (game->getKey(GLFW_KEY_E) == GLFW_PRESS) {
-        cameraRotationDirection.x += 1;
-    }
-    if (game->getKey(GLFW_KEY_Q) == GLFW_PRESS) {
-        cameraRotationDirection.x -= 1;
-    }
-    if (game->getKey(GLFW_KEY_R) == GLFW_PRESS) {
-        cameraRotationDirection.y += 1;
-    }
-    if (game->getKey(GLFW_KEY_F) == GLFW_PRESS) {
-        cameraRotationDirection.y -= 1;
-    }
+    const auto& [cameraMoveDirection, cameraRotationDirection] = getCameraMovement(camera);
 
     bool cameraPositionUpdated = false;
     if (cameraMoveDirection.x != 0 || cameraMoveDirection.z != 0) {
@@ -113,4 +84,39 @@ void CameraSystem::onFramebufferSize(const FramebufferSizeEvent& e) {
 
     CameraUpdateEvent event{cameraEntity, true, false, false};
     game->raiseEvent<CameraUpdateEvent>(event);
+}
+
+std::pair<glm::vec3, glm::vec2> CameraSystem::getCameraMovement(const CameraComponent& camera) const {
+    const glm::vec3& xzCameraFront = glm::vec3(camera.front.x, 0.0f, camera.front.z);
+    const glm::vec3& xzCameraRight = glm::vec3(camera.right.x, 0.0f, camera.right.z);
+
+    glm::vec3 cameraMoveDirection = glm::vec3(0.0f);
+    glm::vec2 cameraRotationDirection = glm::vec2(0.0f);
+
+    if (game->getKey(GLFW_KEY_W) == GLFW_PRESS) {
+        cameraMoveDirection += xzCameraFront;
+    }
+    if (game->getKey(GLFW_KEY_S) == GLFW_PRESS) {
+        cameraMoveDirection -= xzCameraFront;
+    }
+    if (game->getKey(GLFW_KEY_D) == GLFW_PRESS) {
+        cameraMoveDirection += xzCameraRight;
+    }
+    if (game->getKey(GLFW_KEY_A) == GLFW_PRESS) {
+        cameraMoveDirection -= xzCameraRight;
+    }
+    if (game->getKey(GLFW_KEY_E) == GLFW_PRESS) {
+        cameraRotationDirection.x += 1;
+    }
+    if (game->getKey(GLFW_KEY_Q) == GLFW_PRESS) {
+        cameraRotationDirection.x -= 1;
+    }
+    if (game->getKey(GLFW_KEY_R) == GLFW_PRESS) {
+        cameraRotationDirection.y += 1;
+    }
+    if (game->getKey(GLFW_KEY_F) == GLFW_PRESS) {
+        cameraRotationDirection.y -= 1;
+    }
+
+    return std::make_pair(cameraMoveDirection, cameraRotationDirection);
 }

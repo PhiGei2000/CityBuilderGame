@@ -49,10 +49,11 @@ class TerrainSystem : public System {
 
     std::queue<glm::ivec2> chunksToGenerate;
     std::queue<glm::ivec2> chunksToCreateMesh;
-    std::queue<TerrainArea> areasToUpdateMesh;
+    std::queue<glm::ivec2> chunksToUpdateMesh;
 
     static constexpr unsigned int maxThreads = 5;
     std::vector<std::pair<glm::ivec2, std::future<std::pair<GeometryData, GeometryData>>>> meshCreationTasks;
+    std::vector<std::pair<glm::ivec2, std::future<std::pair<GeometryData, GeometryData>>>> meshUpdateTasks;
 
     void init() override;
 
@@ -63,9 +64,6 @@ class TerrainSystem : public System {
 
     static std::pair<unsigned int, unsigned int> generateTerrainQuadMesh(const glm::ivec2& chunkPosition, std::vector<Vertex>& terrainVertices, std::vector<Vertex>& waterVertices, const Quadtree<TerrainData>& terrainData);
     static unsigned int generateQuad(const glm::vec2& position, float size, const float heights[4], unsigned int textureID, std::vector<Vertex>& vertices);
-
-    void updateTerrainMesh(const TerrainArea& area) const;
-    void updateTerrainMesh(const TerrainArea& area, MeshComponent& mesh) const;
 
   public:
     TerrainSystem(Game* game);

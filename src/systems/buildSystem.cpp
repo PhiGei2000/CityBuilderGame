@@ -54,6 +54,9 @@ BuildSystem::BuildSystem(Game* game)
 
     eventDispatcher.sink<BuildingSelectedEvent>()
         .connect<&BuildSystem::handleBuildingSelectedEvent>(*this);
+
+    eventDispatcher.sink<CameraUpdateEvent>()
+        .connect<&BuildSystem::handleCameraUpdateEvent>(*this);
 }
 
 void BuildSystem::init() {
@@ -88,37 +91,16 @@ void BuildSystem::update(float dt) {
         // update the transformation component of the current building, so it will be rendered at the right place
         building.gridPosition = gridMouseIntersection.position;
 
-        // calculate position based on rotation
-        TransformationComponent& transform = registry.get<TransformationComponent>(currentBuilding);
-        glm::vec3 offset = getBuildingOffset(building.buildingID);
+        const auto& [chunk, _] = utility::normalizedWorldGridToNormalizedChunkGridCoords(building.gridPosition);
+        if (game->terrain.chunkLoaded(chunk)) {
+            std::cout << "Building position: " << building.gridPosition << std::endl;
 
-        // rotation | offset
-        // ------------------
-        // 0        | (0,0,0)
-        // 1        | (0,0,1)
-        // 2        | (1,0,1)
-        // 3        | (1,0,0)
+            // calculate position based on rotation
+            updateBuildingPosition(building);
 
-        switch (building.rotation) {
-            case 1:
-                offset.z += static_cast<float>(Configuration::cellSize) * building.size.x;
-                break;
-            case 2:
-                offset.x += static_cast<float>(Configuration::cellSize) * building.size.x;
-                offset.z += static_cast<float>(Configuration::cellSize) * building.size.y;
-                break;
-            case 3:
-                offset.x += static_cast<float>(Configuration::cellSize) * building.size.y;
-                break;
-            default:
-                break;
+            gridMouseIntersection.positionChanged = false;
+            buildingRotationUpdated = false;
         }
-
-        transform.setPosition(utility::normalizedWorldGridToWorldCoords(glm::vec2(building.gridPosition)) + offset);
-        transform.calculateTransform();
-
-        gridMouseIntersection.positionChanged = false;
-        buildingRotationUpdated = false;
     }
 
     while (objectsToBuild.size() > 0) {
@@ -148,8 +130,7 @@ std::pair<bool, glm::ivec2> BuildSystem::getGridPos(const glm::vec2& mousePos, c
 
     // get cell with first intersection (not perfect yet)
 
-    for (int i = 0; i < cells.size(); i++) {
-        const auto& [cell, intersection] = cells[i];
+    for (const auto& [cell, intersection] : cells) {
         if (!game->terrain.positionValid(cell)) {
             break;
         }
@@ -193,12 +174,12 @@ const glm::ivec2& BuildSystem::getDefaultSize(std::string buildingID) {
 }
 
 bool BuildSystem::canBuild(const std::vector<glm::ivec2>& positions, const std::string buildingID, const TerrainComponent& terrain) const {
-    // TODO: Implement this when returning to non flat terrain
+    // TODO: Implement this
 
     return true;
 }
 
-const glm::vec3 BuildSystem::getBuildingOffset(const std::string& buildingID) {
+const glm::vec3 BuildSystem::getBuildingOffset(const std::string& buildingID) const {
     if (buildingID.starts_with("infrastructure.roads")) {
         return static_cast<float>(Configuration::cellSize) * glm::vec3(0.5f, 0.0f, 0.5f);
     }
@@ -229,6 +210,52 @@ void BuildSystem::createNewBuilding() {
 
     registry.emplace<TransformationComponent>(currentBuilding, utility::normalizedWorldGridToWorldCoords(glm::vec2(gridMouseIntersection.position)) + getBuildingOffset(selectedBuildingID)).calculateTransform();
     registry.emplace<BuildingComponent>(currentBuilding, selectedBuildingID, gridMouseIntersection.position, 0, defaultSize, true);
+}
+
+void BuildSystem::updateBuildingPosition(const BuildingComponent& building) const {
+    TransformationComponent& transform = registry.get<TransformationComponent>(currentBuilding);
+    glm::vec3 offset = getBuildingOffset(building.buildingID);
+
+    const std::array<float, 4>& cellHeights = game->terrain.getTerrainCellHeights(building.gridPosition);
+    float cellHeight = *std::max_element(cellHeights.begin(), cellHeights.end());
+    offset.y += cellHeight;
+
+    // rotation | offset
+    // ------------------
+    // 0        | (0,0,0)
+    // 1        | (0,0,1)
+    // 2        | (1,0,1)
+    // 3        | (1,0,0)
+
+    switch (building.rotation) {
+        case 1:
+            offset.z += static_cast<float>(Configuration::cellSize) * building.size.x;
+            break;
+        case 2:
+            offset.x += static_cast<float>(Configuration::cellSize) * building.size.x;
+            offset.z += static_cast<float>(Configuration::cellSize) * building.size.y;
+            break;
+        case 3:
+            offset.x += static_cast<float>(Configuration::cellSize) * building.size.y;
+            break;
+        default:
+            break;
+    }
+
+    transform.setPosition(utility::normalizedWorldGridToWorldCoords(glm::vec2(building.gridPosition)) + offset);
+    transform.calculateTransform();
+}
+
+void BuildSystem::updateGridMouseIntersection() {
+    glm::vec2 mousePos = game->getMousePos();
+    const auto& [intersection, position] = getGridPos(mousePos, getBuildingOffset(selectedBuildingID));
+
+    gridMouseIntersection.intersection = intersection;
+
+    if (intersection) {
+        gridMouseIntersection.positionChanged |= glm::any(glm::notEqual(position, gridMouseIntersection.position));
+        gridMouseIntersection.position = position;
+    }
 }
 
 void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
@@ -278,16 +305,14 @@ void BuildSystem::handleMouseMoveEvent(const MouseMoveEvent& e) {
     if (game->getState() != GameState::BUILD_MODE)
         return;
 
-    glm::vec2 mousePos = game->getMousePos();
-    const auto& [intersection, position] = getGridPos(mousePos, getBuildingOffset(selectedBuildingID));
-    std::cout << position << std::endl;
+    updateGridMouseIntersection();
+}
 
-    gridMouseIntersection.intersection = intersection;
+void BuildSystem::handleCameraUpdateEvent(const CameraUpdateEvent& e) {
+    if (game->getState() != GameState::BUILD_MODE)
+        return;
 
-    if (intersection) {
-        gridMouseIntersection.positionChanged |= glm::any(glm::notEqual(position, gridMouseIntersection.position));
-        gridMouseIntersection.position = position;
-    }
+    updateGridMouseIntersection();
 }
 
 void BuildSystem::handleKeyEvent(const KeyEvent& e) {

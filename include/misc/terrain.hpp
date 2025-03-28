@@ -71,6 +71,11 @@ class Terrain {
     /// @param height The height
     void setTerrainHeight(const glm::ivec2& position, float height) const;
 
+    /// @brief Sets the terrain cell heigts at the specified cell
+    /// @param position The position of the cell in normalized world grid coords
+    /// @param cellHeights The height values of the corners
+    void setTerrainCellHeights(const glm::ivec2& position, const std::array<float, 4>& cellHeights) const;
+
     /// @brief Determines the surface type (grass, water, beach, ...) at the specified position
     /// @param position The position in normalized world grid coords
     /// @return The surface type at the specified position

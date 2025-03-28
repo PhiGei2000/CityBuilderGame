@@ -36,7 +36,11 @@ class RoadSystem : public System {
 
     std::map<std::string, RoadSpecs> roadSpecs;
 
-    void createRoadMesh(const RoadComponent& roadComponent, RoadMeshComponent& geometry) const;
+    void createRoadMesh(const RoadComponent& roadComponent, RoadMeshComponent& geometry, const glm::ivec2& chunk) const;
+
+    void adjustTerrainHeight(const glm::ivec2& chunk, const glm::ivec2& position, RoadComponent& road) const;
+
+    float getRoadHeight(const glm::ivec2& position, const RoadTile& tile) const;
 
     void init();
 

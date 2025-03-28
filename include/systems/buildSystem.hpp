@@ -29,6 +29,7 @@ struct MouseMoveEvent;
 struct KeyEvent;
 struct TerrainComponent;
 struct BuildingComponent;
+struct CameraUpdateEvent;
 
 struct Object;
 
@@ -85,12 +86,14 @@ class BuildSystem : public System {
     /// @return True if the building could be build otherwise false
     bool canBuild(const std::vector<glm::ivec2>& positions, const std::string buildingID, const TerrainComponent& terrain) const;
 
-    const glm::vec3 getBuildingOffset(const std::string& buildingID);
+    const glm::vec3 getBuildingOffset(const std::string& buildingID) const;
 
     /// @brief Creates a new entity in the registry and assings the components for the currently selected building to this entity. In addition to these a BuildingComponent and a TransformationComponent
     void createNewBuilding();
 
-    void updateMesh(const BuildingComponent& building) const;
+    void updateBuildingPosition(const BuildingComponent& building) const;
+
+    void updateGridMouseIntersection();
 
   public:
     BuildSystem(Game* game);
@@ -100,6 +103,8 @@ class BuildSystem : public System {
     void handleMouseButtonEvent(const MouseButtonEvent& e);
 
     void handleMouseMoveEvent(const MouseMoveEvent& e);
+
+    void handleCameraUpdateEvent(const CameraUpdateEvent& e);
 
     void handleKeyEvent(const KeyEvent& e);
 

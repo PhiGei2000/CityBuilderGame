@@ -43,12 +43,16 @@ struct TerrainData {
         terrainHeights[3] = height;
     }
 
-    TerrainData(float heights[4], TerrainSurfaceTypes surfaceType)
+    TerrainData(const float heights[4], TerrainSurfaceTypes surfaceType)
         : surfaceType(surfaceType) {
         terrainHeights[0] = heights[0];
         terrainHeights[1] = heights[1];
         terrainHeights[2] = heights[2];
         terrainHeights[3] = heights[3];
+    }
+
+    TerrainData(const TerrainData& other)
+        : TerrainData(other.terrainHeights, other.surfaceType) {
     }
 
     bool water() const {
@@ -67,12 +71,11 @@ struct TerrainData {
 };
 
 struct TerrainComponent : public AssignableComponent {
-    /// @brief A 2d array of height values for each cell
-    // float** heightValues;
-    /// @brief A 2d array of the surface types
-    // TerrainSurfaceTypes** surfaceTypes;
     /// @brief True if the mesh is generated
     bool meshGenerated = false;
+
+    /// @brief True if the mesh is outdated
+    bool meshOutdated = false;
 
     Quadtree<TerrainData> terrain;
 

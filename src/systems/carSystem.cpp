@@ -37,7 +37,7 @@ void CarSystem::update(float dt) {
         return;
     }
 
-    spawnCars();
+    // spawnCars();
 
     // update cars
     registry.view<CarComponent, TransformationComponent, VelocityComponent>().each(CarSystem::updateCar);

@@ -48,10 +48,11 @@ void RoadSystem::init() {
 
 void RoadSystem::update(float dt) {
     while (!chunksToUpdateMesh.empty()) {
-        const entt::entity chunk = game->terrain.chunkEntities.at(chunksToUpdateMesh.front());
+        const glm::ivec2& chunkPos = chunksToUpdateMesh.front();
+        const entt::entity chunk = game->terrain.chunkEntities.at(chunkPos);
 
         const auto& [road, roadMesh] = registry.get<RoadComponent, RoadMeshComponent>(chunk);
-        createRoadMesh(road, roadMesh);
+        createRoadMesh(road, roadMesh, chunkPos);
         chunksToUpdateMesh.pop();
     }
 
@@ -103,6 +104,7 @@ void RoadSystem::update(float dt) {
         }
 
         road.updateRoad(chunkPos, roadSpecs);
+        adjustTerrainHeight(chunk, chunkPos, road);
 
         // update neighbour roads
         for (unsigned int i = 0; i < 4; i++) {
@@ -120,7 +122,7 @@ void RoadSystem::update(float dt) {
     }
 }
 
-void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& geometry) const {
+void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& geometry, const glm::ivec2& chunkPos) const {
     std::map<std::string, std::map<RoadTileTypes, std::vector<glm::mat4>>> transforms;
     constexpr int sinValues[] = {0, 1, 0, -1};
     constexpr int cosValues[] = {1, 0, -1, 0};
@@ -128,18 +130,22 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& ge
     for (int x = 0; x < Configuration::cellsPerChunk; x++) {
         for (int y = 0; y < Configuration::cellsPerChunk; y++) {
             const RoadTile& tile = road.roadTiles[x][y];
+            RoadTileTypes tileType = tile.tileType;
+
             if (tile.notEmpty()) {
-                const glm::vec3& pos = static_cast<float>(Configuration::cellSize) * glm::vec3(x + 0.5f, 0, y + 0.5f);
+                float roadHeight = getRoadHeight(chunkPos * Configuration::cellsPerChunk + glm::ivec2(x, y), tile);
+
+                const glm::vec3& pos = static_cast<float>(Configuration::cellSize) * glm::vec3(x + 0.5f, 0.0f, y + 0.5f) + glm::vec3(0.0f, roadHeight, 0.0f);
                 float cos = cosValues[tile.rotation];
                 float sin = sinValues[tile.rotation];
 
-                transforms[tile.roadType][tile.tileType].emplace_back(glm::vec4(cos, 0.0f, sin, 0.0f), glm::vec4(0.0f, 1.0f, 0.0f, 0.0f), glm::vec4(-sin, 0.0f, cos, 0.0f), glm::vec4(pos, 1.0f));
+                transforms[tile.roadType][tileType].emplace_back(glm::vec4(cos, 0.0f, sin, 0.0f), glm::vec4(0.0f, 1.0f, 0.0f, 0.0f), glm::vec4(-sin, 0.0f, cos, 0.0f), glm::vec4(pos, 1.0f));
             }
         }
     }
 
     for (const auto& [type, _] : resourceManager.getResources<RoadPack>()) {
-        for (RoadTileTypes tileType = RoadTileTypes::NOT_CONNECTED; tileType < RoadTileTypes::CURVE_FULL; tileType++) {
+        for (RoadTileTypes tileType = RoadTileTypes::NOT_CONNECTED; tileType <= RoadTileTypes::RAMP; tileType++) {
             bool updateBuffer = false;
             if (geometry.roadMeshes.contains(type)) {
                 updateBuffer |= geometry.roadMeshes[type].contains(tileType);
@@ -201,6 +207,65 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& ge
 
     geometry.graphDebugMesh->bufferData(positions, indicesLines, GL_STATIC_DRAW);
 #endif
+}
+
+void RoadSystem::adjustTerrainHeight(const glm::ivec2& chunkPos, const glm::ivec2& position, RoadComponent& road) const {
+    const glm::ivec2& cellPos = Configuration::cellsPerChunk * chunkPos + position;
+
+    const std::array<float, 4>& cellHeights = game->terrain.getTerrainCellHeights(cellPos);
+    float roadHeight = cellHeights[0];
+    bool flatCell = true;
+
+    for (int i = 1; i < 4; i++) {
+        if (cellHeights[i] != cellHeights[0]) {
+            flatCell = false;
+
+            roadHeight = std::max(roadHeight, cellHeights[i]);
+        }
+    }
+
+    RoadTile& tile = road.roadTiles[position.x][position.y];
+    // adjust terrain or build a ramp
+    if (!flatCell) {
+        if (tile.tileType == RoadTileTypes::STRAIGHT) {
+            switch (road.roadTiles[position.x][position.y].rotation % 2) {
+                // north - south
+                case 0: {
+                    float h0 = game->terrain.getTerrainHeight(cellPos + glm::ivec2(-1, 0));
+                    float h1 = game->terrain.getTerrainHeight(cellPos + glm::ivec2(1, 0));
+
+                    game->terrain.setTerrainCellHeights(cellPos, {h0, h1, h0, h1});
+                    tile.tileType = RoadTileTypes::RAMP;
+                    tile.rotation = h0 > h1 ? 2 : 0;
+                } break;
+
+                // east - west
+                case 1: {
+                    float h0 = game->terrain.getTerrainHeight(cellPos + glm::ivec2(0, -1));
+                    float h1 = game->terrain.getTerrainHeight(cellPos + glm::ivec2(0, 1));
+
+                    game->terrain.setTerrainCellHeights(cellPos, {h0, h0, h1, h1});
+                    tile.tileType = RoadTileTypes::RAMP;
+                    tile.rotation = h0 > h1 ? 3 : 1;
+                } break;
+                default:
+                    break;
+            }
+        }
+        else {
+            game->terrain.setTerrainCellHeights(cellPos, {roadHeight, roadHeight, roadHeight, roadHeight});
+        }
+    }
+}
+
+float RoadSystem::getRoadHeight(const glm::ivec2& position, const RoadTile& road) const {
+    const std::array<float, 4> cellHeights = game->terrain.getTerrainCellHeights(position);
+
+    if (road.tileType == RoadTileTypes::RAMP) {
+        return *std::min_element(cellHeights.begin(), cellHeights.end());
+    }
+
+    return *std::max_element(cellHeights.begin(), cellHeights.end());
 }
 
 void RoadSystem::handleBuildEvent(const BuildEvent& event) {

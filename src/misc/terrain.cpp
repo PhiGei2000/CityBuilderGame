@@ -65,13 +65,31 @@ float Terrain::getTerrainHeight(const glm::vec2& position) const {
 }
 
 void Terrain::setTerrainHeight(const glm::ivec2& position, float height) const {
-    const auto& [chunk, pos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
+    const glm::ivec2 positions[4] = {
+        position,
+        position + glm::ivec2(-1, 0),
+        position + glm::ivec2(0, -1),
+        position + glm::ivec2(-1, -1),
+    };
 
-    const entt::entity entity = chunkEntities.at(chunk);
-    TerrainComponent& terrain = game->getRegistry().get<TerrainComponent>(entity);
-    const TerrainData& oldValue = terrain.terrain[pos].value;
+    for (int i = 0; i < 4; i++) {
+        const auto& [chunk, pos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(positions[i]);
 
-    terrain.terrain.setValue(pos, TerrainData(height, oldValue.surfaceType));
+        const entt::entity entity = chunkEntities.at(chunk);
+        TerrainComponent& terrain = game->getRegistry().get<TerrainComponent>(entity);
+
+        if (terrain.terrain.getNode(pos).value.terrainHeights[i] != height) {
+            terrain.terrain.createLeaf(pos).value.terrainHeights[i] = height;
+            terrain.meshOutdated = true;
+        }
+    }
+}
+
+void Terrain::setTerrainCellHeights(const glm::ivec2& position, const std::array<float, 4>& cellHeights) const {
+    setTerrainHeight(position, cellHeights[0]);
+    setTerrainHeight(position + glm::ivec2(1, 0), cellHeights[1]);
+    setTerrainHeight(position + glm::ivec2(0, 1), cellHeights[2]);
+    setTerrainHeight(position + glm::ivec2(1, 1), cellHeights[3]);
 }
 
 TerrainSurfaceTypes Terrain::getSurfaceType(const glm::vec2& position) const {
