@@ -27,7 +27,7 @@ enum class RoadTileTypes : unsigned char {
     T_CROSSING,
     CROSSING,
     STRAIGHT,
-    CURVE_FULL,
+    // CURVE_FULL,
     RAMP,
     UNDEFINED = 254U,
     EMPTY = 255U

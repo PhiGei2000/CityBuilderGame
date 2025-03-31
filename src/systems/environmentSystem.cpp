@@ -31,6 +31,8 @@
 
 #include <format>
 
+const std::array<std::string, 2> EnvironmentSystem::treeNames = {"tree01", "tree02"};
+
 EnvironmentSystem::EnvironmentSystem(Game* game)
     : System(game) {
     init();
@@ -109,30 +111,37 @@ void EnvironmentSystem::destroyEntities() {
 
 void EnvironmentSystem::clearCells() {
 
-    registry.view<EnvironmentComponent, InstancedMeshComponent, TransformationComponent>()
-        .each([&](const EnvironmentComponent& environment, InstancedMeshComponent& instancedMesh, const TransformationComponent& transformation) {
-            while (cellsToClear.size() > 0) {
-                const glm::ivec2& position = cellsToClear.front();
-                auto it = instancedMesh.transformations.begin();
-                bool needsUpdate = false;
+    while (cellsToClear.size() > 0) {
+        const glm::ivec2& position = cellsToClear.front();
+        const auto& [chunkPos, _] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
+        const entt::entity chunkEntity = game->terrain.chunkEntities.at(chunkPos);
 
-                while (it != instancedMesh.transformations.end()) {
-                    const glm::vec3& objectPosition = it->operator[](3);
-                    const glm::ivec2 gridPosition = glm::floor(utility::worldToNormalizedWorldGridCoords(objectPosition));
+        MeshComponent& mesh = registry.get<MeshComponent>(chunkEntity);
 
-                    if (gridPosition == position) {
-                        it = instancedMesh.transformations.erase(it);
-                        needsUpdate = true;
-                    }
-                    else {
-                        it++;
-                    }
+        for (auto& [name, instancedMesh] : mesh.instancedMeshes["trees"].instances) {
+            auto it = instancedMesh.transformations.begin();
+            bool needsUpdate = false;
+
+            while (it != instancedMesh.transformations.end()) {
+                const glm::vec3& objectPosition = it->operator[](3);
+                const glm::ivec2 gridPosition = glm::floor(utility::worldToNormalizedWorldGridCoords(objectPosition));
+
+                if (gridPosition == position) {
+                    it = instancedMesh.transformations.erase(it);
+                    needsUpdate = true;
                 }
+                else {
+                    it++;
+                }
+            }
 
+            if (needsUpdate) {
                 instancedMesh.instanceBuffer.fillBuffer(instancedMesh.transformations);
             }
-            cellsToClear.pop();
-        });
+        }
+
+        cellsToClear.pop();
+    }
 }
 
 void EnvironmentSystem::update(float dt) {
@@ -150,7 +159,7 @@ void EnvironmentSystem::handleBuildEvent(const BuildEvent& e) {
 
     switch (e.shape) {
         case BuildShape::POINT:
-            cellsToClear.emplace(e.positions[0]);
+            cellsToClear.push(e.positions[0]);
             break;
         case BuildShape::LINE: {
             int segmentsCount = e.positions.size() - 1;
@@ -172,9 +181,7 @@ void EnvironmentSystem::handleBuildEvent(const BuildEvent& e) {
 void EnvironmentSystem::handleChunkCreatedEvent(const ChunkCreatedEvent& e) const {
     MeshPtr treeMesh = resourceManager.getResource<Mesh<>>("TREE_MESH");
     const TerrainComponent& terrain = registry.get<TerrainComponent>(e.entity);
-    std::unordered_map<std::string, InstancedMesh<glm::mat4>> transformations;
-
-    const std::array<std::string, 2> treeNames = {"tree01", "tree02"};
+    std::unordered_map<std::string, InstancedData<glm::mat4>> transformations;
 
     // spawn trees
     for (int i = 0; i < 300; i++) {
@@ -203,6 +210,6 @@ void EnvironmentSystem::handleChunkCreatedEvent(const ChunkCreatedEvent& e) cons
         instancedMesh.instanceBuffer.fillBuffer(instancedMesh.transformations);
     }
 
-    MultiInstancedMeshComponent& instancedMesh = registry.emplace<MultiInstancedMeshComponent>(e.entity, treeMesh, transformations);
     registry.emplace<EnvironmentComponent>(e.entity);
+    registry.get<MeshComponent>(e.entity).instancedMeshes["trees"] = InstancedMesh{treeMesh, transformations};
 }

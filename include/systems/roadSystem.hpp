@@ -26,8 +26,7 @@
 
 struct BuildEvent;
 struct RoadComponent;
-struct MeshGeometry;
-struct RoadMeshComponent;
+struct MeshComponent;
 
 class RoadSystem : public System {
   protected:
@@ -36,7 +35,7 @@ class RoadSystem : public System {
 
     std::map<std::string, RoadSpecs> roadSpecs;
 
-    void createRoadMesh(const RoadComponent& roadComponent, RoadMeshComponent& geometry, const glm::ivec2& chunk) const;
+    void createRoadMesh(const RoadComponent& roadComponent, MeshComponent& geometry, const glm::ivec2& chunk) const;
 
     void adjustTerrainHeight(const glm::ivec2& chunk, const glm::ivec2& position, RoadComponent& road) const;
 

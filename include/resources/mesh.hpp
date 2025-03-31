@@ -45,7 +45,8 @@ inline constexpr VertexAttributes getInstanceBufferVertexAttributes<Transformati
 }
 
 enum class MeshShadingMode {
-    WIREFRAME, SOLID
+    WIREFRAME,
+    SOLID
 };
 
 template<typename TKey = std::string>
@@ -104,14 +105,13 @@ struct Mesh {
     std::map<TKey, std::vector<std::pair<MaterialPtr, GeometryPtr>>> geometries;
 
     inline Mesh() {
-
     }
 
     inline Mesh(ShaderPtr shader, const std::map<TKey, std::vector<std::pair<MaterialPtr, GeometryPtr>>>& geometries = {})
         : shader(shader), geometries(geometries) {
     }
 
-    inline void render(const MeshRenderData& renderData, Shader* shader = nullptr) const {
+    inline void render(const MeshRenderData& renderData, MeshShadingMode shadingMode, Shader* shader = nullptr) const {
         if (shader == nullptr) {
             renderData.uploadToShader(this->shader->defaultShader);
         }
@@ -119,15 +119,29 @@ struct Mesh {
             renderData.uploadToShader(shader->defaultShader);
         }
 
+        int polygonMode = GL_FILL;
+        switch (shadingMode) {
+            case MeshShadingMode::WIREFRAME:
+                polygonMode = GL_LINE;
+                glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
+                break;
+            default:
+                break;
+        }
+
         for (const auto& [name, data] : geometries) {
             for (const auto& [material, geometry] : data) {
                 renderGeometry(material, geometry, shader);
             }
         }
+
+        if (polygonMode != GL_FILL) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
     }
 
     template<typename T>
-    inline void renderInstanced(const MeshRenderData& renderData, const InstanceBuffer& instanceBuffer, Shader* shader = nullptr) const {
+    inline void renderInstanced(const MeshRenderData& renderData, MeshShadingMode shadingMode, const InstanceBuffer& instanceBuffer, Shader* shader = nullptr) const {
         if (shader == nullptr) {
             renderData.uploadToShader(this->shader->instanced);
         }
@@ -135,11 +149,25 @@ struct Mesh {
             renderData.uploadToShader(shader->instanced);
         }
 
+        int polygonMode = GL_FILL;
+        switch (shadingMode) {
+            case MeshShadingMode::WIREFRAME:
+                polygonMode = GL_LINE;
+                glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
+                break;
+            default:
+                break;
+        }
+
         linkInstanceBuffer<T>(instanceBuffer);
         for (const auto& [name, data] : geometries) {
             for (const auto& [material, geometry] : data) {
                 renderInstancedGeometry(material, geometry, instanceBuffer.getInstancesCount(), shader);
             }
+        }
+
+        if (polygonMode != GL_FILL) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
     }
 

@@ -246,11 +246,12 @@ void TerrainSystem::update(float dt) {
 
             entt::entity chunk = game->terrain.chunkEntities[chunkPos];
             TerrainComponent& terrain = registry.get<TerrainComponent>(chunk);
-            MeshComponent& mesh = registry.emplace<MeshComponent>(chunk, MeshPtr(new Mesh()));
+            MeshComponent& mesh = registry.emplace<MeshComponent>(chunk);
 
-            mesh.mesh->geometries["0ground"].emplace_back(groundMaterial, new MeshGeometry(terrainGeometry));
-            mesh.mesh->geometries["1water"].emplace_back(waterMaterial, new MeshGeometry(waterGeometry));
-            mesh.mesh->shader = meshShader;
+            mesh.meshes["terrain"] = MeshPtr(new Mesh());
+            mesh.meshes["terrain"]->geometries["0ground"].emplace_back(groundMaterial, new MeshGeometry(terrainGeometry));
+            mesh.meshes["terrain"]->geometries["1water"].emplace_back(waterMaterial, new MeshGeometry(waterGeometry));
+            mesh.meshes["terrain"]->shader = meshShader;
             terrain.meshGenerated = true;
 
             it = meshCreationTasks.erase(it);
@@ -273,8 +274,8 @@ void TerrainSystem::update(float dt) {
             TerrainComponent& terrain = registry.get<TerrainComponent>(chunk);
             MeshComponent& mesh = registry.get<MeshComponent>(chunk);
 
-            mesh.mesh->geometries["0ground"][0].second->bufferData(terrainGeometry.vertices, terrainGeometry.indices);
-            mesh.mesh->geometries["1water"][0].second->bufferData(waterGeometry.vertices, waterGeometry.indices);
+            mesh.meshes["terrain"]->geometries["0ground"][0].second->bufferData(terrainGeometry.vertices, terrainGeometry.indices);
+            mesh.meshes["terrain"]->geometries["1water"][0].second->bufferData(waterGeometry.vertices, waterGeometry.indices);
 
             terrain.meshOutdated = false;
 
@@ -325,7 +326,7 @@ void TerrainSystem::update(float dt) {
         registry.emplace<TransformationComponent>(chunkEntity, utility::normalizedChunkGridToWorldCoords(position, glm::vec2(0.0f)), glm::quat(), glm::vec3(1.0f));
         TerrainComponent& terrain = registry.emplace<TerrainComponent>(chunkEntity);
         registry.emplace<RoadComponent>(chunkEntity);
-        registry.emplace<RoadMeshComponent>(chunkEntity);
+        // registry.emplace<RoadMeshComponent>(chunkEntity);
         game->terrain.chunkEntities[position] = chunkEntity;
 
         // generate terrain height

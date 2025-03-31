@@ -18,6 +18,7 @@
 #include "systems/system.hpp"
 
 #include "components/buildingComponent.hpp"
+#include "components/environmentComponent.hpp"
 #include "components/instancedMeshComponent.hpp"
 #include "components/meshComponent.hpp"
 #include "components/roadMeshComponent.hpp"
@@ -59,9 +60,10 @@ class RenderSystem : public System {
     inline void renderScene(entt::exclude_t<T...> exclude = {}) const {
         GameState gameState = game->getState();
 
-        registry.view<MeshComponent, TransformationComponent>(entt::exclude<T..., TerrainComponent>)
+        registry.view<MeshComponent, TransformationComponent>(entt::exclude<T...>)
             .each([&](auto entity, const MeshComponent& mesh, const TransformationComponent& transform) {
                 MeshRenderData renderData = {transform.transform};
+                MeshShadingMode shadingMode = MeshShadingMode::SOLID;
 
                 // TODO: Optimize this
                 if (registry.all_of<BuildingComponent>(entity)) {
@@ -73,68 +75,73 @@ class RenderSystem : public System {
                     renderData.preview = building.preview;
                 }
 
-                mesh.mesh->render(renderData);
-            });
-
-        if (game->terrain.shadingMode == MeshShadingMode::WIREFRAME) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        }
-
-        registry.view<MeshComponent, TransformationComponent, TerrainComponent>(exclude)
-            .each([&](auto entity, const MeshComponent& mesh, const TransformationComponent& transform, const TerrainComponent& terrain) {
-                MeshRenderData renderData = {transform.transform};
-                mesh.mesh->render(renderData);
-            });
-
-        if (game->terrain.shadingMode == MeshShadingMode::WIREFRAME) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
-
-        registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
-            .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {
-                MeshRenderData renderData = {transform.transform};
-                mesh.mesh->renderInstanced<TransformationComponent>(renderData, mesh.instanceBuffer);
-            });
-
-        registry.view<MultiInstancedMeshComponent, TransformationComponent>(exclude)
-            .each([&](const MultiInstancedMeshComponent& mesh, const TransformationComponent& transform) {
-                MeshRenderData renderData = {transform.transform};
-
-                for (const auto& [name, instances] : mesh.transforms) {
-                    mesh.mesh->renderObjectInstanced<TransformationComponent>(name, renderData, instances.instanceBuffer);
+                if (registry.all_of<TerrainComponent>(entity)) {
+                    shadingMode = game->terrain.shadingMode;
                 }
+
+                mesh.render(renderData, shadingMode);
             });
 
-        registry.view<RoadMeshComponent, TransformationComponent>(exclude).each([&](const RoadMeshComponent& road, const TransformationComponent& transform) {
-            MeshRenderData renderData = {transform.transform};
+        // registry.view<MeshComponent, TransformationComponent, TerrainComponent>(exclude)
+        //     .each([&](auto entity, const MeshComponent& mesh, const TransformationComponent& transform, const TerrainComponent& terrain) {
+        //         MeshRenderData renderData = {transform.transform};
+        //         mesh.mesh->render(renderData);
+        //     });
 
-            for (const auto& [roadPackName, tiles] : road.roadMeshes) {
-                const RoadPackPtr& pack = resourceManager.getResource<RoadPack>(roadPackName);
+        // registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
+        //     .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {
+        //         MeshRenderData renderData = {transform.transform};
+        //         mesh.mesh->renderInstanced<TransformationComponent>(renderData, mesh.instanceBuffer);
+        //     });
 
-                for (const auto& [tileType, instances] : tiles) {
-                    pack->roadGeometries.renderObjectInstanced<glm::mat4>(tileType, renderData, instances.instanceBuffer);
-                }
-            }
+        // registry.view<MultiInstancedMeshComponent, TransformationComponent>(exclude)
+        //     .each([&](const MultiInstancedMeshComponent& mesh, const TransformationComponent& transform) {
+        //         MeshRenderData renderData = {transform.transform};
 
-#if DEBUG
-            if (game->debugMode) {
-                ShaderProgram* roadDebugPointsShader = resourceManager.getResource<Shader>("ROAD_DEBUG_POINTS_SHADER")->defaultShader;
-                ShaderProgram* roadDebugLinesShader = resourceManager.getResource<Shader>("ROAD_DEBUG_LINES_SHADER")->defaultShader;
+        //         for (const auto& [name, instances] : mesh.transforms) {
+        //             mesh.mesh->renderObjectInstanced<TransformationComponent>(name, renderData, instances.instanceBuffer);
+        //         }
+        //     });
 
-                roadDebugLinesShader->use();
-                roadDebugLinesShader->setMatrix4("model", transform.transform);
+        // registry.view<EnvironmentComponent, TransformationComponent>(exclude)
+        //     .each([&](const EnvironmentComponent& environment, const TransformationComponent& transform) {
+        //         MeshRenderData renderData = {transform.transform};
 
-                road.graphDebugMesh->draw();
+        //         for (const auto& [name, instances] : environment.treeMeshes) {
+        //             environment.mesh->renderObjectInstanced<TransformationComponent>(name, renderData, instances.instanceBuffer);
+        //         }
+        //     });
 
-                glEnable(GL_PROGRAM_POINT_SIZE);
-                roadDebugPointsShader->use();
-                roadDebugPointsShader->setMatrix4("model", transform.transform);
+//         registry.view<RoadMeshComponent, TransformationComponent>(exclude).each([&](const RoadMeshComponent& road, const TransformationComponent& transform) {
+//             MeshRenderData renderData = {transform.transform};
 
-                road.graphDebugMesh->draw();
-                glDisable(GL_PROGRAM_POINT_SIZE);
-            }
-#endif
-        });
+//             for (const auto& [roadPackName, tiles] : road.roadMeshes) {
+//                 const RoadPackPtr& pack = resourceManager.getResource<RoadPack>(roadPackName);
+
+//                 for (const auto& [tileType, instances] : tiles) {
+//                     pack->roadGeometries.renderObjectInstanced<glm::mat4>(tileType, renderData, instances.instanceBuffer);
+//                 }
+//             }
+
+// #if DEBUG
+//             if (game->debugMode) {
+//                 ShaderProgram* roadDebugPointsShader = resourceManager.getResource<Shader>("ROAD_DEBUG_POINTS_SHADER")->defaultShader;
+//                 ShaderProgram* roadDebugLinesShader = resourceManager.getResource<Shader>("ROAD_DEBUG_LINES_SHADER")->defaultShader;
+
+//                 roadDebugLinesShader->use();
+//                 roadDebugLinesShader->setMatrix4("model", transform.transform);
+
+//                 road.graphDebugMesh->draw();
+
+//                 glEnable(GL_PROGRAM_POINT_SIZE);
+//                 roadDebugPointsShader->use();
+//                 roadDebugPointsShader->setMatrix4("model", transform.transform);
+
+//                 road.graphDebugMesh->draw();
+//                 glDisable(GL_PROGRAM_POINT_SIZE);
+//             }
+// #endif
+//         });
     }
 
     template<typename... T>
@@ -155,35 +162,44 @@ class RenderSystem : public System {
                     renderData.preview = building.preview;
                 }
 
-                mesh.mesh->render(renderData, shadowShader.get());
+                mesh.render(renderData, MeshShadingMode::SOLID, shadowShader.get());
             });
 
-        registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
-            .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {
-                MeshRenderData renderData = {transform.transform};
-                mesh.mesh->renderInstanced<TransformationComponent>(renderData, mesh.instanceBuffer, shadowShader.get());
-            });
+        // registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
+        //     .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {
+        //         MeshRenderData renderData = {transform.transform};
+        //         mesh.mesh->renderInstanced<TransformationComponent>(renderData, mesh.instanceBuffer, shadowShader.get());
+        //     });
 
-        registry.view<MultiInstancedMeshComponent, TransformationComponent>(exclude)
-            .each([&](const MultiInstancedMeshComponent& mesh, const TransformationComponent& transform) {
-                MeshRenderData renderData = {transform.transform};
+        // registry.view<MultiInstancedMeshComponent, TransformationComponent>(exclude)
+        //     .each([&](const MultiInstancedMeshComponent& mesh, const TransformationComponent& transform) {
+        //         MeshRenderData renderData = {transform.transform};
 
-                for (const auto& [name, instances] : mesh.transforms) {
-                    mesh.mesh->renderObjectInstanced<TransformationComponent>(name, renderData, instances.instanceBuffer, shadowShader.get());
-                }
-            });
+        //         for (const auto& [name, instances] : mesh.transforms) {
+        //             mesh.mesh->renderObjectInstanced<TransformationComponent>(name, renderData, instances.instanceBuffer, shadowShader.get());
+        //         }
+        //     });
 
-        registry.view<RoadMeshComponent, TransformationComponent>(exclude).each([&](const RoadMeshComponent& road, const TransformationComponent& transform) {
-            MeshRenderData renderData = {transform.transform};
+        // registry.view<EnvironmentComponent, TransformationComponent>(exclude)
+        //     .each([&](const EnvironmentComponent& environment, const TransformationComponent& transform) {
+        //         MeshRenderData renderData = {transform.transform};
 
-            for (const auto& [roadPackName, tiles] : road.roadMeshes) {
-                const RoadPackPtr& pack = resourceManager.getResource<RoadPack>(roadPackName);
+        //         for (const auto& [name, instances] : environment.treeMeshes) {
+        //             environment.mesh->renderObjectInstanced<TransformationComponent>(name, renderData, instances.instanceBuffer);
+        //         }
+        //     });
 
-                for (const auto& [tileType, instances] : tiles) {
-                    pack->roadGeometries.renderObjectInstanced<glm::mat4>(tileType, renderData, instances.instanceBuffer, shadowShader.get());
-                }
-            }
-        });
+        // registry.view<RoadMeshComponent, TransformationComponent>(exclude).each([&](const RoadMeshComponent& road, const TransformationComponent& transform) {
+        //     MeshRenderData renderData = {transform.transform};
+
+        //     for (const auto& [roadPackName, tiles] : road.roadMeshes) {
+        //         const RoadPackPtr& pack = resourceManager.getResource<RoadPack>(roadPackName);
+
+        //         for (const auto& [tileType, instances] : tiles) {
+        //             pack->roadGeometries.renderObjectInstanced<glm::mat4>(tileType, renderData, instances.instanceBuffer, shadowShader.get());
+        //         }
+        //     }
+        // });
     }
 
     void updateLightBuffer(const LightComponent& sunLight, const CameraComponent& component) const;

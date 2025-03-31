@@ -111,7 +111,7 @@ std::array<std::array<RoadPath, 4>, 4> RoadPathGenerator::generateNodePaths(cons
             addToPath(tile.rotation + 2, tile.rotation, 0.5f, specs.roadwayWidth / 4.0f);
             break;
         case RoadTileTypes::CURVE:
-        case RoadTileTypes::CURVE_FULL:
+        // case RoadTileTypes::CURVE_FULL:
             for (int i = 0; i <= specs.verticesPerCircle / 4; i++) {
                 float sin = glm::sin(i * anglePerPoint);
                 float cos = glm::cos(i * anglePerPoint);

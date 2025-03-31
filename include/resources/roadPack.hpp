@@ -30,7 +30,7 @@ struct RoadPack {
     std::string icon;
     RoadSpecs specs;
 
-    Mesh<RoadTileTypes> roadGeometries;
+    MeshPtr roadGeometries;
 
     ResourcePtr<Material> material;
 

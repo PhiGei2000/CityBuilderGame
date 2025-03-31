@@ -31,13 +31,13 @@ class EnvironmentSystem : public System {
     std::queue<entt::entity> entitiesToDestroy;
     std::queue<glm::ivec2> cellsToClear;
 
+    const static std::array<std::string, 2> treeNames;
+
     struct SunLight {
         glm::vec3 ambient = 0.4f * glm::vec3(1.0f, 1.0f, 220.0f / 250.0f);
         glm::vec3 diffuse = glm::vec3(1.0f, 1.0f, 220.0f / 250.0f);
         glm::vec3 specular = 0.8f * glm::vec3(1.0f, 1.0f, 220.0f / 250.0f);
     } sunLight;
-
-    entt::entity treeEntity;
 
     void updateDayNightCycle(float dt, TransformationComponent& sunTransform, SunLightComponent& sunLight) const;
 

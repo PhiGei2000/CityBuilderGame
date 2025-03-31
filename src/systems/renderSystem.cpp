@@ -171,6 +171,6 @@ void RenderSystem::update(float dt) {
 
         MeshRenderData renderData = {transform.transform};
 
-        mesh.mesh->render(renderData);
+        mesh.render(renderData, MeshShadingMode::SOLID);
     }
 }

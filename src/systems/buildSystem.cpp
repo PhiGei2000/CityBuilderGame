@@ -197,10 +197,11 @@ void BuildSystem::createNewBuilding() {
         currentBuilding = registry.create();
 
         RoadPackPtr pack = resourceManager.getResource<RoadPack>(selectedBuildingID);
-        MeshComponent& roadMesh = registry.emplace<MeshComponent>(currentBuilding, MeshPtr(new Mesh()));
+        MeshComponent& mesh = registry.emplace<MeshComponent>(currentBuilding);
 
-        roadMesh.mesh->shader = pack->roadGeometries.shader;
-        roadMesh.mesh->geometries[""] = pack->roadGeometries.geometries.at(RoadTileTypes::NOT_CONNECTED);
+        mesh.instancedMeshes[pack->name] = InstancedMesh<glm::mat4>{pack->roadGeometries, {}};
+        // mesh.mesh->shader = pack->roadGeometries.shader;
+        // mesh.mesh->geometries[""] = pack->roadGeometries.geometries.at(RoadTileTypes::NOT_CONNECTED);
     }
     else {
         BuildableObjectPtr object = resourceManager.getResource<BuildableObject>(selectedBuildingID);

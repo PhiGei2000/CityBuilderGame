@@ -51,7 +51,7 @@ void RoadSystem::update(float dt) {
         const glm::ivec2& chunkPos = chunksToUpdateMesh.front();
         const entt::entity chunk = game->terrain.chunkEntities.at(chunkPos);
 
-        const auto& [road, roadMesh] = registry.get<RoadComponent, RoadMeshComponent>(chunk);
+        const auto& [road, roadMesh] = registry.get<RoadComponent, MeshComponent>(chunk);
         createRoadMesh(road, roadMesh, chunkPos);
         chunksToUpdateMesh.pop();
     }
@@ -122,7 +122,7 @@ void RoadSystem::update(float dt) {
     }
 }
 
-void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& geometry, const glm::ivec2& chunkPos) const {
+void RoadSystem::createRoadMesh(const RoadComponent& road, MeshComponent& mesh, const glm::ivec2& chunkPos) const {
     std::map<std::string, std::map<RoadTileTypes, std::vector<glm::mat4>>> transforms;
     constexpr int sinValues[] = {0, 1, 0, -1};
     constexpr int cosValues[] = {1, 0, -1, 0};
@@ -144,11 +144,17 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& ge
         }
     }
 
-    for (const auto& [type, _] : resourceManager.getResources<RoadPack>()) {
+    for (const auto& [type, roadPack] : resourceManager.getResources<RoadPack>()) {
         for (RoadTileTypes tileType = RoadTileTypes::NOT_CONNECTED; tileType <= RoadTileTypes::RAMP; tileType++) {
-            bool updateBuffer = false;
-            if (geometry.roadMeshes.contains(type)) {
-                updateBuffer |= geometry.roadMeshes[type].contains(tileType);
+            const std::string& tileTypeName = getRoadTileTypeName(tileType);
+            // const std::string& roadMeshId = type + "." + tileTypeName;
+
+            bool updateBuffer = mesh.instancedMeshes.contains(type);
+            if (updateBuffer) {
+                updateBuffer |= mesh.instancedMeshes[type].instances.contains(tileTypeName);
+            }
+            else if (transforms.size() > 0) {
+                mesh.instancedMeshes[type] = InstancedMesh<glm::mat4>{roadPack->roadGeometries};
             }
 
             if (transforms.contains(type)) {
@@ -158,54 +164,54 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, RoadMeshComponent& ge
             if (updateBuffer) {
                 const std::vector<glm::mat4>& tiles = transforms[type][tileType];
                 if (tiles.size() > 0) {
-                    geometry.roadMeshes[type][tileType].instanceBuffer.fillBuffer(tiles);
+                    mesh.instancedMeshes[type].instances[tileTypeName].instanceBuffer.fillBuffer(tiles);
                 }
                 else {
-                    geometry.roadMeshes[type][tileType].instanceBuffer.clearBuffer();
+                    mesh.instancedMeshes[type].instances[tileTypeName].instanceBuffer.clearBuffer();
                 }
             }
         }
     }
 
 #if DEBUG
-    std::vector<float> positions;
-    std::vector<unsigned int> indicesLines;
-    unsigned int currentIndex = 0;
+    // std::vector<float> positions;
+    // std::vector<unsigned int> indicesLines;
+    // unsigned int currentIndex = 0;
 
-    for (const auto& [node, nodeData] : road.graph.getNodes()) {
-        const auto& paths = nodeData.paths;
+    // for (const auto& [node, nodeData] : road.graph.getNodes()) {
+    //     const auto& paths = nodeData.paths;
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                for (int k = 0; k < paths[i][j].length(); k++) {
-                    positions.insert(positions.end(), {paths[i][j][k].x, paths[i][j][k].y, paths[i][j][k].z});
+    //     for (int i = 0; i < 4; i++) {
+    //         for (int j = 0; j < 4; j++) {
+    //             for (int k = 0; k < paths[i][j].length(); k++) {
+    //                 positions.insert(positions.end(), {paths[i][j][k].x, paths[i][j][k].y, paths[i][j][k].z});
 
-                    if (k > 0) {
-                        indicesLines.push_back(currentIndex);
-                    }
+    //                 if (k > 0) {
+    //                     indicesLines.push_back(currentIndex);
+    //                 }
 
-                    if (k < paths[i][j].length() - 1) {
-                        indicesLines.push_back(currentIndex);
-                    }
+    //                 if (k < paths[i][j].length() - 1) {
+    //                     indicesLines.push_back(currentIndex);
+    //                 }
 
-                    currentIndex++;
-                }
-            }
-        }
-    }
+    //                 currentIndex++;
+    //             }
+    //         }
+    //     }
+    // }
 
-    for (const auto& [edge, path] : road.graph.getEdges()) {
-        unsigned int pathLength = path.length();
+    // for (const auto& [edge, path] : road.graph.getEdges()) {
+    //     unsigned int pathLength = path.length();
 
-        for (int i = 0; i < pathLength; i++) {
-            positions.insert(positions.end(), {path[i].x, path[i].y, path[i].z});
-            indicesLines.push_back(currentIndex);
+    //     for (int i = 0; i < pathLength; i++) {
+    //         positions.insert(positions.end(), {path[i].x, path[i].y, path[i].z});
+    //         indicesLines.push_back(currentIndex);
 
-            currentIndex++;
-        }
-    }
+    //         currentIndex++;
+    //     }
+    // }
 
-    geometry.graphDebugMesh->bufferData(positions, indicesLines, GL_STATIC_DRAW);
+    // mesh.mesh->geometries["roadGraphDebug"]->bufferData(positions, indicesLines, GL_STATIC_DRAW);
 #endif
 }
 

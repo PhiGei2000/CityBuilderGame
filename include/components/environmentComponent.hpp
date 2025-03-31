@@ -14,10 +14,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "component.hpp"
+#include "instancedMeshComponent.hpp"
 
-struct EnvironmentComponent : public AssignableComponent {   
+struct EnvironmentComponent : public AssignableComponent {
+
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
         registry.emplace<EnvironmentComponent>(entity);
-    }     
+    }
 };
