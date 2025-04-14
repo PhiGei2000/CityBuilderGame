@@ -124,8 +124,6 @@ void RoadSystem::update(float dt) {
 
 void RoadSystem::createRoadMesh(const RoadComponent& road, MeshComponent& mesh, const glm::ivec2& chunkPos) const {
     std::map<std::string, std::map<RoadTileTypes, std::vector<glm::mat4>>> transforms;
-    constexpr int sinValues[] = {0, 1, 0, -1};
-    constexpr int cosValues[] = {1, 0, -1, 0};
 
     for (int x = 0; x < Configuration::cellsPerChunk; x++) {
         for (int y = 0; y < Configuration::cellsPerChunk; y++) {
@@ -136,10 +134,8 @@ void RoadSystem::createRoadMesh(const RoadComponent& road, MeshComponent& mesh, 
                 float roadHeight = getRoadHeight(chunkPos * Configuration::cellsPerChunk + glm::ivec2(x, y), tile);
 
                 const glm::vec3& pos = static_cast<float>(Configuration::cellSize) * glm::vec3(x + 0.5f, 0.0f, y + 0.5f) + glm::vec3(0.0f, roadHeight, 0.0f);
-                float cos = cosValues[tile.rotation];
-                float sin = sinValues[tile.rotation];
 
-                transforms[tile.roadType][tileType].emplace_back(glm::vec4(cos, 0.0f, sin, 0.0f), glm::vec4(0.0f, 1.0f, 0.0f, 0.0f), glm::vec4(-sin, 0.0f, cos, 0.0f), glm::vec4(pos, 1.0f));
+                transforms[tile.roadType][tileType].emplace_back(tile.getTransform(pos));
             }
         }
     }

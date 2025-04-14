@@ -149,13 +149,7 @@ bool RoadComponent::updateRoad(const glm::ivec2& pos, const std::map<std::string
         return false;
     }
 
-    bool connections[4] = {
-        pos.x == Configuration::cellsPerChunk - 1 ? borders[static_cast<int>(Direction::NORTH)][pos.y] : roadTiles[pos.x + 1][pos.y].notEmpty(),
-        pos.y == Configuration::cellsPerChunk - 1 ? borders[static_cast<int>(Direction::EAST)][pos.x] : roadTiles[pos.x][pos.y + 1].notEmpty(),
-        pos.x == 0 ? borders[static_cast<int>(Direction::SOUTH)][pos.y] : roadTiles[pos.x - 1][pos.y].notEmpty(),
-        pos.y == 0 ? borders[static_cast<int>(Direction::WEST)][pos.x] : roadTiles[pos.x][pos.y - 1].notEmpty()};
-
-    const RoadTile& tile = getTileType(connections);
+    const RoadTile& tile = getTileType(pos);
 
     if (tile != roadTiles[pos.x][pos.y]) {
         roadTiles[pos.x][pos.y].tileType = tile.tileType;
@@ -178,6 +172,16 @@ bool RoadComponent::updateRoad(const glm::ivec2& pos, const std::map<std::string
     }
 
     return false;
+}
+
+RoadTile RoadComponent::getTileType(const glm::ivec2& pos) const {
+    bool connections[4] = {
+        pos.x == Configuration::cellsPerChunk - 1 ? borders[static_cast<int>(Direction::NORTH)][pos.y] : roadTiles[pos.x + 1][pos.y].notEmpty(),
+        pos.y == Configuration::cellsPerChunk - 1 ? borders[static_cast<int>(Direction::EAST)][pos.x] : roadTiles[pos.x][pos.y + 1].notEmpty(),
+        pos.x == 0 ? borders[static_cast<int>(Direction::SOUTH)][pos.y] : roadTiles[pos.x - 1][pos.y].notEmpty(),
+        pos.y == 0 ? borders[static_cast<int>(Direction::WEST)][pos.x] : roadTiles[pos.x][pos.y - 1].notEmpty()};
+
+    return getTileType(connections);
 }
 
 constexpr RoadTile RoadComponent::getTileType(const bool (&connections)[4]) {
@@ -267,8 +271,8 @@ void RoadComponent::updateRoadGraph(const std::map<std::string, RoadSpecs>& spec
     std::set<RoadGraph::EdgeType> edges;
     for (auto it = nodes.begin(); it != nodes.end(); it++) {
         for (auto jt = nodes.begin(); jt != it; jt++) {
-            const RoadGraph::NodeType& x = (*it).first;
-            const RoadGraph::NodeType& y = (*jt).first;
+            const RoadGraph::NodeType& x = it->first;
+            const RoadGraph::NodeType& y = jt->first;
 
             if (x.x == y.x) {
                 // horizontal (east-west) edge

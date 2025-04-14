@@ -30,6 +30,7 @@ struct KeyEvent;
 struct TerrainComponent;
 struct BuildingComponent;
 struct CameraUpdateEvent;
+struct GameStateChangedEvent;
 
 struct Object;
 
@@ -38,10 +39,10 @@ class BuildSystem : public System {
     virtual void init() override;
 
     entt::entity cameraEntity;
-    entt::entity currentBuilding;
+    entt::entity currentBuilding = entt::null;
 
     /// @brief Selected building type
-    std::string selectedBuildingID = "infrastructure.roads.basic_roads";
+    std::string selectedBuildingID = "";
 
     /// @brief True if the rotation of the building was modified
     bool buildingRotationUpdated = false;
@@ -84,7 +85,7 @@ class BuildSystem : public System {
     /// @param type The building type
     /// @param terrain The terrain information
     /// @return True if the building could be build otherwise false
-    bool canBuild(const std::vector<glm::ivec2>& positions, const std::string buildingID, const TerrainComponent& terrain) const;
+    bool canBuild(const std::vector<glm::ivec2>& positions, const std::string& buildingID) const;
 
     const glm::vec3 getBuildingOffset(const std::string& buildingID) const;
 
@@ -94,6 +95,8 @@ class BuildSystem : public System {
     void updateBuildingPosition(const BuildingComponent& building) const;
 
     void updateGridMouseIntersection();
+
+    bool positionValid(const glm::ivec2& position) const;
 
   public:
     BuildSystem(Game* game);
@@ -111,4 +114,6 @@ class BuildSystem : public System {
     void handleBuildEvent(const BuildEvent& e);
 
     void handleBuildingSelectedEvent(const BuildingSelectedEvent& e);
+
+    void handleGameStateChangedEvent(const GameStateChangedEvent& e);
 };

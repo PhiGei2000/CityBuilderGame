@@ -102,8 +102,16 @@ int Game::getMouseButton(int button) const {
     return glfwGetMouseButton(app->getWindow(), button);
 }
 
+template<>
+void Game::raiseEvent<GameStateChangedEvent>(GameStateChangedEvent& e) {
+    eventDispatcher.trigger<GameStateChangedEvent&>(e);
+}
+
 void Game::setState(GameState state) {
     this->state = state;
+
+    GameStateChangedEvent e;
+    raiseEvent<GameStateChangedEvent>(e);
 
     if (state == GameState::BUILD_MODE) {
         app->getGui()->getBuildMenu()->show();

@@ -76,6 +76,8 @@ struct RoadTile {
     bool empty() const;
     bool notEmpty() const;
 
+    glm::mat4 getTransform(const glm::vec3& offset) const;
+
     bool operator==(const RoadTile& other) const;
     bool operator!=(const RoadTile& other) const;
 };

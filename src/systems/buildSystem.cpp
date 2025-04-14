@@ -57,17 +57,24 @@ BuildSystem::BuildSystem(Game* game)
 
     eventDispatcher.sink<CameraUpdateEvent>()
         .connect<&BuildSystem::handleCameraUpdateEvent>(*this);
+
+    eventDispatcher.sink<GameStateChangedEvent>()
+        .connect<&BuildSystem::handleGameStateChangedEvent>(*this);
 }
 
 void BuildSystem::init() {
     cameraEntity = registry.view<CameraComponent, TransformationComponent>().front();
 
-    createNewBuilding();
+    // createNewBuilding();
 }
 
 void BuildSystem::update(float dt) {
-    if (game->getState() != GameState::BUILD_MODE) {
+    if (game->getState() != GameState::BUILD_MODE || selectedBuildingID.empty()) {
         return;
+    }
+
+    if (currentBuilding == entt::null) {
+        createNewBuilding();
     }
 
     BuildingComponent& building = registry.get<BuildingComponent>(currentBuilding);
@@ -78,8 +85,16 @@ void BuildSystem::update(float dt) {
     }
 
     if (gridMouseIntersection.positionUpdated() || buildingRotationUpdated) {
+        if (!positionValid(gridMouseIntersection.position)) {
+            goto buildObjects;
+        }
+
+        if (!canBuild({gridMouseIntersection.position}, building.buildingID)) {
+            goto buildObjects;
+        }
+
         if (building.buildingID.starts_with("infrastructure.road")) {
-            if (game->getMouseButton(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+            if (game->getMouseButton(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && positionValid(building.gridPosition)) {
                 BuildEvent event = BuildEvent(currentBuilding, {building.gridPosition}, building.buildingID, BuildShape::POINT);
                 game->raiseEvent(event);
 
@@ -91,18 +106,16 @@ void BuildSystem::update(float dt) {
         // update the transformation component of the current building, so it will be rendered at the right place
         building.gridPosition = gridMouseIntersection.position;
 
-        const auto& [chunk, _] = utility::normalizedWorldGridToNormalizedChunkGridCoords(building.gridPosition);
-        if (game->terrain.chunkLoaded(chunk)) {
-            std::cout << "Building position: " << building.gridPosition << std::endl;
+        std::cout << "Building position: " << building.gridPosition << std::endl;
 
-            // calculate position based on rotation
-            updateBuildingPosition(building);
+        // calculate position based on rotation
+        updateBuildingPosition(building);
 
-            gridMouseIntersection.positionChanged = false;
-            buildingRotationUpdated = false;
-        }
+        gridMouseIntersection.positionChanged = false;
+        buildingRotationUpdated = false;
     }
 
+buildObjects:
     while (objectsToBuild.size() > 0) {
         entt::entity objectToBuild = objectsToBuild.front();
 
@@ -173,13 +186,27 @@ const glm::ivec2& BuildSystem::getDefaultSize(std::string buildingID) {
     return object->buildingInfo.defaultSize;
 }
 
-bool BuildSystem::canBuild(const std::vector<glm::ivec2>& positions, const std::string buildingID, const TerrainComponent& terrain) const {
-    // TODO: Implement this
+bool BuildSystem::canBuild(const std::vector<glm::ivec2>& positions, const std::string& buildingID) const {
+    if (buildingID.starts_with("infrastructure.roads")) {
+        for (const auto& position : positions) {
+            const std::array<float, 4>& terrainHeights = game->terrain.getTerrainCellHeights(position);
+
+            if (!std::all_of(terrainHeights.begin(), terrainHeights.end(), [](float height) {
+                    return height >= 0;
+                })) {
+                return false;
+            }
+        }
+    }
 
     return true;
 }
 
 const glm::vec3 BuildSystem::getBuildingOffset(const std::string& buildingID) const {
+    if (buildingID.empty()) {
+        return glm::vec3(0.0f);
+    }
+
     if (buildingID.starts_with("infrastructure.roads")) {
         return static_cast<float>(Configuration::cellSize) * glm::vec3(0.5f, 0.0f, 0.5f);
     }
@@ -199,9 +226,20 @@ void BuildSystem::createNewBuilding() {
         RoadPackPtr pack = resourceManager.getResource<RoadPack>(selectedBuildingID);
         MeshComponent& mesh = registry.emplace<MeshComponent>(currentBuilding);
 
-        mesh.instancedMeshes[pack->name] = InstancedMesh<glm::mat4>{pack->roadGeometries, {}};
-        // mesh.mesh->shader = pack->roadGeometries.shader;
-        // mesh.mesh->geometries[""] = pack->roadGeometries.geometries.at(RoadTileTypes::NOT_CONNECTED);
+        const auto& [chunk, roadPos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(gridMouseIntersection.position);
+
+        glm::mat4 transform = glm::mat4(1.0f);
+        RoadTileTypes tileType = RoadTileTypes::NOT_CONNECTED;
+        if (game->terrain.chunkLoaded(chunk)) {
+            const entt::entity chunkEntity = game->terrain.chunkEntities.at(chunk);
+            const RoadComponent& roadComponent = registry.get<RoadComponent>(chunkEntity);
+
+            const RoadTile& tile = roadComponent.getTileType(roadPos);
+            tileType = tile.tileType;
+        }
+
+        mesh.instancedMeshes[pack->name] = InstancedMesh<glm::mat4>{
+            pack->roadGeometries, {{getRoadTileTypeName(tileType), InstancedData<glm::mat4>({transform})}}};
     }
     else {
         BuildableObjectPtr object = resourceManager.getResource<BuildableObject>(selectedBuildingID);
@@ -210,7 +248,9 @@ void BuildSystem::createNewBuilding() {
     }
 
     registry.emplace<TransformationComponent>(currentBuilding, utility::normalizedWorldGridToWorldCoords(glm::vec2(gridMouseIntersection.position)) + getBuildingOffset(selectedBuildingID)).calculateTransform();
-    registry.emplace<BuildingComponent>(currentBuilding, selectedBuildingID, gridMouseIntersection.position, 0, defaultSize, true);
+    const BuildingComponent& building = registry.emplace<BuildingComponent>(currentBuilding, selectedBuildingID, gridMouseIntersection.position, 0, defaultSize, true);
+
+    updateBuildingPosition(building);
 }
 
 void BuildSystem::updateBuildingPosition(const BuildingComponent& building) const {
@@ -221,28 +261,36 @@ void BuildSystem::updateBuildingPosition(const BuildingComponent& building) cons
     float cellHeight = *std::max_element(cellHeights.begin(), cellHeights.end());
     offset.y += cellHeight;
 
-    // rotation | offset
-    // ------------------
-    // 0        | (0,0,0)
-    // 1        | (0,0,1)
-    // 2        | (1,0,1)
-    // 3        | (1,0,0)
+    if (building.buildingID.starts_with("infrastructure.roads")) {
+        const auto& [chunk, pos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(building.gridPosition);
+        const RoadComponent& road = registry.get<RoadComponent>(game->terrain.chunkEntities.at(chunk));
+        const RoadTile& roadTile = road.getTileType(pos);
 
-    switch (building.rotation) {
-        case 1:
-            offset.z += static_cast<float>(Configuration::cellSize) * building.size.x;
-            break;
-        case 2:
-            offset.x += static_cast<float>(Configuration::cellSize) * building.size.x;
-            offset.z += static_cast<float>(Configuration::cellSize) * building.size.y;
-            break;
-        case 3:
-            offset.x += static_cast<float>(Configuration::cellSize) * building.size.y;
-            break;
-        default:
-            break;
+        transform.setRotation(glm::vec3(0.0f, -1.0f, 0.0f), glm::pi<float>() / 2.0f * roadTile.rotation);
     }
+    else {
+        // rotation | offset
+        // ------------------
+        // 0        | (0,0,0)
+        // 1        | (0,0,1)
+        // 2        | (1,0,1)
+        // 3        | (1,0,0)
 
+        switch (building.rotation) {
+            case 1:
+                offset.z += static_cast<float>(Configuration::cellSize) * building.size.x;
+                break;
+            case 2:
+                offset.x += static_cast<float>(Configuration::cellSize) * building.size.x;
+                offset.z += static_cast<float>(Configuration::cellSize) * building.size.y;
+                break;
+            case 3:
+                offset.x += static_cast<float>(Configuration::cellSize) * building.size.y;
+                break;
+            default:
+                break;
+        }
+    }
     transform.setPosition(utility::normalizedWorldGridToWorldCoords(glm::vec2(building.gridPosition)) + offset);
     transform.calculateTransform();
 }
@@ -251,12 +299,22 @@ void BuildSystem::updateGridMouseIntersection() {
     glm::vec2 mousePos = game->getMousePos();
     const auto& [intersection, position] = getGridPos(mousePos, getBuildingOffset(selectedBuildingID));
 
+    if (!positionValid(position)) {
+        return;
+    }
+
     gridMouseIntersection.intersection = intersection;
 
     if (intersection) {
         gridMouseIntersection.positionChanged |= glm::any(glm::notEqual(position, gridMouseIntersection.position));
         gridMouseIntersection.position = position;
     }
+}
+
+bool BuildSystem::positionValid(const glm::ivec2& position) const {
+    const auto& [chunk, _] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
+
+    return game->terrain.chunkLoaded(chunk);
 }
 
 void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
@@ -279,14 +337,19 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
                                                 : std::vector<glm::ivec2>{building.gridPosition, building.gridPosition + glm::ivec2(glm::ceil(building.size - glm::vec2(1.0f)))};
         entt::entity entityToBuild = currentBuilding;
 
-        bool canBuild;
-        if (!building.buildingID.starts_with("infrastructure.road")) {
-            objectsToBuild.emplace(currentBuilding);
-        }
-        createNewBuilding();
+        bool canBuild = std::all_of(positions.begin(), positions.end(), [&](const glm::ivec2& pos) {
+            return positionValid(pos);
+        });
 
-        BuildEvent event = BuildEvent(entityToBuild, positions, building.buildingID, shape);
-        game->raiseEvent(event);
+        if (canBuild) {
+            if (!building.buildingID.starts_with("infrastructure.road")) {
+                objectsToBuild.emplace(currentBuilding);
+            }
+            createNewBuilding();
+
+            BuildEvent event = BuildEvent(entityToBuild, positions, building.buildingID, shape);
+            game->raiseEvent(event);
+        }
     }
     else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
         auto [building, transform] = registry.get<BuildingComponent, TransformationComponent>(currentBuilding);
@@ -341,4 +404,15 @@ void BuildSystem::handleBuildEvent(const BuildEvent& e) {
 
 void BuildSystem::handleBuildingSelectedEvent(const BuildingSelectedEvent& e) {
     this->selectedBuildingID = e.buildingID;
+}
+
+void BuildSystem::handleGameStateChangedEvent(const GameStateChangedEvent& e) {
+    if (game->getState() != GameState::BUILD_MODE) {
+        if (currentBuilding != entt::null) {
+            registry.destroy(currentBuilding);
+            selectedBuildingID = "";
+
+            currentBuilding = entt::null;
+        }
+    }
 }

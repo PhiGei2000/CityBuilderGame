@@ -113,7 +113,7 @@ void EnvironmentSystem::clearCells() {
 
     while (cellsToClear.size() > 0) {
         const glm::ivec2& position = cellsToClear.front();
-        const auto& [chunkPos, _] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
+        const auto& [chunkPos, cellPos] = utility::normalizedWorldGridToNormalizedChunkGridCoords(position);
         const entt::entity chunkEntity = game->terrain.chunkEntities.at(chunkPos);
 
         MeshComponent& mesh = registry.get<MeshComponent>(chunkEntity);
@@ -126,7 +126,7 @@ void EnvironmentSystem::clearCells() {
                 const glm::vec3& objectPosition = it->operator[](3);
                 const glm::ivec2 gridPosition = glm::floor(utility::worldToNormalizedWorldGridCoords(objectPosition));
 
-                if (gridPosition == position) {
+                if (gridPosition == cellPos) {
                     it = instancedMesh.transformations.erase(it);
                     needsUpdate = true;
                 }

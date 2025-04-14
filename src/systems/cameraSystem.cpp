@@ -43,8 +43,8 @@ void CameraSystem::update(float dt) {
     CameraComponent& camera = registry.get<CameraComponent>(cameraEntity);
     TransformationComponent& transform = registry.get<TransformationComponent>(cameraEntity);
 
-    const static float cameraSpeed = 10.0f;
-    const static float cameraRotationSpeed = 10.0f;
+    const static float cameraSpeed = 15.0f;
+    const static float cameraRotationSpeed = 20.0f;
 
     const auto& [cameraMoveDirection, cameraRotationDirection] = getCameraMovement(camera);
 

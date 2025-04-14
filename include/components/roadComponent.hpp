@@ -64,6 +64,8 @@ struct RoadComponent : public AssignableComponent {
 
     bool updateRoad(const glm::ivec2& pos, const std::map<std::string, RoadSpecs>& specs);
 
+    RoadTile getTileType(const glm::ivec2& pos) const;
+
     static constexpr RoadTile getTileType(const bool (&connections)[4]);
 
     /// @brief Determines which positions are road nodes. A road node is every type of road except of straight road pieces

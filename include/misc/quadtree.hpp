@@ -167,6 +167,23 @@ struct Quadtree {
         return result;
     }
 
+    template<int size>
+    inline static Quadtree<TValue> getQuadtree(TValue** values, const glm::ivec2& offset = glm::ivec2(0)) {
+        if constexpr (size == 1) {
+            return Quadtree<TValue>(offset, 1, values[offset.x][offset.y]);
+        }
+
+        constexpr int halfSize = size / 2;
+
+        Quadtree<TValue>* subtrees = new Quadtree<TValue>[4];
+        subtrees[0] = getQuadtree<halfSize>(values, offset);
+        subtrees[1] = getQuadtree<halfSize>(values, offset + glm::ivec2(halfSize, 0));
+        subtrees[2] = getQuadtree<halfSize>(values, offset + glm::ivec2(0, halfSize));
+        subtrees[3] = getQuadtree<halfSize>(values, offset + glm::ivec2(halfSize, halfSize));
+
+        return Quadtree<TValue>{offset, size, false, nullptr, subtrees};
+    }
+
     inline Quadtree<TValue>& operator=(const Quadtree<TValue>& other) {
         if (other.data.isLeaf) {
             data = other.data;
@@ -198,24 +215,6 @@ struct Quadtree {
         for (int i = 0; i < 4; i++) {
             data.subtrees[i].getLeafNodes(nodes);
         }
-    }
-
-    template<int size>
-    inline static Quadtree<TValue> getQuadtree(TValue** values, const glm::ivec2& offset = glm::ivec2(0)) {
-        constexpr int halfSize = size / 2;
-
-        Quadtree<TValue>* subtrees = new Quadtree<TValue>[4];
-        subtrees[0] = getQuadtree<halfSize>(values, offset);
-        subtrees[1] = getQuadtree<halfSize>(values, offset + glm::ivec2(halfSize, 0));
-        subtrees[2] = getQuadtree<halfSize>(values, offset + glm::ivec2(0, halfSize));
-        subtrees[3] = getQuadtree<halfSize>(values, offset + glm::ivec2(halfSize, halfSize));
-
-        return Quadtree<TValue>{offset, size, false, nullptr, subtrees};
-    }
-
-    template<>
-    inline static Quadtree<TValue> getQuadtree<1>(TValue** values, const glm::ivec2& offset) {
-        return Quadtree<TValue>(offset, 1, values[offset.x][offset.y]);
     }
 
     int getSubnodeIndex(const glm::ivec2& key) const {
