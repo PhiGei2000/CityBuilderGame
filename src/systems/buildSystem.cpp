@@ -1,18 +1,3 @@
-/*  Copyright (C) 2024  Philipp Geil <https://github.com/PhiGei2000>
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 #include "systems/buildSystem.hpp"
 
 #include "components/components.hpp"
@@ -96,7 +81,7 @@ void BuildSystem::update(float dt) {
         if (building.buildingID.starts_with("infrastructure.road")) {
             if (game->getMouseButton(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && positionValid(building.gridPosition)) {
                 BuildEvent event = BuildEvent(currentBuilding, {building.gridPosition}, building.buildingID, BuildShape::POINT);
-                game->raiseEvent(event);
+                game->raiseEvent<false>(event);
 
                 createNewBuilding();
                 building = registry.get<BuildingComponent>(currentBuilding);
@@ -348,7 +333,7 @@ void BuildSystem::handleMouseButtonEvent(const MouseButtonEvent& e) {
             createNewBuilding();
 
             BuildEvent event = BuildEvent(entityToBuild, positions, building.buildingID, shape);
-            game->raiseEvent(event);
+            game->raiseEvent<false>(event);
         }
     }
     else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {

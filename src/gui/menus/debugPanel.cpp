@@ -1,18 +1,3 @@
-/*  Copyright (C) 2024  Philipp Geil <https://github.com/PhiGei2000>
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 #include "gui/menus/debugPanel.hpp"
 
 #include "gui/components/button.hpp"
@@ -24,22 +9,22 @@
 #include "misc/utility.hpp"
 
 DebugPanel::DebugPanel(Gui* gui)
-    : StackPanel("debug_menu", gui, StackOrientation::COLUMN, colors::anthraziteGrey, ItemAligment::BEGIN) {
+    : Menu<StackPanel>("debug_menu", gui, StackOrientation::COLUMN, colors::anthraziteGrey, ItemAligment::BEGIN) {
     constraints.x = AbsoluteConstraint(0);
     constraints.y = AbsoluteConstraint(0);
     constraints.width = RelativeConstraint(0.3);
     constraints.height = RelativeConstraint(1.0);
     cornerRadius = 0.0f;
 
-    TextButton* reloadResourcesButton = new TextButton("debug_menu.reloadResourcesButton", gui, colors::anthraziteGrey, "Reload Resources");
-    reloadResourcesButton->constraints.height = AbsoluteConstraint(30);
-    reloadResourcesButton->constraints.width = RelativeConstraint(0.9);
-    reloadResourcesButton->textSize = 12;
-    reloadResourcesButton->onClick += [&](const MouseButtonEvent& e) {
-        Application* app = this->gui->getApp();
-        app->getGame()->reloadResources();
-    };
-    addChild(reloadResourcesButton);
+    // TextButton* reloadResourcesButton = new TextButton("debug_menu.reloadResourcesButton", gui, colors::anthraziteGrey, "Reload Resources");
+    // reloadResourcesButton->constraints.height = AbsoluteConstraint(30);
+    // reloadResourcesButton->constraints.width = RelativeConstraint(0.9);
+    // reloadResourcesButton->textSize = 12;
+    // reloadResourcesButton->onClick += [&](const MouseButtonEvent& e) {
+    //     Application* app = this->gui->getApp();
+    //     app->getGame()->reloadResources();
+    // };
+    // addChild(reloadResourcesButton);
 
     Label* fpsCounter = new Label("debug_menu.fpsCounter", gui, colors::transparent, "FPS: ");
     fpsCounter->constraints.height = FitToContentConstraint();

@@ -1,44 +1,20 @@
-/*  Copyright (C) 2024  Philipp Geil <https://github.com/PhiGei2000>
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 #pragma once
 #include "gui/components/widget.hpp"
+#include "gui/menus/menu.hpp"
 
 #include "rendering/renderQuad.hpp"
 #include "rendering/shader.hpp"
 
+#include <map>
 #include <stack>
 
 class Application;
-
-class PauseMenu;
-class OptionsMenu;
-class BuildMenu;
-class DebugPanel;
 class Label;
 
 struct KeyEvent;
 struct MouseButtonEvent;
 struct MouseMoveEvent;
-
-enum class GameMenus {
-    NONE,
-    MAIN_MENU,
-    PAUSE_MENU,
-    OPTIONS_MENU
-};
+struct GameStateChangedEvent;
 
 class Gui {
   private:
@@ -47,11 +23,8 @@ class Gui {
     RenderQuad quad;
     float width, height;
 
-    PauseMenu* pauseMenu;
-    OptionsMenu* optionsMenu;
+    std::map<int, MenuBase*> menus;
 
-    BuildMenu* buildMenu;
-    DebugPanel* debugPanel;
     Label* warningWidget;
 
     std::stack<Widget*> navigation;
@@ -62,8 +35,9 @@ class Gui {
   public:
     Gui(Application* app, float width, float height);
 
-    void showMenu(GameMenus gameMenu);
-    void popMenu();
+    void addMenu(int menuID, MenuBase* menu);
+    void showMenu(int menuID);
+    void hideMenu(int menuID);
 
     void showWarning(const std::string& text) const;
     void hideWarning() const;
@@ -71,7 +45,6 @@ class Gui {
     Application* getApp() const;
     ShaderProgram* getShader() const;
     const RenderQuad& getRenderQuad() const;
-    BuildMenu* getBuildMenu() const;
 
     void setScreenSize(float width, float height);
     void getScreenSize(float* width, float* height) const;

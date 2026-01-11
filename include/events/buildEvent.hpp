@@ -1,18 +1,3 @@
-/*  Copyright (C) 2024  Philipp Geil <https://github.com/PhiGei2000>
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 #pragma once
 #include "entityEvent.hpp"
 
@@ -31,7 +16,7 @@ enum class BuildShape {
 };
 
 /// @brief Holds data about building processes
-struct BuildEvent : public EntityEvent {
+struct BuildEvent : public EntityEvent<false> {
     /// @brief The position where the building should be created
     std::vector<glm::ivec2> positions;
 
@@ -45,7 +30,7 @@ struct BuildEvent : public EntityEvent {
     bool valid = true;
 
     inline BuildEvent(entt::entity entity, const std::vector<glm::ivec2>& positions, const std::string& buildingID, BuildShape shape = BuildShape::LINE, bool valid = true)
-        : EntityEvent(entity), positions(positions), buildingID(buildingID), shape(shape) {
+        : EntityEvent<false>(entity), positions(positions), buildingID(buildingID), shape(shape) {
     }
 
     inline bool insideArea(const glm::vec2& pos) const {
@@ -78,7 +63,7 @@ struct BuildEvent : public EntityEvent {
     }
 };
 
-struct BuildingSelectedEvent : public Event {
+struct BuildingSelectedEvent : public Event<false> {
     std::string buildingID;
 
     inline BuildingSelectedEvent(const std::string& buildingID)

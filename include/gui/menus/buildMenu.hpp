@@ -1,20 +1,6 @@
-/*  Copyright (C) 2024  Philipp Geil <https://github.com/PhiGei2000>
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 #pragma once
 #include "gui/components/stackPanel.hpp"
+#include "gui/menus/menu.hpp"
 #include "misc/buildingType.hpp"
 
 class IconButton;
@@ -30,7 +16,7 @@ struct BuildMenuEntry {
     std::string iconFilename;
 };
 
-class BuildMenu : public StackPanel {
+class BuildMenu : public Menu<StackPanel> {
   private:
     Label* title;
 
@@ -44,4 +30,12 @@ class BuildMenu : public StackPanel {
     ~BuildMenu();
 
     void addBuildingEntry(const BuildMenuEntry& menuEntry);
+
+    inline virtual constexpr std::optional<int> getKey() const override {
+        return GLFW_KEY_B;
+    }
+
+    inline virtual constexpr bool toggleOnKey() const override {
+        return true;
+    }
 };

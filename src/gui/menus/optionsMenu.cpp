@@ -1,25 +1,11 @@
-/*  Copyright (C) 2024  Philipp Geil <https://github.com/PhiGei2000>
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 #include "gui/menus/optionsMenu.hpp"
 
+#include "application.hpp"
 #include "gui/components/button.hpp"
 #include "gui/gui.hpp"
 
 OptionsMenu::OptionsMenu(Gui* gui)
-    : StackPanel("options_menu", gui, StackOrientation::COLUMN, colors::transparent) {
+    : Menu<StackPanel>("options_menu", gui, StackOrientation::COLUMN, colors::transparent) {
     constraints.width = RelativeConstraint(0.6f);
     constraints.height = AbsoluteConstraint(120.0f);
 
@@ -38,7 +24,7 @@ OptionsMenu::OptionsMenu(Gui* gui)
     back->constraints.height = RelativeConstraint(1.0f);
     back->constraints.width = RelativeConstraint(0.5f);
     back->onClick += [&](const MouseButtonEvent& e) {
-        this->gui->popMenu();
+        this->gui->hideMenu(static_cast<int>(GameMenus::OPTIONS_MENU));
     };
     back->cornerRadius = 15.0f;
     row->addChild(back);
@@ -47,9 +33,8 @@ OptionsMenu::OptionsMenu(Gui* gui)
     done->constraints.height = RelativeConstraint(1.0f);
     done->constraints.width = RelativeConstraint(0.5f);
     done->onClick += [&](const MouseButtonEvent& e) {
-        this->gui->popMenu();
+        this->gui->hideMenu(static_cast<int>(GameMenus::OPTIONS_MENU));
     };
     done->cornerRadius = 15.0f;
     row->addChild(done);
-
 }

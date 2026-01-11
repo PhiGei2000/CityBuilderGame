@@ -1,18 +1,3 @@
-/*  Copyright (C) 2024  Philipp Geil <https://github.com/PhiGei2000>
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 #include "gui/menus/pauseMenu.hpp"
 
 #include "gui/components/button.hpp"
@@ -21,7 +6,7 @@
 #include "application.hpp"
 
 PauseMenu::PauseMenu(Gui* gui)
-    : StackPanel("game_menu", gui, StackOrientation::COLUMN, colors::transparent) {
+    : Menu<StackPanel>("game_menu", gui, StackOrientation::COLUMN, colors::transparent) {
 
     constraints.width = RelativeConstraint(0.6f);
     constraints.height = AbsoluteConstraint(195.0f);
@@ -30,7 +15,7 @@ PauseMenu::PauseMenu(Gui* gui)
     _continue->constraints.height = AbsoluteConstraint(45.0f);
     _continue->constraints.width = RelativeConstraint(0.9f);
     _continue->textAlign = TextAlign::CENTER;
-    _continue->textColor =colors::white;
+    _continue->textColor = colors::white;
     _continue->onClick += [&](const MouseButtonEvent& e) {
         this->onResumeButtonClick(e);
     };
@@ -61,11 +46,11 @@ PauseMenu::PauseMenu(Gui* gui)
 }
 
 void PauseMenu::onResumeButtonClick(const MouseButtonEvent& event) {
-    gui->showMenu(GameMenus::NONE);
+    gui->showMenu(static_cast<int>(GameMenus::NONE));
 }
 
 void PauseMenu::onOptionsButtonClick(const MouseButtonEvent& event) {
-    gui->showMenu(GameMenus::OPTIONS_MENU);
+    gui->showMenu(static_cast<int>(GameMenus::OPTIONS_MENU));
 }
 
 void PauseMenu::onExitButtonClick(const MouseButtonEvent& event) {

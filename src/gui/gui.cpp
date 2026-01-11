@@ -1,18 +1,3 @@
-/*  Copyright (C) 2024  Philipp Geil <https://github.com/PhiGei2000>
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 #include "gui/gui.hpp"
 
 #include "gui/components/icon.hpp"
@@ -39,40 +24,62 @@
 
 Gui::Gui(Application* app, float width, float height)
     : app(app), width(width), height(height) {
-
 }
 
-void Gui::showMenu(GameMenus menu) {
+void Gui::addMenu(int id, MenuBase* menu) {
+    menus[id] = menu;
+
+    widgets.push_back(menu->getWidget());
+}
+
+void Gui::showMenu(int menuID) {
     // hide the menu at the top of the navigation stack
     if (!navigation.empty())
         navigation.top()->hide();
 
-    switch (menu) {
-        case GameMenus::NONE:
-            // clear the navigation and set game state to running
-            while (!navigation.empty()) {
-                navigation.pop();
-            }
-            app->setGameState(GameState::RUNNING);
-            return;
-        case GameMenus::PAUSE_MENU:
-            navigation.push(pauseMenu);
-            break;
-        case GameMenus::OPTIONS_MENU:
-            navigation.push(optionsMenu);
-            break;
-        default:
-            return;
+    // switch (menu) {
+    //     case GameMenus::NONE:
+    //         // clear the navigation and set game state to running
+    //         while (!navigation.empty()) {
+    //             navigation.pop();
+    //         }
+    //         app->setGameState(GameState::RUNNING);
+    //         return;
+    //     case GameMenus::PAUSE_MENU:
+    //         navigation.push(pauseMenu);
+    //         break;
+    //     case GameMenus::OPTIONS_MENU:
+    //         navigation.push(optionsMenu);
+    //         break;
+    //     default:
+    //         return;
+    // }
+    auto it = menus.find(menuID);
+    if (it == menus.end()) {
+        while (!navigation.empty()) {
+            navigation.pop();
+        }
+        app->setGameState(GameState::RUNNING);
+        return;
     }
+
+    navigation.push(it->second->getWidget());
 
     // show the top menu on the navigation stack and set the game state to paused
     navigation.top()->show();
     app->setGameState(GameState::PAUSED);
 }
 
-void Gui::popMenu() {
+void Gui::hideMenu(int menuID) {
     if (navigation.empty())
         return;
+
+    auto it = menus.find(menuID);
+    if (it != menus.end()) {
+        if (navigation.top() != it->second->getWidget()) {
+            return;
+        }
+    }
 
     // hide the top menu and remove it from the navigation stack
     navigation.top()->hide();
@@ -109,10 +116,6 @@ const RenderQuad& Gui::getRenderQuad() const {
     return quad;
 }
 
-BuildMenu* Gui::getBuildMenu() const {
-    return buildMenu;
-}
-
 void Gui::setScreenSize(float width, float height) {
     // set new screen size and update the text renderer screen size
     this->width = width;
@@ -137,14 +140,21 @@ Rectangle Gui::getBox() const {
 }
 
 void Gui::init() {
-    pauseMenu = new PauseMenu(this);
-    optionsMenu = new OptionsMenu(this);
-    buildMenu = new BuildMenu(this);
-    debugPanel = new DebugPanel(this);
+    //     menus = {
+    //         std::make_pair(static_cast<int>(GameMenus::OPTIONS_MENU), new OptionsMenu(this)),
+    //         std::make_pair(static_cast<int>(GameMenus::PAUSE_MENU), new PauseMenu(this)),
+    //         std::make_pair(static_cast<int>(GameMenus::BUILD_MENU), new BuildMenu(this)),
+    // #if DEBUG
+    //         std::make_pair(static_cast<int>(GameMenus::DEBUG_PANEL), new DebugPanel(this)),
+    // #endif
+    //     };
+
+    //     for (const auto& [_, menu] : menus) {
+    //         widgets.push_back(menu->getWidget());
+    //     }
+
     warningWidget = new Label("warning_label", this, colors::transparent, "", nullptr, 12, TextAlign::BEGIN, colors::warning);
     warningWidget->hide();
-
-    widgets = {pauseMenu, optionsMenu, buildMenu, debugPanel};
 }
 
 void Gui::update() {
@@ -175,8 +185,9 @@ void Gui::render() const {
         navigation.top()->render();
     }
 
-    buildMenu->render();
-    debugPanel->render();
+    for (const auto [_, menu] : menus) {
+        menu->getWidget()->render();
+    }
 
     warningWidget->render();
 
@@ -189,44 +200,34 @@ void Gui::handleMouseButtonEvent(MouseButtonEvent& event) {
     if (!navigation.empty()) {
         navigation.top()->handleMouseButtonEvent(event);
     }
-
-    if (debugPanel->isVisible()) {
-        debugPanel->handleMouseButtonEvent(event);
-    }
-
-    if (buildMenu->isVisible()) {
-        buildMenu->handleMouseButtonEvent(event);
-    }
 }
 
 void Gui::handleKeyEvent(KeyEvent& e) {
-    if (e.action == GLFW_PRESS) {
-        if (app->getGameState() == GameState::RUNNING) {
-            switch (e.key) {
-                case GLFW_KEY_ESCAPE:
-                    if (!navigation.empty()) {
-                        popMenu();
-                    }
-                    else {
-                        showMenu(GameMenus::PAUSE_MENU);
-                    }
+    if (e.action != GLFW_PRESS) {
+        return;
+    }
 
-                    e.handled = true;
-                    break;
-                case GLFW_KEY_F1:
-                    if (debugPanel->isVisible()) {
-                        debugPanel->hide();
+    if (e.key == GLFW_KEY_ESCAPE) {
+        hideMenu(0);
+    }
+
+    if (app->getGameState() == GameState::RUNNING) {
+        for (auto it = menus.begin(); it != menus.end(); it++) {
+            MenuBase* menu = it->second;
+            if (menu->getKey() == e.key) {
+                if (menu->toggleOnKey()) {
+                    if (menu->getWidget()->isVisible()) {
+                        hideMenu(it->first);
                     }
                     else {
-                        debugPanel->show();
+                        showMenu(it->first);
                     }
+                }
+                else {
+                    showMenu(it->first);
                     e.handled = true;
-                    break;
-            }
-        }
-        else if (app->getGameState() == GameState::PAUSED) {
-            if (e.key == GLFW_KEY_ESCAPE) {
-                popMenu();
+                }
+                break;
             }
         }
     }
@@ -238,7 +239,7 @@ void Gui::handleMouseMoveEvent(MouseMoveEvent& event) {
         navigation.top()->handleMouseMoveEvent(event);
     }
 
-    if (debugPanel->isVisible()) {
-        debugPanel->handleMouseMoveEvent(event);
+    for (const auto& [_, menu] : menus) {
+        menu->getWidget()->handleMouseMoveEvent(event);
     }
 }

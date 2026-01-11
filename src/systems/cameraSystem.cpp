@@ -1,18 +1,3 @@
-/*  Copyright (C) 2024  Philipp Geil <https://github.com/PhiGei2000>
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 #include "systems/cameraSystem.hpp"
 
 #include "components/components.hpp"
@@ -69,7 +54,7 @@ void CameraSystem::update(float dt) {
         camera.calculateMatrices(transform);
 
         CameraUpdateEvent event{cameraEntity, false, cameraPositionUpdated, cameraRotationUpdated};
-        game->raiseEvent<CameraUpdateEvent>(event);
+        game->raiseEvent<true>(event);
     }
 }
 
@@ -83,7 +68,7 @@ void CameraSystem::onFramebufferSize(const FramebufferSizeEvent& e) {
     camera.calculateMatrices(cameraTransform);
 
     CameraUpdateEvent event{cameraEntity, true, false, false};
-    game->raiseEvent<CameraUpdateEvent>(event);
+    game->raiseEvent<true>(event);
 }
 
 std::pair<glm::vec3, glm::vec2> CameraSystem::getCameraMovement(const CameraComponent& camera) const {

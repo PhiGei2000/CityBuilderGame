@@ -1,18 +1,3 @@
-/*  Copyright (C) 2024  Philipp Geil <https://github.com/PhiGei2000>
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 #include "gui/menus/buildMenu.hpp"
 
 #include "application.hpp"
@@ -26,7 +11,7 @@
 #include <cctype>
 
 BuildMenu::BuildMenu(Gui* gui)
-    : StackPanel("build_menu", gui, StackOrientation::COLUMN, colors::anthraziteGrey, ItemAligment::BEGIN) {
+    : Menu<StackPanel>("build_menu", gui, StackOrientation::COLUMN, colors::anthraziteGrey, ItemAligment::BEGIN) {
     this->outerSpacing = false;
     this->spacing = 0.0f;
 
@@ -106,5 +91,5 @@ void BuildMenu::selectBuildingType(const std::string& buildingID) const {
     Game* game = this->gui->getApp()->getGame();
 
     BuildingSelectedEvent event = BuildingSelectedEvent(buildingID);
-    game->raiseEvent<BuildingSelectedEvent>(event);
+    game->raiseEvent<false>(event);
 }

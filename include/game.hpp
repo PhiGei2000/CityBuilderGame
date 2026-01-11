@@ -1,20 +1,7 @@
-/*  Copyright (C) 2024  Philipp Geil <https://github.com/PhiGei2000>
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 #pragma once
+#include "events/event.hpp"
 #include "resources/resourceManager.hpp"
+#include "gameState.hpp"
 
 #include "misc/terrain.hpp"
 #include "misc/typedefs.hpp"
@@ -29,11 +16,6 @@
 class System;
 class Application;
 
-enum class GameState {
-    PAUSED,
-    RUNNING,
-    BUILD_MODE
-};
 
 class Game {
     std::vector<System*> systems;
@@ -78,8 +60,12 @@ class Game {
     void setState(GameState state);
     GameState getState() const;
 
-    template<typename Event>
-    void raiseEvent(Event& args);
+    template<bool ignoreState, EventType<ignoreState> Event>
+    inline void raiseEvent(Event& event) {
+        if (state != GameState::PAUSED || ignoreState) {
+            eventDispatcher.trigger<Event&>(event);
+        }
+    }
 
 #if DEBUG
     void log(const std::string& message);

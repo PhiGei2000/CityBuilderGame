@@ -65,8 +65,7 @@ if(WIN32)
     set(LIBNOISE_INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/lib/libnoise/src)
     set(LIBNOISE_LIBRARIES noise)
 
-    set(FREETYPE_INCLUDE_DIRS ./lib/freetype/include)
-    find_file(FREETYPE_LIBRARY freetype.lib HINTS "${CMAKE_CURRENT_LIST_DIR}/lib/freetype/release static/vs2015-2022/win64")
+    add_subdirectory(lib/freetype)
 else()
     find_package(glm REQUIRED)
     if (GLM_FOUND)
@@ -120,7 +119,7 @@ target_link_libraries(${PROJECT_NAME}
     ${OPENGL_LIBRARIES}
     glfw ${GLFW_LIBRARIES}
     ${GLEW_LIBRARIES}
-    ${FREETYPE_LIBRARY}
+    freetype
     pugixml
     ${LIBNOISE_LIBRARIES}
 )
