@@ -8,6 +8,14 @@ Container::Container(const std::string& id, Gui* gui, const glm::vec4& backgroun
     : Widget(id, gui, backgroundColor) {
 }
 
+void Container::applyConstraints() {
+    Widget::applyConstraints();
+
+    for (Widget* child : children) {
+        child->applyConstraints();
+    }
+}
+
 void Container::handleMouseButtonEvent(MouseButtonEvent& e) {
     if (!visible)
         return;
@@ -65,20 +73,40 @@ void Container::hide() {
     }
 }
 
+void Container::invalidate() {
+    Widget::invalidate();
+
+    for (Widget* child : children) {
+        child->invalidate();
+    }
+}
+
 void Container::update() {
     for (Widget* child : children) {
         child->update();
     }
 }
 
-void Container::render() const {
+void Container::render() {
     if (!visible) {
         return;
     }
 
     Widget::render();
 
-    for (const Widget* child : children) {
+    for (Widget* child : children) {
         child->render();
+    }
+}
+
+void Container::setChildConstraints() {
+    for (const auto& child : children) {
+        Container* container = dynamic_cast<Container*>(child);
+        if (container != nullptr) {
+            container->setChildConstraints();
+        }
+
+        child->invalidate();
+        child->applyConstraints();
     }
 }

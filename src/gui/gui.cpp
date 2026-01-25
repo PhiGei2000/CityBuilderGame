@@ -37,23 +37,6 @@ void Gui::showMenu(int menuID) {
     if (!navigation.empty())
         navigation.top()->hide();
 
-    // switch (menu) {
-    //     case GameMenus::NONE:
-    //         // clear the navigation and set game state to running
-    //         while (!navigation.empty()) {
-    //             navigation.pop();
-    //         }
-    //         app->setGameState(GameState::RUNNING);
-    //         return;
-    //     case GameMenus::PAUSE_MENU:
-    //         navigation.push(pauseMenu);
-    //         break;
-    //     case GameMenus::OPTIONS_MENU:
-    //         navigation.push(optionsMenu);
-    //         break;
-    //     default:
-    //         return;
-    // }
     auto it = menus.find(menuID);
     if (it == menus.end()) {
         while (!navigation.empty()) {
@@ -96,7 +79,8 @@ void Gui::hideMenu(int menuID) {
 }
 
 void Gui::showWarning(const std::string& text) const {
-    warningWidget->text = text;
+    // warningWidget->text = text;
+    warningWidget->setText(text);
     warningWidget->show();
 }
 
@@ -108,7 +92,7 @@ Application* Gui::getApp() const {
     return app;
 }
 
-ShaderProgram* Gui::getShader() const {
+GuiShader* Gui::getShader() const {
     return guiShader;
 }
 
@@ -122,11 +106,15 @@ void Gui::setScreenSize(float width, float height) {
     this->height = height;
 
     // update widgets
-    for (const auto& widget : widgets) {
+    for (Widget* widget : widgets) {
+        widget->applyConstraints();
+
         Container* container;
         if ((container = dynamic_cast<Container*>(widget)) != nullptr) {
             container->setChildConstraints();
         }
+
+        widget->invalidate();
     }
 }
 
@@ -140,19 +128,6 @@ Rectangle Gui::getBox() const {
 }
 
 void Gui::init() {
-    //     menus = {
-    //         std::make_pair(static_cast<int>(GameMenus::OPTIONS_MENU), new OptionsMenu(this)),
-    //         std::make_pair(static_cast<int>(GameMenus::PAUSE_MENU), new PauseMenu(this)),
-    //         std::make_pair(static_cast<int>(GameMenus::BUILD_MENU), new BuildMenu(this)),
-    // #if DEBUG
-    //         std::make_pair(static_cast<int>(GameMenus::DEBUG_PANEL), new DebugPanel(this)),
-    // #endif
-    //     };
-
-    //     for (const auto& [_, menu] : menus) {
-    //         widgets.push_back(menu->getWidget());
-    //     }
-
     warningWidget = new Label("warning_label", this, colors::transparent, "", nullptr, 12, TextAlign::BEGIN, colors::warning);
     warningWidget->hide();
 }
@@ -185,10 +160,6 @@ void Gui::render() const {
         navigation.top()->render();
     }
 
-    for (const auto [_, menu] : menus) {
-        menu->getWidget()->render();
-    }
-
     warningWidget->render();
 
     // enable depth test and disable blend
@@ -207,39 +178,33 @@ void Gui::handleKeyEvent(KeyEvent& e) {
         return;
     }
 
-    if (e.key == GLFW_KEY_ESCAPE) {
+    if (e.key == GLFW_KEY_ESCAPE && !navigation.empty()) {
         hideMenu(0);
+        return;
     }
 
-    if (app->getGameState() == GameState::RUNNING) {
-        for (auto it = menus.begin(); it != menus.end(); it++) {
-            MenuBase* menu = it->second;
-            if (menu->getKey() == e.key) {
-                if (menu->toggleOnKey()) {
-                    if (menu->getWidget()->isVisible()) {
-                        hideMenu(it->first);
-                    }
-                    else {
-                        showMenu(it->first);
-                    }
+    for (auto it = menus.begin(); it != menus.end(); it++) {
+        MenuBase* menu = it->second;
+        if (menu->getKey() == e.key) {
+            if (menu->toggleOnKey()) {
+                if (menu->getWidget()->isVisible()) {
+                    hideMenu(it->first);
                 }
-                else {
+                else if (navigation.empty()) {
                     showMenu(it->first);
-                    e.handled = true;
                 }
-                break;
             }
+            else if (navigation.empty()) {
+                showMenu(it->first);
+                e.handled = true;
+            }
+            break;
         }
     }
 }
 
 void Gui::handleMouseMoveEvent(MouseMoveEvent& event) {
-
     if (!navigation.empty()) {
         navigation.top()->handleMouseMoveEvent(event);
-    }
-
-    for (const auto& [_, menu] : menus) {
-        menu->getWidget()->handleMouseMoveEvent(event);
     }
 }

@@ -12,7 +12,6 @@
 
 BuildMenu::BuildMenu(Gui* gui)
     : Menu<StackPanel>("build_menu", gui, StackOrientation::COLUMN, colors::anthraziteGrey, ItemAligment::BEGIN) {
-    this->outerSpacing = false;
     this->spacing = 0.0f;
 
     constraints.x = CenterConstraint();
@@ -24,7 +23,6 @@ BuildMenu::BuildMenu(Gui* gui)
     title->constraints.x = AbsoluteConstraint();
     title->constraints.y = AbsoluteConstraint();
     title->constraints.height = AbsoluteConstraint(48.0f);
-    title->textAlign = TextAlign::BEGIN;
     addChild(title);
 
     for (unsigned int i = 0; i < static_cast<unsigned int>(BuildingCategory::BUILDING_CATEGORY_COUNT); i++) {
@@ -35,7 +33,6 @@ BuildMenu::BuildMenu(Gui* gui)
 
         Label* categoryLabel = new Label(std::format("build_menu.label_{}", categoryName), gui, colors::darkGrey, categoryName, nullptr, 12);
         categoryLabel->constraints.height = AbsoluteConstraint(18.0f);
-        categoryLabel->textAlign = TextAlign::BEGIN;
         addChild(categoryLabel);
 
         StackPanel* categoryStackPanel = new StackPanel(std::format("build_menu.stackPanel_{}", categoryName), gui, StackOrientation::ROW, colors::transparent, ItemAligment::BEGIN);

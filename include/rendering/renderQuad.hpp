@@ -1,5 +1,7 @@
 #pragma once
 
+struct Rectangle;
+
 class RenderQuad {
   private:
     unsigned int vbo, vao;
@@ -9,4 +11,5 @@ class RenderQuad {
     ~RenderQuad();
 
     void draw(float xMin, float yMin, float width, float height) const;
+    void draw(const Rectangle& rect) const;
 };

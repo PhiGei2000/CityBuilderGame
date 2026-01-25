@@ -17,6 +17,11 @@ class Label : public virtual Widget {
     Geometry geometry;
     float textWidth, textHeight, baselineOffset = 0;
 
+    std::string text;
+    TextAlign textAlign;
+    FontPtr font;
+    int textSize;
+
     struct TextVertex {
         glm::vec2 position;
         glm::vec2 texCoord;
@@ -24,20 +29,20 @@ class Label : public virtual Widget {
         static const VertexAttributes attributes;
     };
 
+    virtual void applyConstraints() override;
+    void updateTextGeometry();
+
   public:
-    std::string text;
-    TextAlign textAlign;
     glm::vec4 textColor;
-    FontPtr font;
-    int textSize;
 
     Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, FontPtr font = nullptr, const int textSize = 24, TextAlign align = TextAlign::BEGIN, const glm::vec4& textColor = colors::white);
 
-    void updateTextGeometry();
+    // virtual void update() override;
 
-    virtual void update() override;
+    void setFont(FontPtr font);
+    void setText(const std::string& text);
+    void setTextAlign(TextAlign align);
+    void setTextSize(int textSize);
 
-    virtual Rectangle getBox() const override;
-
-    virtual void render() const override;
+    virtual void render() override;
 };

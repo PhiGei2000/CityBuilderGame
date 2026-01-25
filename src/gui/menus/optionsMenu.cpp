@@ -17,24 +17,21 @@ OptionsMenu::OptionsMenu(Gui* gui)
     StackPanel* row = new StackPanel("options_menu.last_row", gui, StackOrientation::ROW, colors::transparent);
     row->constraints.height = AbsoluteConstraint(45.0f);
     row->constraints.width = RelativeConstraint(1.0f);
-    row->outerSpacing = false;
     addChild(row);
 
     TextButton* back = new TextButton("options_menu.back", gui, colors::anthraziteGrey, "Back");
     back->constraints.height = RelativeConstraint(1.0f);
-    back->constraints.width = RelativeConstraint(0.5f);
+    back->constraints.width = FlexConstraint(1.0f);
     back->onClick += [&](const MouseButtonEvent& e) {
         this->gui->hideMenu(static_cast<int>(GameMenus::OPTIONS_MENU));
     };
-    back->cornerRadius = 15.0f;
     row->addChild(back);
 
     TextButton* done = new TextButton("options_menu.done", gui, colors::anthraziteGrey, "Done");
     done->constraints.height = RelativeConstraint(1.0f);
-    done->constraints.width = RelativeConstraint(0.5f);
+    done->constraints.width = FlexConstraint(1.0f);
     done->onClick += [&](const MouseButtonEvent& e) {
         this->gui->hideMenu(static_cast<int>(GameMenus::OPTIONS_MENU));
     };
-    done->cornerRadius = 15.0f;
     row->addChild(done);
 }

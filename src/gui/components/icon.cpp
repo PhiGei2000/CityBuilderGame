@@ -12,7 +12,7 @@ Icon::~Icon() {
     delete texture;
 }
 
-void Icon::render() const {
+void Icon::render() {
     if (!visible) {
         return;
     }

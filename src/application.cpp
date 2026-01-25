@@ -199,3 +199,14 @@ void Application::onMouseButtonEvent(MouseButtonEvent& e) {
 void Application::onMouseScrollEvent(MouseScrollEvent& e) {
     game->raiseEvent<false>(e);
 }
+
+bool Application::getMouseButton(int mouseButton) const {
+    return glfwGetMouseButton(window, mouseButton) == GLFW_PRESS;
+}
+
+glm::vec2 Application::getMousePos() const {
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+
+    return glm::vec2{static_cast<float>(x), static_cast<float>(y)};
+}

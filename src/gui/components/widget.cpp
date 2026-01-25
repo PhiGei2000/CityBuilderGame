@@ -49,7 +49,7 @@ bool Widget::isVisible() const {
 void Widget::update() {
 }
 
-void Widget::render() const {
+void Widget::render() {
     if (!visible) {
         return;
     }
@@ -60,88 +60,96 @@ void Widget::render() const {
 
     Rectangle area = getBox();
 
-    ShaderProgram* guiShader = gui->getShader();
+    GuiShader* guiShader = gui->getShader();
     guiShader->setVector4("color", backgroundColor);
-    guiShader->setVector2("widgetArea.position", glm::vec2{area.x, area.y});
-    guiShader->setVector2("widgetArea.size", glm::vec2{area.width, area.height});
+    guiShader->setRectangle("widgetArea", area);
     guiShader->setFloat("cornerRadius", cornerRadius);
 
     const RenderQuad& quad = gui->getRenderQuad();
-    quad.draw(area.x, area.y, area.width, area.height);
+    quad.draw(area);
 }
 
-Rectangle Widget::getBox() const {
+void Widget::applyConstraints() {
     Rectangle parentBox;
     if (parent == nullptr) {
         // friend class Widget
         parentBox = gui->getBox();
-}
+    }
     else {
         // TODO: Split functions to getPos, getWidth and getHeight
         parentBox = parent->getBox();
     }
 
     // set width and height values
-    float width = 0, height = 0;
-    switch (constraints.height.type) {
+    switch (constraints.height.getType()) {
         case ConstraintType::ABSOLUTE:
-            height = constraints.height.value;
+            box.height = constraints.height.getValue<AbsoluteConstraint>().value;
             break;
         case ConstraintType::RELATIVE:
-            height = constraints.height.value * parentBox.height;
+            box.height = constraints.height.getValue<RelativeConstraint>().value * parentBox.height;
+            break;
+        case ConstraintType::FLEX:
+            box.height = constraints.height.getValue<FlexConstraint>().absoluteValue;
             break;
         default:
+            std::cerr << "\"" << id << "\"\r\nInvalid constraint \"height\"!" << std::endl;
             break;
     }
 
-    switch (constraints.width.type) {
+    switch (constraints.width.getType()) {
         case ConstraintType::ABSOLUTE:
-            width = constraints.width.value;
+            box.width = constraints.width.getValue<AbsoluteConstraint>().value;
             break;
         case ConstraintType::RELATIVE:
-            width = constraints.width.value * parentBox.width;
+            box.width = constraints.width.getValue<RelativeConstraint>().value * parentBox.width;
+            break;
+        case ConstraintType::FLEX:
+            box.width = constraints.width.getValue<FlexConstraint>().absoluteValue;
             break;
         default:
+            std::cerr << "\"" << id << "\"\r\nInvalid constraint \"width\"!" << std::endl;
             break;
     }
 
-    if (constraints.height.type == ConstraintType::ASPECT) {
-        height = width / constraints.height.value;
+    if (constraints.height.getType() == ConstraintType::ASPECT) {
+        box.height = box.width / constraints.height.getValue<AspectConstraint>().value;
     }
-    else if (constraints.width.type == ConstraintType::ASPECT) {
-        width = height * constraints.width.value;
+    else if (constraints.width.getType() == ConstraintType::ASPECT) {
+        box.width = box.height * constraints.width.getValue<AspectConstraint>().value;
     }
 
     // set coordinates of top left corner
-    float x = parentBox.x;
-    float y = parentBox.y;
-    switch (constraints.x.type) {
+    box.x = parentBox.x;
+    box.y = parentBox.y;
+    switch (constraints.x.getType()) {
         case ConstraintType::ABSOLUTE:
-            x += constraints.x.value;
+            box.x += constraints.x.getValue<AbsoluteConstraint>().value;
             break;
         case ConstraintType::RELATIVE:
-            x += constraints.x.value * parentBox.width;
+            box.x += constraints.x.getValue<RelativeConstraint>().value * parentBox.width;
             break;
         case ConstraintType::CENTER:
-            x += (parentBox.width - width) * 0.5f;
+            box.x += (parentBox.width - box.width) * 0.5f;
             break;
         default:
+            std::cerr << "\"" << id << "\"\r\nInvalid constraint \"x\"!" << std::endl;
             break;
     }
 
-    switch (constraints.y.type) {
+    switch (constraints.y.getType()) {
         case ConstraintType::ABSOLUTE:
-            y += constraints.y.value;
+            box.y += constraints.y.getValue<AbsoluteConstraint>().value;
             break;
         case ConstraintType::RELATIVE:
-            y += constraints.y.value * parentBox.height;
+            box.y += constraints.y.getValue<RelativeConstraint>().value * parentBox.height;
             break;
         case ConstraintType::CENTER:
-            y += (parentBox.height - height) * 0.5f;
+            box.y += (parentBox.height - box.height) * 0.5f;
             break;
         default:
+            std::cerr << "\"" << id << "\"\r\nInvalid constraint \"y\"!" << std::endl;
             break;
     }
 
-    return Rectangle{x, y, width, height};
+    invalid = false;
 }

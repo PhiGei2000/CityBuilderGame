@@ -1,9 +1,9 @@
 #pragma once
 #include "gui/components/widget.hpp"
+#include "gui/guiShader.hpp"
 #include "gui/menus/menu.hpp"
 
 #include "rendering/renderQuad.hpp"
-#include "rendering/shader.hpp"
 
 #include <map>
 #include <stack>
@@ -30,7 +30,7 @@ class Gui {
     std::stack<Widget*> navigation;
     std::vector<Widget*> widgets;
 
-    ShaderProgram* guiShader = new ShaderProgram("res/shaders/renderQuad.vert", "res/shaders/renderQuad.frag");
+    GuiShader* guiShader = new GuiShader("res/shaders/renderQuad.vert", "res/shaders/renderQuad.frag");
 
   public:
     Gui(Application* app, float width, float height);
@@ -43,7 +43,7 @@ class Gui {
     void hideWarning() const;
 
     Application* getApp() const;
-    ShaderProgram* getShader() const;
+    GuiShader* getShader() const;
     const RenderQuad& getRenderQuad() const;
 
     void setScreenSize(float width, float height);

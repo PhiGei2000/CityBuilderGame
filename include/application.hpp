@@ -77,4 +77,7 @@ class Application {
     void onMouseMoveEvent(MouseMoveEvent& e);
     void onMouseButtonEvent(MouseButtonEvent& e);
     void onMouseScrollEvent(MouseScrollEvent& e);
+
+    bool getMouseButton(int mouseButton) const;
+    glm::vec2 getMousePos() const;
 };

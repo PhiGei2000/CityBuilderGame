@@ -248,7 +248,7 @@ Rectangle StackPanel::getBox() const {
         }
     }
 
-    if (constraints.height.type == ConstraintType::FIT_TO_CONTENT) {
+    if (constraints.height.getType() == ConstraintType::FIT_TO_CONTENT) {
         float maxHeight = 0.0f;
         for (const auto child : children) {
             const Rectangle& childBox = child->getBox();
@@ -260,7 +260,7 @@ Rectangle StackPanel::getBox() const {
         box.height = maxHeight;
     }
 
-    if (constraints.width.type == ConstraintType::FIT_TO_CONTENT) {
+    if (constraints.width.getType() == ConstraintType::FIT_TO_CONTENT) {
         float maxWidth = 0.0f;
         for (const auto child : children) {
             const Rectangle& childBox = child->getBox();
@@ -271,6 +271,4 @@ Rectangle StackPanel::getBox() const {
 
         box.width = maxWidth;
     }
-
-    return box;
 }

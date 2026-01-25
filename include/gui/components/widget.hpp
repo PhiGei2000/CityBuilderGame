@@ -18,8 +18,12 @@ class Widget {
     bool visible = false;
 
     friend class Gui;
+    Rectangle box;
+    bool invalid = true;
 
   public:
+    virtual void applyConstraints();
+
     const std::string id;
 
     EventDispatcher<MouseMoveEvent> onMouseEnter;
@@ -36,11 +40,21 @@ class Widget {
     virtual void hide();
     bool isVisible() const;
 
+    inline virtual void invalidate() {
+        invalid = true;
+    }
+
     virtual void update();
 
-    virtual void render() const;
+    virtual void render();
 
-    virtual Rectangle getBox() const;
+    virtual Rectangle getBox() {
+        if (invalid) {
+            applyConstraints();
+        }
+
+        return box;
+    }
 
     virtual void handleMouseButtonEvent(MouseButtonEvent& e);
     virtual void handleMouseMoveEvent(MouseMoveEvent& e);

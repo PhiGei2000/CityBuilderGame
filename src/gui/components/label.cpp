@@ -12,25 +12,49 @@ const VertexAttributes Label::TextVertex::attributes = {
 Label::Label(const std::string& id, Gui* gui, const glm::vec4& backgroundColor, const std::string& text, FontPtr font, const int textSize, TextAlign textAlign, const glm::vec4& textColor)
     : Widget(id, gui, backgroundColor), text(text), textAlign(textAlign), textColor(textColor), textSize(textSize), geometry(TextVertex::attributes) {
     this->font = font == nullptr ? gui->getApp()->getGame()->getResourceManager().getResource<Font>("Montserrat-Regular") : font;
-    updateTextGeometry();
+    // updateTextGeometry();
 }
 
-Rectangle Label::getBox() const {
-    if (constraints.height.type != ConstraintType::FIT_TO_CONTENT && constraints.width.type != ConstraintType::FIT_TO_CONTENT) {
-        return Widget::getBox();
+void Label::setFont(FontPtr font) {
+    this->font = font == nullptr ? gui->getApp()->getGame()->getResourceManager().getResource<Font>("Montserrat-Regular") : font;
+    invalid = true;
+}
+
+void Label::setText(const std::string& text) {
+    this->text = text;
+    invalid = true;
+}
+
+void Label::setTextAlign(TextAlign align) {
+    this->textAlign = align;
+    invalid = true;
+}
+
+void Label::setTextSize(int textSize) {
+    this->textSize = textSize;
+    invalid = true;
+}
+
+void Label::applyConstraints() {
+    Widget::applyConstraints();
+    updateTextGeometry();
+
+    if (constraints.height.getType() != ConstraintType::FIT_TO_CONTENT && constraints.width.getType() != ConstraintType::FIT_TO_CONTENT) {
+        // box = Widget::getBox();
+        return;
     }
 
-    Rectangle parentBox = Widget::getBox();
+    // Rectangle parentBox = Widget::getBox();
 
-    if (constraints.height.type == ConstraintType::FIT_TO_CONTENT) {
-        parentBox.height = textHeight;
+    if (constraints.height.getType() == ConstraintType::FIT_TO_CONTENT) {
+        box.height = textHeight;
     }
 
-    if (constraints.width.type == ConstraintType::FIT_TO_CONTENT) {
-        parentBox.width = textWidth;
+    if (constraints.width.getType() == ConstraintType::FIT_TO_CONTENT) {
+        box.width = textWidth;
     }
 
-    return parentBox;
+    // box = parentBox;
 }
 
 void Label::updateTextGeometry() {
@@ -42,7 +66,7 @@ void Label::updateTextGeometry() {
     float screenWidth, screenHeight;
     gui->getScreenSize(&screenWidth, &screenHeight);
 
-    float pixelScale = 1.0f / 24.0f;// / screenHeight;
+    float pixelScale = 1.0f / 24.0f; // / screenHeight;
 
     glm::vec2 currentPos = {0.0f, 0.0f};
     unsigned int indexOffset = 0;
@@ -94,11 +118,7 @@ void Label::updateTextGeometry() {
     geometry.bufferData(vertices, indices, GL_DYNAMIC_DRAW);
 }
 
-void Label::update() {
-    updateTextGeometry();
-}
-
-void Label::render() const {
+void Label::render() {
     if (!visible) {
         return;
     }
