@@ -1,252 +1,101 @@
 #include "gui/components/stackPanel.hpp"
 
+#include <set>
+
 StackPanel::StackPanel(const std::string& id, Gui* gui, StackOrientation orientation, const glm::vec4 backgroundColor, ItemAligment itemAligment)
     : Container(id, gui, backgroundColor), orientation{orientation}, itemAligment{itemAligment} {
 }
 
-void StackPanel::setChildConstraints() {
-    for (const auto& child : children) {
-        Container* container = dynamic_cast<Container*>(child);
-        if (container != nullptr) {
-            container->setChildConstraints();
-        }
-    }
+float StackPanel::calculateSpace(float totalSpace, float totalSpacing, const std::function<float(Widget*)>& getChildSize, const std::function<Constraint&(Widget*)>& getChildSizeConstraint) {
+    std::set<int> flexItems;
+    float remainingSpace = 0.0f;
+    float flexSum = 0.0f;
+    float space = 0.0f;
 
-    Rectangle containerBox = getBox();
-
-    if (!outerSpacing) {
-        if (orientation == StackOrientation::COLUMN || orientation == StackOrientation::COLUMN_REVERSE) {
-            containerBox.height += spacing;
+    for (int i = 0; i < children.size(); i++) {
+        if (children[i]->constraints.width.getType() == ConstraintType::FLEX) {
+            flexItems.insert(i);
+            flexSum += getChildSizeConstraint(children[i]).getValue<FlexConstraint>().value;
         }
         else {
-            containerBox.width += spacing;
+            space += getChildSize(children[i]);
         }
     }
+    remainingSpace = totalSpace - space - totalSpacing;
+    for (int i : flexItems) {
+        FlexConstraint& flex = getChildSizeConstraint(children[i]).getValue<FlexConstraint>();
+        flex.absoluteValue = remainingSpace * flex.value / flexSum;
+        space += flex.absoluteValue;
+    }
 
-    switch (itemAligment) {
-        case ItemAligment::STRECH: {
-            float spacing = 1.0f / children.size();
+    return space;
+}
 
-            switch (orientation) {
-                case StackOrientation::COLUMN:
-                    for (int i = 0; i < children.size(); i++) {
-                        children[i]->constraints.y = RelativeConstraint(i * spacing);
-                        children[i]->constraints.height = RelativeConstraint(spacing);
-                    }
-                    break;
-                case StackOrientation::COLUMN_REVERSE:
-                    for (int i = 0; i < children.size(); i++) {
-                        children[i]->constraints.y = RelativeConstraint(1 - (i + 1) * spacing);
-                        children[i]->constraints.height = RelativeConstraint(spacing);
-                    }
-                    break;
-                case StackOrientation::ROW:
-                    for (int i = 0; i < children.size(); i++) {
-                        children[i]->constraints.x = RelativeConstraint(i * spacing);
-                        children[i]->constraints.width = RelativeConstraint(spacing);
-                    }
-                    break;
-                case StackOrientation::ROW_REVERSE:
-                    for (int i = 0; i < children.size(); i++) {
-                        children[i]->constraints.x = RelativeConstraint(1 - (i + 1) * spacing);
-                        children[i]->constraints.width = RelativeConstraint(spacing);
-                    }
-                default:
-                    break;
-            }
-        } break;
-        case ItemAligment::BEGIN: {
-            float current = spacing / 2.0f;
-
-            switch (orientation) {
-                case StackOrientation::COLUMN:
-                    for (int i = 0; i < children.size(); i++) {
-                        children[i]->constraints.y = AbsoluteConstraint(current);
-
-                        const Rectangle& childArea = children[i]->getBox();
-                        current += (childArea.height + spacing);
-                    }
-                    break;
-                case StackOrientation::COLUMN_REVERSE:
-                    for (int i = children.size() - 1; i >= 0; i--) {
-                        children[i]->constraints.y = AbsoluteConstraint(current);
-
-                        const Rectangle& childArea = children[i]->getBox();
-                        current += (childArea.height + spacing);
-                    }
-                    break;
-                case StackOrientation::ROW:
-                    for (int i = 0; i < children.size(); i++) {
-                        children[i]->constraints.x = AbsoluteConstraint(current);
-
-                        const Rectangle& childArea = children[i]->getBox();
-                        current += (childArea.width + spacing);
-                    }
-                    break;
-                case StackOrientation::ROW_REVERSE:
-                    for (int i = children.size() - 1; i >= 0; i--) {
-                        children[i]->constraints.x = AbsoluteConstraint(current);
-
-                        const Rectangle& childArea = children[i]->getBox();
-                        current += (childArea.width + spacing);
-                    }
-                default:
-                    break;
-            }
-        } break;
-        case ItemAligment::CENTER: {
-            float current = 0;
-            switch (orientation) {
-                case StackOrientation::COLUMN: {
-                    float height = 0.0f;
-                    for (const auto child : children) {
-                        const Rectangle& childArea = child->getBox();
-                        height += (childArea.height + spacing);
-                    }
-
-                    current = (containerBox.height - height + spacing) / 2.0f;
-                    for (int i = 0; i < children.size(); i++) {
-                        children[i]->constraints.y = AbsoluteConstraint(current);
-
-                        const Rectangle& childArea = children[i]->getBox();
-                        current += (childArea.height + spacing);
-                    }
-                } break;
-                case StackOrientation::COLUMN_REVERSE: {
-                    float height = 0.0f;
-                    for (const auto child : children) {
-                        const Rectangle& childArea = child->getBox();
-                        height += (childArea.height + spacing);
-                    }
-
-                    current = (containerBox.height - height + spacing) / 2.0f;
-                    for (int i = children.size() - 1; i >= 0; i--) {
-                        children[i]->constraints.y = AbsoluteConstraint(current);
-
-                        const Rectangle& childArea = children[i]->getBox();
-                        current += (childArea.height + spacing);
-                    }
-                } break;
-                case StackOrientation::ROW: {
-                    float width = 0.0f;
-                    for (const auto child : children) {
-                        const Rectangle& childArea = child->getBox();
-                        width += (childArea.width + spacing);
-                    }
-
-                    current = (containerBox.width - width + spacing) / 2.0f;
-                    for (int i = 0; i < children.size(); i++) {
-                        children[i]->constraints.x = AbsoluteConstraint(current);
-
-                        const Rectangle& childArea = children[i]->getBox();
-                        current += (childArea.width + spacing);
-                    }
-                } break;
-                case StackOrientation::ROW_REVERSE: {
-                    float width = 0.0f;
-                    for (const auto child : children) {
-                        const Rectangle& childArea = child->getBox();
-                        width += (childArea.width + spacing);
-                    }
-
-                    current = (containerBox.width - width + spacing) / 2.0f;
-                    for (int i = children.size() - 1; i >= 0; i--) {
-                        children[i]->constraints.x = AbsoluteConstraint(current);
-
-                        const Rectangle& childArea = children[i]->getBox();
-                        current += (childArea.width + spacing);
-                    }
-                } break;
-                default:
-                    break;
-            }
-        } break;
-        case ItemAligment::END: {
-            float current = 0.0f;
-
-            switch (orientation) {
-                case StackOrientation::COLUMN: {
-                    float height = 0.0f;
-                    for (const Widget* child : children) {
-                        const Rectangle& area = child->getBox();
-                        height += (area.height + spacing);
-                    }
-
-                    current = (containerBox.height - height) + spacing / 2.0f;
-
-                    for (int i = 0; i < children.size(); i++) {
-                        children[i]->constraints.y = AbsoluteConstraint(current);
-
-                        const Rectangle& childArea = children[i]->getBox();
-                        current += (childArea.height + spacing);
-                    }
-                } break;
-                case StackOrientation::COLUMN_REVERSE: {
-                    float height = 0.0f;
-                    for (const Widget* child : children) {
-                        const Rectangle& area = child->getBox();
-                        height += (area.height + spacing);
-                    }
-
-                    current = (containerBox.height - height) + spacing / 2.0f;
-
-                    for (int i = children.size() - 1; i >= 0; i--) {
-                        children[i]->constraints.y = AbsoluteConstraint(current);
-
-                        const Rectangle& childArea = children[i]->getBox();
-                        current += (childArea.height + spacing);
-                    }
-                } break;
-                case StackOrientation::ROW: {
-                    float width = 0.0f;
-                    for (const Widget* child : children) {
-                        const Rectangle& area = child->getBox();
-                        width += (area.width + spacing);
-                    }
-
-                    current = (containerBox.width - width) + spacing / 2.0f;
-
-                    for (int i = 0; i < children.size(); i++) {
-                        children[i]->constraints.x = AbsoluteConstraint(current);
-
-                        const Rectangle& childArea = children[i]->getBox();
-                        current += (childArea.width + spacing);
-                    }
-                } break;
-                case StackOrientation::ROW_REVERSE: {
-                    float width = 0.0f;
-                    for (const Widget* child : children) {
-                        const Rectangle& area = child->getBox();
-                        width += (area.width + spacing);
-                    }
-
-                    current = (containerBox.width - width) + spacing / 2.0f;
-
-                    for (int i = children.size() - 1; i >= 0; i--) {
-                        children[i]->constraints.x = AbsoluteConstraint(current);
-
-                        const Rectangle& childArea = children[i]->getBox();
-                        current += (childArea.width + spacing);
-                    }
-                } break;
-                default:
-                    break;
-            }
-        } break;
+void StackPanel::setChildPositions(float start, const std::function<float(Widget*, float)>& setChildPosition, bool reverse) {
+    float current = start;
+    if (reverse) {
+        for (int i = children.size() - 1; i >= 0; i--) {
+            current += setChildPosition(children[i], current) + spacing;
+        }
+    }
+    else {
+        for (int i = 0; i < children.size(); i++) {
+            current += setChildPosition(children[i], current) + spacing;
+        }
     }
 }
 
-Rectangle StackPanel::getBox() const {
-    Rectangle box = Widget::getBox();
+void StackPanel::setChildConstraints() {
+    Container::setChildConstraints();
 
-    if (!outerSpacing) {
-        if (orientation == StackOrientation::COLUMN || orientation == StackOrientation::COLUMN_REVERSE) {
-            box.height -= spacing;
-        }
-        else {
-            box.width -= spacing;
-        }
+    Rectangle containerBox = getBox();
+
+    float totalSpacing = (children.size() - 1) * spacing;
+    std::function<float(Widget*, float)> setChildPosition;
+    bool reverse = false;
+    float totalSpace = 0.0f;
+
+    float space = 0.0f;
+    switch (orientation) {
+        case StackOrientation::COLUMN_REVERSE:
+            reverse = true;
+        case StackOrientation::COLUMN:
+            totalSpace = containerBox.height;
+            space = calculateSpace(totalSpace, totalSpacing, [](Widget* child) { return child->getBox().height; }, [](Widget* child) -> Constraint& { return child->constraints.height; });
+
+            setChildPosition = [](Widget* child, float position) {
+                child->constraints.y = AbsoluteConstraint(position);
+                child->invalidate();
+
+                return child->getBox().height;
+            };
+            break;
+        case StackOrientation::ROW_REVERSE:
+            reverse = true;
+        case StackOrientation::ROW:
+            totalSpace = containerBox.width;
+            space = calculateSpace(totalSpace, totalSpacing, [](Widget* child) { return child->getBox().width; }, [](Widget* child) -> Constraint& { return child->constraints.width; });
+
+            setChildPosition = [](Widget* child, float position) {
+                child->constraints.x = AbsoluteConstraint(position);
+                child->invalidate();
+
+                return child->getBox().width;
+            };
+            break;
     }
+
+    float start = 0.0f;
+
+    if (itemAligment == ItemAligment::CENTER) {
+        start = (totalSpace - space - totalSpacing) / 2.0f;
+    }
+
+    setChildPositions(start, setChildPosition, reverse);
+}
+
+void StackPanel::applyConstraints() {
+    Container::applyConstraints();
 
     if (constraints.height.getType() == ConstraintType::FIT_TO_CONTENT) {
         float maxHeight = 0.0f;
