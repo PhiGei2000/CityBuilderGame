@@ -25,6 +25,7 @@ enum class GameMenus : int {
     MAIN_MENU,
     PAUSE_MENU,
     OPTIONS_MENU,
+    GRAPHICS_MENU,
     BUILD_MENU,
 #if DEBUG
     DEBUG_PANEL

@@ -135,6 +135,7 @@ void RenderSystem::update(float dt) {
     }
 #endif
 
+    updateLightBuffer(sun, camera);
     shadowBuffer.bindTextures();
 
     renderScene(entt::exclude<DebugComponent>);

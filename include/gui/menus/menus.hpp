@@ -1,9 +1,10 @@
 #pragma once
 
-#include "buildMenu.hpp"
-#include "optionsMenu.hpp"
-#include "pauseMenu.hpp"
+#include "gui/menus/buildMenu.hpp"
+#include "gui/menus/graphicsMenu.hpp"
+#include "gui/menus/optionsMenu.hpp"
+#include "gui/menus/pauseMenu.hpp"
 
 #if DEBUG
-#include "debugPanel.hpp"
+#include "gui/menus/debugPanel.hpp"
 #endif

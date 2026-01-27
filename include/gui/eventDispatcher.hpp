@@ -10,9 +10,19 @@ class EventDispatcher {
     std::vector<EventDelegate> subscribers;
 
   public:
-    void subscribe(EventDelegate&& function);
+    inline void subscribe(EventDelegate&& delegate) {
+        this->subscribers.push_back(std::forward<EventDelegate>(delegate));
+    }
 
-    EventDispatcher& operator+=(EventDelegate&& delegate);
+    inline EventDispatcher& operator+=(EventDelegate&& delegate) {
+        subscribers.push_back(std::forward<EventDelegate>(delegate));
 
-    void invoke(Event& event) const;
+        return *this;
+    }
+
+    inline void invoke(Event& event) const {
+        for (const EventDelegate& delegate : subscribers) {
+            delegate.operator()(event);
+        }
+    }
 };

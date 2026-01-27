@@ -9,10 +9,13 @@ OptionsMenu::OptionsMenu(Gui* gui)
     constraints.width = RelativeConstraint(0.6f);
     constraints.height = AbsoluteConstraint(120.0f);
 
-    TextButton* test = new TextButton("options_menu.test", gui, colors::anthraziteGrey, "Test");
-    test->constraints.height = AbsoluteConstraint(45.0f);
-    test->constraints.width = RelativeConstraint(1.0f);
-    addChild(test);
+    TextButton* graphics = new TextButton("options_menu.graphics", gui, colors::anthraziteGrey, "Graphics");
+    graphics->constraints.height = AbsoluteConstraint(45.0f);
+    graphics->constraints.width = RelativeConstraint(1.0f);
+    graphics->onClick += [&](const MouseButtonEvent& e) {
+        this->gui->showMenu(static_cast<int>(GameMenus::GRAPHICS_MENU));
+    };
+    addChild(graphics);
 
     StackPanel* row = new StackPanel("options_menu.last_row", gui, StackOrientation::ROW, colors::transparent);
     row->constraints.height = AbsoluteConstraint(45.0f);

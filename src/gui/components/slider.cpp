@@ -5,11 +5,14 @@
 
 #include "application.hpp"
 
-Slider::Slider(const std::string& id, Gui* gui, const glm::vec4& color, const glm::vec4& backgroundColor)
+Slider::Slider(const std::string& id, Gui* gui, float initialValue, float maxValue, float minValue, const glm::vec4& color, const glm::vec4& backgroundColor)
     : Widget(id, gui, backgroundColor), color(color),
+      value(initialValue),
+      minValue(minValue),
+      maxValue(maxValue),
       sliderBarWidth(RelativeConstraint(0.9f)),
       sliderBarHeight(AbsoluteConstraint(10)),
-      sliderIndicatorSize(AbsoluteConstraint(15)) {
+      sliderIndicatorSize(AbsoluteConstraint(25)) {
 }
 
 void Slider::applyConstraints() {
@@ -107,5 +110,9 @@ void Slider::handleMouseMoveEvent(MouseMoveEvent& e) {
     float x = glm::clamp(e.x, minX, maxX);
 
     value = (x - minX) * (maxValue - minValue) / sliderBarArea.width + minValue;
+
+    ValueChangedEvent eValue{value};
+    onValueChanged.invoke(eValue);
+
     invalid = true;
 }

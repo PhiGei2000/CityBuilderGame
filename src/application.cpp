@@ -118,6 +118,7 @@ void Application::init() {
     gui = new Gui(this, 800, 600);
     gui->addMenu(static_cast<int>(GameMenus::PAUSE_MENU), new PauseMenu(gui));
     gui->addMenu(static_cast<int>(GameMenus::OPTIONS_MENU), new OptionsMenu(gui));
+    gui->addMenu(static_cast<int>(GameMenus::GRAPHICS_MENU), new GraphicsMenu(gui));
     gui->addMenu(static_cast<int>(GameMenus::BUILD_MENU), new BuildMenu(gui));
 #if DEBUG
     gui->addMenu(static_cast<int>(GameMenus::DEBUG_PANEL), new DebugPanel(gui));

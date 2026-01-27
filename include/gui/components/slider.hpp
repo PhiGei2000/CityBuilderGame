@@ -2,6 +2,16 @@
 #include "gui/colors.hpp"
 #include "gui/components/widget.hpp"
 
+#include "gui/eventDispatcher.hpp"
+
+struct ValueChangedEvent {
+    float newValue;
+
+    inline ValueChangedEvent(float newValue)
+        : newValue(newValue) {
+    }
+};
+
 class Slider : public Widget {
   protected:
     bool mouseDown = false;
@@ -11,8 +21,7 @@ class Slider : public Widget {
 
     Rectangle getIndicatorBox() const;
 
-
-    public:
+  public:
     float minValue = 0.0f;
     float maxValue = 1.0f;
     float value = 0.0f;
@@ -22,7 +31,9 @@ class Slider : public Widget {
     Constraint sliderBarWidth;
     AbsoluteConstraint sliderIndicatorSize;
 
-    Slider(const std::string& id, Gui* gui, const glm::vec4& color = colors::white, const glm::vec4& backgroundColor = colors::transparent);
+    EventDispatcher<ValueChangedEvent> onValueChanged;
+
+    Slider(const std::string& id, Gui* gui, float initialValue = 0.5f, float maxValue = 1.0f, float minValue = 0.0f, const glm::vec4& color = colors::white, const glm::vec4& backgroundColor = colors::transparent);
 
     virtual void applyConstraints() override;
 

@@ -11,4 +11,8 @@ class DebugPanel : public Menu<StackPanel> {
     inline virtual constexpr std::optional<int> getKey() const override {
         return GLFW_KEY_F1;
     }
+
+    inline virtual constexpr bool toggleOnKey() const override {
+        return true;
+    }
 };
