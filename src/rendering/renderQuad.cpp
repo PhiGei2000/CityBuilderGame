@@ -2,7 +2,6 @@
 
 #include "gui/rectangle.hpp"
 
-#include <GL/glew.h>
 
 RenderQuad::RenderQuad() {
     glGenVertexArrays(1, &vao);
@@ -24,7 +23,7 @@ RenderQuad::RenderQuad() {
 RenderQuad::~RenderQuad() {
 }
 
-void RenderQuad::draw(float xMin, float yMin, float width, float height) const {
+void RenderQuad::draw(float xMin, float yMin, float width, float height, int drawMode) const {
     glBindVertexArray(vao);
 
     float vertices[] = {
@@ -41,9 +40,9 @@ void RenderQuad::draw(float xMin, float yMin, float width, float height) const {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawArrays(drawMode, 0, 6);
 }
 
-void RenderQuad::draw(const Rectangle& rect) const {
-    draw(rect.x, rect.y, rect.width, rect.height);
+void RenderQuad::draw(const Rectangle& rect, int drawMode) const {
+    draw(rect.x, rect.y, rect.width, rect.height, drawMode);
 }

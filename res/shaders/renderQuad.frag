@@ -16,10 +16,16 @@ uniform bool useTexture;
 uniform bool text;
 uniform float cornerRadius;
 
+// border
+uniform float borderThickness;
+uniform vec4 borderColor;
+
 // widget area
 uniform Rectangle widgetArea;
 
 out vec4 FragColor;
+
+float distanceFromEdge();
 
 void main() {
     // render round corners if radius is greather than zero
@@ -37,6 +43,11 @@ void main() {
         }
     }
 
+    if (borderThickness > 0 && distanceFromEdge() < borderThickness) {
+        FragColor = borderColor;
+        return;
+    }
+
     // render text and texture
     if (text) {
         float val = texture(tex, texCoord).r;
@@ -51,4 +62,14 @@ void main() {
     else {
         FragColor = color;
     }
+}
+
+float distanceFromEdge() {
+    float d_minX = fragPosition.x - widgetArea.position.x;
+    float d_maxX = widgetArea.size.x - d_minX;
+
+    float d_minY = fragPosition.y - widgetArea.position.y;
+    float d_maxY = widgetArea.size.y - d_minY;
+
+    return min(min(d_minX, d_maxX), min(d_minY, d_maxY));
 }

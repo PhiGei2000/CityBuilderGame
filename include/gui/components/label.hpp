@@ -30,7 +30,7 @@ class Label : public virtual Widget {
     };
 
     virtual void applyConstraints() override;
-    void updateTextGeometry();
+    void updateTextGeometry(const glm::vec2& textOffset = glm::vec2(0.0f));
 
   public:
     glm::vec4 textColor;

@@ -57,7 +57,7 @@ void Label::applyConstraints() {
     // box = parentBox;
 }
 
-void Label::updateTextGeometry() {
+void Label::updateTextGeometry(const glm::vec2& textOffset) {
     std::vector<TextVertex> vertices = std::vector<TextVertex>();
     vertices.reserve(4 * text.size());
     std::vector<unsigned int> indices = std::vector<unsigned int>();
@@ -98,7 +98,7 @@ void Label::updateTextGeometry() {
     textWidth = currentPos.x;
 
     Rectangle box = getBox();
-    glm::vec2 textPos = {box.x, box.y + box.height * 0.75f};
+    glm::vec2 textPos = glm::vec2{box.x, box.y + box.height * 0.75f} + textOffset;
     switch (textAlign) {
         case TextAlign::BEGIN:
             textPos.x += 10.0f;
@@ -125,7 +125,7 @@ void Label::render() {
 
     Widget::render();
 
-    ShaderProgram* guiShader = gui->getShader();
+    GuiShader* guiShader = gui->getShader();
 
     guiShader->setBool("text", true);
     guiShader->setVector4("color", textColor);
