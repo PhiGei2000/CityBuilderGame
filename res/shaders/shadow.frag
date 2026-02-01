@@ -24,10 +24,11 @@ struct Material {
 out vec4 FragColor;
 
 uniform Material material;
+uniform mat4 model;
 
-void main() {     
+void main() {
     // discard fragments if they are transparent
     if (material.dissolve < 1) {
         discard;
-    }    
+    }
 }

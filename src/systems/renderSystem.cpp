@@ -110,10 +110,8 @@ void RenderSystem::update(float dt) {
     shadowBuffer.use();
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    glCullFace(GL_FRONT);
     renderSceneShadows(entt::exclude<DebugComponent, SunLightComponent>);
 
-    glCullFace(GL_BACK);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     const CameraComponent& camera = registry.get<CameraComponent>(game->camera);

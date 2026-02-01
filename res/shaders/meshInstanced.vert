@@ -40,18 +40,18 @@ layout(std140, binding = 2) uniform Light {
 uniform mat4 model;
 
 void main() {
-    vec4 position = aModel * vec4(aPos, 1.0);
+    vec4 position = model * aModel * vec4(aPos, 1.0);
 
     // calculate TBN matrix to transform world vectors into tangent space
-    mat3 normalMatrix = transpose(inverse(mat3(model * aModel)));
-    vec3 T = normalize(normalMatrix * aTangent);
-    vec3 B = normalize(normalMatrix * aBitangent);
-    vec3 N = normalize(normalMatrix * aNormal);
+    // mat3 normalMatrix = transpose(inverse(mat3(model * aModel)));
+    vec3 T = normalize(vec3(model * aModel * vec4(aTangent, 0.0)));
+    vec3 B = normalize(vec3(model * aModel * vec4(aBitangent, 0.0)));
+    vec3 N = normalize(vec3(model * aModel * vec4(aNormal, 0.0)));
 
     vs_out.TBN = transpose(mat3(T, B, N));
 
-    gl_Position = projection * view * model * position;
-    vs_out.FragPos = vec3(model * position);
+    gl_Position = projection * view * position;
+    vs_out.FragPos = vec3(position);
     vs_out.TexCoord = aTexCoord;
 
     // transform light direction vector to tangent space

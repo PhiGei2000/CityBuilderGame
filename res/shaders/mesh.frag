@@ -88,43 +88,42 @@ void main() {
 float shadowCalculation(vec3 normal) {
     // transform fragment position from world space into view space
     vec4 fragPosViewSpace = view * vec4(fs_in.FragPos, 1.0);
+    float depthValue = abs(fragPosViewSpace.z);
 
     // find the corresponding shadow map
-    int mapIndex = -1;
+    int layer = -1;
     for (int i = 0; i < cascadeCount; i++) {
-        if (abs(fragPosViewSpace.z) < cascadeFarPlanes[i]) {
-            mapIndex = i;
+        if (depthValue < cascadeFarPlanes[i]) {
+            layer = i;
             break;
         }
     }
 
-    if (mapIndex == -1) {
+    if (layer == -1) {
         return 0.0;
     }
 
     // transform the fragment position from world space into light space and extract depth from the shadow map
-    vec4 fragPosLightSpace = lightProjection[mapIndex] * lightView[mapIndex] * vec4(fs_in.FragPos, 1.0);
+    vec4 fragPosLightSpace = lightProjection[layer] * lightView[layer] * vec4(fs_in.FragPos, 1.0);
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
     float currentDepth = projCoords.z;
 
     // if depth greater than one render no shadow
-    if (currentDepth > 1.0 || projCoords.z > 1.0) {
+    if (currentDepth > 1.0) {
         return 0.0;
     }
 
     // calculate bias and apply pcf
-    float shadowBias = 1.2E-4;
-
-    vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps, 0));
     float cosTheta = dot(normal, -fs_in.tangentLightDirection);
-    float bias = max(abs(shadowBias * (1 - cosTheta)), shadowBias * 0.1);
+    float bias = max(abs(0.02 * (1 - cosTheta)), 0.002) / (cascadeFarPlanes[layer] * 0.5);
 
     float shadow = 0;
+    vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps, 0));
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
-            float closestDepth = texture(shadowMaps, vec3(projCoords.xy + vec2(x, y) * texelSize, mapIndex)).r;
-            shadow += float((currentDepth - bias) > closestDepth);
+            float closestDepth = texture(shadowMaps, vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r;
+            shadow += (currentDepth - bias) > closestDepth ? 1.0 : 0.0;
         }
     }
 
