@@ -16,6 +16,66 @@ void Container::applyConstraints() {
     }
 }
 
+Rectangle Container::getChildArea() {
+    const Rectangle& box = getBox();
+    Rectangle childArea = box;
+
+    float dtop = 0;
+    float dleft = 0;
+    float dbottom = 0;
+    float dright = 0;
+    switch (padding.top.getType()) {
+        case ConstraintType::ABSOLUTE:
+            dtop = padding.top.getValue<AbsoluteConstraint>().value;
+            break;
+        case ConstraintType::RELATIVE:
+            dtop = padding.top.getValue<RelativeConstraint>().value * box.height;
+            break;
+        default:
+            throw std::runtime_error("Invalid padding constraint (top)");
+    }
+
+    switch (padding.left.getType()) {
+        case ConstraintType::ABSOLUTE:
+            dleft = padding.left.getValue<AbsoluteConstraint>().value;
+            break;
+        case ConstraintType::RELATIVE:
+            dleft = padding.left.getValue<RelativeConstraint>().value * box.width;
+            break;
+        default:
+            throw std::runtime_error("Invalid padding constraint (left)");
+    }
+
+    switch (padding.bottom.getType()) {
+        case ConstraintType::ABSOLUTE:
+            dbottom = padding.bottom.getValue<AbsoluteConstraint>().value;
+            break;
+        case ConstraintType::RELATIVE:
+            dbottom = padding.bottom.getValue<RelativeConstraint>().value * box.height;
+            break;
+        default:
+            throw std::runtime_error("Invalid padding constraint (bottom)");
+    }
+
+    switch (padding.right.getType()) {
+        case ConstraintType::ABSOLUTE:
+            dright = padding.right.getValue<AbsoluteConstraint>().value;
+            break;
+        case ConstraintType::RELATIVE:
+            dright = padding.right.getValue<RelativeConstraint>().value * box.height;
+            break;
+        default:
+            throw std::runtime_error("Invalid padding constraint (right)");
+    }
+
+    childArea.x += dleft;
+    childArea.y += dtop;
+    childArea.width -= (dleft + dright);
+    childArea.height -= (dtop + dbottom);
+
+    return childArea;
+}
+
 void Container::handleMouseButtonEvent(MouseButtonEvent& e) {
     if (!visible)
         return;

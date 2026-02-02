@@ -6,7 +6,7 @@ class StackPanel : public Container {
     void applyConstraints() override;
 
     float calculateSpace(float totalSpace, float totalSpaceing, const std::function<float(Widget*)>& getChildSize, const std::function<Constraint&(Widget*)>& getChildSizeConstraint);
-    void setChildPositions(float start, const std::function<float(Widget*, float)>& setChildPosition, bool reverse);
+    void setChildPositions(const glm::vec2& offset, const std::function<glm::vec2(Widget*, const glm::vec2&)>& setChildPosition, bool reverse);
 
   public:
     enum class StackOrientation {

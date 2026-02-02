@@ -31,27 +31,32 @@ float StackPanel::calculateSpace(float totalSpace, float totalSpacing, const std
     return space;
 }
 
-void StackPanel::setChildPositions(float start, const std::function<float(Widget*, float)>& setChildPosition, bool reverse) {
-    float current = start;
+void StackPanel::setChildPositions(const glm::vec2& offset, const std::function<glm::vec2(Widget*, const glm::vec2&)>& setChildPosition, bool reverse) {
+    glm::vec2 current = offset;
     if (reverse) {
         for (int i = children.size() - 1; i >= 0; i--) {
-            current += setChildPosition(children[i], current) + spacing;
+            current += setChildPosition(children[i], current);
         }
     }
     else {
         for (int i = 0; i < children.size(); i++) {
-            current += setChildPosition(children[i], current) + spacing;
+            current += setChildPosition(children[i], current);
         }
     }
 }
 
 void StackPanel::setChildConstraints() {
     Container::setChildConstraints();
+    if (children.size() == 0) {
+        return;
+    }
 
-    Rectangle containerBox = getBox();
+    const Rectangle& containerBox = getBox();
+    const Rectangle& childArea = getChildArea();
+    glm::vec2 offset = childArea.getPosition() - containerBox.getPosition();
 
     float totalSpacing = (children.size() - 1) * spacing;
-    std::function<float(Widget*, float)> setChildPosition;
+    std::function<glm::vec2(Widget*, const glm::vec2&)> setChildPosition;
     bool reverse = false;
     float totalSpace = 0.0f;
 
@@ -60,38 +65,42 @@ void StackPanel::setChildConstraints() {
         case StackOrientation::COLUMN_REVERSE:
             reverse = true;
         case StackOrientation::COLUMN:
-            totalSpace = containerBox.height;
+            totalSpace = childArea.height;
             space = calculateSpace(totalSpace, totalSpacing, [](Widget* child) { return child->getBox().height; }, [](Widget* child) -> Constraint& { return child->constraints.height; });
 
-            setChildPosition = [](Widget* child, float position) {
-                child->constraints.y = AbsoluteConstraint(position);
+            setChildPosition = [this](Widget* child, const glm::vec2& position) {
+                child->constraints.x = AbsoluteConstraint(position.x);
+                child->constraints.y = AbsoluteConstraint(position.y);
                 child->invalidate();
 
-                return child->getBox().height;
+                return glm::vec2(0.0f, child->getBox().height + spacing);
             };
+
+            if (itemAligment == ItemAligment::CENTER) {
+                offset.y += (totalSpace - space - totalSpacing) / 2.0f;
+            }
             break;
         case StackOrientation::ROW_REVERSE:
             reverse = true;
         case StackOrientation::ROW:
-            totalSpace = containerBox.width;
+            totalSpace = childArea.width;
             space = calculateSpace(totalSpace, totalSpacing, [](Widget* child) { return child->getBox().width; }, [](Widget* child) -> Constraint& { return child->constraints.width; });
 
-            setChildPosition = [](Widget* child, float position) {
-                child->constraints.x = AbsoluteConstraint(position);
+            setChildPosition = [this](Widget* child, const glm::vec2& position) {
+                child->constraints.x = AbsoluteConstraint(position.x);
+                child->constraints.y = AbsoluteConstraint(position.y);
                 child->invalidate();
 
-                return child->getBox().width;
+                return glm::vec2(child->getBox().width + spacing, 0.0f);
             };
+
+            if (itemAligment == ItemAligment::CENTER) {
+                offset.x += (totalSpace - space - totalSpacing) / 2.0f;
+            }
             break;
     }
 
-    float start = 0.0f;
-
-    if (itemAligment == ItemAligment::CENTER) {
-        start = (totalSpace - space - totalSpacing) / 2.0f;
-    }
-
-    setChildPositions(start, setChildPosition, reverse);
+    setChildPositions(offset, setChildPosition, reverse);
 }
 
 void StackPanel::applyConstraints() {
