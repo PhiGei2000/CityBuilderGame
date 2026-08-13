@@ -1,5 +1,6 @@
 #include "components/roadComponent.hpp"
 
+#include "components/terrainComponent.hpp"
 #include "misc/roads/roadPathGenerator.hpp"
 
 #include "misc/utility.hpp"
@@ -122,14 +123,14 @@ void RoadComponent::updateRoadTypes(const std::map<std::string, RoadSpecs>& spec
     //    return;
     // }
 
-    for (int x = 0; x < Configuration::cellsPerChunk; x++) {
-        for (int y = 0; y < Configuration::cellsPerChunk; y++) {
-            updateRoad(glm::ivec2(x, y), specs);
-        }
-    }
+    // for (int x = 0; x < Configuration::cellsPerChunk; x++) {
+    //     for (int y = 0; y < Configuration::cellsPerChunk; y++) {
+    //         updateRoad(glm::ivec2(x, y), specs);
+    //     }
+    // }
 }
 
-bool RoadComponent::updateRoad(const glm::ivec2& pos, const std::map<std::string, RoadSpecs>& specs) {
+bool RoadComponent::updateRoad(const glm::ivec2& pos, const std::map<std::string, RoadSpecs>& specs, const TerrainComponent& terrain) {
     if (roadTiles[pos.x][pos.y].empty()) {
         return false;
     }
@@ -144,10 +145,7 @@ bool RoadComponent::updateRoad(const glm::ivec2& pos, const std::map<std::string
 
         // update road graph nodes
         if (tile.isRoadNode()) {
-            graph.addNode(pos, RoadGraph::NodeDataType{RoadPathGenerator::generateNodePaths(pos, specs.at(roadTiles[pos.x][pos.y].roadType), tile)});
-        }
-        else if (pos.x == 0 || pos.x == Configuration::cellsPerChunk - 1 || pos.y == 0 || pos.y == Configuration::cellsPerChunk - 1) {
-            graph.addNode(pos, RoadGraph::NodeDataType{RoadPathGenerator::generateNodePaths(pos, specs.at(roadTiles[pos.x][pos.y].roadType), tile)});
+            graph.addNode(pos, RoadGraph::NodeDataType{RoadPathGenerator::generateNodePaths(pos, specs.at(roadTiles[pos.x][pos.y].roadType), tile, terrain)});
         }
         else {
             graph.removeNode(pos);
@@ -249,10 +247,10 @@ std::unordered_set<glm::ivec2> RoadComponent::getNodes() const {
     return positions;
 }
 
-void RoadComponent::updateRoadGraph(const std::map<std::string, RoadSpecs>& specs) {
+void RoadComponent::updateRoadGraph(const std::map<std::string, RoadSpecs>& specs, const TerrainComponent& terrain) {
     const std::unordered_map<RoadGraph::NodeType, RoadGraph::NodeDataType>& nodes = graph.getNodes();
-    // identify edges
 
+    // identify edges
     std::set<RoadGraph::EdgeType> edges;
     for (auto it = nodes.begin(); it != nodes.end(); it++) {
         for (auto jt = nodes.begin(); jt != it; jt++) {
@@ -264,8 +262,8 @@ void RoadComponent::updateRoadGraph(const std::map<std::string, RoadSpecs>& spec
 
                 // check if any nodes are between x and y
                 if (checkEdge(x, y, 1)) {
-                    graph.addEdge(x, y, RoadPathGenerator::generateEdgePath(RoadGraph::EdgeType(x, y), specs.at(roadTiles[x.x][x.y].roadType)));
-                    graph.addEdge(y, x, RoadPathGenerator::generateEdgePath(RoadGraph::EdgeType(y, x), specs.at(roadTiles[x.x][x.y].roadType)));
+                    graph.addEdge(x, y, RoadPathGenerator::generateEdgePath(RoadGraph::EdgeType(x, y), *this, terrain, specs));
+                    graph.addEdge(y, x, RoadPathGenerator::generateEdgePath(RoadGraph::EdgeType(y, x), *this, terrain, specs));
                 }
             }
             else if (x.y == y.y) {
@@ -273,8 +271,8 @@ void RoadComponent::updateRoadGraph(const std::map<std::string, RoadSpecs>& spec
 
                 // check if any nodes are between x and y
                 if (checkEdge(x, y, 0)) {
-                    graph.addEdge(x, y, RoadPathGenerator::generateEdgePath(RoadGraph::EdgeType(x, y), specs.at(roadTiles[x.x][x.y].roadType)));
-                    graph.addEdge(y, x, RoadPathGenerator::generateEdgePath(RoadGraph::EdgeType(y, x), specs.at(roadTiles[x.x][x.y].roadType)));
+                    graph.addEdge(x, y, RoadPathGenerator::generateEdgePath(RoadGraph::EdgeType(x, y), *this, terrain, specs));
+                    graph.addEdge(y, x, RoadPathGenerator::generateEdgePath(RoadGraph::EdgeType(y, x), *this, terrain, specs));
                 }
             }
 

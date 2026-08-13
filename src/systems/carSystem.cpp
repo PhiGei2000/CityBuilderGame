@@ -85,7 +85,7 @@ void CarSystem::updateCarPath(CarComponent& car) const {
     const RoadGraph& graph = registry.get<RoadComponent>(chunkEntity).graph;
     const RoadGraph::NodeDataType& endNode = graph.getNodeData(tilePos);
 
-    const auto [_, _, direction] = car.currentPath.getCurrentSegment();
+    const auto [start, end, direction] = car.currentPath.getCurrentSegment();
     int incommingDirection = static_cast<int>(utility::getDirection(glm::vec2(-direction.x, -direction.z)));
 
     int outgoingDirecion = 0;

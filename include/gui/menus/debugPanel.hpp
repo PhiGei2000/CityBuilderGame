@@ -15,4 +15,8 @@ class DebugPanel : public Menu<StackPanel> {
     inline virtual constexpr bool toggleOnKey() const override {
         return true;
     }
+
+    inline virtual constexpr bool toggleGameState() const override {
+        return false;
+    }
 };

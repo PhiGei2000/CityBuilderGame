@@ -39,7 +39,6 @@ float TerrainSystem::getTerrainHeight(const glm::ivec2& position) const {
     //  noiseValue in [-1,1]
     float noiseValue = terrainNoise.GetValue(pos.x, pos.y, 0);
     return noiseValue;
-    // TODO: Use noise
     // return 0.0f;
 }
 

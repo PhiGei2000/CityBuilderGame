@@ -6,6 +6,7 @@
 #include "components/environmentComponent.hpp"
 #include "components/instancedMeshComponent.hpp"
 #include "components/meshComponent.hpp"
+#include "components/roadComponent.hpp"
 #include "components/roadMeshComponent.hpp"
 #include "components/terrainComponent.hpp"
 #include "components/transformationComponent.hpp"
@@ -67,66 +68,31 @@ class RenderSystem : public System {
                 mesh.render(renderData, shadingMode);
             });
 
-        // registry.view<MeshComponent, TransformationComponent, TerrainComponent>(exclude)
-        //     .each([&](auto entity, const MeshComponent& mesh, const TransformationComponent& transform, const TerrainComponent& terrain) {
-        //         MeshRenderData renderData = {transform.transform};
-        //         mesh.mesh->render(renderData);
-        //     });
+#if DEBUG
 
-        // registry.view<InstancedMeshComponent, TransformationComponent>(exclude)
-        //     .each([&](const InstancedMeshComponent& mesh, const TransformationComponent& transform) {
-        //         MeshRenderData renderData = {transform.transform};
-        //         mesh.mesh->renderInstanced<TransformationComponent>(renderData, mesh.instanceBuffer);
-        //     });
+        if (game->debugOptions.drawCarPaths) {
+            ShaderProgram* roadDebugPointsShader = resourceManager.getResource<Shader>("ROAD_DEBUG_POINTS_SHADER")->defaultShader;
+            ShaderProgram* roadDebugLinesShader = resourceManager.getResource<Shader>("ROAD_DEBUG_LINES_SHADER")->defaultShader;
 
-        // registry.view<MultiInstancedMeshComponent, TransformationComponent>(exclude)
-        //     .each([&](const MultiInstancedMeshComponent& mesh, const TransformationComponent& transform) {
-        //         MeshRenderData renderData = {transform.transform};
+            registry.view<RoadComponent, TransformationComponent>().each([&](const RoadComponent& road, const TransformationComponent& transform) {
+                if (road.getNodes().size() == 0) {
+                    return;
+                }
 
-        //         for (const auto& [name, instances] : mesh.transforms) {
-        //             mesh.mesh->renderObjectInstanced<TransformationComponent>(name, renderData, instances.instanceBuffer);
-        //         }
-        //     });
+                roadDebugLinesShader->use();
+                roadDebugLinesShader->setMatrix4("model", transform.transform);
 
-        // registry.view<EnvironmentComponent, TransformationComponent>(exclude)
-        //     .each([&](const EnvironmentComponent& environment, const TransformationComponent& transform) {
-        //         MeshRenderData renderData = {transform.transform};
+                road.graph.drawPaths();
 
-        //         for (const auto& [name, instances] : environment.treeMeshes) {
-        //             environment.mesh->renderObjectInstanced<TransformationComponent>(name, renderData, instances.instanceBuffer);
-        //         }
-        //     });
+                glEnable(GL_PROGRAM_POINT_SIZE);
+                roadDebugPointsShader->use();
+                roadDebugPointsShader->setMatrix4("model", transform.transform);
 
-//         registry.view<RoadMeshComponent, TransformationComponent>(exclude).each([&](const RoadMeshComponent& road, const TransformationComponent& transform) {
-//             MeshRenderData renderData = {transform.transform};
-
-//             for (const auto& [roadPackName, tiles] : road.roadMeshes) {
-//                 const RoadPackPtr& pack = resourceManager.getResource<RoadPack>(roadPackName);
-
-//                 for (const auto& [tileType, instances] : tiles) {
-//                     pack->roadGeometries.renderObjectInstanced<glm::mat4>(tileType, renderData, instances.instanceBuffer);
-//                 }
-//             }
-
-// #if DEBUG
-//             if (game->debugMode) {
-//                 ShaderProgram* roadDebugPointsShader = resourceManager.getResource<Shader>("ROAD_DEBUG_POINTS_SHADER")->defaultShader;
-//                 ShaderProgram* roadDebugLinesShader = resourceManager.getResource<Shader>("ROAD_DEBUG_LINES_SHADER")->defaultShader;
-
-//                 roadDebugLinesShader->use();
-//                 roadDebugLinesShader->setMatrix4("model", transform.transform);
-
-//                 road.graphDebugMesh->draw();
-
-//                 glEnable(GL_PROGRAM_POINT_SIZE);
-//                 roadDebugPointsShader->use();
-//                 roadDebugPointsShader->setMatrix4("model", transform.transform);
-
-//                 road.graphDebugMesh->draw();
-//                 glDisable(GL_PROGRAM_POINT_SIZE);
-//             }
-// #endif
-//         });
+                road.graph.drawPaths();
+                glDisable(GL_PROGRAM_POINT_SIZE);
+            });
+        }
+#endif
     }
 
     template<typename... T>

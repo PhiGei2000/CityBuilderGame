@@ -40,12 +40,19 @@ class Geometry {
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(T), vertices.data(), usage);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), usage);
 
-        drawCount = indices.size();
+        if (indices.size() == 0) {
+            drawCount = vertices.size();
+        }
+        else {
+            drawCount = indices.size();
+        }
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
+
+    virtual void drawArrays() const;
 
     virtual void draw() const;
 

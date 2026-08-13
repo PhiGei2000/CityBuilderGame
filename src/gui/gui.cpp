@@ -50,7 +50,9 @@ void Gui::showMenu(int menuID) {
 
     // show the top menu on the navigation stack and set the game state to paused
     navigation.top()->show();
-    app->setGameState(GameState::PAUSED);
+    if (it->second->toggleGameState()) {
+        app->setGameState(GameState::PAUSED);
+    }
 }
 
 void Gui::hideMenu(int menuID) {

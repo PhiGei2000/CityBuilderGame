@@ -1,12 +1,15 @@
 #include "gui/menus/debugPanel.hpp"
 
 #include "gui/components/button.hpp"
+#include "gui/components/checkbox.hpp"
 #include "gui/gui.hpp"
 
 #include "application.hpp"
 
 #include "components/components.hpp"
 #include "misc/utility.hpp"
+
+#include <fstream>
 
 DebugPanel::DebugPanel(Gui* gui)
     : Menu<StackPanel>("debug_menu", gui, StackOrientation::COLUMN, colors::anthraziteGrey, ItemAligment::BEGIN) {
@@ -46,14 +49,44 @@ DebugPanel::DebugPanel(Gui* gui)
     cameraPos->constraints.width = RelativeConstraint(0.9);
     addChild(cameraPos);
 
-    TextButton* terrainShadingModeButton = new TextButton("debug_menu.terrainShadingModeButton", gui, colors::anthraziteGrey, "Terrain Shading", nullptr, 12);
-    terrainShadingModeButton->constraints.height = AbsoluteConstraint(30);
-    terrainShadingModeButton->constraints.width = RelativeConstraint(0.9);
-    terrainShadingModeButton->onClick += [&](const MouseButtonEvent& e) {
+    Checkbox* terrainShadingModeCheckbox = new Checkbox("debug_menu.terrainShadingModeCheckbox", gui, colors::transparent, "Wireframe Terrain Shading", false, nullptr, 12);
+    terrainShadingModeCheckbox->constraints.height = AbsoluteConstraint(30);
+    terrainShadingModeCheckbox->constraints.width = RelativeConstraint(0.9);
+    terrainShadingModeCheckbox->onStateChanged += [&](const Checkbox::CheckboxStateChangedEvent& e) {
         Application* app = this->gui->getApp();
-        app->getGame()->terrain.shadingMode = app->getGame()->terrain.shadingMode == MeshShadingMode::SOLID ? MeshShadingMode::WIREFRAME : MeshShadingMode::SOLID;
+        app->getGame()->terrain.shadingMode = e.newState ? MeshShadingMode::WIREFRAME : MeshShadingMode::SOLID;
     };
-    addChild(terrainShadingModeButton);
+    addChild(terrainShadingModeCheckbox);
+
+    Checkbox* carPathCheckbox = new Checkbox("debug_menu.carPathCheckbox", gui, colors::transparent, "Draw car paths", false, nullptr, 12);
+    carPathCheckbox->constraints.height = AbsoluteConstraint(30);
+    carPathCheckbox->constraints.width = RelativeConstraint(0.9f);
+    carPathCheckbox->onStateChanged += [&](const Checkbox::CheckboxStateChangedEvent& e) {
+        Game* game = this->gui->getApp()->getGame();
+        game->debugOptions.drawCarPaths = e.newState;
+    };
+    addChild(carPathCheckbox);
+
+    TextButton* saveRoadGraph = new TextButton("debug_menu.saveRoadGraph", gui, colors::transparent, "Save road graph", nullptr, 12);
+    saveRoadGraph->constraints.height = AbsoluteConstraint(30);
+    saveRoadGraph->constraints.width = RelativeConstraint(0.9f);
+    saveRoadGraph->onClick += [&](const MouseButtonEvent& e) {
+        Game* game = this->gui->getApp()->getGame();
+        auto activeChunks = game->terrain.chunkEntities;
+
+        std::ofstream file;
+        file.open("roadGraph.txt");
+
+        for (auto [pos, chunkEntity] : activeChunks) {
+            file << "chunk position: " << pos << "\r\n";
+            const RoadGraph& graph = game->getRegistry().get<RoadComponent>(chunkEntity).graph;
+
+            file << graph;
+        }
+
+        file.close();
+    };
+    addChild(saveRoadGraph);
 }
 
 void DebugPanel::update() {

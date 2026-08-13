@@ -37,6 +37,9 @@ BuildMenu::BuildMenu(Gui* gui)
 
         StackPanel* categoryStackPanel = new StackPanel(std::format("build_menu.stackPanel_{}", categoryName), gui, StackOrientation::ROW, colors::transparent, ItemAligment::BEGIN);
         categoryStackPanel->constraints.height = AbsoluteConstraint(84.0f);
+        categoryStackPanel->padding.setHorizontal(AbsoluteConstraint(10.0f));
+        categoryStackPanel->padding.setVertical(AbsoluteConstraint(10.0f));
+
         addChild(categoryStackPanel);
 
         categories[category] = std::make_pair(categoryLabel, categoryStackPanel);

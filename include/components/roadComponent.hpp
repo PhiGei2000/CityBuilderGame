@@ -11,6 +11,8 @@
 #include <string>
 #include <unordered_map>
 
+struct TerrainComponent;
+
 /// @brief A component that represents roads in one chunk
 struct RoadComponent : public AssignableComponent {
   private:
@@ -47,7 +49,7 @@ struct RoadComponent : public AssignableComponent {
 
     void updateRoadTypes(const std::map<std::string, RoadSpecs>& specs);
 
-    bool updateRoad(const glm::ivec2& pos, const std::map<std::string, RoadSpecs>& specs);
+    bool updateRoad(const glm::ivec2& pos, const std::map<std::string, RoadSpecs>& specs, const TerrainComponent& terrain);
 
     RoadTile getTileType(const glm::ivec2& pos) const;
 
@@ -57,7 +59,7 @@ struct RoadComponent : public AssignableComponent {
     /// @return A collection of the positions
     std::unordered_set<glm::ivec2> getNodes() const;
 
-    void updateRoadGraph(const std::map<std::string, RoadSpecs>& specs);
+    void updateRoadGraph(const std::map<std::string, RoadSpecs>& specs, const TerrainComponent& terrain);
 
     inline void assignToEntity(const entt::entity entity, entt::registry& registry) const override {
         RoadComponent& road = registry.emplace<RoadComponent>(entity, roadTiles);

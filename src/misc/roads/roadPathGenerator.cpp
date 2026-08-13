@@ -1,5 +1,7 @@
 #include "misc/roads/roadPathGenerator.hpp"
 
+#include "components/roadComponent.hpp"
+#include "components/terrainComponent.hpp"
 #include "misc/roads/graph.hpp"
 
 #include "misc/configuration.hpp"
@@ -8,42 +10,85 @@
 
 #include <glm/gtc/constants.hpp>
 
-RoadPath RoadPathGenerator::generateEdgePath(const RoadGraph::EdgeType& edge, const RoadSpecs& specs) {
+RoadPath RoadPathGenerator::generateEdgePath(const RoadGraph::EdgeType& edge, const RoadComponent& roadComponent, const TerrainComponent& terrain, const std::map<std::string, RoadSpecs>& specs) {
     const auto& [start, end] = edge;
-    if (glm::length(end - start) <= 1) {
+    int edgeLength = glm::length(end - start);
+    if (edgeLength < 1) {
         return {};
     }
 
     Direction direction = utility::getDirection(end - start);
-    glm::vec3 offset = glm::vec3(0.0f, specs.roadwayHeight, 0.0f);
+    glm::ivec2 directionVector = DirectionVectors<glm::ivec2>[direction];
+    Path path;
 
-    switch (direction) {
-        case Direction::NORTH:
-            offset.x += Configuration::cellSize;
-            offset.z += Configuration::cellSize * (0.5f + specs.roadwayWidth / 4.0f);
-            break;
-        case Direction::EAST:
-            offset.x += Configuration::cellSize * (0.5f - specs.roadwayWidth / 4.0f);
-            offset.z += Configuration::cellSize;
-            break;
-        case Direction::SOUTH:
-            offset.z += Configuration::cellSize * (0.5f - specs.roadwayWidth / 4.0f);
-            break;
-        case Direction::WEST:
-            offset.x += Configuration::cellSize * (0.5f + specs.roadwayWidth / 4.0f);
-            break;
-        default:
-            break;
+    for (int i = 0; i <= edgeLength; i++) {
+        glm::ivec2 position = start + i * directionVector;
+        const glm::vec2 partStart = position;
+        const RoadTile& tile = roadComponent.roadTiles[position.x][position.y];
+        const RoadSpecs& tileSpecs = specs.at(tile.roadType);
+        TerrainData heights = terrain.getCellHeights(position);
+
+        float height;
+        switch (tile.tileType) {
+            case RoadTileTypes::RAMP:
+                switch (direction) {
+                    case Direction::NORTH:
+                    case Direction::EAST:
+                        height = heights.terrainHeights[3];
+                        break;
+                    case Direction::SOUTH:
+                    case Direction::WEST:
+                        height = heights.terrainHeights[0];
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            default:
+                height = heights.terrainHeights[0];
+                break;
+        }
+
+        glm::vec3 offset = glm::vec3(0.0f, tileSpecs.roadwayHeight + height, 0.0f);
+        switch (direction) {
+            case Direction::NORTH:
+                offset.x += Configuration::cellSize;
+                offset.z += Configuration::cellSize * (0.5f + tileSpecs.roadwayWidth / 4.0f);
+                break;
+            case Direction::EAST:
+                offset.x += Configuration::cellSize * (0.5f - tileSpecs.roadwayWidth / 4.0f);
+                offset.z += Configuration::cellSize;
+                break;
+            case Direction::SOUTH:
+                offset.z += Configuration::cellSize * (0.5f - tileSpecs.roadwayWidth / 4.0f);
+                break;
+            case Direction::WEST:
+                offset.x += Configuration::cellSize * (0.5f + tileSpecs.roadwayWidth / 4.0f);
+                break;
+            default:
+                break;
+        }
+
+        if (i == 0) {
+            path.add(static_cast<float>(Configuration::cellSize) * glm::vec3(partStart.x, 0.0f, partStart.y) + offset);
+        }
+
+        while (i < edgeLength && roadComponent.roadTiles[position.x + directionVector.x][position.y + directionVector.y].tileType != tile.tileType) {
+            // TODO: Handle road type change
+
+            position += directionVector;
+            i++;
+        }
+
+        path.add(static_cast<float>(Configuration::cellSize) * glm::vec3(position.x - directionVector.x, 0.0f, end.y - directionVector.y) + offset);
+        // const glm::vec3& pathBegin = static_cast<float>(Configuration::cellSize) * glm::vec3(start.x, 0.0f, start.y) + offset;
+        // const glm::vec3& pathEnd = static_cast<float>(Configuration::cellSize) * glm::vec3(end.x - directionVector.x, 0.0f, end.y - directionVector.y) + offset;
     }
 
-    glm::ivec2 directionVector = DirectionVectors<glm::ivec2>[direction];
-    const glm::vec3& pathBegin = static_cast<float>(Configuration::cellSize) * glm::vec3(start.x, 0.0f, start.y) + offset;
-    const glm::vec3& pathEnd = static_cast<float>(Configuration::cellSize) * glm::vec3(end.x - directionVector.x, 0.0f, end.y - directionVector.y) + offset;
-
-    return {pathBegin, pathEnd};
+    return path;
 }
 
-std::array<std::array<RoadPath, 4>, 4> RoadPathGenerator::generateNodePaths(const RoadGraph::NodeType& node, const RoadSpecs& specs, const RoadTile& tile) {
+std::array<std::array<RoadPath, 4>, 4> RoadPathGenerator::generateNodePaths(const RoadGraph::NodeType& node, const RoadSpecs& specs, const RoadTile& tile, const TerrainComponent& terrain) {
     std::array<std::array<RoadPath, 4>, 4> paths;
 
     constexpr int sinValues[] = {0, 1, 0, -1};
@@ -56,9 +101,10 @@ std::array<std::array<RoadPath, 4>, 4> RoadPathGenerator::generateNodePaths(cons
     //     {  0, 1,    0},
     //     {sin, 0,  cos}
     // };
+    float height = terrain.getCellHeights(node).terrainHeights[0];
 
     auto addToPath = [&](int i, int j, float x, float z) {
-        paths[i % 4][j % 4].add(static_cast<float>(Configuration::cellSize) * glm::vec3(cos * x - sin * z + 0.5f + node.x, 0.0f, sin * x + cos * z + 0.5f + node.y) + glm::vec3(0.0f, specs.roadwayHeight, 0.0f));
+        paths[i % 4][j % 4].add(static_cast<float>(Configuration::cellSize) * glm::vec3(cos * x - sin * z + 0.5f + node.x, 0.0f, sin * x + cos * z + 0.5f + node.y) + glm::vec3(0.0f, specs.roadwayHeight + height, 0.0f));
     };
 
     float anglePerPoint = 2 * glm::pi<float>() / specs.verticesPerCircle;
@@ -95,7 +141,7 @@ std::array<std::array<RoadPath, 4>, 4> RoadPathGenerator::generateNodePaths(cons
             addToPath(tile.rotation + 2, tile.rotation, 0.5f, specs.roadwayWidth / 4.0f);
             break;
         case RoadTileTypes::CURVE:
-        // case RoadTileTypes::CURVE_FULL:
+            // case RoadTileTypes::CURVE_FULL:
             for (int i = 0; i <= specs.verticesPerCircle / 4; i++) {
                 float sin = glm::sin(i * anglePerPoint);
                 float cos = glm::cos(i * anglePerPoint);

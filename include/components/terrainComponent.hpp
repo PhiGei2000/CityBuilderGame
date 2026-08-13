@@ -9,6 +9,11 @@
 #include <ostream>
 
 struct TerrainData {
+    /// @brief Height values of the cell corners
+    ///
+    /// 1 3
+    ///
+    /// 0 2
     float terrainHeights[4];
     TerrainSurfaceTypes surfaceType;
 
@@ -69,5 +74,9 @@ struct TerrainComponent : public AssignableComponent {
 
         TerrainComponent& newTerrain = registry.emplace<TerrainComponent>(entity);
         newTerrain.terrain = terrain;
+    }
+
+    inline const TerrainData& getCellHeights(const glm::ivec2& position) const {
+        return terrain.getNode(position).value;
     }
 };

@@ -43,6 +43,9 @@ class Game {
     Game(Application* app);
 
     bool debugMode = false;
+    struct DebugOptions {
+        bool drawCarPaths = false;
+    } debugOptions;
 
     entt::registry& getRegistry();
     const entt::registry& getRegistry() const;

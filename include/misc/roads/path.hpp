@@ -7,6 +7,9 @@
 struct Path {
   protected:
     std::vector<glm::vec3> positions;
+#if DEBUG
+    friend struct RoadGraph;
+#endif
 
   public:
     Path();

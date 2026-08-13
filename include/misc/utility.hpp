@@ -21,8 +21,8 @@ namespace std {
 namespace utility {
 
     template<typename T>
-    constexpr bool inRange(T value, T minValue, T maxValue) {
-        return minValue <= value && maxValue >= value;
+    constexpr bool inRange(T value, T v1, T v2) {
+        return std::min(v1, v2) <= value && std::max(v1, v2) >= value;
     }
 
     template<glm::length_t L, typename T, glm::qualifier Q>
@@ -62,6 +62,6 @@ namespace glm {
 template<>
 struct std::less<glm::ivec2> {
     bool operator()(const glm::ivec2& first, const glm::ivec2& second) const {
-        return first.x < second.x || (first.x == second.x && first.y < second.y);
+        return first.y > second.y || (first.y == second.y && first.x < second.x);
     }
 };

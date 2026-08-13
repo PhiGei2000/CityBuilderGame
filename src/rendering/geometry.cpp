@@ -54,6 +54,13 @@ void Geometry::setVertexAttribute(unsigned int index, const VertexAttribute& att
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+void Geometry::drawArrays() const {
+    glBindVertexArray(vao);
+
+    glDrawArrays(drawMode, 0, drawCount);
+    glBindVertexArray(0);
+}
+
 void Geometry::draw() const {
     glBindVertexArray(vao);
 

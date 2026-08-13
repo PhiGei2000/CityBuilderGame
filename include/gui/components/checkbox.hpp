@@ -15,7 +15,7 @@ class Checkbox : public Label {
         bool newState;
     };
 
-    EventDispatcher<CheckboxStateChangedEvent> onStateChanged;
+    EventDispatcher<const CheckboxStateChangedEvent&> onStateChanged;
 
     glm::vec4 checkboxColor = colors::white;
 

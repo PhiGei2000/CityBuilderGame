@@ -49,8 +49,9 @@ void RoadSystem::update(float dt) {
         entt::entity chunkEntity = game->terrain.chunkEntities.at(chunk);
 
         RoadComponent& road = registry.get<RoadComponent>(chunkEntity);
-        road.roadTiles[chunkPos.x][chunkPos.y].tileType = RoadTileTypes::UNDEFINED;
-        road.roadTiles[chunkPos.x][chunkPos.y].roadType = type;
+        RoadTile& tile = road.roadTiles[chunkPos.x][chunkPos.y];
+        tile.tileType = RoadTileTypes::UNDEFINED;
+        tile.roadType = type;
 
         // update borders
         Direction dir = Direction::UNDEFINED;
@@ -80,7 +81,8 @@ void RoadSystem::update(float dt) {
 
                 neighbourRoads.borders[static_cast<int>(utility::getInverse(dir))][borderPos] = true;
                 glm::ivec2 posInNeighbourChunk = chunkPos - (Configuration::cellsPerChunk - 1) * DirectionVectors<glm::ivec2>[dir];
-                neighbourRoads.updateRoad(posInNeighbourChunk, roadSpecs);
+                const TerrainComponent& neighbourTerrain = registry.get<TerrainComponent>(game->terrain.chunkEntities[neighbourChunk]);
+                neighbourRoads.updateRoad(posInNeighbourChunk, roadSpecs, neighbourTerrain);
 
                 if (neighbourRoads.meshOutdated) {
                     chunksToUpdateMesh.push(neighbourChunk);
@@ -88,18 +90,19 @@ void RoadSystem::update(float dt) {
             }
         }
 
-        road.updateRoad(chunkPos, roadSpecs);
+        const TerrainComponent& terrainComponent = registry.get<TerrainComponent>(chunkEntity);
+        road.updateRoad(chunkPos, roadSpecs, terrainComponent);
         adjustTerrainHeight(chunk, chunkPos, road);
 
         // update neighbour roads
         for (unsigned int i = 0; i < 4; i++) {
             const glm::ivec2& pos = chunkPos - DirectionVectors<glm::ivec2>[static_cast<Direction>(i)];
             if (utility::inChunk(pos)) {
-                road.updateRoad(pos, roadSpecs);
+                road.updateRoad(pos, roadSpecs, terrainComponent);
             }
         }
 
-        road.updateRoadGraph(roadSpecs);
+        road.updateRoadGraph(roadSpecs, terrainComponent);
         if (road.meshOutdated) {
             chunksToUpdateMesh.push(chunk);
         }

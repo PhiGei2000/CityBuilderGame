@@ -1,14 +1,16 @@
 #pragma once
 #include "misc/roads/path.hpp"
+#include "misc/utility.hpp"
+#include "rendering/geometry.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
 
 #include <array>
+#include <stdexcept>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <stdexcept>
 
 using RoadPath = Path;
 
@@ -22,7 +24,13 @@ struct std::hash<std::pair<glm::ivec2, glm::ivec2>> {
 template<typename T>
 concept GraphDataTypes = requires {
     typename T::NodeType;
+    requires requires(T::NodeType n) {
+        n.x;
+        n.y;
+    };
+
     typename T::EdgeType;
+    { std::convertible_to<typename T::EdgeType, std::pair<typename T::NodeType, typename T::NodeType>> };
 
     typename T::NodeDataType;
     typename T::EdgeDataType;
@@ -125,6 +133,21 @@ struct Graph {
     virtual const EdgeDataType& getEdgeData(const NodeType& x, const NodeType& y) const {
         return edges.at(std::make_pair(x, y));
     }
+
+    virtual bool onEdge(const NodeType& node) const {
+        for (const auto& [edge, _] : edges) {
+            const auto& [start, end] = edge;
+
+            if (start.x == node.x && utility::inRange(node.y, start.y, end.y)) {
+                return true;
+            }
+            else if (start.y == node.y && utility::inRange(node.x, start.x, end.x)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 };
 
 struct RoadGraphDataTypes {
@@ -138,4 +161,18 @@ struct RoadGraphDataTypes {
     using EdgeDataType = RoadPath;
 };
 
-using RoadGraph = Graph<RoadGraphDataTypes>;
+struct RoadGraph : public Graph<RoadGraphDataTypes> {
+#if DEBUG
+    Geometry* pathGeometries = new Geometry({
+                                                VertexAttribute{3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0u}
+    },
+                                            GL_LINE_STRIP);
+
+    void drawPaths() const;
+
+    #endif
+};
+
+#if DEBUG
+std::ostream& operator<<(std::ostream& os, const RoadGraph& graph);
+#endif

@@ -23,6 +23,10 @@ struct MenuBase {
     }
 
     virtual Widget* getWidget() = 0;
+
+    inline virtual constexpr bool toggleGameState() const {
+        return true;
+    }
 };
 
 template<WidgetType T>

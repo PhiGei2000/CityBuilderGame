@@ -92,7 +92,6 @@ void Widget::applyConstraints() {
             box.height = constraints.height.getValue<FlexConstraint>().absoluteValue;
             break;
         default:
-            std::cerr << "\"" << id << "\"\r\nInvalid constraint \"height\"!" << std::endl;
             break;
     }
 
@@ -107,7 +106,6 @@ void Widget::applyConstraints() {
             box.width = constraints.width.getValue<FlexConstraint>().absoluteValue;
             break;
         default:
-            std::cerr << "\"" << id << "\"\r\nInvalid constraint \"width\"!" << std::endl;
             break;
     }
 
@@ -132,7 +130,6 @@ void Widget::applyConstraints() {
             box.x += (parentBox.width - box.width) * 0.5f;
             break;
         default:
-            std::cerr << "\"" << id << "\"\r\nInvalid constraint \"x\"!" << std::endl;
             break;
     }
 
@@ -147,7 +144,6 @@ void Widget::applyConstraints() {
             box.y += (parentBox.height - box.height) * 0.5f;
             break;
         default:
-            std::cerr << "\"" << id << "\"\r\nInvalid constraint \"y\"!" << std::endl;
             break;
     }
 
